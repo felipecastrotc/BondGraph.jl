@@ -4,6 +4,7 @@
 
 ### Expression signs
 
+Level: **Critical**
 Where: Junction functions
 
 * CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
@@ -15,6 +16,7 @@ The example considers the convention only for the sum in the equality it does no
 
 ### MSD systems
 
+Level: **Critical**
 Where: NDOF - MSD system examples
 
 Issues:
