@@ -27,17 +27,16 @@ function Sf(expr; name)
     ODESystem(eqs, t, sts, []; name = name)
 end
 
-
 # =============================================================================
 # Ports
 
-function Junction1(ps...; name, subsys = [], couple = true)
+function Junction1(ps...; name, subsys = [], couple = true, sgn = 1)
     # Check subsys type
     sys = subsys isa ODESystem ? [subsys] : subsys
 
     # Get connections
     ps = Base.Flatten([ps])
-    con = collect(Base.Flatten([ps, sys]))
+    con = addsgnODE.(collect(Base.Flatten([ps, sys])))
 
     if couple
         @named power = Power()
@@ -47,9 +46,15 @@ function Junction1(ps...; name, subsys = [], couple = true)
     end
 
     # Σ efforts
-    eqs = [e ~ sumvar(con, "e")]
+    eqs = [0 ~ sumvar(con, "e") + sgn * e]
     # f₁ = f₂ = f₃
     eqs = vcat(eqs, equalityeqs(con, "f", couple = couple))
+    # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
+    # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
+    # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
+    # Example: https://www.20sim.com/webhelp/modeling_tutorial_bond_graphs_frombondgraphtoequations.php
+    # The example considers the convention only for the sum in the
+    # equality it does not consider the arrow direction
 
     # Build subsystem
     if couple
@@ -58,16 +63,17 @@ function Junction1(ps...; name, subsys = [], couple = true)
         sys = ODESystem(eqs, t, [], []; name = name)
     end
 
-    compose(sys, ps...)
+
+    compose(sys, rmsgnODE.(ps)...)
 end
 
-function Junction0(ps...; name, subsys = [], couple = true)
+function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
     # Check subsys type
     sys = subsys isa ODESystem ? [subsys] : subsys
 
     # Get connections
     ps = Base.Flatten([ps])
-    con = collect(Base.Flatten([ps, sys]))
+    con = addsgnODE.(collect(Base.Flatten([ps, sys])))
 
     if couple
         @named power = Power()
@@ -77,9 +83,15 @@ function Junction0(ps...; name, subsys = [], couple = true)
     end
 
     # Σ flows
-    eqs = [f ~ sumvar(con, "f")]
+    eqs = [0 ~ sumvar(con, "f") + sgn * f]
     # e₁ = e₂ = e₃
-    eqs = vcat(eqs, equalityeqs(con, "e", couple = couple))
+    eqs = vcat(eqs, equalityeqs(con, "e", couple = couple, sgn = sgn))
+    # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
+    # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
+    # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
+    # Example: https://www.20sim.com/webhelp/modeling_tutorial_bond_graphs_frombondgraphtoequations.php
+    # The example considers the convention only for the sum in the
+    # equality it does not consider the arrow direction
 
     # Build subsystem
     if couple
@@ -88,9 +100,8 @@ function Junction0(ps...; name, subsys = [], couple = true)
         sys = ODESystem(eqs, t, [], []; name = name)
     end
 
-    compose(sys, ps...)
+    compose(sys, rmsgnODE.(ps)...)
 end
-
 # =============================================================================
 # Elements
 

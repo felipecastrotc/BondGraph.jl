@@ -1,4 +1,5 @@
 using ModelingToolkit, Symbolics
+import Base: +, -
 
 # Deprecated -> use ModelingToolkit.get_variables
 function extract_vars(O)
@@ -13,36 +14,66 @@ end
 # =============================================================================
 # Support junction functions
 
+struct SgnODESystem
+    ode::ODESystem
+    sgn::Num
+end
+
+-(sys::ODESystem) = SgnODESystem(sys, -1)
++(sys::ODESystem) = SgnODESystem(sys, 1)
+
+function addsgnODE(sys)
+    if typeof(sys) == ODESystem
+        +sys
+    elseif typeof(sys) == SgnODESystem
+        sys
+    end
+end
+
+function rmsgnODE(sys)
+    if typeof(sys) == ODESystem
+        sys
+    elseif typeof(sys) == SgnODESystem
+        sys.ode
+    end
+end
+
 # Deprecated with the usage of hasproperty
-function isdefnothing(c::ODESystem, var::String)
-    sym = Symbol(var)
+function isdefnothing(c::ODESystem, sym::String)
+    # sym = Symbol(var)
     st = getproperty(c, sym, namespace = false)
     isnothing(ModelingToolkit.get_defaults(c)[st])
 end
 
-function sumvar(con::Vector{ODESystem}, var::String)
+function sumvar(con::Vector{SgnODESystem}, var::String)
     sym = Symbol(var)
-    C = filter(c -> hasproperty(c, sym), con)
-    sum(c -> getproperty(c, sym), C)
+    C = filter(c -> hasproperty(c.ode, sym), con)
+    sum(c -> c.sgn * getproperty(c.ode, sym), C)
 end
 
-function equalityeqs(con::Vector{ODESystem}, var::String; couple = false)
+function equalityeqs(con::Vector{SgnODESystem}, var::String; couple = false, sgn = 1)
     sym = Symbol(var)
-    C = filter(c -> hasproperty(c, sym), con)
+    C = filter(c -> hasproperty(c.ode, sym), con)
 
     eqs = Vector{Equation}(undef, length(C) - 1)
     for i in 1:(length(C)-1)
-        eqs[i] = getproperty(C[i], sym) ~ getproperty(C[i+1], sym)
+        # f₁ = C[i].sgn * getproperty(C[i].ode, sym)
+        # f₂ = C[i+1].sgn * getproperty(C[i+1].ode, sym)
+        f₁ = getproperty(C[i].ode, sym)
+        f₂ = getproperty(C[i+1].ode, sym)
+        eqs[i] = f₁ ~ f₂
     end
 
     if couple
-        V = getproperty(C[end], sym)
-        v = getproperty(C[end], sym, namespace = false)
-        push!(eqs, V ~ v)
+        # f₁ = C[end].sgn * getproperty(C[end].ode, sym)
+        f₁ = getproperty(C[end].ode, sym)
+        f₂ = sgn * getproperty(C[end].ode, sym, namespace = false)
+        push!(eqs, f₁ ~ f₂)
     end
 
     eqs
 end
+
 
 # =============================================================================
 # Functions to replace variables on equations by the observed variables

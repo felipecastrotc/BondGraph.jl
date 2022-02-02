@@ -6,28 +6,31 @@ include("lib_bg.jl")
 # =============================================================================
 # Function mGY
 
-function mGY(subsys...; name, g = 1.0, couple = true)
+function mGY(subsys...; name, g = 1.0)
+
     # Get connections
-    c = collect(Base.Flatten([subsys]))
+    c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
 
-    if couple
-        pos = .!isnothing.(c)
-        @assert length(sum(pos)) == 1
+    # Remove nothing from c array
+    pos = .!isnothing.(c)
+    c = c[pos]
+    @assert !isempty(c)
 
+    # If only one subsys is passed it automatically generates an open  
+    # connection
+    if sum(pos) == 1
         @named power = Power()
-
+        @unpack e, f = power
         # Set variables according to the position
         if pos[1]
-            @unpack e₁, f₁ = power
+            e₁, f₁ = e, f
             e₂, f₂ = c[1].e, c[1].f
         else
-            @unpack e₂, f₂ = power
+            e₂, f₂ = e, f
             e₁, f₁ = c[1].e, c[1].f
         end
-
     else
         @assert length(c) == 2
-
         e₁, f₁ = c[1].e, c[1].f
         e₂, f₂ = c[2].e, c[2].f
     end
@@ -38,17 +41,14 @@ function mGY(subsys...; name, g = 1.0, couple = true)
         e₁ ~ g * f₂,
     ]
 
-    # Remove nothing from c array
-    filter!(!isnothing, c)
-
     # Check if it is a modulated gyrator
     if isvariable(g)
         sts, ps = [], [g]
     elseif istree(unwrap(g))
         sts = []
-        ps = collect(Set(extract_vars(g)))
+        ps = collect(Set(ModelingToolkit.get_variables(g)))
     else
-        sts, ps = []
+        sts, ps = [], []
     end
 
     sys = ODESystem(eqs, t, sts, ps; name = name)
@@ -59,8 +59,6 @@ function mGY(subsys...; name, g = 1.0, couple = true)
 
     compose(sys, c...)
 end
-
-
 
 # =============================================================================
 # DC motor
@@ -85,18 +83,17 @@ eqs = [
     L.f ~ f[4],
     e[5] ~ g * f[4],
     e[4] ~ g * f[5],
-
     0 ~ e[5] - b.e - J.e - e[8],
     f[5] ~ b.f,
     b.f ~ J.f,
     # e[1] ~ V,
     # e[8] ~ T,
     e[1] ~ 12.0,
-    e[8] ~ -1.,
+    e[8] ~ -1.0,
 ]
 
-
-# mdl = compose(ODESystem(eqs, t, sts, [V, k, T]; name = :mdl), L, R, J, b)
+# g = 0.01
+# g = k
 mdl = compose(ODESystem(eqs, t, sts, []; name = :mdl), L, R, J, b)
 equations(mdl)
 
@@ -124,36 +121,24 @@ plot(sol)
 
 @named L = Mass(m = 0.5)
 @named R = Damper(c = 1.0)
+@named Uₐ = Se(12.0)
+
 @named J = Mass(m = 0.01)
 @named b = Damper(c = 0.1)
+@named Tₗ = Se(1.0)
 
-@parameters V, k, T
+g = 0.01
 
+@named je = Junction1(Uₐ, -R, -L, sgn = -1)
+@named jm = Junction1(Tₗ, -b, -J)
+@named gy = mGY(je, jm, g = g)
 
+equations(gy)
+sys = structural_simplify(gy)
 
-
-
-
-# mdl = compose(ODESystem(eqs, t, sts, [V, k, T]; name = :mdl), L, R, J, b)
-mdl = compose(ODESystem(eqs, t, sts, []; name = :mdl), L, R, J, b)
-equations(mdl)
-
-sys = structural_simplify(mdl)
+@named sys = reducedobs(sys)
 equations(sys)
-states(sys)
-parameters(sys)
 
 prob = ODEProblem(sys, [], (0.0, 4.0))
 sol = solve(prob)
 plot(sol)
-
-@named sysr = reducedobs(sys)
-
-equations(sysr)
-states(sysr)
-parameters(sysr)
-
-prob = ODEProblem(sysr, [], (0.0, 4.0))
-sol = solve(prob)
-plot(sol)
-
