@@ -134,11 +134,12 @@ g = 0.01
 @named gy = mGY(je, jm, g = g)
 
 equations(gy)
-sys = structural_simplify(gy)
-
-@named sys = reducedobs(sys)
+@named sys = reducedobs(structural_simplify(gy))
 equations(sys)
 
 prob = ODEProblem(sys, [], (0.0, 4.0))
 sol = solve(prob)
 plot(sol)
+
+# Example coherent with literature
+# https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&section=SystemModeling

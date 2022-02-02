@@ -5,7 +5,7 @@ import Base: +, -
 include("lib_bg.jl")
 
 # =============================================================================
-# Function Junction1
+# Function
 
 struct SgnODESystem
     ode::ODESystem
