@@ -1,6 +1,6 @@
 using ModelingToolkit, Symbolics
 
-# Deprecate -> use ModelingToolkit.get_variables
+# Deprecated -> use ModelingToolkit.get_variables
 function extract_vars(O)
     O = unwrap(O)
     if istree(O)
@@ -13,23 +13,22 @@ end
 # =============================================================================
 # Support junction functions
 
+# Deprecated with the usage of hasproperty
 function isdefnothing(c::ODESystem, var::String)
     sym = Symbol(var)
     st = getproperty(c, sym, namespace = false)
     isnothing(ModelingToolkit.get_defaults(c)[st])
 end
 
-
 function sumvar(con::Vector{ODESystem}, var::String)
     sym = Symbol(var)
-    C = filter(c -> !isdefnothing(c, sym), con)
+    C = filter(c -> hasproperty(c, sym), con)
     sum(c -> getproperty(c, sym), C)
 end
 
-
 function equalityeqs(con::Vector{ODESystem}, var::String; couple = false)
     sym = Symbol(var)
-    C = filter(c -> !isdefnothing(c, sym), con)
+    C = filter(c -> hasproperty(c, sym), con)
 
     eqs = Vector{Equation}(undef, length(C) - 1)
     for i in 1:(length(C)-1)
@@ -45,8 +44,6 @@ function equalityeqs(con::Vector{ODESystem}, var::String; couple = false)
     eqs
 end
 
-
-
 # =============================================================================
 # Functions to replace variables on equations by the observed variables
 
@@ -60,7 +57,7 @@ function substitute_dict(O, expr, sub)
     elseif istree(O)
         A = arguments(O)
         for a in A
-            expr = substitute_observed(a, expr, sub)
+            expr = substitute_dict(a, expr, sub)
         end
     end
 

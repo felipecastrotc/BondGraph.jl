@@ -13,6 +13,22 @@ D = Differential(t)
 end
 
 # =============================================================================
+# Sources
+
+function Se(expr; name)
+    sts = @variables e(t) = 0.0
+    eqs = [sts[1] ~ expr]
+    ODESystem(eqs, t, sts, []; name = name)
+end
+
+function Sf(expr; name)
+    sts = @variables f(t) = 0.0
+    eqs = [sts[1] ~ expr]
+    ODESystem(eqs, t, sts, []; name = name)
+end
+
+
+# =============================================================================
 # Ports
 
 function Junction1(ps...; name, subsys = [], couple = true)
