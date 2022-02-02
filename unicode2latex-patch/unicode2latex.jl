@@ -1,0 +1,1 @@
+/home/fctc/.julia/packages/Latexify/Kg8HA/src/unicode2latex.jl
