@@ -6,151 +6,136 @@ include("lib_bg.jl")
 # =============================================================================
 # Transformer
 
-function mTF(subsys...; name, r = 1.0, couple = true)
+function mTF(subsys...; name, r = 1.0)
+
     # Get connections
-    c = collect(Base.Flatten([subsys]))
+    c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
 
-    # Get variables
-    # vars = extract_vars(r)
-    # if isnothing()
+    # Remove nothing from c array
+    pos = .!isnothing.(c)
+    c = c[pos]
+    @assert !isempty(c)
 
-    if couple
-
-        pos = .!isnothing.(c)
-        @assert length(sum(pos)) == 1
-
+    # If only one subsys is passed it automatically generates an open  
+    # connection
+    if sum(pos) == 1
         @named power = Power()
         @unpack e, f = power
-
-        # Effort and flow 
-        print(pos)
+        # Set variables according to the position
         if pos[1]
-            eqs = [
-                c[1].f * r ~ f,
-                e * r ~ c[1].e,
-            ]
+            e₁, f₁ = e, f
+            e₂, f₂ = c[1].e, c[1].f
         else
-            eqs = [
-                f * r ~ c[2].f,
-                c[2].e * r ~ e,
-            ]
+            e₂, f₂ = e, f
+            e₁, f₁ = c[1].e, c[1].f
         end
-        # Build subsystem
-        # ODESys
-        filter!(!isnothing, c)
-        compose(extend(ODESystem(eqs, t, [], []; name = name), power), c...)
     else
-
         @assert length(c) == 2
-
-        # Effort and flow 
-        eqs = [
-            c[1].f * r ~ c[2].f,
-            c[2].e * r ~ c[1].e,
-        ]
-        # Build subsystem
-        compose(ODESystem(eqs, t, [], []; name = name), c...)
+        e₁, f₁ = c[1].e, c[1].f
+        e₂, f₂ = c[2].e, c[2].f
     end
+
+    # Transformer equation
+    eqs = [
+        f₂ ~ f₁ * r,
+        e₁ ~ e₂ * r,
+    ]
+
+    # Check if it is a modulated transformer
+    if isvariable(r)
+        sts, ps = [], [r]
+    elseif istree(unwrap(r))
+        sts = []
+        ps = collect(Set(ModelingToolkit.get_variables(r)))
+    else
+        sts, ps = [], []
+    end
+
+    sys = ODESystem(eqs, t, sts, ps; name = name)
+
+    if @isdefined power
+        sys = extend(sys, power)
+    end
+
+    compose(sys, c...)
 end
 
 
 # =============================================================================
 # System dynamics (palm2014) P4.65 - Solutions
 # I modified the example by adding a bearing friction but the equations should
-# not change significantly
+# not change significantly.
+# Bond graph example: https://youtu.be/gxjbtkLANOE?t=893
 
 # -----------------------------------------------------------------------------
 # Definitions
 
-m = 1.0
-X = 1.0
-k = 10.0
-c = 1.0
-@named bm = Mass(m = m)
-@named bs = Spring(k = k, x = X)
-@named bd = Damper(c = c * 2)
+@named rm = Mass(m = 1.0)
+@named rk = Spring(k = 10.0, x = 0.1)
+@named rf = Damper(c = 1.0)
 
-@named rm = Mass(m = m * 2)
-@named rd = Damper(c = c * 5)
+@named pj = Mass(m = 1.0)
+@named pf = Damper(c = 0.01)
+@variables T
+@named pT = Se(3)
 
 # -----------------------------------------------------------------------------
 # Using Junctions and mTR
+# Bond graph example 
 
-@named r = Junction1(rm, rd)
-@named b = Junction1(bm, bs, bd)
-@named mdl = mTF(r, b, r = 2, couple = false)
+# Gear radius
+@variables R
+R = GlobalScope(R)
 
-sys = structural_simplify(mdl)
-equations(sys)
-parameters(sys)
-states(sys)
+@named p = Junction1(pT, -pj, -pf, sgn = -1)
+@named r = Junction1(-rm, -rk, -rf)
+@named tf = mTF(p, r, r = 10)
 
-prob = ODEProblem(sys, [], (0.0, 10.0))
-sol = solve(prob)
-plot(sol)
-plot(sol.t, sol[r.e])
-plot(sol.t, sol[b.bs.q])
+equations(tf)
+mdl = structural_simplify(tf)
+equations(mdl)
 
-@named sysr = reducedobs(sys)
-equations(sysr)
+@named sys = reducedobs(structural_simplify(tf))
+eqs = equations(sys)
+
+latexify(eqs[4])
+latexify(simplify(eqs[4]))
+
+# The last equation generated it basically states the relationship between the 
+# linear and angular acceleration. I am guessing that it could be used to 
+# change the coordinates. The book solutions obtain a single equation by 
+# changing the coordinates. 
+# It is easier to observe before replace the varaibles.
 
 # -----------------------------------------------------------------------------
 # Setting equations by hand
 
-@variables e₁, e₂, f₁, f₂
+@variables e₁(t), e₂(t), f₁(t), f₂(t)
 # @variables R  -> It generates problem with more variable than equations
 R = 2.0
 
 eqs = [
-    e₁ ~ rd.e + rm.e,
-    rd.f ~ rm.f,
-    f₁ ~ rd.f,
+    0 ~ 3.0 - pj.e - pf.e - e₁,
+    pj.f ~ pf.f,
+    pf.f ~ f₁,
     e₁ ~ e₂ * R,
-    f₁ * R ~ f₂,
-    e₂ ~ bm.e + bd.e + bs.e,
-    f₂ ~ bm.f,
-    f₂ ~ bd.f,
-    f₂ ~ bs.f,
+    f₂ ~ f₁ * R,
+    0 ~ -rm.e - rf.e - rk.e + e₂,
+    rm.f ~ rf.f,
+    rf.f ~ rk.f,
+    rk.f ~ f₂,
 ]
 
-mdl = compose(ODESystem(eqs, t, [], []; name = :tst), rm, rd, bm, bd, bs)
-sys = structural_simplify(mdl)
-dae_index_lowering(ODESystem(eqs, t, [], []; name = :tst))
-structural_simplify(ODESystem(eqs, t, [], []; name = :tst))
-
-
-# -----------------------------------------------------------------------------
-# Setting equations by hand simplified
-
-ps = @parameters R
-ps = [2.0]
-
-eqs = [
-    rd.e + rm.e ~ (bm.e + bd.e + bs.e) * ps[1],
-    rd.f ~ rm.f,
-    rd.f * ps[1] ~ bm.f,
-    bd.f ~ bm.f,
-    bs.f ~ bd.f,
-]
-
-mdl = compose(ODESystem(eqs, t, [], ps; name = :tst), bm, bd, bs, rm, rd)
-mdl = compose(ODESystem(eqs, t, [], []; name = :tst), bm, bd, bs, rm, rd)
+mdl = compose(ODESystem(eqs, t, [], []; name = :tst), rm, rf, rk, pj, pf)
+equations(mdl)
 sys = structural_simplify(mdl)
 equations(sys)
 
-prob = ODEProblem(sys, [], (0.0, 20.0))
-sol = solve(prob)
-plot(sol)
+latexify(equations(sys)[4])
 
-states(sys)
-
-@named sysr = reducedobs(sys)
-equations(sysr)
-
-# The equations obtained by hand and by the mTR and junctions functions were 
-# the same for some reason the DAE obtained is not in the canonical form. They
-# do not depend on the states variables but on effort and flow :/
-
+# The manual equations after simplification resulted in the same set of equation
+# obtained from the usage of the functions. So the functions are behavouring as 
+# expected
 
 # =============================================================================
 # Pendulum
