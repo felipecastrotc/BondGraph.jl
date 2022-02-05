@@ -38,8 +38,12 @@ Reason:
 1. A basic feature for the library
 
 Ideas:
-1. Rewrite the current version to be like the `mGY`.
+1. ~~Rewrite the current version to be like the `mGY`.~~
 2. Try to find the 20-sim mGY like example to verify the equations
+
+Activities:
+1. ~~Verify the rack and pinion example~~
+2. Verify the pendulum example
 
 Notes:
 1. There is an old code on `dev_test_bg.jl` it probably is not useful, remember to clean

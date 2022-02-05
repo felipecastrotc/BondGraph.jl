@@ -48,30 +48,41 @@ end
 function sumvar(con::Vector{SgnODESystem}, var::String)
     sym = Symbol(var)
     C = filter(c -> hasproperty(c.ode, sym), con)
-    sum(c -> c.sgn * getproperty(c.ode, sym), C)
+    if length(C) == 0
+        0.0
+    else
+        sum(c -> c.sgn * getproperty(c.ode, sym), C)
+    end
 end
 
 function equalityeqs(con::Vector{SgnODESystem}, var::String; couple = false, sgn = 1)
     sym = Symbol(var)
     C = filter(c -> hasproperty(c.ode, sym), con)
 
-    eqs = Vector{Equation}(undef, length(C) - 1)
-    for i in 1:(length(C)-1)
-        # f₁ = C[i].sgn * getproperty(C[i].ode, sym)
-        # f₂ = C[i+1].sgn * getproperty(C[i+1].ode, sym)
-        f₁ = getproperty(C[i].ode, sym)
-        f₂ = getproperty(C[i+1].ode, sym)
-        eqs[i] = f₁ ~ f₂
+    if length(C) > 0
+        eqs = Vector{Equation}(undef, length(C) - 1)
+        for i in 1:(length(C)-1)
+            # f₁ = C[i].sgn * getproperty(C[i].ode, sym)
+            # f₂ = C[i+1].sgn * getproperty(C[i+1].ode, sym)
+            f₁ = getproperty(C[i].ode, sym)
+            f₂ = getproperty(C[i+1].ode, sym)
+            eqs[i] = f₁ ~ f₂
+        end
+
+        if couple
+            # f₁ = C[end].sgn * getproperty(C[end].ode, sym)
+            f₁ = getproperty(C[end].ode, sym)
+            f₂ = sgn * getproperty(C[end].ode, sym, namespace = false)
+            push!(eqs, f₁ ~ f₂)
+        end
+
+        eqs
+
+    else
+        Vector{Equation}(undef, 0)
     end
 
-    if couple
-        # f₁ = C[end].sgn * getproperty(C[end].ode, sym)
-        f₁ = getproperty(C[end].ode, sym)
-        f₂ = sgn * getproperty(C[end].ode, sym, namespace = false)
-        push!(eqs, f₁ ~ f₂)
-    end
 
-    eqs
 end
 
 
@@ -113,3 +124,9 @@ function reducedobs(sys::ODESystem; name)
     eqs = map(eq -> substitute_observed(eq, sys), equations(sys))
     ODESystem(eqs; name = name)
 end
+
+
+# =============================================================================
+# multibond graph 
+
+

@@ -145,28 +145,47 @@ latexify(equations(sys)[4])
 # -----------------------------------------------------------------------------
 # Definitions
 
-m = 1.0
-X = pi / 2
-k = 0.01
-c = 2.0
 l = 1.5
-@named lm = Mass(m = m)
-
-@named js = Spring(k = k, x = X)
-@named jd = Damper(c = c)
+@named m = Mass(m = 1.0)
+@named js = Spring(k = 0.01, x = -pi / 6)
+@named jd = Damper(c = 0.01)
+@named fix = Sf(0)
+@named g = Se(9.81 * 1.0)
 
 # -----------------------------------------------------------------------------
 # Using Junctions and mTR
 @variables θ
 θ = GlobalScope(θ)
 
-@named j = Junction1(js, jd)
-@named lx = Junction0(lm)
-@named ly1 = Junction1(lm, se = [-9.81])
-@named ly = Junction0(ly1)
-@named mtfx = mTF(lx, r = l * sin(θ))
-@named mtfy = mTF(ly, r = l * cos(θ))
-@named mdl = Junction0(mtfx, mtfy, j, couple = false)
+# @named xs = Junction1(fix, sgn = -1)
+@named xm = Junction1(-m)
+@named x0 = Junction0(-fix, -xm, sgn = -1)
+@named xtf = mTF(x0, r = 1.5 * cos(θ))
+
+# @named ys = Junction1(fix, sgn = -1)
+@named ym = Junction1(-m, g)
+@named y0 = Junction0(-fix, -ym, sgn = -1)
+@named ytf = mTF(y0, r = -1.5 * sin(θ))
+
+@named j = Junction1(-js, -jd)
+@named mdl = Junction0(-j, ytf, xtf, couple = false)
+
+eqs = [θ ~ j.js.q]
+mdl = extend(ODESystem(eqs, t, [], []; name = :mdl), mdl)
+
+sys = structural_simplify(mdl)
+equations(sys)
+
+@named sys = reducedobs(sys)
+equations(sys)
+
+
+prob = ODEProblem(sys, [], (0.0, 4.0))
+sol = solve(prob)
+plot(sol)
+sol.t
+plot(sol.t, sol[j.js.q])
+
 
 
 # -----------------------------------------------------------------------------
