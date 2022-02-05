@@ -136,11 +136,6 @@ function Junction02D(ps2d...; name, subsys2d = [], couple = true, sgn = 1)
 end
 
 # =============================================================================
-# Sensors
-
-
-
-# =============================================================================
 # Modulated Transformers
 
 function M2Dtrans(a, θ, d)
@@ -209,17 +204,18 @@ function mTF2Dtrans(subsys...; name, a = 1.0, θ = 0.0, d = [0.0, 0.0])
         l = labels[i]
         namei = Symbol((name |> String) * l)
         sym = Symbol(l)
-
-        sts = isvariable(θ) ? [θ] : []
-        ps = [x for x in [a, d[1], d[2]] if isvariable(x)]
-
+    
+        num_vars = [x for x in (a, θ, d[1], d[2]) if x isa Num]
+        sts = [x for x in num_vars if !isindependent(x)]
+        ps = [x for x in num_vars if isindependent(x)]
+    
         if @isdefined sys
             updt_sys = getproperty(sys, sym)
-
+    
             eq = collect(eqs[i])
             updt_sys = extend(ODESystem(eq, t, sts, ps; name = namei), updt_sys)
             updt_sys = compose(updt_sys, [getproperty(j, sym) for j in c]...)
-
+    
             push!(sys_vec, updt_sys)
         else
             eq = collect(eqs[i])
@@ -279,6 +275,17 @@ function setveceq(sys::ODESystem2D, var::String)
     [getproperty(getproperty(sys, Symbol(l)), sym) for l in planar_labels]
 end
 
+function get2Dsystem(sys::ODESystem2D; name)
+
+    sts = states(sys)
+    ps = parameters(sys)
+    eqs = equations(sys)
+
+    ODESystem(eqs, t, sts, ps, name = name)
+end
+
+# -----------------------------------------------------------------------------
+# Extending
 function equations(sys::ODESystem2D)
     eqs = Equation[]
     for l in planar_labels
@@ -303,11 +310,3 @@ function parameters(sys::ODESystem2D)
     ps
 end
 
-function get2Dsystem(sys::ODESystem2D; name)
-
-    sts = states(sys)
-    ps = parameters(sys)
-    eqs = equations(sys)
-
-    ODESystem(eqs, t, sts, ps, name=name)
-end

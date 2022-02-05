@@ -55,6 +55,19 @@ function sumvar(con::Vector{SgnODESystem}, var::String)
     end
 end
 
+function filterexpr(expr::Equation; ignore::Vector{Num} = Num[])
+
+    expr_rhs = Set(ModelingToolkit.get_variables(expr.rhs))
+    expr_lhs = Set(ModelingToolkit.get_variables(expr.lhs))
+    expr_var = union(expr_rhs, expr_lhs)
+    
+    vars = collect(setdiff(expr_var, Set(ignore)))
+     
+    length(vars) > 0
+end
+
+
+
 function equalityeqs(con::Vector{SgnODESystem}, var::String; couple = false, sgn = 1)
     sym = Symbol(var)
     C = filter(c -> hasproperty(c.ode, sym), con)
@@ -84,7 +97,6 @@ function equalityeqs(con::Vector{SgnODESystem}, var::String; couple = false, sgn
 
 
 end
-
 
 # =============================================================================
 # Functions to replace variables on equations by the observed variables
@@ -125,8 +137,10 @@ function reducedobs(sys::ODESystem; name)
     ODESystem(eqs; name = name)
 end
 
-
-# =============================================================================
-# multibond graph 
-
-
+function isindependent(var::Num)
+    if isvariable(var)
+        !istree(unwrap(var))
+    else
+        true
+    end
+end

@@ -18,10 +18,15 @@ function Sf(expr; name)
     ODESystem(eqs, t, sts, []; name = name)
 end
 
-# function Sf(expr; name)
-#     @named power = Power(effort = nothing, flow = expr)
-#     extend(ODESystem(Equation[], t, [], []; name = name), power)
-# end
+function Dq(; name, x = 0.0)
+    @variables f(t) = 0.0
+    @variables q(t) = 0.0
+
+    eqs = [
+        D(q) ~ f
+    ]
+    ODESystem(eqs, t, [q, f], []; name = name)
+end
 
 # -----------------------------------------------------------------------------
 # Dev
@@ -31,6 +36,8 @@ end
 
 @named sf = Sf(sin(θ))
 @named se = Se(sin(θ))
+@named dq = Dq()
+dq.q
 
 # Test junciton1
 @named m = Mass(m = 0.5)
@@ -38,13 +45,15 @@ end
 @named d = Damper(c = 1.0)
 
 # Simple MSD system
-@named c = Junction1(m, s, d, se, couple = false)
+@named c = Junction1(m, s, d, se, dq, couple = false)
 
 # Add the θ equation
-eqs = [θ ~ s.q]
+eqs = [θ ~ dq.q]
 c = extend(ODESystem(eqs, t, [], []; name = :c), c)
 
 # Simplify
+equations(c)
+
 sys = structural_simplify(c)
 @named sys = reducedobs(sys)
 equations(sys)

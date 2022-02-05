@@ -27,6 +27,16 @@ function Sf(expr; name)
     ODESystem(eqs, t, sts, []; name = name)
 end
 
+function Dq(; name, x = 0.0)
+    @variables f(t) = 0.0
+    @variables q(t) = 0.0
+
+    eqs = [
+        D(q) ~ f
+    ]
+    ODESystem(eqs, t, [q, f], []; name = name)
+end
+
 # =============================================================================
 # Ports
 
@@ -49,6 +59,8 @@ function Junction1(ps...; name, subsys = [], couple = true, sgn = 1)
     eqs = [0 ~ sumvar(con, "e") + sgn * e]
     # f₁ = f₂ = f₃
     eqs = vcat(eqs, equalityeqs(con, "f", couple = couple))
+    # Remove empty equations
+    filter!(x -> filterexpr(x, ignore=[e, f]), eqs)
     # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
     # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
     # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
@@ -86,6 +98,8 @@ function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
     eqs = [0 ~ sumvar(con, "f") + sgn * f]
     # e₁ = e₂ = e₃
     eqs = vcat(eqs, equalityeqs(con, "e", couple = couple, sgn = sgn))
+    # Remove empty equations
+    filter!(x -> filterexpr(x, ignore = [e, f]), eqs)
     # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
     # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
     # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
