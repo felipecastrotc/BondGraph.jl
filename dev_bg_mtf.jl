@@ -179,13 +179,11 @@ equations(sys)
 @named sys = reducedobs(sys)
 equations(sys)
 
-
 prob = ODEProblem(sys, [], (0.0, 4.0))
 sol = solve(prob)
 plot(sol)
 sol.t
 plot(sol.t, sol[j.js.q])
-
 
 
 # -----------------------------------------------------------------------------

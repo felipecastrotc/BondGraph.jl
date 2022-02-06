@@ -60,7 +60,9 @@ function Junction1(ps...; name, subsys = [], couple = true, sgn = 1)
     # f₁ = f₂ = f₃
     eqs = vcat(eqs, equalityeqs(con, "f", couple = couple))
     # Remove empty equations
-    filter!(x -> filterexpr(x, ignore=[e, f]), eqs)
+    if couple
+        filter!(x -> filterexpr(x, ignore = [e, f]), eqs)
+    end
     # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
     # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
     # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
@@ -99,7 +101,9 @@ function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
     # e₁ = e₂ = e₃
     eqs = vcat(eqs, equalityeqs(con, "e", couple = couple, sgn = sgn))
     # Remove empty equations
-    filter!(x -> filterexpr(x, ignore = [e, f]), eqs)
+    if couple
+        filter!(x -> filterexpr(x, ignore = [e, f]), eqs)
+    end
     # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
     # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
     # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
