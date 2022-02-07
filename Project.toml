@@ -1,4 +1,4 @@
-name = "bg_mtk"
+name = "BondGraph"
 uuid = "41e83443-7082-4de0-b466-8936bcd80675"
 authors = ["Felipe de Castro <felipecastrotc@gmail.com>"]
 version = "0.1.0"
