@@ -1,8 +1,3 @@
-# SINDy and FFX on Oil
+# BondGraph.jl
 
 Under development
-
-$ \frac{dspring₊q(t)}{dt} =& \mathrm{mass₊f}\left( t \right)$
-
-$\frac{1}{2} \sterling$
-
