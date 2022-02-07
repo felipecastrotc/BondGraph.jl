@@ -1,9 +1,4 @@
-using ModelingToolkit, Plots, DifferentialEquations, LinearAlgebra
-using Symbolics, Symbolics.Latexify
 import ModelingToolkit: states, parameters
-
-
-include("lib_bg.jl")
 
 # =============================================================================
 # Types

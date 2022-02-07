@@ -1,9 +1,3 @@
-using ModelingToolkit, DifferentialEquations, LinearAlgebra
-using Symbolics
-
-include("lib_mtk.jl")
-include("lib_utils.jl")
-
 @variables t
 D = Differential(t)
 

@@ -1,6 +1,4 @@
 # Extending ModelingToolkit
-using Symbolics
-
 import Symbolics: Symbolic
 # equations functions
 import SymbolicUtils: FnType
@@ -14,13 +12,11 @@ import ModelingToolkit: getname, rename, setmetadata
 import ModelingToolkit: namespace_equations, equations
 
 
-
 function namespace_equation(eq::Equation, sys, couple)
     _lhs = namespace_expr(eq.lhs, sys, couple)
     _rhs = namespace_expr(eq.rhs, sys, couple)
     _lhs ~ _rhs
 end
-
 
 function namespace_expr(O, sys, couple) where {T}
     ivs = independent_variables(sys)
@@ -76,7 +72,6 @@ function namespace_equations(sys::ODESystem, couple)
     isempty(eqs) && return Equation[]
     map(eq -> namespace_equation(eq, sys, couple), eqs)
 end
-
 
 function equations(sys::Array{ODESystem,1})
 

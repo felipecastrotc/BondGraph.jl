@@ -1,4 +1,3 @@
-using ModelingToolkit, Symbolics
 import Base: +, -
 
 # Deprecated -> use ModelingToolkit.get_variables
@@ -65,8 +64,6 @@ function filterexpr(expr::Equation; ignore::Vector{Num} = Num[])
      
     length(vars) > 0
 end
-
-
 
 function equalityeqs(con::Vector{SgnODESystem}, var::String; couple = false, sgn = 1)
     sym = Symbol(var)
