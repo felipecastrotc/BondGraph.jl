@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.17.1
+# v0.17.7
 
 using Markdown
 using InteractiveUtils
@@ -233,29 +233,14 @@ md"""Create new spring model, SpringU:"""
 # ╔═╡ a2bbe472-cde7-44fc-93fa-5eaf42bd2c19
 md"""Declare the new spring:"""
 
+# ╔═╡ 94b11ce2-ff6f-4fea-8a50-675117b0fbf5
+@named springU = SpringU(x=1.)
+
 # ╔═╡ 9137c9fb-906f-4e6f-8470-8a01096ee60b
 md""" Guess a function type for $h(x,p)$."""
 
 # ╔═╡ 7a4ca281-91e0-435e-865e-7555a44efa71
 h(x, p) = x*p
-
-# ╔═╡ 0f7a2c98-fb1a-444c-9798-1276a47b0324
-function SpringU(;name, x = 0., P=1.)
-    @named power = Power()
-    @unpack e, f = power
-
-    @variables q(t)=x
-    ps = @parameters p=P
-    
-    eqs = [
-            e ~ h(q, p)
-            D(q) ~ f
-        ]
-    extend(ODESystem(eqs, t, [q], ps; name=name), power)
-end
-
-# ╔═╡ 94b11ce2-ff6f-4fea-8a50-675117b0fbf5
-@named springU = SpringU(x=1.)
 
 # ╔═╡ e6763942-e37a-47b8-bb80-e3100f58febd
 md"""Now, model the mass-spring-damper system using the generic SpringU, instead of the linear spring."""
@@ -342,6 +327,21 @@ begin
 	p, a = train(p_1dofu, y, 600);
 	
 	gif(a)
+end
+
+# ╔═╡ 0f7a2c98-fb1a-444c-9798-1276a47b0324
+function SpringU(;name, x = 0., P=1.)
+    @named power = Power()
+    @unpack e, f = power
+
+    @variables q(t)=x
+    ps = @parameters p=P
+    
+    eqs = [
+            e ~ h(q, p)
+            D(q) ~ f
+        ]
+    extend(ODESystem(eqs, t, [q], ps; name=name), power)
 end
 
 # ╔═╡ 30c83012-cc69-44d8-a451-dfe0e857df34

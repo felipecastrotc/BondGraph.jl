@@ -1,25 +1,28 @@
 ### A Pluto.jl notebook ###
-# v0.17.5
+# v0.17.7
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ d893fade-cb72-4271-8bec-a561f914dc60
-import Pkg; Pkg.add("ModelingToolkit")
+# ╔═╡ 818e3cee-1df8-48b1-bd64-227265772680
+begin	
+	import Pkg
+	Pkg.add("SymbolicUtils")
+end
 
-# ╔═╡ be7c4dea-7f8e-4c19-bc43-d1b30be524bc
-begin
-		using ModelingToolkit, Plots, DifferentialEquations, LinearAlgebra
-		using Symbolics, Symbolics.Latexify
-		
-		include("lib_bg.jl")
+# ╔═╡ 494eb4a0-2bb7-4ef5-a210-91a4780f8630
+begin	
+	using ModelingToolkit, Plots, DifferentialEquations, LinearAlgebra
+	using Symbolics, Symbolics.Latexify
+
+	include("lib_bg.jl")
 end
 
 # ╔═╡ f8656632-5785-4b65-83be-ef0db325323d
 begin
-	@named L = Mass(m = 0.5)
-	@named R = Damper(c = 1.0)
-	@named Uₐ = Se(12.0)
+	@named L = Mass(m = 0.5);
+	@named R = Damper(c = 1.0);
+	@named Uₐ = Se(12.0);
 	
 end
 
@@ -34,8 +37,7 @@ end
 g = 0.01
 
 # ╔═╡ 25edf63e-84fe-11ec-13a0-e93833c9b99d
-begin	
-
+begin		
 	function mGY(subsys...; name, g = 1.0)
 	
 	    # Get connections
@@ -117,13 +119,13 @@ end
 
 # ╔═╡ Cell order:
 # ╠═f8656632-5785-4b65-83be-ef0db325323d
-# ╠═c1bcea2c-eb82-4082-9b3b-b9be15ba143c
+# ╟─c1bcea2c-eb82-4082-9b3b-b9be15ba143c
 # ╠═6611c596-4909-4671-87bd-f7df1b76e7a9
-# ╠═861d9a17-a9ba-4de3-98b1-37c5dd2238f6
-# ╠═b8ca3891-ab03-452f-8a41-60e752d2a0f5
+# ╟─861d9a17-a9ba-4de3-98b1-37c5dd2238f6
+# ╟─b8ca3891-ab03-452f-8a41-60e752d2a0f5
 # ╠═ae9d9340-3705-4779-ac84-d0b9db0fba0f
-# ╠═15c818c5-2203-47f1-8c78-5bb8601dec0f
-# ╠═974a0ab1-3800-4de1-a26a-7625899d5e43
-# ╠═be7c4dea-7f8e-4c19-bc43-d1b30be524bc
-# ╠═d893fade-cb72-4271-8bec-a561f914dc60
+# ╟─15c818c5-2203-47f1-8c78-5bb8601dec0f
+# ╟─974a0ab1-3800-4de1-a26a-7625899d5e43
+# ╟─818e3cee-1df8-48b1-bd64-227265772680
+# ╟─494eb4a0-2bb7-4ef5-a210-91a4780f8630
 # ╟─25edf63e-84fe-11ec-13a0-e93833c9b99d

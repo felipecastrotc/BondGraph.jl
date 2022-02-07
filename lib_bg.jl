@@ -120,6 +120,115 @@ function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
 
     compose(sys, rmsgnODE.(ps)...)
 end
+
+function mGY(subsys...; name, g = 1.0)
+
+    # Get connections
+    c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
+
+    # Remove nothing from c array
+    pos = .!isnothing.(c)
+    c = c[pos]
+    @assert !isempty(c)
+
+    # If only one subsys is passed it automatically generates an open  
+    # connection
+    if sum(pos) == 1
+        @named power = Power()
+        @unpack e, f = power
+        # Set variables according to the position
+        if pos[1]
+            e₁, f₁ = e, f
+            e₂, f₂ = c[1].e, c[1].f
+        else
+            e₂, f₂ = e, f
+            e₁, f₁ = c[1].e, c[1].f
+        end
+    else
+        @assert length(c) == 2
+        e₁, f₁ = c[1].e, c[1].f
+        e₂, f₂ = c[2].e, c[2].f
+    end
+
+    # Gyrator equation
+    eqs = [
+        e₂ ~ g * f₁,
+        e₁ ~ g * f₂,
+    ]
+
+    # Check if it is a modulated gyrator
+    if isvariable(g)
+        sts, ps = [], [g]
+    elseif istree(unwrap(g))
+        sts = []
+        ps = collect(Set(ModelingToolkit.get_variables(g)))
+    else
+        sts, ps = [], []
+    end
+
+    sys = ODESystem(eqs, t, sts, ps; name = name)
+
+    if @isdefined power
+        sys = extend(sys, power)
+    end
+
+    compose(sys, c...)
+end
+
+function mTF(subsys...; name, r = 1.0)
+
+    # Get connections
+    c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
+
+    # Remove nothing from c array
+    pos = .!isnothing.(c)
+    c = c[pos]
+    @assert !isempty(c)
+
+    # If only one subsys is passed it automatically generates an open  
+    # connection
+    if sum(pos) == 1
+        @named power = Power()
+        @unpack e, f = power
+        # Set variables according to the position
+        if pos[1]
+            e₁, f₁ = e, f
+            e₂, f₂ = c[1].e, c[1].f
+        else
+            e₂, f₂ = e, f
+            e₁, f₁ = c[1].e, c[1].f
+        end
+    else
+        @assert length(c) == 2
+        e₁, f₁ = c[1].e, c[1].f
+        e₂, f₂ = c[2].e, c[2].f
+    end
+
+    # Transformer equation
+    eqs = [
+        f₂ ~ f₁ * r,
+        e₁ ~ e₂ * r,
+    ]
+
+    # Check if it is a modulated transformer
+    if isvariable(r)
+        sts, ps = [], [r]
+    elseif istree(unwrap(r))
+        sts = []
+        ps = collect(Set(ModelingToolkit.get_variables(r)))
+    else
+        sts, ps = [], []
+    end
+
+    sys = ODESystem(eqs, t, sts, ps; name = name)
+
+    if @isdefined power
+        sys = extend(sys, power)
+    end
+
+    compose(sys, c...)
+end
+
 # =============================================================================
 # Elements
 
