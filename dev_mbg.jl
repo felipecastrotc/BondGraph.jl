@@ -1,11 +1,12 @@
-using ModelingToolkit, Plots, DifferentialEquations, LinearAlgebra
-using Symbolics, Symbolics.Latexify
+using BondGraph, Plots, Symbolics.Latexify
+import BondGraph: t, D
 
-include("lib_bg.jl")
+using DifferentialEquations
+
 
 # -----------------------------------------------------------------------------
-# mTF - translation - CHAPTER 6. PLANAR MECHANICS -> master thesis zimmer_ms
 @variables rx ry θ(t) = 0.0 a θ₀
+# mTF - translation - CHAPTER 6. PLANAR MECHANICS -> master thesis zimmer_ms
 
 d = [rx, ry]
 d = [1, 0]

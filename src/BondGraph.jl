@@ -3,8 +3,7 @@ module BondGraph
 using Reexport
 
 @reexport using ModelingToolkit
-@reexport using Symbolics
-using DifferentialEquations, LinearAlgebra
+# using Symbolics, DifferentialEquations, LinearAlgebra
 
 
 export SgnODESystem, Power, Se, Sf, Dq, Junction1, Junction0, mGY, mTF, Mass, Spring, Spring3, Damper, reducedobs, isindependent
