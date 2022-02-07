@@ -1,4 +1,4 @@
-module bg_mtk
+module BondGraph
 
 greet() = print("Hello World!")
 
