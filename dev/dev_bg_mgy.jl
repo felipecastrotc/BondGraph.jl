@@ -1,10 +1,10 @@
-using ModelingToolkit, Plots, DifferentialEquations, LinearAlgebra
-using Symbolics, Symbolics.Latexify
+using BondGraph, Plots, Symbolics.Latexify
+import BondGraph: t, D
 
-include("lib_bg.jl")
+using DifferentialEquations
 
 # =============================================================================
-# Function mGY
+# Function mGY dev place
 
 function mGY(subsys...; name, g = 1.0)
 
