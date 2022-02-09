@@ -200,8 +200,8 @@ function mTF(subsys...; name, r = 1.0)
 
     # Transformer equation
     eqs = [
-        f₂ ~ f₁ * r,
-        e₁ ~ e₂ * r,
+        f₁ * r ~ f₂,
+        e₂ * r ~ e₁,
     ]
 
     # Check if it is a modulated transformer

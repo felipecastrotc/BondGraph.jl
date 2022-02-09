@@ -14,7 +14,7 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 5c81a42a-88e6-11ec-05fc-0fc1789957c6
+# ╔═╡ 02164454-88ec-11ec-324b-dd90be6f42fd
 begin
 	using BondGraph, Plots, Symbolics.Latexify
 	import BondGraph: t, D
@@ -22,95 +22,179 @@ begin
 	using DifferentialEquations
 end
 
-# ╔═╡ 64270364-9af4-46d0-a72d-902bb1a95d10
+# ╔═╡ b3fa029f-a902-4881-9a28-cb52bf580f68
 begin
-	voltage_slider = @bind V html"<input type=range min=-24 max=24 step=0.5 value=12>"
-	torque_slider = @bind τ html"<input type=range min=-10 max=10 step=0.1 value=0.1>"
-	
 	md"""
-	## Example of a DC Motor
+	## Pendulum simulation
 	
-	**Set the DC motor input voltage and the axis torque.**
+	**Set the pendulum length and its initial position.**
 	
-	Voltage: $(voltage_slider) $(V)
+	Pendulum length: $(@bind l₀ html"<input type=number value=1>")m
 	
-	Torque: $(torque_slider) $(τ)
+	Initial position: $(@bind θd html"<input type=number value=179>")º
+
+	Mass: `m = ` $(@bind m₀ html"<input type=number value=1.0>") `kg`
 	"""
 end
 
-# ╔═╡ f63415ea-9e11-46c1-b79a-92985856e347
-md"""
-Voltage: $(V) V
+# ╔═╡ 305abba2-abab-41a7-b458-894208c32fbd
+begin 
+	θ₀ = deg2rad(θd);
+	
+	@parameters l, g
+	@variables θ(t) = θ₀
+	g = GlobalScope(g)
+	l = GlobalScope(l)
+	θ = GlobalScope(θ)
+	
+	md"""
+	Length: $(l₀) m
 
-Torque: $(τ) N⋅m
-"""
+	Initial angle: $(θd)º
+	"""
+end
 
-# ╔═╡ 874eb586-a630-4095-ad1c-deaded69c6da
-md"""
-**Eletronic parameters**
-
-Inductance: `L = ` $(@bind l html"<input type=number value=0.5>")
-
-Resistance: `R = ` $(@bind r html"<input type=number value=1.0>")
-
-Electromotive force constant: `Ke = ` $(@bind g html"<input type=number value=0.01>")
-
-**Mechanical parameters**
-
-Axis inertia: `J = ` $(@bind m html"<input type=number value=0.01>")
-
-Axis friction: `b = ` $(@bind c html"<input type=number value=0.1>")
-"""
-
-# ╔═╡ 1e3f9a3e-07ad-4ec0-9f20-353c56c65a68
+# ╔═╡ de42d476-b1db-43f6-b8f8-3f0f88b25361
 md"
-**Bond graph of a DC motor**
+**Theoretic model**
 
-![DC motor bond graph](https://www.researchgate.net/profile/Gautam-Biswas-8/publication/266396943/figure/fig10/AS:1009716255813640@1617746523459/Bond-Graph-model-of-separately-excited-DC-motor-in-integral-causality.png)
-
+All systems were solved using Tsitouras 5/4 Runge-Kutta method
 "
 
-# ╔═╡ ef47b894-fb76-4d3c-b4ee-e2fdb00ed844
-	md"""
-	**ODE system**
-
-	The equations from the bond graph modelling process are shown below
-
-	Reference: [https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&section=SystemModeling](https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&section=SystemModeling)
-	"""
-
-# ╔═╡ b59299dc-d9a7-4b91-a05b-eb99c040cb15
-begin	
-	# Electrical elements
-	@named L = Mass(m = l);
-	@named R = Damper(c = r);
-	@named Uₐ = Se(V);
+# ╔═╡ 1b9e92b5-8a51-4ed3-a185-59b83e80cea6
+begin
+	@variables θ̇(t) = 0.0
 	
-	# Mechanical elements
-	@named J = Mass(m = m)
-	@named b = Damper(c = c)
-	@named Tₗ = Se(τ)
-
-	# Build the bond graph system
-	@named je = Junction1(Uₐ, -R, -L, sgn = -1)
-	@named jm = Junction1(Tₗ, -b, -J)
-	@named gy = mGY(je, jm, g = g)
-
-	# Get the system equations
-	@named sys = reducedobs(structural_simplify(gy))
+	eqsₚ = [D(θ̇) ~ -(g / l) * sin(θ), D(θ) ~ θ̇]
+	@named sysₚ = ODESystem(eqsₚ, t)
+	sysₚ = structural_simplify(sysₚ)
+	equations(sysₚ)
 	
+	probₚ = ODEProblem(sysₚ, [], (0.0, 60.0), [l => l₀, g => 9.81])
+
+md"""
+```math
+	\begin{aligned} \\{\frac{d^{2}\theta }{dt^{2}}}= - {\frac {g}{\ell }}\sin(\theta) 
+\end{aligned}
+```
+"""
 end
 
-# ╔═╡ 9068b917-ea6e-4364-9fa3-4f9fa97833b5
+# ╔═╡ 56cf5bce-6d82-4969-b390-21be31a11cc5
+md"
+**Bond graph**
+
+Using custom element.
+"
+
+# ╔═╡ 3d86f4f6-cd7a-4b41-a150-acd1f15e2b14
+begin
+	function SpringSin(; name, m = 1.0, g = 9.81, l = 1.0, θ = 0.0)
+	    @named power = Power()
+	    @unpack e, f = power
+	
+	    @variables q(t) = θ
+	    ps = @parameters g = g l = l
+	
+	    eqs = [
+	        e ~ sin(q) * g * m / l,
+	        D(q) ~ f
+	    ]
+	    extend(ODESystem(eqs, t, [q], ps; name = name), power)
+	end
+	
+	@named m₁ = Mass(m = m₀)
+	@named s₁ = SpringSin(m = m₀, g = g, l = l, θ = θ)
+	@named p₁ = Junction1(m₁, s₁, couple = false)
+	
+	@named sys₁ = reducedobs(structural_simplify(p₁))
+	
+	prob₁ = ODEProblem(sys₁, [], (0.0, 60.0), [l => l₀, g => 9.81, θ => θ₀])
+
+	sys₁
+end
+
+# ╔═╡ fbadb4ff-c3a2-46d0-bdfb-f5b4306e5ea5
+md"
+**Bond graph**
+
+Standard library.
+"
+
+# ╔═╡ 415e0c6e-e919-4f75-8aee-077f0da649b4
+begin
+	@named mⱼ = Mass(m = 0.999*m₀)
+	@named Jⱼ = Mass(m = 0.001*m₀)
+	@named gⱼ = Se(9.81 * m₀)
+	
+	@named x = Junction1(-mⱼ)
+	@named xtf = mTF(x, r = (l₀ * cos(θ)))
+	
+	@named y = Junction1(-mⱼ, gⱼ)
+	@named ytf = mTF(y, r = -(l₀ * sin(θ)))
+	@named mdlⱼ = Junction1(-Jⱼ, -ytf, -xtf, couple = false)
+	
+	eqsⱼ = [D(θ) ~ Jⱼ.f]
+	mdl2ⱼ = extend(ODESystem(eqsⱼ, t, [θ], []; name = :mdl), mdlⱼ)
+	@named sysⱼ = reducedobs(structural_simplify(mdl2ⱼ))
+	
+	probⱼ = ODEProblem(sysⱼ, [], (0.0, 60.0))
+
+	structural_simplify(mdl2ⱼ)
+end
+
+# ╔═╡ a1d95c68-9c58-4534-af74-f9938ee7abfc
 md"""
-Simulating the ODE system obtained from the modelling process.
+**Simulation**
+
+Simulation time: $(@bind tf html"<input type=number value=10>")s
+
+Angular position
 """
 
-# ╔═╡ d187566b-61db-4a55-ad42-733d223fc77b
+# ╔═╡ e95235eb-4a95-40de-964a-3ef841936e38
 begin
-	prob = ODEProblem(sys, [], (0.0, 4.0))
-	sol = solve(prob)
-	plot(sol)
+	solₚ = solve(probₚ, reltol = 1e-8, abstol = 1e-8)
+	sol₁ = solve(prob₁, reltol = 1e-8, abstol = 1e-8)
+	solⱼ = solve(probⱼ, reltol = 1e-8, abstol = 1e-8)
+	
+	# Configure plot
+	ts = 0:0.01:tf
+	
+	stₚ = solₚ(ts)
+	st₁ = sol₁(ts)
+	stⱼ = solⱼ(ts)
+	plot(stₚ.t, stₚ[2, :], xlabel="Time (s)", label="Theoretical")
+	plot!(st₁.t, st₁[2, :], ylabel="θ (rad)", label="BG Custom")
+	plot!(stⱼ.t, stⱼ[θ], label="BG mTF")
+end
+
+# ╔═╡ 44ce6dbb-878a-4bb4-b7b5-569b0681f5fb
+md"
+Angular velocity
+"
+
+# ╔═╡ 17a89da4-5dc9-4829-8819-47656c7f332a
+begin
+	plot(stₚ.t, stₚ[1, :], xlabel = "Time (s)", label = "Theoretical")
+	plot!(st₁.t, st₁[1, :], ylabel = "θ (rad/s)", label = "BG Custom")
+	plot!(stⱼ.t, stⱼ[Jⱼ.f], label = "BG mTF")
+end
+
+# ╔═╡ d7d9abe4-6dab-4a42-b493-c5a541cb1943
+md"Phase space"
+
+# ╔═╡ a3cdeb26-39bd-4499-b14c-c8198e5ccfd7
+begin
+	Θ₀ = (π * 2 .^ (-3:0.2:0) .- 1e-4)
+	plot(title="Phase space", xlabel="θ", ylabel="θ vel", legend=false)
+	for i in Θ₀
+	    probₚ = ODEProblem(sysₚ, [θ => i], (0.0, 30.0), [l => l₀, g => 9.81])
+	    ϕ = solve(probₚ, reltol = 1e-8, abstol = 1e-8)
+	    plot!(ϕ[2, :], ϕ[1, :], lc=:blue)
+	end
+	plot!()
+	
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2385,14 +2469,20 @@ version = "0.5.5+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─64270364-9af4-46d0-a72d-902bb1a95d10
-# ╟─f63415ea-9e11-46c1-b79a-92985856e347
-# ╟─874eb586-a630-4095-ad1c-deaded69c6da
-# ╟─1e3f9a3e-07ad-4ec0-9f20-353c56c65a68
-# ╟─ef47b894-fb76-4d3c-b4ee-e2fdb00ed844
-# ╠═b59299dc-d9a7-4b91-a05b-eb99c040cb15
-# ╟─9068b917-ea6e-4364-9fa3-4f9fa97833b5
-# ╟─d187566b-61db-4a55-ad42-733d223fc77b
-# ╟─5c81a42a-88e6-11ec-05fc-0fc1789957c6
+# ╟─b3fa029f-a902-4881-9a28-cb52bf580f68
+# ╟─305abba2-abab-41a7-b458-894208c32fbd
+# ╟─de42d476-b1db-43f6-b8f8-3f0f88b25361
+# ╟─1b9e92b5-8a51-4ed3-a185-59b83e80cea6
+# ╟─56cf5bce-6d82-4969-b390-21be31a11cc5
+# ╟─3d86f4f6-cd7a-4b41-a150-acd1f15e2b14
+# ╟─fbadb4ff-c3a2-46d0-bdfb-f5b4306e5ea5
+# ╟─415e0c6e-e919-4f75-8aee-077f0da649b4
+# ╟─a1d95c68-9c58-4534-af74-f9938ee7abfc
+# ╟─e95235eb-4a95-40de-964a-3ef841936e38
+# ╟─44ce6dbb-878a-4bb4-b7b5-569b0681f5fb
+# ╟─17a89da4-5dc9-4829-8819-47656c7f332a
+# ╟─d7d9abe4-6dab-4a42-b493-c5a541cb1943
+# ╟─a3cdeb26-39bd-4499-b14c-c8198e5ccfd7
+# ╟─02164454-88ec-11ec-324b-dd90be6f42fd
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

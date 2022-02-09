@@ -19,7 +19,7 @@ M = M2Dtrans(p)
 
 # -----------------------------------------------------------------------------
 # Test junctions
-
+ᵣ
 @named m = Mass2D()
 @named s = Spring2D()
 @named d = Damper2D()
@@ -54,7 +54,7 @@ eqs = [D(θ) ~ jm.θ.mθ.f]
 mdl = extend(ODESystem(eqs, t, [], []; name = :mdl), mdl)
 
 sys = structural_simplify(mdl)
-sys = reducedobs(sys, name=:mdl)
+sys = reducedobs(sys, name = :mdl)
 equations(sys)
 
 prob = ODEProblem(sys, [], (0.0, 20.0))
@@ -62,4 +62,3 @@ sol = solve(prob)
 # plot(sol.t, sqrt.(sol[jm.y.e] .^ 2 + sol[jm.x.e] .^ 2))
 plot(sol)
 plot(sol.t, sol[θ])
-

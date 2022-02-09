@@ -14,7 +14,7 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 5c81a42a-88e6-11ec-05fc-0fc1789957c6
+# ╔═╡ 02164454-88ec-11ec-324b-dd90be6f42fd
 begin
 	using BondGraph, Plots, Symbolics.Latexify
 	import BondGraph: t, D
@@ -22,95 +22,100 @@ begin
 	using DifferentialEquations
 end
 
-# ╔═╡ 64270364-9af4-46d0-a72d-902bb1a95d10
+# ╔═╡ b3fa029f-a902-4881-9a28-cb52bf580f68
 begin
-	voltage_slider = @bind V html"<input type=range min=-24 max=24 step=0.5 value=12>"
-	torque_slider = @bind τ html"<input type=range min=-10 max=10 step=0.1 value=0.1>"
+	length_slider = @bind A html"<input type=range min=0.1 max=2 step=0.1 value=1>"
+	#init_slider = @bind θ₀ html"<input type=range min=0 max=360 step=0.1 value=90>"
 	
 	md"""
-	## Example of a DC Motor
+	## Pendulum using multi-bond graph
 	
-	**Set the DC motor input voltage and the axis torque.**
+	**Set the pendulum length and its initial position.**
 	
-	Voltage: $(voltage_slider) $(V)
+	Pendulum length: $(length_slider)m
 	
-	Torque: $(torque_slider) $(τ)
+	Initial position: $(@bind θ₀ html"<input type=number value=90>")º
+
+	Mass: `m = ` $(@bind M html"<input type=number value=2.0>") `kg`
 	"""
 end
 
-# ╔═╡ f63415ea-9e11-46c1-b79a-92985856e347
+# ╔═╡ 305abba2-abab-41a7-b458-894208c32fbd
 md"""
-Voltage: $(V) V
+Length: $(A) m
 
-Torque: $(τ) N⋅m
+Initial angle: $(θ₀)º
 """
 
-# ╔═╡ 874eb586-a630-4095-ad1c-deaded69c6da
-md"""
-**Eletronic parameters**
-
-Inductance: `L = ` $(@bind l html"<input type=number value=0.5>")
-
-Resistance: `R = ` $(@bind r html"<input type=number value=1.0>")
-
-Electromotive force constant: `Ke = ` $(@bind g html"<input type=number value=0.01>")
-
-**Mechanical parameters**
-
-Axis inertia: `J = ` $(@bind m html"<input type=number value=0.01>")
-
-Axis friction: `b = ` $(@bind c html"<input type=number value=0.1>")
-"""
-
-# ╔═╡ 1e3f9a3e-07ad-4ec0-9f20-353c56c65a68
+# ╔═╡ a7d57c73-2d90-4b40-9184-f7a5da57a442
 md"
-**Bond graph of a DC motor**
+**Bond graph of a pendulum**
 
-![DC motor bond graph](https://www.researchgate.net/profile/Gautam-Biswas-8/publication/266396943/figure/fig10/AS:1009716255813640@1617746523459/Bond-Graph-model-of-separately-excited-DC-motor-in-integral-causality.png)
+![Pendulum multi-bond graph](https://i.imgur.com/1LID6Mv.png)
 
 "
 
-# ╔═╡ ef47b894-fb76-4d3c-b4ee-e2fdb00ed844
+# ╔═╡ 34a5476f-84ce-4beb-bf91-0e53c26bec96
 	md"""
 	**ODE system**
 
 	The equations from the bond graph modelling process are shown below
-
-	Reference: [https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&section=SystemModeling](https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&section=SystemModeling)
 	"""
 
-# ╔═╡ b59299dc-d9a7-4b91-a05b-eb99c040cb15
+# ╔═╡ 2e14868c-6390-4077-9830-670830bb52fa
 begin	
-	# Electrical elements
-	@named L = Mass(m = l);
-	@named R = Damper(c = r);
-	@named Uₐ = Se(V);
+	@variables θ(t)=0.0 
+
+	# Pendulum parameters
+	θ = GlobalScope(θ)
+	θ₀ᵣ = deg2rad(θ₀)
+	Rx = A * sin(θ₀ᵣ)
+	Ry = A * cos(θ₀ᵣ)
 	
-	# Mechanical elements
-	@named J = Mass(m = m)
-	@named b = Damper(c = c)
-	@named Tₗ = Se(τ)
+	# Pendulum mass
+	@named m = Mass2D(m = [M, M, M])
+	
+	# Defining sources
+	# Wall source
+	Sw = ODESystem2D(Sf(0, name = :wx), Sf(0, name = :wy), Se(0, name = :wθ))
+	# Gravity source
+	Sg = ODESystem2D(Se(0, name = :gx), Se(-9.81, name = :gy), Se(0, name = :gθ))
 
-	# Build the bond graph system
-	@named je = Junction1(Uₐ, -R, -L, sgn = -1)
-	@named jm = Junction1(Tₗ, -b, -J)
-	@named gy = mGY(je, jm, g = g)
+	# Buding the pendulum on the bondgraph
+	@named j1 = Junction12D(Sw)
+	@named jm = Junction12D(Sg, -m)
+	@named mtf = mTF2Dtrans(j1, jm, a = A, θ = θ, d = [Rx, Ry])
+	@named mdl = get2Dsystem(mtf)
 
-	# Get the system equations
-	@named sys = reducedobs(structural_simplify(gy))
+	# Adding the θ relationship
+	eqs = [D(θ) ~ jm.θ.mθ.f]
+	mdl = extend(ODESystem(eqs, t, [θ], []; name = :mdl), mdl)
+	sys = structural_simplify(mdl)
+	#@named sys = reducedobs(structural_simplify(mdl))	
+end
+
+# ╔═╡ a5fab938-e8c0-453e-bf73-dd8f70458c33
+md"""
+Simulating the DAE system obtained from the modelling process.
+"""
+
+# ╔═╡ 9142cd2f-93a6-463e-89a1-d295c6b25864
+begin
+	prob = ODEProblem(sys, [], (0.0, 20.0))
+	sol = solve(prob)
+	# plot(sol.t, sqrt.(sol[jm.y.e] .^ 2 + sol[jm.x.e] .^ 2))
+	plot(sol)
+	#plot(sol.t, sol[θ])
 	
 end
 
-# ╔═╡ 9068b917-ea6e-4364-9fa3-4f9fa97833b5
-md"""
-Simulating the ODE system obtained from the modelling process.
-"""
+# ╔═╡ 14981cf4-1137-4e2e-9a8e-fe8711f675bc
+md"Pendulum angular position "
 
-# ╔═╡ d187566b-61db-4a55-ad42-733d223fc77b
+# ╔═╡ 3c30332c-bb34-4a82-8db9-69cbcdb0cb9c
 begin
-	prob = ODEProblem(sys, [], (0.0, 4.0))
-	sol = solve(prob)
-	plot(sol)
+	md"Pendulum angular position "
+	plot(sol.t, sol[θ])
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2385,14 +2390,15 @@ version = "0.5.5+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─64270364-9af4-46d0-a72d-902bb1a95d10
-# ╟─f63415ea-9e11-46c1-b79a-92985856e347
-# ╟─874eb586-a630-4095-ad1c-deaded69c6da
-# ╟─1e3f9a3e-07ad-4ec0-9f20-353c56c65a68
-# ╟─ef47b894-fb76-4d3c-b4ee-e2fdb00ed844
-# ╠═b59299dc-d9a7-4b91-a05b-eb99c040cb15
-# ╟─9068b917-ea6e-4364-9fa3-4f9fa97833b5
-# ╟─d187566b-61db-4a55-ad42-733d223fc77b
-# ╟─5c81a42a-88e6-11ec-05fc-0fc1789957c6
+# ╟─b3fa029f-a902-4881-9a28-cb52bf580f68
+# ╟─305abba2-abab-41a7-b458-894208c32fbd
+# ╟─a7d57c73-2d90-4b40-9184-f7a5da57a442
+# ╟─34a5476f-84ce-4beb-bf91-0e53c26bec96
+# ╠═2e14868c-6390-4077-9830-670830bb52fa
+# ╟─a5fab938-e8c0-453e-bf73-dd8f70458c33
+# ╠═9142cd2f-93a6-463e-89a1-d295c6b25864
+# ╟─14981cf4-1137-4e2e-9a8e-fe8711f675bc
+# ╠═3c30332c-bb34-4a82-8db9-69cbcdb0cb9c
+# ╟─02164454-88ec-11ec-324b-dd90be6f42fd
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

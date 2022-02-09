@@ -1,7 +1,7 @@
-using ModelingToolkit, Plots, DifferentialEquations, LinearAlgebra
-using Symbolics, Symbolics.Latexify
+using BondGraph, Plots, Symbolics.Latexify
+import BondGraph: t, D
 
-include("lib_bg.jl")
+using DifferentialEquations
 
 # =============================================================================
 # Transformer
@@ -147,31 +147,29 @@ latexify(equations(sys)[4])
 
 l = 1.5
 @named m = Mass(m = 1.0)
+@named J = Mass(m = 1.0)
 @named js = Spring(k = 0.01, x = -pi / 6)
 @named jd = Damper(c = 0.01)
 @named fix = Sf(0)
 @named g = Se(9.81 * 1.0)
 
 # -----------------------------------------------------------------------------
-# Using Junctions and mTR
-@variables θ
+# Yellow blue Using Junctions and mTR
+@variables θ(t) = 0.999*pi
 θ = GlobalScope(θ)
 
-# @named xs = Junction1(fix, sgn = -1)
-@named xm = Junction1(-m)
-@named x0 = Junction0(-fix, -xm, sgn = -1)
-@named xtf = mTF(x0, r = 1.5 * cos(θ))
+@named x = Junction1(-m)
+@named xtf = mTF(x, r =(1.5 * cos(θ)))
 
-# @named ys = Junction1(fix, sgn = -1)
-@named ym = Junction1(-m, g)
-@named y0 = Junction0(-fix, -ym, sgn = -1)
-@named ytf = mTF(y0, r = -1.5 * sin(θ))
+@named y = Junction1(-m, g)
+@named ytf = mTF(y, r = -(1.5 * sin(θ)))
+@named mdl = Junction1(-J, -ytf, -xtf, couple=false)
 
-@named j = Junction1(-js, -jd)
-@named mdl = Junction0(-j, ytf, xtf, couple = false)
 
-eqs = [θ ~ j.js.q]
-mdl = extend(ODESystem(eqs, t, [], []; name = :mdl), mdl)
+eqs = [D(θ) ~ J.f]
+mdl = extend(ODESystem(eqs, t, [θ], []; name = :mdl), mdl)
+equations(mdl)
+
 
 sys = structural_simplify(mdl)
 equations(sys)
@@ -179,10 +177,50 @@ equations(sys)
 @named sys = reducedobs(sys)
 equations(sys)
 
-prob = ODEProblem(sys, [], (0.0, 4.0))
-sol = solve(prob)
+prob = ODEProblem(sys, [], (0.0, 30.0), [θ => pi/2])
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
+plot(sol.t, sol[θ])
+# plot(sol)
+
+
+# -----------------------------------------------------------------------------
+# Book Using Junctions and mTR WRONGG!!!
+@variables qx(t) = 0.0 qy(t) = 0.0
+@variables θ(t) = 0.0
+θ = GlobalScope(θ)
+
+# @named xs = Junction1(fix, sgn = -1)
+@named xm = Junction1(-m)
+@named x0 = Junction0(-fix, -xm, sgn = -1)
+@named xtf = mTF(x0, r = -(1.5 * cos(θ)))
+
+# @named ys = Junction1(fix, sgn = -1)
+@named ym = Junction1(-m, g)
+@named y0 = Junction0(-fix, -ym, sgn = -1)
+@named ytf = mTF(y0, r = -(1.5 * sin(θ)))
+
+# @named j = Junction1(-js, -jd)
+# @named j = Junction1(-js)
+# @named j = Junction1(-m)
+@named mdl = Junction1(-m, ytf, xtf, couple = false)
+# @named mdl = Junction0(-j, ytf, xtf, couple = false)
+# @named mdl = Junction0(ytf, xtf, couple = false)
+
+# eqs = [D(θ) ~ ytf.f]
+# eqs = [θ ~ j.js.q]
+eqs = [D(θ) ~ mdl.m.f]
+mdl = extend(ODESystem(eqs, t, [θ], []; name = :mdl), mdl)
+
+sys = structural_simplify(mdl)
+equations(sys)
+
+@named sys = reducedobs(sys)
+equations(sys)
+
+prob = ODEProblem(sys, [], (0.0, 4.0), check_length = false)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 plot(sol)
-sol.t
+
 plot(sol.t, sol[j.js.q])
 
 
