@@ -147,7 +147,7 @@ end
 md"""
 **Simulation**
 
-Simulation time: $(@bind tf html"<input type=number value=10>")s
+Simulation time: $(@bind tf html"<input type=number value=20>")s
 
 Angular position
 """
