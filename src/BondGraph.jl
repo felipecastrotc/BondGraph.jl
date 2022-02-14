@@ -4,7 +4,7 @@ using Reexport
 
 @reexport using ModelingToolkit
 # using Symbolics, DifferentialEquations, LinearAlgebra
-
+using DomainSets
 
 export SgnODESystem, Power, Se, Sf, Dq, Junction1, Junction0, mGY, mTF, Mass, Spring, Spring3, Damper, reducedobs, isindependent
 

@@ -1,5 +1,6 @@
 @variables t
 D = Differential(t)
+It = Integral(t in DomainSets.ClosedInterval(0, t))
 
 @connector function Power(; name, effort = 0.0, flow = 0.0)
     sts = @variables e(t) = effort f(t) = flow
@@ -230,10 +231,15 @@ function Mass(; name, m = 1.0, u = 0.0)
     @named power = Power(flow = u)
     @unpack e, f = power
     ps = @parameters I = m
+    # @variables p(t)
     eqs = [
+        # It(e) ~ f*I
+        # D(e) ~ p,
+        # f ~ p/I,
         D(f) ~ e / I
     ]
     extend(ODESystem(eqs, t, [], ps; name = name), power)
+    # extend(ODESystem(eqs, t, [p], ps; name = name), power)
 end
 
 function Spring(; name, k = 10, x = 0.0)
