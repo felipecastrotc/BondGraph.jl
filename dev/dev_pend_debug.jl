@@ -32,14 +32,13 @@ plot(sol)
 # Bond 1D non-linear compliance
 
 function SpringSin(; name, m = 1.0, g = 9.81, l = 1.0, θ = 0.0)
-    @named power = Power()
-    @unpack e, f = power
+    e, f = Power()
 
     @variables q(t) = θ
     ps = @parameters g = g l = l
 
     eqs = [e ~ sin(q) * g * m / l, D(q) ~ f]
-    extend(ODESystem(eqs, t, [q], ps; name = name), power)
+    ODESystem(eqs, t, [e, f, q], ps; name = name)
 end
 
 @named m₁ = Mass(m = m₀)
@@ -62,13 +61,12 @@ plot(sol₁)
 @named Jⱼ = Mass(m = m₀ * 0.0001)
 # @named mⱼ = Mass(m = m₀ * 1)
 # @named Jⱼ = Mass(m = m₀ * 0)
-# @named gⱼ = Se(9.81 * m₀)
+@named gⱼ = Se(9.81 * m₀)
 
 @named x = Junction1(-mⱼ)
 @named xtf = mTF(x, r = (l₀ * cos(θ)))
 
-# @named y = Junction1(-mⱼ, gⱼ)
-@named y = Junction1(-mⱼ)
+@named y = Junction1(-mⱼ, gⱼ)
 @named ytf = mTF(y, r = -(l₀ * sin(θ)))
 
 @named mdlⱼ = Junction1(-Jⱼ, -ytf, -xtf, couple = false)
@@ -76,17 +74,10 @@ equations(mdlⱼ)
 
 eqsⱼ = [D(θ) ~ Jⱼ.f]
 mdl2ⱼ = extend(ODESystem(eqsⱼ, t, [θ], []; name = :mdl), mdlⱼ)
-equations(mdl2ⱼ)
-
-equations(mdl2ⱼ)
-
-equations(alias_elimination(mdl2ⱼ))
-
 @named sysⱼ = reducedobs(structural_simplify(mdl2ⱼ))
 
 equations(sysⱼ)
 equations(structural_simplify(mdl2ⱼ))
-observed(structural_simplify(mdl2ⱼ))
 
 probⱼ = ODEProblem(sysⱼ, [θ => θ₀], (0.0, 40.0))
 solⱼ = solve(probⱼ, reltol = 1e-8, abstol = 1e-8)
