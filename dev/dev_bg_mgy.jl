@@ -36,10 +36,7 @@ function mGY(subsys...; name, g = 1.0)
     end
 
     # Gyrator equation
-    eqs = [
-        e₂ ~ g * f₁,
-        e₁ ~ g * f₂,
-    ]
+    eqs = [e₂ ~ g * f₁, e₁ ~ g * f₂]
 
     # Check if it is a modulated gyrator
     if isvariable(g)

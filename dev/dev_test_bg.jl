@@ -30,7 +30,7 @@ function Junction1(ps...; name, subsys = [], couple = true)
         eqs = [e ~ sum(c -> c.e, con)]
         # f₁ = f₂ = f₃
         if length(con) > 1
-            for i in 1:(length(con)-1)
+            for i = 1:(length(con)-1)
                 push!(eqs, con[i].f ~ con[i+1].f)
             end
         end
@@ -47,7 +47,7 @@ function Junction1(ps...; name, subsys = [], couple = true)
         eqs = [0 ~ sum(p -> p.e, con)]
         # f₁ = f₂ = f₃
         if length(con) > 1
-            for i in 1:(length(con)-1)
+            for i = 1:(length(con)-1)
                 push!(eqs, con[i].f ~ con[i+1].f)
             end
         end
@@ -75,7 +75,7 @@ function Junction0(ps...; name, subsys = [], couple = true)
         eqs = [f ~ sum(c -> c.f, con)]
         # e₁ = e₂ = e₃
         if length(con) > 1
-            for i in 1:(length(con)-1)
+            for i = 1:(length(con)-1)
                 push!(eqs, con[i].e ~ con[i+1].e)
             end
         end
@@ -92,7 +92,7 @@ function Junction0(ps...; name, subsys = [], couple = true)
         eqs = [0 ~ sum(p -> p.f, con)]
         # e₁ = e₂ = e₃
         if length(con) > 1
-            for i in 1:(length(con)-1)
+            for i = 1:(length(con)-1)
                 push!(eqs, con[i].e ~ con[i+1].e)
             end
         end
@@ -117,9 +117,7 @@ function Mass(; name, m = 1.0, u = 0.0)
     @named power = Power(flow = u)
     @unpack e, f = power
     ps = @parameters I = m
-    eqs = [
-        D(f) ~ e / I
-    ]
+    eqs = [D(f) ~ e / I]
     extend(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
@@ -158,9 +156,7 @@ function Damper(; name, c = 10)
     @unpack e, f = power
 
     ps = @parameters R = c
-    eqs = [
-        e ~ f * R
-    ]
+    eqs = [e ~ f * R]
     extend(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
@@ -302,8 +298,7 @@ end
 
 vars = vcat(parameters(sys), states(sys))
 cvt = []
-dct =
-    x = arguments(O)[1]
+dct = x = arguments(O)[1]
 x = O
 # function renamespace(sys, x)
 x = unwrap(x)
@@ -326,4 +321,3 @@ end
 # end
 
 Symbol()
-

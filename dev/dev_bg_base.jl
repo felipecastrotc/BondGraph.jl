@@ -17,9 +17,7 @@ function Mass(; name, m = 1.0, u = 0.0)
     @named power = Power(flow = u)
     @unpack e, f = power
     ps = @parameters I = m
-    eqs = [
-        D(f) ~ e / I
-    ]
+    eqs = [D(f) ~ e / I]
     extend(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
@@ -43,9 +41,7 @@ function Damper(; name, c = 10)
     @unpack e, f = power
 
     ps = @parameters R = c
-    eqs = [
-        e ~ f * R
-    ]
+    eqs = [e ~ f * R]
     extend(ODESystem(eqs, t, [], ps; name = name), power)
 end
 

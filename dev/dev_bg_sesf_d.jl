@@ -22,9 +22,7 @@ function Dq(; name, x = 0.0)
     @variables f(t) = 0.0
     @variables q(t) = 0.0
 
-    eqs = [
-        D(q) ~ f
-    ]
+    eqs = [D(q) ~ f]
     ODESystem(eqs, t, [q, f], []; name = name)
 end
 
