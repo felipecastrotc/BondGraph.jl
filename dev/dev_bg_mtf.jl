@@ -1,7 +1,8 @@
-using BondGraph, Plots, Symbolics.Latexify
-import BondGraph: t, D
+using BondGraph, Plots, Symbolics.Latexify, DifferentialEquations
+using ModelingToolkit
 
-using DifferentialEquations
+import BondGraph: t, D, mTF
+import ModelingToolkit: isvariable, istree, unwrap
 
 # =============================================================================
 # Transformer
@@ -19,8 +20,7 @@ function mTF(subsys...; name, r = 1.0)
     # If only one subsys is passed it automatically generates an open  
     # connection
     if sum(pos) == 1
-        @named power = Power()
-        @unpack e, f = power
+        e, f = Power()
         # Set variables according to the position
         if pos[1]
             e₁, f₁ = e, f
@@ -36,30 +36,27 @@ function mTF(subsys...; name, r = 1.0)
     end
 
     # Transformer equation
-    eqs = [
-        f₂ ~ f₁ * r,
-        e₁ ~ e₂ * r,
-    ]
+    eqs = [f₁ * r ~ f₂, e₂ * r ~ e₁]
 
     # Check if it is a modulated transformer
     if isvariable(r)
         sts, ps = [], [r]
     elseif istree(unwrap(r))
-        sts = []
-        ps = collect(Set(ModelingToolkit.get_variables(r)))
+        vars = collect(Set(ModelingToolkit.get_variables(r)))
+        sts = filter(x -> ~isindependent(Num(x)), vars)
+        ps = filter(x -> isindependent(Num(x)), vars)
     else
         sts, ps = [], []
     end
 
-    sys = ODESystem(eqs, t, sts, ps; name = name)
-
-    if @isdefined power
-        sys = extend(sys, power)
+    if (@isdefined e) | (@isdefined f)
+        push!(sts, e, f)
     end
+
+    sys = ODESystem(eqs, t, sts, ps; name = name)
 
     compose(sys, c...)
 end
-
 
 # =============================================================================
 # System dynamics (palm2014) P4.65 - Solutions
@@ -155,21 +152,19 @@ l = 1.5
 
 # -----------------------------------------------------------------------------
 # Yellow blue Using Junctions and mTR
-@variables θ(t) = 0.999*pi
+@variables θ(t) = 0.999 * pi
 θ = GlobalScope(θ)
 
 @named x = Junction1(-m)
-@named xtf = mTF(x, r =(1.5 * cos(θ)))
+@named xtf = mTF(x, r = (1.5 * cos(θ)))
 
 @named y = Junction1(-m, g)
 @named ytf = mTF(y, r = -(1.5 * sin(θ)))
-@named mdl = Junction1(-J, -ytf, -xtf, couple=false)
+@named mdl = Junction1(-J, -ytf, -xtf, couple = false)
 
 
 eqs = [D(θ) ~ J.f]
 mdl = extend(ODESystem(eqs, t, [θ], []; name = :mdl), mdl)
-equations(mdl)
-
 
 sys = structural_simplify(mdl)
 equations(sys)
@@ -177,7 +172,7 @@ equations(sys)
 @named sys = reducedobs(sys)
 equations(sys)
 
-prob = ODEProblem(sys, [], (0.0, 30.0), [θ => pi/2])
+prob = ODEProblem(sys, [], (0.0, 30.0), [θ => pi / 2])
 sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 plot(sol.t, sol[θ])
 # plot(sol)

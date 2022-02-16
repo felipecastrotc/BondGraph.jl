@@ -2,9 +2,17 @@
 D = Differential(t)
 It = Integral(t in DomainSets.ClosedInterval(0, t))
 
-@connector function Power(; name, effort = 0.0, flow = 0.0)
+# After updating the packages I am unable to create an empty equation ODESystem
+# I am replacing the  Power() connector with a simple function to return the
+# states e and f
+# @connector function Power(; name, effort = 0.0, flow = 0.0)
+#     sts = @variables e(t) = effort f(t) = flow
+#     ODESystem(Equation[], t, sts, []; name = name)
+# end
+
+function Power(; effort = 0.0, flow = 0.0)
     sts = @variables e(t) = effort f(t) = flow
-    ODESystem(Equation[], t, sts, []; name = name)
+    sts
 end
 
 # =============================================================================
@@ -44,8 +52,7 @@ function Junction1(ps...; name, subsys = [], couple = true, sgn = 1)
     con = addsgnODE.(collect(Base.Flatten([ps, sys])))
 
     if couple
-        @named power = Power()
-        @unpack e, f = power
+        e, f = Power()
     else
         e, f = 0.0, nothing
     end
@@ -67,7 +74,7 @@ function Junction1(ps...; name, subsys = [], couple = true, sgn = 1)
 
     # Build subsystem
     if couple
-        sys = extend(ODESystem(eqs, t, [], []; name = name), power)
+        sys = ODESystem(eqs, t, [e, f], []; name = name)
     else
         sys = ODESystem(eqs, t, [], []; name = name)
     end
@@ -85,8 +92,7 @@ function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
     con = addsgnODE.(collect(Base.Flatten([ps, sys])))
 
     if couple
-        @named power = Power()
-        @unpack e, f = power
+        e, f = Power()
     else
         e, f = nothing, 0.0
     end
@@ -108,7 +114,7 @@ function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
 
     # Build subsystem
     if couple
-        sys = extend(ODESystem(eqs, t, [], []; name = name), power)
+        sys = ODESystem(eqs, t, [e, f], []; name = name)
     else
         sys = ODESystem(eqs, t, [], []; name = name)
     end
@@ -129,8 +135,7 @@ function mGY(subsys...; name, g = 1.0)
     # If only one subsys is passed it automatically generates an open  
     # connection
     if sum(pos) == 1
-        @named power = Power()
-        @unpack e, f = power
+        e, f = Power()
         # Set variables according to the position
         if pos[1]
             e₁, f₁ = e, f
@@ -155,20 +160,22 @@ function mGY(subsys...; name, g = 1.0)
     if isvariable(g)
         sts, ps = [], [g]
     elseif istree(unwrap(g))
-        sts = []
-        ps = collect(Set(ModelingToolkit.get_variables(g)))
+        vars = collect(Set(ModelingToolkit.get_variables(r)))
+        sts = filter(x -> ~isindependent(Num(x)), vars)
+        ps = filter(x -> isindependent(Num(x)), vars)
     else
         sts, ps = [], []
     end
 
-    sys = ODESystem(eqs, t, sts, ps; name = name)
-
-    if @isdefined power
-        sys = extend(sys, power)
+    if (@isdefined e) | (@isdefined f)
+        push!(sts, e, f)
     end
+
+    sys = ODESystem(eqs, t, sts, ps; name = name)
 
     compose(sys, c...)
 end
+
 
 function mTF(subsys...; name, r = 1.0)
 
@@ -183,8 +190,7 @@ function mTF(subsys...; name, r = 1.0)
     # If only one subsys is passed it automatically generates an open  
     # connection
     if sum(pos) == 1
-        @named power = Power()
-        @unpack e, f = power
+        e, f = Power()
         # Set variables according to the position
         if pos[1]
             e₁, f₁ = e, f
@@ -209,17 +215,18 @@ function mTF(subsys...; name, r = 1.0)
     if isvariable(r)
         sts, ps = [], [r]
     elseif istree(unwrap(r))
-        sts = []
-        ps = collect(Set(ModelingToolkit.get_variables(r)))
+        vars = collect(Set(ModelingToolkit.get_variables(r)))
+        sts = filter(x -> ~isindependent(Num(x)), vars)
+        ps = filter(x -> isindependent(Num(x)), vars)
     else
         sts, ps = [], []
     end
 
-    sys = ODESystem(eqs, t, sts, ps; name = name)
-
-    if @isdefined power
-        sys = extend(sys, power)
+    if (@isdefined e) | (@isdefined f)
+        push!(sts, e, f)
     end
+
+    sys = ODESystem(eqs, t, sts, ps; name = name)
 
     compose(sys, c...)
 end
@@ -228,24 +235,25 @@ end
 # Elements
 
 function Mass(; name, m = 1.0, u = 0.0)
-    @named power = Power(flow = u)
-    @unpack e, f = power
+    e, f = Power(flow = u)
     ps = @parameters I = m
-    # @variables p(t)
+    @variables p(t)
+
     eqs = [
         # It(e) ~ f*I
-        # D(e) ~ p,
+        # D(p) ~ e,
+        # p ~ I * f,
         # f ~ p/I,
         D(f) ~ e / I
     ]
-    extend(ODESystem(eqs, t, [], ps; name = name), power)
+    # ODESystem(eqs, t, [e, f, p], ps; name = name)
+    ODESystem(eqs, t, [e, f], ps; name = name)
+    # ODESystem(eqs, t, [], ps; name = name)
     # extend(ODESystem(eqs, t, [p], ps; name = name), power)
 end
 
 function Spring(; name, k = 10, x = 0.0)
-    @named power = Power()
-    @unpack e, f = power
-
+    e, f = Power()
     @variables q(t) = x
     ps = @parameters C = 1 / k
 
@@ -254,13 +262,11 @@ function Spring(; name, k = 10, x = 0.0)
         D(q) ~ f
         # D(e) ~ f/C
     ]
-    extend(ODESystem(eqs, t, [q], ps; name = name), power)
+    ODESystem(eqs, t, [e, f, q], ps; name = name)
 end
 
 function Spring3(; name, k = 10, x = 0.0)
-    @named power = Power()
-    @unpack e, f = power
-
+    e, f = Power()
     @variables q(t) = x
     ps = @parameters C = 1 / k
 
@@ -269,16 +275,15 @@ function Spring3(; name, k = 10, x = 0.0)
         D(q) ~ f
         # D(e) ~ f/C
     ]
-    extend(ODESystem(eqs, t, [q], ps; name = name), power)
+    ODESystem(eqs, t, [e, f, q], ps; name = name)
 end
 
 function Damper(; name, c = 10)
-    @named power = Power()
-    @unpack e, f = power
+    e, f = Power()
 
     ps = @parameters R = c
     eqs = [
         e ~ f * R
     ]
-    extend(ODESystem(eqs, t, [], ps; name = name), power)
+    ODESystem(eqs, t, [e, f], ps; name = name)
 end
