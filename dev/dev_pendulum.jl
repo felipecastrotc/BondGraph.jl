@@ -57,10 +57,10 @@ plot(sol₁)
 # Yellow blue Using Junctions and mTR
 # Example of double pendulum system -> Intelligent Mechatronic System -> p.283
 
-@named mⱼ = Mass(m = m₀ * (1 - 0.0001))
-@named Jⱼ = Mass(m = m₀ * 0.0001)
-# @named mⱼ = Mass(m = m₀ * 1)
-# @named Jⱼ = Mass(m = m₀ * 0)
+# @named mⱼ = Mass(m = m₀ * (1 - 0.0001))
+# @named Jⱼ = Mass(m = m₀ * 0.0001)
+@named mⱼ = Mass(m = m₀ * 1)
+@named Jⱼ = Mass(m = m₀ * 0)
 @named gⱼ = Se(9.81 * m₀)
 
 @named x = Junction1(-mⱼ)
@@ -76,7 +76,6 @@ eqsⱼ = [D(θ) ~ Jⱼ.f]
 mdl2ⱼ = extend(ODESystem(eqsⱼ, t, [θ], []; name = :mdl), mdlⱼ)
 @named sysⱼ = reducedobs(structural_simplify(mdl2ⱼ))
 
-equations(sysⱼ)
 equations(structural_simplify(mdl2ⱼ))
 
 probⱼ = ODEProblem(sysⱼ, [θ => θ₀], (0.0, 40.0))
