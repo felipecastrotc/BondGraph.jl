@@ -34,9 +34,7 @@ function Dq(; name, x = 0.0)
     @variables f(t) = 0.0
     @variables q(t) = 0.0
 
-    eqs = [
-        D(q) ~ f
-    ]
+    eqs = [D(q) ~ f]
     ODESystem(eqs, t, [q, f], []; name = name)
 end
 
@@ -151,10 +149,7 @@ function mGY(subsys...; name, g = 1.0)
     end
 
     # Gyrator equation
-    eqs = [
-        e₂ ~ g * f₁,
-        e₁ ~ g * f₂,
-    ]
+    eqs = [e₂ ~ g * f₁, e₁ ~ g * f₂]
 
     # Check if it is a modulated gyrator
     if isvariable(g)
@@ -206,10 +201,7 @@ function mTF(subsys...; name, r = 1.0)
     end
 
     # Transformer equation
-    eqs = [
-        f₁ * r ~ f₂,
-        e₂ * r ~ e₁,
-    ]
+    eqs = [f₁ * r ~ f₂, e₂ * r ~ e₁]
 
     # Check if it is a modulated transformer
     if isvariable(r)
@@ -244,7 +236,7 @@ function Mass(; name, m = 1.0, u = 0.0)
         # D(p) ~ e,
         # p ~ I * f,
         # f ~ p/I,
-        D(f) ~ e / I
+        D(f) ~ e / I,
     ]
     # ODESystem(eqs, t, [e, f, p], ps; name = name)
     ODESystem(eqs, t, [e, f], ps; name = name)
@@ -282,8 +274,6 @@ function Damper(; name, c = 10)
     e, f = Power()
 
     ps = @parameters R = c
-    eqs = [
-        e ~ f * R
-    ]
+    eqs = [e ~ f * R]
     ODESystem(eqs, t, [e, f], ps; name = name)
 end

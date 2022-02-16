@@ -78,8 +78,7 @@ function equations(sys::Array{ODESystem,1})
     # Systems to be coupled
     couple = [string(s.name) for s in sys]
 
-    eqs = reduce(vcat, namespace_equations.(sys, Ref(couple));
-        init = Equation[])
+    eqs = reduce(vcat, namespace_equations.(sys, Ref(couple)); init = Equation[])
 
     return eqs
 end

@@ -59,9 +59,9 @@ function filterexpr(expr::Equation; ignore::Vector{Num} = Num[])
     expr_rhs = Set(ModelingToolkit.get_variables(expr.rhs))
     expr_lhs = Set(ModelingToolkit.get_variables(expr.lhs))
     expr_var = union(expr_rhs, expr_lhs)
-    
+
     vars = collect(setdiff(expr_var, Set(ignore)))
-     
+
     length(vars) > 0
 end
 
@@ -71,7 +71,7 @@ function equalityeqs(con::Vector{SgnODESystem}, var::String; couple = false, sgn
 
     if length(C) > 0
         eqs = Vector{Equation}(undef, length(C) - 1)
-        for i in 1:(length(C)-1)
+        for i = 1:(length(C)-1)
             # f₁ = C[i].sgn * getproperty(C[i].ode, sym)
             # f₂ = C[i+1].sgn * getproperty(C[i+1].ode, sym)
             f₁ = getproperty(C[i].ode, sym)

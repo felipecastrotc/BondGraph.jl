@@ -21,7 +21,7 @@ end
 function Mass2D(; name, m::Vector = [1.0, 1.0, 1.0], u::Vector = [0.0, 0.0, 0.0])
     labels = planar_labels
     sys = []
-    for i in 1:length(m)
+    for i = 1:length(m)
 
         namei = Symbol((name |> String) * labels[i])
 
@@ -30,9 +30,7 @@ function Mass2D(; name, m::Vector = [1.0, 1.0, 1.0], u::Vector = [0.0, 0.0, 0.0]
 
         ps = @parameters I = m[i]
 
-        eqs = [
-            D(f) ~ e / I
-        ]
+        eqs = [D(f) ~ e / I]
 
         push!(sys, extend(ODESystem(eqs, t, [], ps; name = namei), power))
     end
@@ -43,7 +41,7 @@ end
 function Spring2D(; name, k::Vector = [1.0, 1.0, 1.0], x::Vector = [0.0, 0.0, 0.0])
     labels = planar_labels
     sys = []
-    for i in 1:length(k)
+    for i = 1:length(k)
         namei = Symbol((name |> String) * labels[i])
 
         @named power = Power()
@@ -68,16 +66,14 @@ function Damper2D(; name, c::Vector = [1.0, 1.0, 1.0])
 
     labels = planar_labels
     sys = []
-    for i in 1:length(c)
+    for i = 1:length(c)
         namei = Symbol((name |> String) * labels[i])
 
         @named power = Power()
         @unpack e, f = power
 
         ps = @parameters R = c[i]
-        eqs = [
-            e ~ f * R
-        ]
+        eqs = [e ~ f * R]
 
         push!(sys, extend(ODESystem(eqs, t, [], ps; name = namei), power))
     end
@@ -94,14 +90,15 @@ function Junction12D(ps2d...; name, subsys2d = [], couple = true, sgn = 1)
 
     labels = planar_labels
     sys = []
-    for i in 1:length(labels)
+    for i = 1:length(labels)
         namei = Symbol((name |> String) * labels[i])
 
         ps = getcomponent(ps2d, labels[i])
         subsys = getcomponent(sys2d, labels[i])
 
-        push!(sys,
-            Junction1(ps...; name = namei, subsys = subsys, couple = couple, sgn = sgn)
+        push!(
+            sys,
+            Junction1(ps...; name = namei, subsys = subsys, couple = couple, sgn = sgn),
         )
     end
 
@@ -115,14 +112,15 @@ function Junction02D(ps2d...; name, subsys2d = [], couple = true, sgn = 1)
 
     labels = planar_labels
     sys = []
-    for i in 1:length(labels)
+    for i = 1:length(labels)
         namei = Symbol((name |> String) * labels[i])
 
         ps = getcomponent(ps2d, labels[i])
         subsys = getcomponent(sys2d, labels[i])
 
-        push!(sys,
-            Junction0(ps...; name = namei, subsys = subsys, couple = couple, sgn = sgn)
+        push!(
+            sys,
+            Junction0(ps...; name = namei, subsys = subsys, couple = couple, sgn = sgn),
         )
     end
 
@@ -195,22 +193,22 @@ function mTF2Dtrans(subsys...; name, a = 1.0, θ = 0.0, d = [0.0, 0.0])
     eqs = collect(zip(eqs...))
 
     sys_vec = []
-    for i in 1:length(labels)
+    for i = 1:length(labels)
         l = labels[i]
         namei = Symbol((name |> String) * l)
         sym = Symbol(l)
-    
+
         num_vars = [x for x in (a, θ, d[1], d[2]) if x isa Num]
         sts = [x for x in num_vars if !isindependent(x)]
         ps = [x for x in num_vars if isindependent(x)]
-    
+
         if @isdefined sys
             updt_sys = getproperty(sys, sym)
-    
+
             eq = collect(eqs[i])
             updt_sys = extend(ODESystem(eq, t, sts, ps; name = namei), updt_sys)
             updt_sys = compose(updt_sys, [getproperty(j, sym) for j in c]...)
-    
+
             push!(sys_vec, updt_sys)
         else
             eq = collect(eqs[i])
@@ -248,7 +246,7 @@ function getcomponent(sys, comp::String)
     out = SgnODESystem[]
     for sub in sys
         c = getproperty(sub, component)
-    
+
         if !hasproperty(sub, sgn)
             push!(out, +c)
         else
@@ -258,7 +256,7 @@ function getcomponent(sys, comp::String)
                 push!(out, -c)
             end
         end
-    
+
     end
 
     out
@@ -304,4 +302,3 @@ function parameters(sys::ODESystem2D)
     end
     ps
 end
-
