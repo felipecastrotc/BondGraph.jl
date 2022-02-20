@@ -56,6 +56,7 @@ plot(sol₁)
 # -----------------------------------------------------------------------------
 # Yellow blue Using Junctions and mTR
 # Example of double pendulum system -> Intelligent Mechatronic System -> p.283
+# SEAMS interesting -> Mechatronic modeling and simulation using bond graphs 434
 
 # @named mⱼ = Mass(m = m₀ * (1 - 0.0001))
 # @named Jⱼ = Mass(m = m₀ * 0.0001)
