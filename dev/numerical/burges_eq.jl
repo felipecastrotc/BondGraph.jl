@@ -1,6 +1,10 @@
 using FFTW, Plots, DifferentialEquations
 #  BenchmarkTools
 
+# Examples
+# https://github.com/SciML/SciMLBenchmarks.jl
+# https://benchmarks.sciml.ai/html/MOLPDE/burgers_spectral_wpd.html
+
 ν = 0.01           # Diffusion coefficient
 L = 20              # Domain length
 N = 1000            # Number of discretization points
@@ -31,7 +35,6 @@ function BurgersEq(dudt, u, p, t)
     # @. dudt = -u * du
     @. dudt = -u * du + ν * ddu
 end
-
 
 tspan = 100
 prob = ODEProblem(BurgersEq, u0, (0.0, tspan), [κ, ν])
