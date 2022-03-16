@@ -180,12 +180,8 @@ plot!(st.t, st[2, :], line = (:dot, 4), ylabel = "I (A)", label = "BG mGY")
 plot!(size = 72 .* (5.5, 3.5), dpi = 300)
 savefig("/home/fctc/vm-share/Equinor/images/dc_sim_A.png")
 
-plot(stₚ.t, stₚ[2, :], xlabel = "Time (s)", label = "Theoretical")
-plot!(st.t, st[2, :], line = (:dot, 4), ylabel = "I (A)", label = "BG mGY")
+
+plot(stₚ.t, stₚ[3, :], xlabel = "Time (s)", label = "Theoretical")
+plot!(st.t, st[1, :], line = (:dot, 4), ylabel = "θ̇ (rad/s)", label = "BG mGY")
 plot!(size = 72 .* (5.5, 3.5), dpi = 300)
-savefig("/home/fctc/vm-share/Equinor/images/dc_sim_A.png")
-
-
-plot(stₚ.t, stₚ[1, :], xlabel = "Time (s)", label = "Theoretical")
-plot!(st₁.t, st₁[1, :], ylabel = "θ (rad/s)", label = "BG Custom")
-plot!(stⱼ.t, stⱼ[Jⱼ.f], label = "BG mTF")
+savefig("/home/fctc/vm-share/Equinor/images/dc_sim_rad.png")
