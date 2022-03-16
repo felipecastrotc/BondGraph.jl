@@ -140,3 +140,52 @@ plot(sol)
 
 # Example coherent with literature
 # https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&section=SystemModeling
+
+# -----------------------------------------------------------------------------
+# Theory model
+
+@variables i(t) = 0.0
+@variables θ(t) = 0.0
+@variables θ̇(t) = 0.0
+
+Uᵥ = 12.0   # V - Voltage
+Lᵥ = 0.5    # H - Inductance
+Rᵥ = 1.0    # Ohm - Resistance
+Jᵥ = 0.01   # kg*m² - Moment of intertia of the rotor
+bᵥ = 0.1    # N*m*s - Motor viscous friction constant
+Tᵥ = 1.0    # N*m - Motor torque
+
+eqsₚ = [Jᵥ * D(θ̇) ~ Tᵥ + g * i - bᵥ * θ̇, Lᵥ * D(i) ~ -Rᵥ * i + Uᵥ - g * θ̇, D(θ) ~ θ̇]
+@named sysₚ = ODESystem(eqsₚ, t)
+sysₚ = structural_simplify(sysₚ)
+
+probₚ = ODEProblem(sysₚ, [], (0.0, 4.0))
+solₚ = solve(probₚ, reltol = 1e-8, abstol = 1e-8)
+plot(solₚ.t, solₚ[θ̇])
+plot(solₚ.t, solₚ[i])
+
+# ------------------------------------------------------------------------------
+# Comparison Solutions
+solₚ = solve(probₚ, reltol = 1e-8, abstol = 1e-8)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
+
+# Configure plot
+ts = 0:0.01:4
+
+stₚ = solₚ(ts)
+st = sol(ts)
+
+plot(stₚ.t, stₚ[2, :], xlabel = "Time (s)", label = "Theoretical")
+plot!(st.t, st[2, :], line = (:dot, 4), ylabel = "I (A)", label = "BG mGY")
+plot!(size = 72 .* (5.5, 3.5), dpi = 300)
+savefig("/home/fctc/vm-share/Equinor/images/dc_sim_A.png")
+
+plot(stₚ.t, stₚ[2, :], xlabel = "Time (s)", label = "Theoretical")
+plot!(st.t, st[2, :], line = (:dot, 4), ylabel = "I (A)", label = "BG mGY")
+plot!(size = 72 .* (5.5, 3.5), dpi = 300)
+savefig("/home/fctc/vm-share/Equinor/images/dc_sim_A.png")
+
+
+plot(stₚ.t, stₚ[1, :], xlabel = "Time (s)", label = "Theoretical")
+plot!(st₁.t, st₁[1, :], ylabel = "θ (rad/s)", label = "BG Custom")
+plot!(stⱼ.t, stⱼ[Jⱼ.f], label = "BG mTF")

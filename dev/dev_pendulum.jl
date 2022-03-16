@@ -5,7 +5,7 @@ using DifferentialEquations
 
 
 # Global definitions
-θ₀ = 0.999 * π
+θ₀ = 0.98 * π
 l₀ = 10
 m₀ = 1
 
@@ -25,8 +25,8 @@ sysₚ = structural_simplify(sysₚ)
 equations(sysₚ)
 
 probₚ = ODEProblem(sysₚ, [θ => θ₀], (0.0, 30.0), [l => l₀, g => 9.81])
-sol = solve(probₚ, reltol = 1e-8, abstol = 1e-8)
-plot(sol)
+solₚ = solve(probₚ, reltol = 1e-8, abstol = 1e-8)
+plot(solₚ)
 
 # -----------------------------------------------------------------------------
 # Bond 1D non-linear compliance
@@ -58,10 +58,10 @@ plot(sol₁)
 # Example of double pendulum system -> Intelligent Mechatronic System -> p.283
 # SEAMS interesting -> Mechatronic modeling and simulation using bond graphs 434
 
-# @named mⱼ = Mass(m = m₀ * (1 - 0.0001))
-# @named Jⱼ = Mass(m = m₀ * 0.0001)
-@named mⱼ = Mass(m = m₀ * 1)
-@named Jⱼ = Mass(m = m₀ * 0)
+@named mⱼ = Mass(m = m₀ * (1 - 0.0001))
+@named Jⱼ = Mass(m = m₀ * 0.0001)
+# @named mⱼ = Mass(m = m₀ * 1)
+# @named Jⱼ = Mass(m = m₀ * 0)
 @named gⱼ = Se(9.81 * m₀)
 
 @named x = Junction1(-mⱼ)
@@ -82,10 +82,10 @@ equations(structural_simplify(mdl2ⱼ))
 probⱼ = ODEProblem(sysⱼ, [θ => θ₀], (0.0, 40.0))
 solⱼ = solve(probⱼ, reltol = 1e-8, abstol = 1e-8)
 # plot(solⱼ)
-# plot(solⱼ.t, solⱼ[θ])
+plot(solⱼ.t, solⱼ[θ])
 # plot!(solⱼ.t, solⱼ[Jⱼ.f])
 
-plot(sol₁.t, sol₁[2, :], label = "target")
+plot(solₚ.t, solₚ[2, :], label = "target")
 plot!(solⱼ.t, solⱼ[θ], label = "sim")
 # ------------------------------------------------------------------------------
 # Comparison Solutions
@@ -100,8 +100,10 @@ stₚ = solₚ(ts)
 st₁ = sol₁(ts)
 stⱼ = solⱼ(ts)
 plot(stₚ.t, stₚ[2, :], xlabel = "Time (s)", label = "Theoretical")
-plot!(st₁.t, st₁[2, :], ylabel = "θ (rad)", label = "BG Custom")
-plot!(stⱼ.t, stⱼ[θ], label = "BG mTF")
+plot!(st₁.t, st₁[2, :], label = "BG Custom")
+plot!(stⱼ.t, stⱼ[θ], line = (:dot, 4), ylabel = "θ (rad)", label = "BG mTF")
+# plot!(size = 72 .* (5.5, 3.5), dpi = 300)
+# savefig("/home/fctc/vm-share/Equinor/images/pend_sim_rad.png")
 
 plot(stₚ.t, stₚ[1, :], xlabel = "Time (s)", label = "Theoretical")
 plot!(st₁.t, st₁[1, :], ylabel = "θ (rad/s)", label = "BG Custom")
