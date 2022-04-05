@@ -125,7 +125,7 @@ v
 g = 9.81        # m/s^2 - Gravity
 
 l = 0.1         # m - Pipe segment length
-d = 0.01        # m - Pipe segment diameter
+d = 0.001        # m - Pipe segment diameter
 A = π * d^2 / 4     # m^2 - Pipe section area
 μ = 1e-3        # Pa*s - Viscosity
 ρ = 998         # kg/m³ - Water
@@ -149,8 +149,8 @@ equations(j1)
 @named sys = reducedobs(structural_simplify(j1))
 equations(sys)
 
-ts = (0.0, 0.3)
 ts = (0.0, 20)
+ts = (0.0, 0.3)
 prob = ODEProblem(sys, [], ts)
 sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 
@@ -170,9 +170,11 @@ for k in 1:20
 end
 v - (s[1, :] ./ A)[end]
 
-f = jldopen("../numerical/data/sim_laminar.jld2")
+f1 = jldopen("../numerical/data/sim_laminar.jld2")
+f2 = jldopen("../numerical/data/sim_laminar2.jld2")
 plot(s.t, s[1, :] ./ A)
-plot!(f["t"], f["V"])
+plot!(f1["t"], f1["V"])
+plot!(f2["t"], f2["V"])
 
 # -----------------------------------------------------------------------------
 # Multiple

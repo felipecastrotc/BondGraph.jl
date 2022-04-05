@@ -3,6 +3,8 @@ _table.xlsx
 _devel_tp.py
 _matlab/
 
+*.jld2
+
 # Binary files
 *.out
 *.h5
