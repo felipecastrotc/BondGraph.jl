@@ -63,7 +63,7 @@ A = π*d^2/4
 Rᵥ = 128 * μ * L / (π * d^4)
 Iᵥ = ρ * L / A
 
-Hin = ex["Hr"] - ex["Hf"]
+Δh = ex["Hr"] - ex["Hf"]
 
 g = 9.81        # m/s^2 - Gravity
 
@@ -91,11 +91,11 @@ hd(p, θ) = dot(dre(θ)([p[1], p[2], p[3], p[4], p[5]]), [1])
 @register hd(p, θ)
 
 # Set elements
-@named Pin = Se(Hin * ρ * g)
+@named Pin = Se(Δh * ρ * g)
 @named Mu = MassU(hm)
 @named Ru = DamperU(hd)
 
-@named M = Mass(m = 2*Iᵥ)
+@named M = Mass(m = Iᵥ)
 
 # Build system
 # @named j1 = Junction1(Pin, -Mu, -Ru, sgn = -1, couple=false)
@@ -309,4 +309,105 @@ loss(predict_ode(dθ), y)
 
 g = gradient((p) -> loss(predict_ode(p), y), dθ)
 
+# ----------------------------------------------------------------------------
+# Manual - extending 2-functions
+using MacroTools
 
+myode_oop = generate_function(sysu)[2]; # first one is the out-of-place function
+MacroTools.striplines(myode_oop) # print without line numbers
+
+# f = ODEFunction(sysu)
+nlsys_func = generate_function(sysu)[2]
+f = eval(nlsys_func)
+
+function myf(du, u, p, t)
+    f(du, u, [dp, p[1], p[2], mp], t)
+end
+
+function myfv(du, u, p, t)
+    du[1] = (/)((+)(6263.702421289803, (*)((*)(-1//1, u[1]), (hd)(dp, p[1]))), (hm)(mp, p[2]))
+end
+
+function myfd(du, u, p, t)
+    du[1] = (/)((+)(6263.702421289803, (*)((*)(-1//1, u[1]), (hd)(dp, p[:d]))), (hm)(mp, p[:m]))
+end
+
+function myfdd(du, u, p, t)
+    du[1] = (6263.702421289803 - u[1]*hd(dp, p[:d]))/(hm(mp, p[:m]))
+end
+
+function myfdc(du, u, p, t)
+    du[1] = (/)((+)(6263.702421289803, (*)((*)(-1//1, u[1]), (hd)(dp, dθ))), (hm)(mp, mθ))
+end
+
+function predict_odep(p)
+    Array(solve(probu, Tsit5(), u0 = u0, p = p, saveat = t_rng))[1, :]
+end
+
+function predict_odei()
+    Array(solve(probu, Tsit5(), u0 = u0, saveat = t_rng))[1, :]
+end
+
+y = ex["V"][1:10];
+t_rng = ex["t"][1:10];
+
+du = [0.0];
+u0 = [0.0];
+
+# ---------------------------------------------------
+# myfv
+ps = [dθ, mθ];
+myfv(du, [0], ps, 1.0)
+
+probu = ODEProblem(myfv, [0.0], (0.0, 20.0));
+predict_odep(ps);
+gradient(θ -> loss(predict_odep(θ), y), params(ps))
+gradient(θ -> loss(predict_odep(θ), y), ps)
+
+predict_odep(params(ps))
+
+# ---------------------------------------------------
+# myfd
+ps = Dict(:d => dθ, :m => mθ);
+myfdd(du, [0], ps, 1.0)
+
+probu = ODEProblem(myfd, [0.0], (0.0, 20.0));
+predict_odep(ps);
+gradient(θ -> loss(predict_odep(θ), y), params(ps))
+gradient(θ -> loss(predict_odep(θ), y), ps)
+
+predict_odep(params(ps))
+
+
+
+ps = 0.0;
+myfdc(du, [0], ps, 1.0)
+
+y = ex["V"][1:10];
+t_rng = ex["t"][1:10];
+
+probu = ODEProblem(myf, [0.0], (0.0, 20.0));
+probu = ODEProblem(myfdc, [0.0], (0.0, 20.0));
+
+
+loss(predict_odei(), y)
+
+
+# g = gradient((p) -> loss(predict_ode(p), y), ps)
+
+gradient(θ -> loss(predict_ode(θ), y), ps)
+
+predict_odei()
+
+
+# Ta bom......
+
+linear(θ, x) = θ[:W] * x .+ θ[:b]
+
+x = rand(5);
+θ = Dict(:W => rand(2, 5), :b => rand(2))
+
+ps
+
+θ̄ = gradient(θ -> sum(linear(θ, x)), θ)[1]
+θ̄

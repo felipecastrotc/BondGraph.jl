@@ -33,7 +33,8 @@ function SpringU(h ; name, x = 0.0, P = 1.0, Θ=1.0)
     ps = @parameters p = P θ = Θ
 
     eqs = [
-        e ~ q*h(q, e, f, p, θ)
+        # e ~ q*h(q, e, f, p, θ)
+        e ~ q*h(p, θ)
         D(q) ~ f
     ]
     ODESystem(eqs, t, [e, f, q], ps; name = name)
@@ -191,48 +192,94 @@ hd(p, θ) = dot(dre(θ)([p[1], p[2], p[3], p[4], p[5]]), [1])
 @named sysu = reducedobs(structural_simplify(j1))
 equations(sysu)
 
-# Solve
-probu = ODEProblem(sysu, [], (0.0, 20.0))
-solu = solve(probu)
-plot!(solu)
-
-
 # Parameters system
 parameters(sysu)
-mp = [ρ, L, d, A]
-dp = [μ, ϵ, L, d, A]
-ps = [dp, dθ, mθ, mp]
+pm = [ρ, L, d, A]
+pd = [μ, ϵ, L, d, A]
+ps = [dθ, mθ]
+ps = mθ
+ps = [pd, dθ, mθ, pm]
+
+# Convert the system to a function
+f = ODEFunction(sysu);
+parameters(sysu)
+# dummy(du, u, p, t) = f(du, u, [pd, p[1], p[2], pm], t);
+dummy(du, u, p, t) = f(du, u, [pd, dθ, p, pm], t);
+dummy(du, u, p, t) = f(du, u, p, t);
+
+# Test dummy function
+du = [0.0]
+u0 = [0.0]
+dummy(du, u0, ps, 0.0)
+
+# Create a ODE problem from the system function
+probu = ODEProblem(dummy, [0.0], (0.0, 3.0))
 
 # Initial condition
-u0 = probu.u0;
-# Using a different approach to solve the system
-t_rng = 0:0.1:20
-out = Array(solve(probu, Tsit5(), u0 = u0, p = ps, saveat = t_rng))
+states(sysu)
+u0 = [0.0];
+y = ex["V"]
+t_rng = ex["t"]
+out = Array(solve(probu, Tsit5(), u0 = u0, p = ps, saveat=t_rng))[1, :]
+plot(t_rng, out)
 
-# Working
-plot(t_rng, out[1, :])
 
 # Now trying to fit
-
-function pred_ode(θ)
-    ps = [dp, θ[1:length(dθ)], θ[length(dθ)+1:end], mp]
-    Array(solve(probu, Tsit5(), u0 = u0, p = ps, saveat = t_rng))
+function pred_ode(p)
+    ps = [pd, p[1], p[2], pm]
+    Array(solve(probu, Tsit5(), u0 = u0, p = ps, saveat = t_rng))[1, :]
 end
 
+loss(x, y) = mean((x .- y) .^ 2);
+loss(pred_ode([dθ, mθ]), y)
 
-# Flat weights
-θ = vcat(dθ, mθ)
+y = ex["V"][1:100]
+t_rng = ex["t"][1:100]
 
-ps = Flux.params(θ);
 
-# Initialise optimiser
+gradient((p) -> loss(pred_ode(p), y), dθ, mθ)
+
+
+g = gradient((p) -> loss(pred_ode(p), y), ps)
+
+grads = gradient(() -> loss(pred_ode(dθ, mθ), y), dθ, mθ)
+
+
+
+loss(y) = mean((pred_ode(ps) .- y) .^ 2);
+loss(y)
+
+
+gradient(() -> loss(y), params([dθ, mθ]))
+
+
+
+s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # opt = AMSGrad();
 opt = ADAM(0.01);
 
 loss(x, y) = mean((x .- y) .^ 2);
 
-y = ex["V"]
-t_rng = ex["t"]
 
 pred_ode(θ)
 g = gradient((θ) -> loss(pred_ode(θ), y), θ)

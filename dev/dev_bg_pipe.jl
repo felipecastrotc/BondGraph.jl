@@ -6,7 +6,7 @@ using DifferentialEquations, JLD2
 function colebrook(ϵ, d, Re)
     # Return the friction factor as 0 for reynolds number equals to 0
     if Re < 2300
-        return min(64/Re, 64)
+        return min(64 / Re, 64)
     end
 
     # Niazkar approximation
@@ -51,7 +51,7 @@ uρ = kg / uV
 
 m * uρ * ua
 
-uPa/(uρ*m/uA)
+uPa / (uρ * m / uA)
 
 
 # -----------------------------------------------------------------------------
@@ -76,15 +76,15 @@ Rᵥ = 128 * μ * l / (π * d^4)
 Cᵥ = A * l / B
 Iᵥ = ρ * l / A
 
-@named C = Spring(k = Cᵥ)
-@named R = Damper(c = Rᵥ)
-@named I = Mass(m = Iᵥ)
+@named C = Spring(k=Cᵥ)
+@named R = Damper(c=Rᵥ)
+@named I = Mass(m=Iᵥ)
 
-1/Cᵥ
+1 / Cᵥ
 Δh = 0.0001
 @named Pin = Se(Δh * ρ * g)
-@named j1 = Junction1(Pin, -I, -R, sgn = -1)
-@named j0 = Junction0(j1, -C, couple = false)
+@named j1 = Junction1(Pin, -I, -R, sgn=-1)
+@named j0 = Junction0(j1, -C, couple=false)
 equations(j0)
 equations(j1)
 @named sys = reducedobs(structural_simplify(j0))
@@ -92,9 +92,9 @@ equations(sys)
 
 ts = (0.0, 10.0)
 prob = ODEProblem(sys, [], ts)
-sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
+sol = solve(prob, reltol=1e-8, abstol=1e-8)
 
-plot(sol.t, sol[I.f]./ A)
+plot(sol.t, sol[I.f] ./ A)
 
 tr = ts[1]:(diff(collect(ts))/100)[1]:ts[2]
 s = sol(tr)
@@ -108,7 +108,7 @@ plot!(s.t, s[j1.I.f] ./ A)
 # (s[j1.I.f]./A)[end]
 (sol[I.f]./A)[end]
 
-1/A
+1 / A
 
 v = 27
 ϵ = 1e-5            # m Roughness
@@ -124,7 +124,8 @@ v
 
 g = 9.81        # m/s^2 - Gravity
 
-l = 0.1         # m - Pipe segment length
+l = 1         # m - Pipe segment length
+# l = 0.1         # m - Pipe segment length
 d = 0.001        # m - Pipe segment diameter
 A = π * d^2 / 4     # m^2 - Pipe section area
 μ = 1e-3        # Pa*s - Viscosity
@@ -132,34 +133,37 @@ A = π * d^2 / 4     # m^2 - Pipe section area
 B = 2.2 * 1e9       # Pa -> Fluid bulk modulus
 
 # Pressure drop 0.005m/m
-Δh = 0.05*l     # m - Pressure head in
-Δh = 0.005*l     # m - Pressure head in
-Δh = 0.003*l     # m - Pressure head in
+Δh = 0.05 * l     # m - Pressure head in
+Δh = 0.005 * l     # m - Pressure head in
+Δh = 0.003 * l     # m - Pressure head in
 Δh = 0.5
+Δh = 1.5
 @named Pin = Se(Δh * ρ * g)
 
 Rᵥ = 128 * μ * l / (π * d^4)
 Iᵥ = ρ * l / A
 
-@named R = Damper(c = Rᵥ)
-@named I = Mass(m = Iᵥ)
+@named R = Damper(c=Rᵥ)
+@named I = Mass(m=Iᵥ)
 
-@named j1 = Junction1(Pin, -I, -R, sgn = -1, couple=false)
+@named j1 = Junction1(Pin, -I, -R, sgn=-1, couple=false)
 equations(j1)
 @named sys = reducedobs(structural_simplify(j1))
 equations(sys)
 
-ts = (0.0, 20)
 ts = (0.0, 0.3)
+ts = (0.0, 20)
+ts = (0.0, 3.0)
 prob = ODEProblem(sys, [], ts)
-sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
+sol = solve(prob, reltol=1e-8, abstol=1e-8)
+sol = solve(prob, u0 = [0.0], p=[Iᵥ, Rᵥ], reltol=1e-8, abstol=1e-8)
 
 tr = ts[1]:(diff(collect(ts))/100)[1]:ts[2]
 s = sol(tr)
 
-plot(s.t, s[1, :] ./ A)
-
-v
+Vbg = (s[1, :] ./ A)
+plot(s.t, Vbg)
+#plot!(s.t, Vbg)
 
 v = 0.1
 ϵ = 1e-5            # m Roughness
@@ -168,29 +172,69 @@ for k in 1:20
     f = colebrook.(ϵ, d, Re)
     v = sqrt(Δh * 2 * g * d / (l * f))
 end
-v - (s[1, :] ./ A)[end]
+
+100 * (v - Vbg[end]) / v
+
+calcRe(Vbg[end], ρ, μ, d)
 
 f1 = jldopen("../numerical/data/sim_laminar.jld2")
 f2 = jldopen("../numerical/data/sim_laminar2.jld2")
-plot(s.t, s[1, :] ./ A)
-plot!(f1["t"], f1["V"])
-plot!(f2["t"], f2["V"])
+plot(s.t, Vbg, ylabel="Velocity (m/s)", xlabel="Time (s)", label="BG")
+plot!(f1["t"], f1["V"], label="IAB")
+
+# -----------------------------------------------------------------------------
+# Manual function debug - validation
+using MacroTools
+
+@parameters Δhₛ
+@named Pinm = Se(Δhₛ)
+
+@named j1m = Junction1(Pinm, -I, -R, sgn=-1, couple=false)
+equations(j1m)
+@named sysm = reducedobs(structural_simplify(j1m))
+equations(sysm)
+
+# Genrate function
+foo = generate_function(sysm)[2]; # first one is the out-of-place function
+sym = MacroTools.striplines(foo) # print without line numbers
+
+# Manually copying the function
+function diffeq(du, u, p, t)
+    f = u[1]
+    I₊I = p[1]
+    R₊R = p[2]
+    ΔP = p[3]
+    du[1] = (ΔP - R₊R * f) / I₊I
+end
+
+# rng = 1:300:10000
+# y = ex["V"][rng]
+# t = ex["t"][rng]
+# trng = 0:step(t):step(t)*(length(rng)-1)
+u0 = [y[1]]
+probm = ODEProblem(diffeq, u0, ts)
+solm = solve(probm, Tsit5(), u0=u0, p=[Iᵥ, Rᵥ, Δh*ρ*g], reltol=1e-8, abstol=1e-8)
+
+plot(solm.t, Array(solm./ A)')
+
+parameters(sys)
+
 
 # -----------------------------------------------------------------------------
 # Multiple
 
-ir = Junction1(-I, -R, sgn = -1, name = :ir)
+ir = Junction1(-I, -R, sgn=-1, name=:ir)
 
-M = [Junction1(Pin, -I, -R, sgn = -1, name = :s11)]
-push!(M, Junction0(-C, subsys = M[1], name = :s10))
-push!(M, Junction1(ir, subsys = M[2], name = :s21))
-push!(M, Junction0(-C, subsys = M[3], name = :s20))
-push!(M, Junction1(ir, subsys = M[4], name = :s31))
-push!(M, Junction0(-C, subsys = M[5], name = :s30))
-push!(M, Junction1(ir, subsys = M[6], name = :s41))
-push!(M, Junction0(-C, subsys = M[7], name = :s40, couple = false))
+M = [Junction1(Pin, -I, -R, sgn=-1, name=:s11)]
+push!(M, Junction0(-C, subsys=M[1], name=:s10))
+push!(M, Junction1(ir, subsys=M[2], name=:s21))
+push!(M, Junction0(-C, subsys=M[3], name=:s20))
+push!(M, Junction1(ir, subsys=M[4], name=:s31))
+push!(M, Junction0(-C, subsys=M[5], name=:s30))
+push!(M, Junction1(ir, subsys=M[6], name=:s41))
+push!(M, Junction0(-C, subsys=M[7], name=:s40, couple=false))
 
-model = ODESystem(equations(M), t; name = :tst)
+model = ODESystem(equations(M), t; name=:tst)
 
 @named sys = reducedobs(structural_simplify(model))
 equations(sys)
