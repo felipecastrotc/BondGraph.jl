@@ -86,6 +86,7 @@ for s in 1:length(sims_train)
 
     λ = 1e-2
     α = 50
+    c = 0
     it = 40000
     hist = zeros(it)
     tik = @elapsed for i in 1:it
@@ -106,13 +107,8 @@ for s in 1:length(sims_train)
         hist[i] = loss(dθ, probd)
 
         # Stop criteria
-        if i > (α + 1)
-            c = mean(diff(hist[(i - α):(i - 1)]))
-            info[:c] = c
-            if abs(c) < 1e-5
-                break
-            end
-        end
+        if stopcrit!(c, i, hist, α) break end
+        info[:c] = c
 
         # Print info it
         println(printit(i, hist[i], info))
@@ -127,12 +123,14 @@ for s in 1:length(sims_train)
 end
 
 extrema(losslist)
+histogram(log10.(losslist))
+mean(losslist)
 
 # Save parameter
 filename = "./data/fit_md_sim_doe4.jld2"
 file = jldopen(filename, "w")
 
-file["x"] = x
+file["x"] = hcat([s["all"] for s in sims_train]...)
 file["m"] = Float64.(mlist)
 file["d"] = Float64.(dlist)
 file["loss"] = Float64.(losslist)

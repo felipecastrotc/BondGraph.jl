@@ -185,3 +185,12 @@ function printit(i, loss, info=missing)
     end
     return base
 end
+
+function stopcrit!(c, i, hist, α=50, tol=1e-5)
+    if i > (α + 1)
+        c .= mean(diff(hist[(i - α):(i - 1)]))
+        return abs(c) < tol
+    else
+        return false
+    end
+end
