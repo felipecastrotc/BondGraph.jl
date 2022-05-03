@@ -955,9 +955,9 @@ version = "2.1.2+0"
 
 [[deps.JuliaFormatter]]
 deps = ["CSTParser", "CommonMark", "DataStructures", "Pkg", "Tokenize"]
-git-tree-sha1 = "7a6717e8055dc3ee240c8d44668e5908d40efd2a"
+git-tree-sha1 = "64613299ded610bc40afeea529918d4baf3cf4e5"
 uuid = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
-version = "0.22.7"
+version = "0.22.10"
 
 [[deps.JuliaVariables]]
 deps = ["MLStyle", "NameResolution"]

@@ -4,6 +4,7 @@ _devel_tp.py
 _matlab/
 
 *.jld2
+*.bson
 
 # Binary files
 *.out
