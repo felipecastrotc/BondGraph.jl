@@ -1,3 +1,4 @@
+
 include("lib_dev_fit.jl")
 using BSON: @load
 using Random
@@ -5,13 +6,14 @@ using CUDA
 
 # -----------------------------------------------------------------------------
 # Get data
-filefit = jldopen("./data/fit_md_sim_doe3.jld2", "r")
+# filefit = jldopen("./data/fit_md_sim_doe3.jld2", "r")
 filefit = jldopen("./data/fit_md_sim_doe4.jld2", "r")
 
 # x = Float32.(filefit["x"])
 x = Float32.(filefit["x"])[[1, 2, 3, 4, 7], :]
-yd = Float32.(filefit["d"])
-ym = Float32.(filefit["m"])
+yd = Float32.(filefit["d"])[11:end]
+ym = Float32.(filefit["m"])[11:end]
+id = 1:length(yd)
 
 nσ = 1
 rm_idx = collect(1:length(yd))[yd.>(mean(yd)+nσ*std(yd))]
@@ -21,6 +23,7 @@ kp_idx = filter(x -> !(x in rm_idx), 1:length(yd))
 yd = yd[kp_idx]
 ym = ym[kp_idx]
 x = x[:, kp_idx]
+id = id[kp_idx]
 
 x[2, :] = log10.(x[2, :])
 x[3, :] = log10.(x[3, :])
@@ -41,11 +44,13 @@ Ysm = (ym .- ȳm) ./ ỹm
 # datam = [(i, j) for (i, j) in zip(eachcol(xs), ysm)]
 
 idxs = shuffle(1:size(Xs, 2))
-ntrn = floor(Int, 0.8 * length(ym))
+ntrn = floor(Int, 0.9 * length(ym))
+id_train = id[idxs[1:ntrn]]
 xs = gpu(Xs[:, idxs[1:ntrn]])
 ysd = gpu(Ysd[idxs[1:ntrn]])
 ysm = gpu(Ysm[idxs[1:ntrn]])
 
+id_test = id[idxs[ntrn:end]]
 xt = gpu(Xs[:, idxs[ntrn:end]])
 ytd = gpu(Ysd[idxs[ntrn:end]])
 ytm = gpu(Ysm[idxs[ntrn:end]])
@@ -68,9 +73,7 @@ nn = gpu(Chain(Dense(size(xs, 1) => 256, relu), Dense(256 => 256, relu),Dense(25
 #     Chain(
 #         Dense(size(xs, 1) => 16, relu),
 #         Dense(16 => 16, relu),
-#         Dense(16 => 16, tanh),
 #         Dense(16 => 16, relu),
-#         Dense(16 => 16, tanh),
 #         Dense(16 => 1),
 #     ),
 # )
@@ -86,7 +89,7 @@ c = 0
 it = 600000
 hist = gpu(zeros(it, 2))
 for i = 1:it
-    # batch = gpu(shuffle(1:size(xs, 2))[1:32])
+    # batch = gpu(shuffle(1:size(xs, 2))[1:30])
     batch = 1:size(xs, 2)
     ∇p = gradient(() -> loss(xs[:, batch], ysd[batch]'), ps)
     # ∇p = gradient(() -> loss(xs[:, batch], ysm[batch]'), ps)
@@ -99,6 +102,8 @@ for i = 1:it
     #     p .+= -(λ*norm(p)/norm(g))*g
     # end
 
+    # hist[i, 1] = loss(xs, ysm')
+    # hist[i, 2] = loss(xt, ytm')
     hist[i, 1] = loss(xs, ysd')
     hist[i, 2] = loss(xt, ytd')
     info[:c] = hist[i, 2]
@@ -117,11 +122,11 @@ end
 
 ŷ = vec(nn(xt));
 metrics(ŷ, ytd)
-# metrics(ŷ, ytm)
+metrics(ŷ, ytm)
 
 ŷ = vec(nn(xs));
 metrics(ŷ, ysd)
-# metrics(ŷ, ysm)
+metrics(ŷ, ysm)
 
 # Plot history
 idx = findfirst(hist[:, 1] .== 0.0)
@@ -132,7 +137,10 @@ plot!(hist[1:(i-1), 2]; yaxis = :log10)
 ŷ2 = ŷ .* std(y) .+ mean(y)
 metrics(ŷ2, y)
 
-@save "./data/model_sim_doe3.bson" nn
+nd = deepcopy(nn)
+@save "./data/model_sim_res_doe4.bson" nd
+nm = deepcopy(nn)
+@save "./data/model_sim_ine_doe4.bson" nm
 
 # -----------------------------------------------------------------------------
 # Mass

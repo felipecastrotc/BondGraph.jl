@@ -1,5 +1,5 @@
 include("lib_dev_fit.jl")
-using BSON: @save
+using BSON: @load
 
 # -----------------------------------------------------------------------------
 # Get data
@@ -7,10 +7,12 @@ using BSON: @save
 # file = jldopen("../numerical/data/sim_doe1.jld2")
 file = jldopen("../numerical/data/sim_doe4.jld2", "r")
 
-sims_all = gendata(file, 10, 0, Inf, remove_slow=0.9);
 sims_tmp = [s for s in sims_tmp if s["Rᵥ"] < 1e7];
+sims_all = gendata(file, 10, 0, Inf, remove_slow=0.9);
 # sims = sims_tmp
 sims = sims_all;
+Re = [i for (i, s) in enumerate(sims_all) if s["Re"] < 2200]
+sims = sims_all[[6, 13, 22]]
 
 # -----------------------------------------------------------------------------
 # Approx functions
@@ -64,6 +66,7 @@ end
 # cfg = Dict()
 
 tik = 0.0
+c = 0.0
 mlist, dlist, losslist, timelist = [], [], [], []
 sims_train = sims_all[1:10]
 sims_train = sims_all
@@ -79,14 +82,14 @@ for s in 1:length(sims_train)
     info = Dict(
         # :Iᵥ => Dict(:pred => () -> m̂!(1.0, mθ), :truth => nsim["Iᵥ"]),
         # :Rᵥ => Dict(:pred => () -> d̂!(1.0, dθ), :truth => nsim["Rᵥ"]),
-        :c => 0.0,
+        #:c => 0.0,
         :s => s,
         :time => tik,
     )
 
     λ = 1e-2
     α = 50
-    c = 0
+    c = 0.0
     it = 40000
     hist = zeros(it)
     tik = @elapsed for i in 1:it
@@ -107,8 +110,8 @@ for s in 1:length(sims_train)
         hist[i] = loss(dθ, probd)
 
         # Stop criteria
-        if stopcrit!(c, i, hist, α) break end
-        info[:c] = c
+        if stopcrit!(i, hist, α) break end
+        #info[:c] = c
 
         # Print info it
         println(printit(i, hist[i], info))
@@ -136,3 +139,68 @@ file["d"] = Float64.(dlist)
 file["loss"] = Float64.(losslist)
 
 close(file)
+
+
+#FAST
+
+# -----------------------------------------------------------------------------
+# Approx functions
+
+function d̂!(u, p)
+    return (nd((u .- x̄) ./ x̃) .* ỹd .+ ȳd)[1]
+end;
+
+function m̂!(u, p)
+    return (nm((u .- x̄) ./ x̃) .* ỹm .+ ȳm)[1]
+end;
+
+
+diffeqm!(du, u, p, t) = diffeq!(du, u, [Δp, p[1], 1.0, p[2], 1.0], t)
+
+
+function predict(p, nsim, prob)
+    global Δp
+    Δp = nsim["Δp"]
+    x = nsim["all"][[1, 2, 3, 4, 7]]
+    x[2] = log10(x[2])
+    x[3] = log10(x[3])
+    x[5] = log10(x[5])
+    p = [x, x]
+    tmp_prob = remake(prob; u0=nsim["u0"], p=p)
+    return vec(solve(tmp_prob, Tsit5(); saveat=nsim["trng"])) ./ nsim["A"]
+end
+
+
+
+predict(123, sims[123], probm)
+
+d̂!(x[:, 1], 1)
+
+x[:, 1]
+sims[1]["all"]
+
+yd[1]
+
+idxs
+
+x[:, 123]
+
+k = id_train[j]
+j = 392
+k = id[j]
+nsim = sims[k]
+u = nsim["all"][[1, 2, 3, 4, 7]]
+u[2] = log10(u[2])
+u[3] = log10(u[3])
+u[5] = log10(u[5])
+x[:, j]- u
+
+m̂!(u, 1.0)
+nsim["Iᵥ"]
+yd[k]
+d̂!(u, 1.0)
+nsim["Rᵥ"]
+nsim["Re"]
+
+plotsims(sims[[k]], [k], probm)
+

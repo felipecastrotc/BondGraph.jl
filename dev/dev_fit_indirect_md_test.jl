@@ -1,5 +1,6 @@
 include("lib_dev_fit.jl")
 using BSON: load
+using Flux: loadmodel!
 
 # -----------------------------------------------------------------------------
 # Get data
@@ -16,8 +17,11 @@ sims = sims_all;
 # -----------------------------------------------------------------------------
 # Approx functions
 
-@load "./data/model_sim_doe4.bson" nn
-@load "./data/model_sim_doe4.bson" nn
+odel = loadmodel!(model, @load("./data/model_sim_res_doe4.bson"))
+
+
+@load "./data/model_sim_res_doe4.bson" nd
+@load "./data/model_sim_ine_doe4.bson" nm
 
 # Mass model
 

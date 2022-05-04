@@ -113,10 +113,10 @@ function plotsims(sims, p=missing, prob=missing)
         # Color palette selection
         c = palette(:default)[i % 15 + 1]
         # Plot the reference
-        plt = plot!(s["t"], s["y"]; ls=:dash, linecolor=c, label=string(i))
+        plt = plot!(s["t"], s["y"]; ls=:dash, linecolor=c, label="Ref."*string(i))
         # Simulate and plot the simulation
         if !ismissing(p)
-            plot!(s["t"], predict(p, s, prob); linecolor=c)
+            plot!(s["t"], predict(p, s, prob); linecolor=c, label="Sim."*string(i))
         end
     end
     return plot!()
@@ -147,7 +147,7 @@ function metrics(y, ŷ)
         median(err)
     )
 
-    return scatter(y, ŷ)
+    return scatter(y, ŷ, ylabel="Predicted", xlabel="True", legend=false)
 end
 
 function plotit(i, t, y, ŷ; every=500)
@@ -186,9 +186,9 @@ function printit(i, loss, info=missing)
     return base
 end
 
-function stopcrit!(c, i, hist, α=50, tol=1e-5)
+function stopcrit!(i, hist, α=50, tol=1e-5)
     if i > (α + 1)
-        c .= mean(diff(hist[(i - α):(i - 1)]))
+        c = mean(diff(hist[(i - α):(i - 1)]))
         return abs(c) < tol
     else
         return false
