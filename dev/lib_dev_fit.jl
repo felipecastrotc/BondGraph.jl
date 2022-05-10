@@ -1,5 +1,6 @@
 using DiffEqFlux, DifferentialEquations, Plots
 using JLD2, LinearAlgebra, Statistics
+import Interpolations: LinearInterpolation
 
 using Flux
 using DiffEqSensitivity
@@ -73,18 +74,21 @@ function gendata(file, n=10, minre=1000, maxre=10000; remove_slow=nothing)
         data["Iᵥ"] = ρ * L / A
 
         # Simulation settings
-        tsim = ex["t"] .< 4
-        stp = Int(round(length(ex["t"][tsim]) / n))
-        rng = 1:stp:length(ex["t"][tsim])
-        y = ex["V"][rng]
-        t = ex["t"][rng]
-        trng = 0:step(t):(step(t) * (length(rng) - 1))
+        # Find when the simulation stabilizes
+        imax = findfirst(ex["V"] .> ex["V"][end]*(1-1e-3))
+        # Create an interpolator
+        v = LinearInterpolation(ex["t"][1:imax], ex["V"][1:imax])
+        # Get the velocities and time
+        trng = 0:ex["t"][imax]/(n-1):ex["t"][imax]
+        y = v(trng)
+        t = trng
 
         data["u0"] = [y[1] .* A]
         data["y"] = y
         data["t"] = t
         data["trng"] = trng
-
+        
+        data["key"] = k
         push!(sims, data)
     end
     return sims
@@ -150,16 +154,16 @@ function metrics(y, ŷ)
     return scatter(y, ŷ, ylabel="Predicted", xlabel="True", legend=false)
 end
 
-function plotit(i, t, y, ŷ; every=500)
+function plotit(i, t, y, ŷ::Function; every=500)
     if i == 1
-        p = plot(t, y; label=string(i))
+        p = plot(t, y, linewidth=5, linecolor=:black; label="Ref.")
     elseif (i % every) == 0
-        p = plot!(t, ŷ; label=string(i))
+        p = plot!(t, ŷ(); label=string(i))
         display(p)
     end
 end
 
-function plotit(i::Int, data::Dict, ŷ::Vector; every=500)
+function plotit(i::Int, data::Dict, ŷ::Function; every=500)
     return plotit(i, data["t"], data["y"], ŷ; every=every)
 end
 
@@ -180,6 +184,8 @@ function printit(i, loss, info=missing)
             end
             base *= @sprintf("- %s: %s ", string(k), aux)
         end
+    elseif ismissing(info)
+        base = base
     else
         base *= @sprintf(" %.3e", info[k])
     end

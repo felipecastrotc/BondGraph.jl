@@ -4,15 +4,30 @@ using BSON: @load
 using Random
 using CUDA
 
+# Get Reynolds keys
+
+
 # -----------------------------------------------------------------------------
 # Get data
 # filefit = jldopen("./data/fit_md_sim_doe3.jld2", "r")
-filefit = jldopen("./data/fit_md_sim_doe4.jld2", "r")
+filefit = jldopen("./data/fit_md_sim_doe4_lam_1000_2000.jld2", "r")
+filefit = jldopen("./data/fit_md_sim_doe4_all.jld2", "r")
+Re = getre(file, 500, 2400)
+lam = []
+for k in keys(Re)
+    result = findfirst(filefit["key"] .== k)
+    if !isnothing(result)
+        push!(lam, result)
+    end
+end
 
-# x = Float32.(filefit["x"])
-x = Float32.(filefit["x"])[[1, 2, 3, 4, 7], :]
-yd = Float32.(filefit["d"])[11:end]
-ym = Float32.(filefit["m"])[11:end]
+x = Float32.(filefit["x"])[:, lam]
+#x = Float32.(filefit["x"])[[1, 2, 3, 4, 7], :]
+# x = Float64.(filefit["x"])
+yd = Float32.(filefit["d"])[lam]
+# yd = Float64.(filefit["d"])
+ym = Float32.(filefit["m"])[lam]
+# ym = Float64.(filefit["m"])
 id = 1:length(yd)
 
 nσ = 1
@@ -57,18 +72,13 @@ ytm = gpu(Ysm[idxs[ntrn:end]])
 
 # -----------------------------------------------------------------------------
 # Damper
-
-# loss(x, y) = Flux.Losses.mse(nn(x), y)
-loss(x, y) = sqrt(Flux.Losses.mse(nn(x), y))
-loss(xs, ysd')
-loss(xs, ysm')
-
 # Train
 opt = RMSProp(0.0001)
 opt = ADAM(0.01)
 
-# nn = gpu(Chain(Dense(size(xs, 1) => 256, relu), Dense(256 => 1)))
-nn = gpu(Chain(Dense(size(xs, 1) => 256, relu), Dense(256 => 256, relu),Dense(256 => 1)))
+nn = gpu(Chain(Dense(size(xs, 1) => 256, relu), Dense(256 => 1)))
+# nn = gpu(Chain(Dense(size(xs, 1) => 256, relu), Dense(256 => 256, relu),Dense(256 => 1)))
+#nn = gpu(Chain(Dense(size(xs, 1) => 10, relu), Dense(10 => 10, relu), Dense(10 => 1)))
 # nn = gpu(
 #     Chain(
 #         Dense(size(xs, 1) => 16, relu),
@@ -79,6 +89,10 @@ nn = gpu(Chain(Dense(size(xs, 1) => 256, relu), Dense(256 => 256, relu),Dense(25
 # )
 
 ps = Flux.params(nn)
+
+# loss(x, y) = Flux.Losses.mse(nn(x), y)
+loss(x, y) = sqrt(Flux.Losses.mse(nn(x), y))
+loss(xs, ysd')
 
 info = gpu(Dict(:c => 0.0))
 
@@ -91,8 +105,8 @@ hist = gpu(zeros(it, 2))
 for i = 1:it
     # batch = gpu(shuffle(1:size(xs, 2))[1:30])
     batch = 1:size(xs, 2)
-    ∇p = gradient(() -> loss(xs[:, batch], ysd[batch]'), ps)
-    # ∇p = gradient(() -> loss(xs[:, batch], ysm[batch]'), ps)
+    # ∇p = gradient(() -> loss(xs[:, batch], ysd[batch]'), ps)
+    ∇p = gradient(() -> loss(xs[:, batch], ysm[batch]'), ps)
 
     update!(opt, ps, ∇p)
 
@@ -102,10 +116,10 @@ for i = 1:it
     #     p .+= -(λ*norm(p)/norm(g))*g
     # end
 
-    # hist[i, 1] = loss(xs, ysm')
-    # hist[i, 2] = loss(xt, ytm')
-    hist[i, 1] = loss(xs, ysd')
-    hist[i, 2] = loss(xt, ytd')
+    hist[i, 1] = loss(xs, ysm')
+    hist[i, 2] = loss(xt, ytm')
+    # hist[i, 1] = loss(xs, ysd')
+    # hist[i, 2] = loss(xt, ytd')
     info[:c] = hist[i, 2]
 
     # hist[i] = loss(xs, ysm')
