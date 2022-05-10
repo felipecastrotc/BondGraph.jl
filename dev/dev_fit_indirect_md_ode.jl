@@ -34,13 +34,16 @@ end
 file = jldopen("../numerical/data/sim_doe4.jld2", "r")
 
 # sims_tmp = [s for s in sims_tmp if s["Rᵥ"] < 1e7];
-# sims_all = gendata(file, 10, 0, Inf, remove_slow = 0.9);
 sims_all = gendata(file, 30, 8000, 10000, remove_slow = 0.9);
+sims_all = gendata(file, 20, 0, Inf, remove_slow = 0.9);
 # sims = sims_tmp
 sims = sims_all;
 Re = [i for (i, s) in enumerate(sims_all) if s["Re"] < 2200]
-# Re = [i for (i, s) in enumerate(sims_all) if s["Re"] > 9000]
+Re = [i for (i, s) in enumerate(sims_all) if s["Re"] > 3500]
 sims = sims_all[[1, 3, 8]]
+sims = sims_all[[9, 12, 14, 15]]  # lam
+sims = sims_all[[3, 47, 55]]  # turb
+sims = sims_all[Re]  # turb
 
 # -----------------------------------------------------------------------------
 # Approx functions
@@ -51,11 +54,18 @@ sims = sims_all[[1, 3, 8]]
 # mθ = [1e6];
 # dθ = [1e6];
 
+# d̂!(u, p) = p[1]*u[1]^2;
+# d̂!(u, p) = p[1]*u[1] + p[2]*u[1]^2;
 d̂!(u, p) = p[1] + p[2]*u[1] + p[3]*u[1]^2;
 m̂!(u, p) = p[1] + p[2]*u[1] + p[3]*u[1]^2;
 # d̂!(u, p) = p[3]*u[1]^2;
 # m̂!(u, p) = p[1];
 
+# mθ = [1e6, 0.0, 0.0];
+# dθ = [0.0, 0.0, 1e6];
+# mθ = [1e6];
+# dθ = [1e6];
+# dθ = [1e6, 0.0];
 mθ = [1e6, 0.0, 0.0];
 dθ = [0.0, 0.0, 1e6];
 
@@ -103,8 +113,9 @@ function loss(p, prob)
     rmse = sqrt(
         mean([mean((s["y"] .- ŷ) .^ 2) for (ŷ, s) in zip(Ŷ, sims)])
         )
-    θ = sum(log10.(abs.(dθ))) + sum(log10.(abs.(mθ)))
-    return ρ + rmse + 0.1*θ
+    # θ = sum(log10.(abs.(dθ))) + sum(log10.(abs.(mθ)))
+    # return ρ + rmse + 0.1*θ
+    return ρ + rmse
 end
 
 function lossout(p, prob)
@@ -118,7 +129,7 @@ function lossout(p, prob)
 end
 
 
-loss(dθ, probd)
+# loss(dθ, probd)
 # Generate gradient functions
 ∇d = gradient((p) -> loss(p, probd), dθ)
 ∇m = gradient((p) -> loss(p, probm), mθ)
@@ -132,30 +143,37 @@ tik = 0.0
 c = 0.0
 mlist, dlist, losslist, timelist, klist, xlist = [], [], [], [], [], []
 sims_train = sims_all
+sims_train = sims_all[[9, 12, 14, 15]]
+sims_train = sims_all[[3, 47, 55, 63]]
+sims_train = sims_all[Re]
 # sims_train = sims_all[1:10]
 # for s in 1:length(sims_train)
 # idxs = shuffle(1:length(sims_train))[1:100]
 # idxs = shuffle(1:length(sims_train))
 # idxs = 1:2
-# idxs = 1:length(sims_train)
+idxs = 1:length(sims_train)
 # for (k, s) in enumerate(idxs)
     global sims, mθ, dθ
 
     # mθ = [1e6]
     # dθ = [1e6]
     
-    mθ = [1e6, 1e3, 1e3];
-    dθ = [1e3, 1e3, 1e6];
+    # mθ = [1e6, 1e3, 1e3];
+    # dθ = [1e3, 1e3, 1e6];
 
-    mθ = [1e-10, 1e-10, 1e-10];
-    dθ = [1e-10, 1e-10, 1e-10];
+    # dθ = [0.0, 0.0, 1e6];
+    # mθ = [1e6];
+    # dθ = [1e6];
+    # dθ = [1e6, 0.0];
+    dθ = [0.0, 1e6, 0.0];
+    dθ = [0.0, 1e6, 1e6];
+    dθ = [0.0, 0.0, 1e6];
+    mθ = [1e6, 0.0, 0.0];
 
     optm = ADAM(1000);
     optd = ADAM(1000);
-    p = 1e6
-    dθ[3] = p
-    mθ[1] = p
-    s = 1
+
+    s = 200
     k = 1.0
     sims = sims_train[[s]]
     # nsim = sims[1]
@@ -171,6 +189,7 @@ sims_train = sims_all
     )
     c = 0.0
     it = 400000
+    α = 50
     hist = zeros(it)
     tik = @elapsed for i = 1:it
         # i = 2
@@ -178,11 +197,16 @@ sims_train = sims_all
         ∇d = gradient((p) -> loss(p, probd), dθ)
         # mθ[i] = p
 
+        ∇m[1][[2, 3]] .= 0.0
+        ∇d[1][[1, 2]] .= 0.0
+
         # update!(optm, mθ, ∇m[1])
         # update!(optd, dθ, ∇d[1])
 
-        λ = 1e-4  # Better than below according to a test with 20 samples
+        # λ = 1e-4  # Better than below according to a test with 20 samples
         # λ = 1e-3  # Better than below according to a test with 20 samples
+        λ = 5e-3  # Better than below according to a test with 20 samples
+        # λ = 5e-5  # Better than below according to a test with 20 samples
         # λ = 1e-4  # Better than below according to a test with 20 samples
         # λ = 1e-5  # Better than below according to a test with 20 samples
         # λ = 1e-6  # Better than below according to a test with 20 samples
@@ -192,21 +216,22 @@ sims_train = sims_all
         # λ = 9e-3 
         # λ = i > 1 ? 10^(floor(log10(hist[i - 1])) - 1) : 9e-3
 
-        # mθ += -(λ * norm(mθ) / norm(∇m[1])) * ∇m[1]
-        # dθ += -(λ * norm(dθ) / norm(∇d[1])) * ∇d[1]
+        mθ += -(λ * norm(mθ) / norm(∇m[1])) * ∇m[1]
+        dθ += -(λ * norm(dθ) / norm(∇d[1])) * ∇d[1]
 
-        dθ += -(norm(∇d[1])^-0.2) * ∇d[1]*1e2
-        mθ += -(norm(∇m[1])^-0.5) * ∇m[1]*1e2
+        # dθ[2] = 0.0;
+        # λ = norm(∇m[1])^0.2
+        # λ = norm(∇d[1])^0.9
 
         ρ, rmse, θ  = lossout(dθ, probd)
-        hist[i] = ρ + rmse + 0.1*θ
-        info[:ρ], info[:θ], info[:rmse] = ρ, rmse, θ
+        hist[i] = ρ + rmse
+        info[:ρ], info[:rmse], info[:θ] = ρ, rmse, θ
 
         # Stop criteria
-        # if stopcrit!(i, hist, α)
-        #     break
-        # end
-        #info[:c] = c
+        if stopcrit!(i, hist, α)
+            break
+        end
+        # info[:c] = c
 
         # Print info it
         println(printit(i, hist[i], info))
@@ -229,11 +254,38 @@ dθ
 # dθ = dlist[i]
 # nsim["Rᵥ"]
 # # nsim["Δp"] *= 1/100
-
+nsim = sims[1]
 plot(nsim["t"], nsim["y"])
-plot!(nsim["t"], predict(mθ, nsim, probm))
+plot!(nsim["t"], predict(mθ, nsim, probm), legend=false)
 plot!(nsim["t"], predict([nsim["Iᵥ"], 0.0, 0.0, 0.0], nsim, probm))
 # plot!(nsim["t"], predict([nsim["Iᵥ"]], nsim, probm))
+
+dθ
+
+metrics(nsim["y"], predict(mθ, nsim, probm))
+
+# Turb u + u^2
+# rmse: 3.5593e-02 mse: 1.2669e-03 ρ: 9.98355e-01 a: 1.00254e+00 b: 5.71178e-01
+# 0.0
+# 1.4557456294974292e7
+# 1.0167066969264485e6
+
+# Turb u^2
+# rmse: 3.9396e-03 mse: 1.5520e-05 ρ: 9.99983e-01 a: 1.00126e+00 b: 5.71178e-01
+# 0.0
+# 0.0
+# 5.9435415142057526e10
+
+# Lam u + u^2
+# rmse: 4.2286e-03 mse: 1.7881e-05 ρ: 9.99860e-01
+# 0.0
+# 4.694348794776163e7
+# 32840.04644376066
+# Lam u
+# rmse: 4.2307e-03 mse: 1.7899e-05 ρ: 9.99860e-01 a: 9.98314e-01 b: 1.27581e+00
+#  0.0
+#  4.694290276424844e7
+#  0.0
 
 # plot(predict(dθ, nsim, probd))
 # plot!(predict([nsim["Rᵥ"]], nsim, probd))
