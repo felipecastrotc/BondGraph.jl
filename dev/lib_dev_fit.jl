@@ -75,7 +75,7 @@ function gendata(file, n=10, minre=1000, maxre=10000; remove_slow=nothing)
 
         # Simulation settings
         # Find when the simulation stabilizes
-        imax = findfirst(ex["V"] .> ex["V"][end]*(1-1e-3))
+        imax = findfirst(ex["V"] .> ex["V"][end]*(1-1e-4))
         # Create an interpolator
         v = LinearInterpolation(ex["t"][1:imax], ex["V"][1:imax])
         # Get the velocities and time
@@ -115,12 +115,22 @@ function plotsims(sims, p=missing, prob=missing)
     plt = plot()
     for (i, s) in enumerate(sims)
         # Color palette selection
-        c = palette(:default)[i % 15 + 1]
+        c = palette(:default)[i % 15]
         # Plot the reference
-        plt = plot!(s["t"], s["y"]; ls=:dash, linecolor=c, label="Ref."*string(i))
+        plt = plot!(s["t"], s["y"]; ls=:dash, lc=c, label="Ref."*string(i), xaxis="Time (s)", yaxis="Velocity (m/s)")
         # Simulate and plot the simulation
         if !ismissing(p)
-            plot!(s["t"], predict(p, s, prob); linecolor=c, label="Sim."*string(i))
+            if isa(prob, Dict)
+                for (j, k) in enumerate(keys(prob))
+                    label = ("Sim."*string(i)*"."*string(k))
+                    ls = [:solid :dashdot :dashdotdot][j]
+                    y = predict(p[k], s, prob[k])
+                    # plot!(s["t"], y; ls=ls, lc=c, label=label)
+                    plot!(s["t"], y; ls=ls, label=label)
+                end
+            else
+                plot!(s["t"], predict(p, s, prob); lc=c, label=("Sim."*string(i)))
+            end
         end
     end
     return plot!()

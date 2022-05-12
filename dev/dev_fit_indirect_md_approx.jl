@@ -1,18 +1,21 @@
 
 include("lib_dev_fit.jl")
-using BSON: @load
+using Serialization
 using Random
 using CUDA
 
 # Get Reynolds keys
 
-
 # -----------------------------------------------------------------------------
 # Get data
 # filefit = jldopen("./data/fit_md_sim_doe3.jld2", "r")
+file = jldopen("../numerical/data/sim_doe4.jld2", "r")
 filefit = jldopen("./data/fit_md_sim_doe4_lam_1000_2000.jld2", "r")
 filefit = jldopen("./data/fit_md_sim_doe4_all.jld2", "r")
-Re = getre(file, 500, 2400)
+# close(filefit)
+
+Re = getre(file, 0, 2200)
+Re = getre(file, 3000, 10000)
 lam = []
 for k in keys(Re)
     result = findfirst(filefit["key"] .== k)
@@ -22,27 +25,41 @@ for k in keys(Re)
 end
 
 x = Float32.(filefit["x"])[:, lam]
-#x = Float32.(filefit["x"])[[1, 2, 3, 4, 7], :]
+# x = Float32.(filefit["x"])[[1, 2, 3, 4, 7], :]
 # x = Float64.(filefit["x"])
-yd = Float32.(filefit["d"])[lam]
+yd = Float32.(filefit["d"])[2, lam]
+# yd = Float32.(filefit["d"])[1, lam]
+# yd = Float32.(filefit["d"])[1, :]
 # yd = Float64.(filefit["d"])
 ym = Float32.(filefit["m"])[lam]
 # ym = Float64.(filefit["m"])
-id = 1:length(yd)
+j = filefit["loss"][lam]
+kl = filefit["key"][lam]
+# j = filefit["loss"]
+id = collect(1:size(x, 2))
 
 nσ = 1
-rm_idx = collect(1:length(yd))[yd.>(mean(yd)+nσ*std(yd))]
-rm_idx = vcat(rm_idx, collect(1:length(ym))[ym.>(mean(ym)+nσ*std(ym))])
-kp_idx = filter(x -> !(x in rm_idx), 1:length(yd))
+yv = yd[:][yd[:] .!= 0]
+yv = yd
+rm_idx = collect(1:length(yv))[yv.>(mean(yv)+nσ*std(yv))]
+rm_idx = vcat(rm_idx, id[ym.>(mean(ym)+nσ*std(ym))])
+rm_idx = vcat(rm_idx, id[j .> -0.98])
+rm_idx = Set(rm_idx)
+
+kp_idx = filter(x -> !(x in rm_idx), 1:length(yv))
 
 yd = yd[kp_idx]
+# yd = yd[:, kp_idx]
 ym = ym[kp_idx]
 x = x[:, kp_idx]
-id = id[kp_idx]
+id = collect(1:length(id[kp_idx]))
+kl = kl[kp_idx]
+kl
 
 x[2, :] = log10.(x[2, :])
 x[3, :] = log10.(x[3, :])
 x[5, :] = log10.(x[5, :])
+x[7, :] = log10.(x[7, :])
 
 # -----------------------------------------------------------------------------
 # Data
@@ -58,17 +75,32 @@ Ysm = (ym .- ȳm) ./ ỹm
 # datad = [(i, j) for (i, j) in zip(eachcol(xs), ysd)]
 # datam = [(i, j) for (i, j) in zip(eachcol(xs), ysm)]
 
-idxs = shuffle(1:size(Xs, 2))
-ntrn = floor(Int, 0.9 * length(ym))
-id_train = id[idxs[1:ntrn]]
-xs = gpu(Xs[:, idxs[1:ntrn]])
-ysd = gpu(Ysd[idxs[1:ntrn]])
-ysm = gpu(Ysm[idxs[1:ntrn]])
+γ = 0.8
+idxs = shuffle(id)
+ntrn = floor(Int, γ * length(id))
+trnidx = idxs[1:ntrn]
+tstidx = idxs[ntrn+1:end]
 
-id_test = id[idxs[ntrn:end]]
-xt = gpu(Xs[:, idxs[ntrn:end]])
-ytd = gpu(Ysd[idxs[ntrn:end]])
-ytm = gpu(Ysm[idxs[ntrn:end]])
+tstidx = id[[all(c) for c in eachcol(-1.5.< Xs .< 1.5)]]
+tstidx = id[[all(c) for c in eachcol(-1.2 .< Xs .< 1.2)]]
+if length(tstidx) > (1 - γ)*length(id)
+    ntst = floor(Int, (1 - γ) * length(id))
+    tstidx = shuffle(tstidx)[1:ntst]
+else
+    trnidx = collect(setdiff(Set(id), Set(tstidx)))
+end
+
+xs = gpu(Xs[:, trnidx])
+# ysd = gpu(Ysd[:, trnidx])
+ysd = gpu(Ysd[trnidx])
+ysm = gpu(Ysm[trnidx])
+kl[id[trnidx]]
+xs[:, 1]
+
+xt = gpu(Xs[:, tstidx])
+ytd = gpu(Ysd[tstidx])
+# ytd = gpu(Ysd[:, tstidx])
+ytm = gpu(Ysm[tstidx])
 
 # -----------------------------------------------------------------------------
 # Damper
@@ -76,7 +108,33 @@ ytm = gpu(Ysm[idxs[ntrn:end]])
 opt = RMSProp(0.0001)
 opt = ADAM(0.01)
 
-nn = gpu(Chain(Dense(size(xs, 1) => 256, relu), Dense(256 => 1)))
+scatter(xs[1, :], xs[2, :])
+scatter!(xt[1, :], xt[2, :])
+
+scatter(xs[1, :], xs[3, :])
+scatter!(xt[1, :], xt[3, :])
+
+scatter(xs[1, :], xs[4, :])
+scatter!(xt[1, :], xt[4, :])
+
+scatter(xs[1, :], xs[5, :])
+scatter!(xt[1, :], xt[5, :])
+
+scatter(xs[1, :], xs[6, :])
+scatter!(xt[1, :], xt[6, :])
+
+scatter(xs[1, :], xs[7, :])
+scatter!(xt[1, :], xt[7, :])
+
+
+# nn = gpu(Chain(Dense(size(xs, 1) => 256, relu), Dense(256 => 1)))
+# nn = gpu(Chain(Dense(size(xs, 1) => 32, tanh), Dense(32 => 32, tanh), Dense(32 => 1)))
+# UHUUUUU - Laminar resistance
+nn = gpu(Chain(Dense(size(xs, 1) => 14, tanh), Dense(14 => 1)))
+nn = gpu(Chain(Dense(size(xs, 1) => 8, tanh), Dense(8 => 1)))
+# UHUUUUU - Laminar mass
+# nn = gpu(Chain(Dense(size(xs, 1) => 8, tanh), Dense(8 => 1)))
+# nn = gpu(Chain(Dense(size(xs, 1) => 16, relu), Dense(16 => 1)))
 # nn = gpu(Chain(Dense(size(xs, 1) => 256, relu), Dense(256 => 256, relu),Dense(256 => 1)))
 #nn = gpu(Chain(Dense(size(xs, 1) => 10, relu), Dense(10 => 10, relu), Dense(10 => 1)))
 # nn = gpu(
@@ -94,19 +152,16 @@ ps = Flux.params(nn)
 loss(x, y) = sqrt(Flux.Losses.mse(nn(x), y))
 loss(xs, ysd')
 
+# loss(xs, ysd)
 info = gpu(Dict(:c => 0.0))
-
-λ = 1e-1
-λ = 5e-2
-α = 10000
-c = 0
-it = 600000
+it = 900000
 hist = gpu(zeros(it, 2))
 for i = 1:it
     # batch = gpu(shuffle(1:size(xs, 2))[1:30])
     batch = 1:size(xs, 2)
-    # ∇p = gradient(() -> loss(xs[:, batch], ysd[batch]'), ps)
-    ∇p = gradient(() -> loss(xs[:, batch], ysm[batch]'), ps)
+    # ∇p = gradient(() -> loss(xs[:, batch], ysd[:, batch]), ps)
+    ∇p = gradient(() -> loss(xs[:, batch], ysd[batch]'), ps)
+    # ∇p = gradient(() -> loss(xs[:, batch], ysm[batch]'), ps)
 
     update!(opt, ps, ∇p)
 
@@ -116,10 +171,12 @@ for i = 1:it
     #     p .+= -(λ*norm(p)/norm(g))*g
     # end
 
-    hist[i, 1] = loss(xs, ysm')
-    hist[i, 2] = loss(xt, ytm')
-    # hist[i, 1] = loss(xs, ysd')
-    # hist[i, 2] = loss(xt, ytd')
+    # hist[i, 1] = loss(xs, ysm')
+    # hist[i, 2] = loss(xt, ytm')
+    hist[i, 1] = loss(xs, ysd')
+    hist[i, 2] = loss(xt, ytd')
+    # hist[i, 1] = loss(xs, ysd)
+    # hist[i, 2] = loss(xt, ytd)
     info[:c] = hist[i, 2]
 
     # hist[i] = loss(xs, ysm')
@@ -135,26 +192,24 @@ for i = 1:it
 end
 
 ŷ = vec(nn(xt));
-metrics(ŷ, ytd)
+# metrics(ŷ, vec(ytd))
 metrics(ŷ, ytm)
 
 ŷ = vec(nn(xs));
-metrics(ŷ, ysd)
+metrics(ŷ, vec(ysd))
 metrics(ŷ, ysm)
 
 # Plot history
 idx = findfirst(hist[:, 1] .== 0.0)
 i = isnothing(idx) ? size(hist, 1) + 1 : idx
 plot(hist[1:(i-1), 1]; yaxis = :log10)
-plot!(hist[1:(i-1), 2]; yaxis = :log10)
+plot!(hist[1:(i-2), 2]; yaxis = :log10)
 
-ŷ2 = ŷ .* std(y) .+ mean(y)
-metrics(ŷ2, y)
 
-nd = deepcopy(nn)
-@save "./data/model_sim_res_doe4.bson" nd
-nm = deepcopy(nn)
-@save "./data/model_sim_ine_doe4.bson" nm
+serialize("./data/model_sim_rest_doe4.dat", nn)
+serialize("./data/model_sim_inet_doe4.dat", nn)
+serialize("./data/model_sim_varst_doe4.dat", Dict(:x_mean => x̄, :x_std => x̃, :yd_mean => ȳd, :yd_std => ỹd, :ym_mean => ȳm, :ym_std => ỹm))
+
 
 # -----------------------------------------------------------------------------
 # Mass
@@ -172,10 +227,7 @@ loss(xs, ysm')
 
 info = Dict(:c => 0.0)
 
-λ = 5e-2
-α = 50
-c = 0
-it = 100000
+λ = 5e-2vcat(Float64.(losslist), file2["loss"])
 hist = zeros(it)
 for i = 1:it
     ∇p = gradient(() -> loss(xs, ysd'), ps)
