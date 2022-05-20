@@ -46,6 +46,10 @@ function renamespace(sys, x, couple)
             if scope isa LocalScope
                 sys_name = getname(sys)
                 var_name = getname(x)
+                
+                if isa(couple, Symbol)
+                    couple = [couple]
+                end
 
                 chk = filter(x -> x ≠ string(sys_name), couple)
                 lvl = split(string(var_name), "₊")

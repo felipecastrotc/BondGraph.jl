@@ -180,20 +180,32 @@ expand(out)
 # X = vcat(x, ones(1, size(x, 2)));
 # X = vcat(X, (1.0./x[3, :].^2)');
 X = copy(x);
+y = copy(dlist)
 X = vcat(x, ones(1, size(x, 2)));
 X = vcat(X, 1.0 ./ x);
 
+X = copy(x);
+# X = vcat(X, 1.0 ./ x);
+Xs = (X .- mean(X, dims=2))./std(X, dims=2);
+Xs = vcat(Xs, ones(1, size(x, 2)));
+
 # Model parameters
-order = 6;
+order = 4;
 rnk = 1;
 l = [order, rnk]
 # Set initial values
 p₀ = ones(rnk * size(X, 1) * order + rnk) ./ 10
 # Fit model
-mdl = fitcp(X, y, l);
+# mdl = fitcp(X, y, l);
+mdl = fitcp(Xs, Ys, l)
 # Get approximation
-ŷ = CP(X, mdl.param, rnk, order);
-metrics(y, ŷ)
+# ŷ = CP(X, mdl.param, rnk, order);
+ŷ = CP(Xs, mdl.param, rnk, order);
+# metrics(y, ŷ)
+metrics(Ys, ŷ)
+
+expr = CP([ρ, μ, d, L, ϵ, a, A, 1, 1/ρ, 1/μ, 1/d, 1/L, 1/ϵ, 1/a, 1/A], mdl.param, rnk, order)
+Symbolics.expand(expr)
 
 # -----------------------------------------------------------------------------
 # Pipe differential equation mass and damper functions

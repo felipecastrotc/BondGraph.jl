@@ -1,5 +1,4 @@
 include("lib_dev_fit.jl")
-using BSON: @load
 
 function ArmijoLineSearch(f, d, α0; ρ=0.5, c1=1e-4)
 
@@ -32,10 +31,19 @@ end
 
 # file = jldopen("../numerical/data/sim_doe1.jld2")
 file = jldopen("../numerical/data/sim_doe4.jld2", "r")
+file = jldopen("../numerical/data/sim_doe3.jld2", "r")
+file = jldopen("../numerical/data/sim_doe5.jld2", "r")
+
+plot(file["1"]["V"][1:100])
+plot(file["1"]["H"][1:10000] .- file["1"]["Hf"])
+keys(file["1"])
+file["1"]["Hr"]
+
 
 # sims_tmp = [s for s in sims_tmp if s["Rᵥ"] < 1e7];
-sims_all = gendata(file, 30, 8000, 10000, remove_slow = 0.9);
-sims_all = gendata(file, 30, 0, Inf, remove_slow = 0.9);
+# sims_all = gendata(file, 30, 8000, 10000, remove_slow = 0.9);
+# sims_all = gendata(file, 30, 0, Inf, remove_slow = 0.9);
+sims_all = gendata(file, 30, 0, 2200, remove_slow = 0.9);
 # sims = sims_tmp
 sims = sims_all;
 Re = [i for (i, s) in enumerate(sims_all) if s["Re"] > 3500]
@@ -58,7 +66,7 @@ findfirst("1" .== [k["key"] for k in sims])
 
 # d̂!(u, p) = p[1]*u[1]^2;
 d̂!(u, p) = p[1]*u[1];
-d̂!(u, p) = Float64(nn((Float32.(xx) .- x̄)./x̃)[1]*ỹd + ȳd)*u[1];
+# d̂!(u, p) = Float64(nn((Float32.(xx) .- x̄)./x̃)[1]*ỹd + ȳd)*u[1];
 
 # d̂!(u, p) = p[1]*u[1] + p[2]*u[1]^2;
 # d̂!(u, p) = p[1] + p[2]*u[1] + p[3]*u[1]^2;
@@ -99,14 +107,14 @@ probd = ODEProblem(diffeqd!, u0, (0.0, 20.0), dθ)
 # Train setup
 
 function predict(p, nsim, prob)
-    global Δp, xx
+    global Δp
     Δp = nsim["Δp"]
     # nsim = sims[376]
-    xx = copy(nsim["all"])
-    xx[2] = log10.(xx[2])
-    xx[3] = log10.(xx[3])
-    xx[5] = log10.(xx[5])
-    xx[7] = log10.(xx[7])
+    # xx = copy(nsim["all"])
+    # xx[2] = log10.(xx[2])
+    # xx[3] = log10.(xx[3])
+    # xx[5] = log10.(xx[5])
+    # xx[7] = log10.(xx[7])
     tmp_prob = remake(prob; u0 = nsim["u0"], p = p)
     return vec(solve(tmp_prob, Tsit5(); saveat = nsim["trng"])) ./ nsim["A"]
 end
@@ -164,9 +172,10 @@ info = Dict(
 
 mlist, dlist, losslist, timelist, klist, xlist = [], [], [], [], [], []
 sims_train = sims_all
-sims_train = sims_all[[9, 12, 14, 15]]
-sims_train = sims_all[[3, 47, 55, 63]]
-sims_train = sims_all[Re]
+# sims_train = sims_all[[9, 12, 14, 15]]
+# sims_train = sims_all[[3, 47, 55, 63]]
+# sims_train = sims_all[Re]
+# sims_train = sims_all[[1, 3, 4, 5, 6, 7]]
 # sims_train = sims_all[1:10]
 
 mθ = [1e6]
@@ -177,6 +186,7 @@ dθ = [1e6]
 # idxs = shuffle(1:length(sims_train))
 # idxs = 1:2
 idxs = 1:length(sims_train)
+idxs = 1:3
 for (k, s) in enumerate(idxs)
     # k = 1
     global sims, mθ, dθ
@@ -249,10 +259,76 @@ for (k, s) in enumerate(idxs)
 end
 
 
-mθ = [ym[1]]
-nsim = sims[376]
+ρ, rmse, θ  = lossout(dθ, probd)
+
+
+i = 3
+mθ = mlist[[i]]
+dθ = dlist[i][[2]]
+nsim = sims = sims_train[i]
 plot(nsim["t"], nsim["y"])
-plot!(nsim["t"], predict(mθ, nsim, probm), legend=false)
+plot!(nsim["t"], predict(dθ, nsim, probd), legend=false)
+
+Δp = nsim["Δp"]
+k = nsim["key"]
+
+tmp_prob = remake(probd; u0 = nsim["u0"], p = dθ)
+sim = vec(solve(tmp_prob, Tsit5(); saveat = file[k]["t"])) ./ nsim["A"]
+ts = file[k]["t"]
+plot(ts, sim)
+plot!(ts, file[k]["V"])
+
+
+n = length(sim)
+n = 300
+plot(file[k]["t"][1:n], file[k]["V"][1:n] - sim[1:n])
+plot(file[k]["t"][1:n], file[k]["V"][1:n])
+plot(sim[1:n])
+
+
+
+mlist = Float64.(mlist)
+# dlist = Float64.(dlist)
+dlist = [d[2] for d in dlist]
+
+x = hcat(xlist...)
+W = hcat([(x[2, :].*x[4, :]./(x[3, :].^4)), (x[1, :].*x[4, :]./x[7, :]), (x[6, :].*x[2, :]./x[5, :]), (x[6, :].*x[3, :].^3)./(x[5, :].*x[1, :])]...)
+
+W
+W\mlist
+W\dlist
+
+Ws\Ys
+
+using ScikitLearn
+@sk_import linear_model: LassoCV
+
+W = deepcopy(B)
+Ws = (W .- mean(W, dims=1))./std(W, dims=1)
+Ys = (mlist .- mean(mlist, dims=1))./std(mlist, dims=1)
+Ys = (dlist .- mean(dlist, dims=1))./std(dlist, dims=1)
+
+θ = Ws\Ys
+
+scatter(Ws*θ, Ys)
+
+# Fit LASSO with crossvalidation
+lm = LassoCV(max_iter=3000, cv=5, normalize=false, fit_intercept=false, n_alphas=1000);
+lm.fit(Ws, Ys)
+# lm.fit(W, mlist)
+# lm.fit(W, dlist)
+θ = lm.coef_
+
+idx[θ .> 1e-1]
+θ[θ .> 1e-1]
+θ[θ .< 1e-1] .= 0.0
+
+scatter(W*θ, mlist)
+scatter(Ws*θ, Ys)
+cor(Ws*θ, Ys)
+
+
+
 # plot!(nsim["t"], predict([nsim["Iᵥ"], 0.0, 0.0, 0.0], nsim, probm))
 # # plot!(nsim["t"], predict([nsim["Iᵥ"]], nsim, probm))
 
@@ -376,62 +452,3 @@ for k in 1:100
     end
     println(k)
 end
-
-#FAST
-
-# -----------------------------------------------------------------------------
-# Approx functions
-
-function d̂!(u, p)
-    return (nd((u .- x̄) ./ x̃).*ỹd.+ȳd)[1]
-end;
-
-function m̂!(u, p)
-    return (nm((u .- x̄) ./ x̃).*ỹm.+ȳm)[1]
-end;
-
-
-diffeqm!(du, u, p, t) = diffeq!(du, u, [Δp, p[1], 1.0, p[2], 1.0], t)
-
-
-function predict(p, nsim, prob)
-    global Δp
-    Δp = nsim["Δp"]
-    x = nsim["all"][[1, 2, 3, 4, 7]]
-    x[2] = log10(x[2])
-    x[3] = log10(x[3])
-    x[5] = log10(x[5])
-    p = [x, x]
-    tmp_prob = remake(prob; u0 = nsim["u0"], p = p)
-    return vec(solve(tmp_prob, Tsit5(); saveat = nsim["trng"])) ./ nsim["A"]
-end
-
-
-
-predict(123, sims[123], probm)nsim["trng"]
-
-yd[1]
-
-idxs
-
-x[:, 123]
-
-k = id_train[j]
-j = 392
-k = id[j]
-nsim = sims[k]
-u = nsim["all"][[1, 2, 3, 4, 7]]
-u[2] = log10(u[2])
-u[3] = log10(u[3])
-u[5] = log10(u[5])
-x[:, j] - u
-
-m̂!(u, 1.0)
-nsim["Iᵥ"]
-yd[k]
-d̂!(u, 1.0)
-nsim["Rᵥ"]
-nsim["Re"]
-
-plotsims(sims[[k]], [k], probm)
-

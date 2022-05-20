@@ -1,4 +1,3 @@
-using BSON: @load
 using LsqFit
 using SymPy
 
@@ -13,7 +12,7 @@ file = jldopen("../numerical/data/sim_doe3.jld2", "r")
 
 sims_all = gendata(file, 10, 0, Inf; remove_slow=0.9);
 sims_all = gendata(file, 10, 1800, 4000, remove_slow=0.9);
-sims_all = gendata(file, 30, 500, 1500; remove_slow=0.9);
+sims_all = gendata(file, 30, 500, 2000; remove_slow=0.9);
 sims = sims_all[[1, 2]]
 sims = sims_all
 
@@ -33,12 +32,17 @@ sims = sims_all
 # [1, 2, 3, 4, 5, 6, 7]
 # [ρ, μ, d, L, ϵ, a, A]
 
-m̂!(x, p) = p[1]*(x[1]*x[4]/(x[7])) + p[2]*(x[2]*x[4]/(x[3]^4)) + p[3]*(x[1]*x[2]*x[3]/(x[6]*x[7])) + p[4]*(x[3]*x[6]/x[1]);
-d̂!(x, p) = p[1]*(x[1]*x[4]/(x[7])) + p[2]*(x[2]*x[4]/(x[3]^4)) + p[3]*(x[1]*x[2]*x[3]/(x[6]*x[7])) + p[4]*(x[3]*x[6]/x[1]);
-128/π
+d̂!(u, p) = p[1]*(u[2]*u[4]/(u[3]^4)) + p[2]*(u[1]*u[4]/u[7]);
+m̂!(u, p) = p[1]*(u[2]*u[4]/(u[3]^4)) + p[2]*(u[1]*u[4]/u[7]);
 
-dθ = ones(4)
-mθ = ones(4)
+d̂!(u, p) = p[1]*(u[2]*u[4]/(u[3]^4)) + p[2]*0.0;
+m̂!(u, p) = p[1]*0.0 + p[2]*(u[1]*u[4]/u[7]);
+
+d̂!(u, p) = p[1] + p[2]*0.0;
+m̂!(u, p) = p[1] + p[2]*0.0;
+
+dθ = ones(2)
+mθ = ones(2)
 
 # -----------------------------------------------------------------------------
 # Differential equations
@@ -56,7 +60,8 @@ d̂!(vcat(p[2], u), p[3])
 
 function diffeq!(du, u, p, t)
     # return du[1] = (p[1] - u[1] * d̂!(vcat(p[2], u), p[3])) / max(m̂!(vcat(p[4], u), p[5]), 2e3)
-    return du[1] = (p[1] - u[1] * d̂!(vcat(p[2], u), p[3])) / m̂!(vcat(p[4], u), p[5])
+    # return du[1] = (p[1] - u[1] * d̂!(vcat(p[2], u), p[3])) / m̂!(vcat(p[4], u), p[5])
+    return du[1] = (p[1] - u[1] * d̂!(p[2], p[3])) / m̂!(p[4], p[5])
 end
 
 nsim = sims[1]
@@ -94,11 +99,11 @@ end
 #         mean([mean((s["y"] .- predict(p, s, prob)) .^ 2) for s in sims])
 #     ) + sum(log10.(abs.(dθ.^2))) + sum(log10.(abs.(mθ.^2)))
 # end
-# function loss(p, prob)
-#     return sqrt(
-#         mean([mean((s["y"] .- predict(p, s, prob)) .^ 2) for s in sims])
-#     )
-# end
+function loss(p, prob)
+    return sqrt(
+        mean([mean((s["y"] .- predict(p, s, prob)) .^ 2) for s in sims])
+    )
+end
 
 # function loss(p, prob)
 #     return sqrt(
@@ -110,16 +115,36 @@ end
 #             mean([mean((s["y"] .- predict(p, s, prob)) .^ 2) for s in sims])
 #         )
 # end
-function lossm(p, prob)
-    return mean([-cor(s["y"], predict(p, s, prob)) for s in sims])
-end
+# function lossm(p, prob)
+#     return mean([-cor(s["y"], predict(p, s, prob)) for s in sims])
+# end
 
-function lossd(p, prob)
-    return sqrt(
-            mean([mean(((s["y"] .- predict(p, s, prob))/s["y"][end]) .^ 2) for s in sims])
-        )
-end
+# function lossd(p, prob)
+#     return sqrt(
+#             mean([mean(((s["y"] .- predict(p, s, prob))/1) .^ 2) for s in sims])
+#         )
+# end
+# function lossm(p, prob)
+#     return sqrt(
+#             mean([mean(((s["y"] .- predict(p, s, prob))/1) .^ 2) for s in sims])
+#             # mean([mean(((s["y"] .- predict(p, s, prob))/s["y"][end]) .^ 2) for s in sims])
+#         )
+# end
 
+
+[mean(((s["y"] .- predict(mθ, s, probm))/s["y"][end]) .^ 2) for s in sims]
+
+nsim = sims[1]
+plot(nsim["y"])
+plot!(predict(mθ, nsim, probm))
+nsim = sims[2]
+plot(nsim["y"]/nsim["y"][end] .- predict(mθ, nsim, probm)/nsim["y"][end])
+plot(((nsim["y"] .- predict(mθ, nsim, probm))./nsim["y"][end]).^2)
+
+mean(((nsim["y"] .- predict(mθ, nsim, probm))./nsim["y"][end]).^2)
+
+plot(nsim["y"])
+plot!(predict(mθ, nsim, probm))
 
 # function loss(p, prob)
     # return mean([-cor(s["y"], predict(p, s, prob)) for s in sims])
@@ -127,10 +152,10 @@ end
 
 # -----------------------------------------------------------------------------
 # Generate gradient functions
-# ∇d = gradient((p) -> loss(p, probd), dθ)
-# ∇m = gradient((p) -> loss(p, probm), mθ)
-∇d = gradient((p) -> lossd(p, probd), dθ)
-∇m = gradient((p) -> lossm(p, probd), mθ)
+∇d = gradient((p) -> loss(p, probd), dθ)
+∇m = gradient((p) -> loss(p, probm), mθ)
+# ∇d = gradient((p) -> lossd(p, probd), dθ)
+# ∇m = gradient((p) -> lossm(p, probd), mθ)
 
 # -----------------------------------------------------------------------------
 # Training
@@ -145,7 +170,8 @@ i = 1
 
 sims = sims_all[[1, 2,3,4,5,6]]
 # sims = sims_all[[3, 4]]
-sims = sims_all[[2, 3]]
+sims = sims_all[[1, 3, 4, 5, 6, 7]]
+sims = sims_all[[1]]
 [s["Re"] for s in sims]
 
 dθ = [0.0, 40, 0.0, 0]
@@ -154,12 +180,21 @@ mθ = [0.98, 0, 0, 0.0]
 dθ = [0.0, 128/π, 0.0, 0]
 mθ = [1.0, 0, 0, 0.0]
 
-loss(dθ, probd)
+mθ = ones(2)
+dθ = ones(2)
 
 dθ = Float64.(rand(4) .> 0.35)
 mθ = Float64.(rand(4) .> 0.35)
 dθ = rand(4)
 mθ = rand(4)
+dθ = [35, 0.0]
+mθ = [0.0, 0.5]
+dθ = [35, 1e-10]
+mθ = [1e-10, 0.5]
+dθ = Float64.(rand(2) .> 0.35)
+mθ = Float64.(rand(2) .> 0.35)
+dθ = rand(2)
+mθ = rand(2)
 # mθ = ones(4)
 optm = ADAM(0.1);
 optd = ADAM(0.1);
@@ -169,6 +204,10 @@ hist = zeros(it)
 for i in 1:it
     ∇d = gradient((p) -> lossd(p, probd), dθ)
     ∇m = gradient((p) -> lossm(p, probm), mθ)
+
+    λ = 5e-3
+    mθ .+= -(λ * norm(mθ) / norm(∇m[1])) * ∇m[1]
+    dθ .+= -(λ * norm(dθ) / norm(∇d[1])) * ∇d[1]
 
     # Hd = Zygote.hessian((p) -> lossd(p, probd), dθ)
     # Hm = Zygote.hessian((p) -> lossm(p, probm), mθ)
@@ -185,8 +224,8 @@ for i in 1:it
     # else
     #     update!(optm, dθ, ∇d[1])
     # end
-    update!(optm, mθ, ∇m[1])
-    update!(optd, dθ, ∇d[1])
+    # update!(optm, mθ, ∇m[1])
+    # update!(optd, dθ, ∇d[1])
     
     # # λ = i > 1 ? 10^(floor(log10(abs(hist[i - 1]))) - 1) : 5e-3
     # λ = i > 1 ? 10^(floor(log10(abs(hist[i - 1]))) - 2) : 5e-3
@@ -215,7 +254,17 @@ end
 dθ
 mθ
 
+
+[s["Rᵥ"]/s["Iᵥ"] for s in sims_all]'
+
+
+sims[1]["Rᵥ"]/sims[1]["Iᵥ"]
+sims[2]["Rᵥ"]/sims[2]["Iᵥ"]
+sims[3]["Rᵥ"]/sims[3]["Iᵥ"]
+sims[4]["Rᵥ"]/sims[4]["Iᵥ"]
+
 plotsims(sims, dθ, probd)
+
 plotsims(sims[[1]], dθ, probd)
 plotit(1, sims[1], () -> predict(dθ, sims[1], probd); every=10)
 

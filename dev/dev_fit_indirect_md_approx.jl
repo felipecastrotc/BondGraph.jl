@@ -1,4 +1,3 @@
-
 include("lib_dev_fit.jl")
 using Serialization
 using Random
@@ -27,8 +26,8 @@ end
 x = Float32.(filefit["x"])[:, lam]
 # x = Float32.(filefit["x"])[[1, 2, 3, 4, 7], :]
 # x = Float64.(filefit["x"])
-yd = Float32.(filefit["d"])[2, lam]
-# yd = Float32.(filefit["d"])[1, lam]
+# yd = Float32.(filefit["d"])[2, lam]
+yd = Float32.(filefit["d"])[1, lam]
 # yd = Float32.(filefit["d"])[1, :]
 # yd = Float64.(filefit["d"])
 ym = Float32.(filefit["m"])[lam]
