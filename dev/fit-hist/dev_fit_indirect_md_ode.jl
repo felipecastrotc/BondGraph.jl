@@ -68,11 +68,12 @@ m̂!(u, p) = p[1];
 
 # mθ = [1e6, 0.0, 0.0];
 # dθ = [0.0, 0.0, 1e6];
-mθ = [1e6];
-dθ = [1e6];
+# mθ = [1e6];
+# dθ = [1e6];
 # dθ = [1e6, 0.0];
 # mθ = [1e6, 0.0, 0.0];
 # dθ = [0.0, 0.0, 1e6];
+θ = [1e6, 1e6]
 
 # -----------------------------------------------------------------------------
 # Differential equation setup
@@ -85,30 +86,16 @@ function diffeq!(du, u, p, t)
     return du[1] = (p[1] - d̂!(u[1], p[2])) / m̂!(u[1], p[3])
 end
 
-nsim = sims[1]
-Δp = nsim["Δp"]
-u0 = nsim["u0"]
-
-diffeqd!(du, u, p, t) = diffeq!(du, u, [Δp, 1.0, p, 1.0, mθ], t)
-diffeqm!(du, u, p, t) = diffeq!(du, u, [Δp, 1.0, dθ, 1.0, p], t)
-
-probm = ODEProblem(diffeqm!, u0, (0.0, 20.0), mθ)
-probd = ODEProblem(diffeqd!, u0, (0.0, 20.0), dθ)
+prob = ODEProblem(diffeq!, [0.0], (0.0, 20.0), θ)
 
 # -----------------------------------------------------------------------------
 # Train setup
 
-function predict(p, nsim, prob)
-    global Δp
-    Δp = nsim["Δp"]
-    # nsim = sims[376]
-    # xx = copy(nsim["all"])
-    # xx[2] = log10.(xx[2])
-    # xx[3] = log10.(xx[3])
-    # xx[5] = log10.(xx[5])
-    # xx[7] = log10.(xx[7])
-    tmp_prob = remake(prob; u0 = nsim["u0"], p = p)
-    return vec(solve(tmp_prob, Tsit5(); saveat = nsim["trng"])) ./ nsim["A"]
+function predict(p, nsim, prob, t=nothing)
+    saveat = isnothing(t) ? nsim["trng"] : t
+    tmp_prob = remake(prob; u0 = nsim["u0"], p = vcat(nsim["Δp"], p))
+    out = solve(tmp_prob, Tsit5(); saveat=saveat, reltol=1e-8, abstol=1e-8)
+    return vec(out[1, :]) ./ nsim["A"]
 end
 
 # Define loss functions
@@ -135,15 +122,13 @@ function lossout(p, prob)
     rmse = sqrt(
         mean([mean((s["y"] .- ŷ) .^ 2) for (ŷ, s) in zip(Ŷ, sims)])
         )
-    θ = sum(log10.(abs.(dθ))) + sum(log10.(abs.(mθ)))
+    # θ = sum(log10.(abs.(dθ))) + sum(log10.(abs.(mθ)))
+    θ = sum(log10.(abs.(p)))
     return ρ, rmse, θ
 end
 
-
-# loss(dθ, probd)
 # Generate gradient functions
-∇d = gradient((p) -> loss(p, probd), dθ)
-∇m = gradient((p) -> loss(p, probm), mθ)
+∇θ = gradient((p) -> loss(p, prob), θ)
 
 # -----------------------------------------------------------------------------
 # Train
@@ -162,7 +147,8 @@ info = Dict(
     :eta => 0.0,
 )
 
-mlist, dlist, losslist, timelist, klist, xlist = [], [], [], [], [], []
+θlist, losslist, timelist, klist, xlist = [], [], [], [], []
+# mlist, dlist, losslist, timelist, klist, xlist = [], [], [], [], [], []
 sims_train = sims_all
 # sims_train = sims_all[[9, 12, 14, 15]]
 # sims_train = sims_all[[3, 47, 55, 63]]
@@ -170,8 +156,7 @@ sims_train = sims_all
 # sims_train = sims_all[[1, 3, 4, 5, 6, 7]]
 # sims_train = sims_all[1:10]
 
-mθ = [1e6]
-dθ = [1e6]
+θ = [1e6, 1e6]
 
 # for s in 1:length(sims_train)
 # idxs = shuffle(1:length(sims_train))[1:100]
@@ -181,10 +166,9 @@ idxs = 1:length(sims_train)
 idxs = 1:3
 for (k, s) in enumerate(idxs)
     # k = 1
-    global sims, mθ, dθ
+    global sims, θ
 
-    # optm = ADAM(1000);
-    # optd = ADAM(1000);
+    # opt = ADAM(1000);
     sims = sims_train[[s]]
     # nsim = sims[1]
     info[:s] = k
@@ -193,9 +177,9 @@ for (k, s) in enumerate(idxs)
     α = 1000
     hist = zeros(it)
     tik = @elapsed for i = 1:it
-        ∇m = gradient((p) -> loss(p, probm), mθ)
-        ∇d = gradient((p) -> loss(p, probd), dθ)
-        # mθ[i] = p
+        # ∇m = gradient((p) -> loss(p, probm), mθ)
+        # ∇d = gradient((p) -> loss(p, probd), dθ)
+        ∇θ = gradient((p) -> loss(p, prob), θ)
 
         # ∇m[1][[2, 3]] .= 0.0
         # ∇d[1][[1, 2]] .= 0.0
@@ -214,16 +198,17 @@ for (k, s) in enumerate(idxs)
         # λ = 9e-3 
         # λ = i > 1 ? 10^(floor(log10(hist[i - 1])) - 1) : 9e-3
 
-        mθ += -(λ * norm(mθ) / norm(∇m[1])) * ∇m[1]
-        dθ += -(λ * norm(dθ) / norm(∇d[1])) * ∇d[1]
+        θ += -(λ * norm(θ) / norm(∇θ[1])) * ∇θ[1]
+        # mθ += -(λ * norm(mθ) / norm(∇m[1])) * ∇m[1]
+        # dθ += -(λ * norm(dθ) / norm(∇d[1])) * ∇d[1]
 
         # dθ[2] = 0.0;
         # λ = norm(∇m[1])^0.2
         # λ = norm(∇d[1])^0.9
 
-        ρ, rmse, θ  = lossout(dθ, probd)
+        ρ, rmse, w  = lossout(θ, prob)
         hist[i] = ρ + rmse
-        info[:ρ], info[:rmse], info[:θ] = ρ, rmse, θ
+        info[:ρ], info[:rmse], info[:θ] = ρ, rmse, w
 
         # Stop criteria
         if stopcrit!(i, hist, α)
@@ -236,9 +221,10 @@ for (k, s) in enumerate(idxs)
         println(printit(i, hist[i], info))
     end
 
-    push!(mlist, mθ[1])
-    push!(dlist, [0.0, dθ[1]])
+    # push!(mlist, mθ[1])
+    # push!(dlist, [0.0, dθ[1]])
     # push!(dlist, [dθ[1], 0.0])
+    push!(θlist, θ)
     push!(xlist, sims[1]["all"])
     push!(klist, sims[1]["key"])
 
@@ -250,13 +236,8 @@ for (k, s) in enumerate(idxs)
     info[:tik] = tik
 end
 
-
-ρ, rmse, θ  = lossout(dθ, probd)
-
-
 i = 3
-mθ = mlist[[i]]
-dθ = dlist[i][[2]]
+θ = θlist[[i]]
 nsim = sims = sims_train[i]
 plot(nsim["t"], nsim["y"])
 plot!(nsim["t"], predict(dθ, nsim, probd), legend=false)
