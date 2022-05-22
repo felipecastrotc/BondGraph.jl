@@ -1,11 +1,13 @@
 using DiffEqFlux, DifferentialEquations, Plots
-using JLD2, LinearAlgebra, Statistics
+using LinearAlgebra, Statistics
 import Interpolations: LinearInterpolation
 
 using Flux
 using DiffEqSensitivity
 using Flux.Optimise: ADAM, update!
 using Printf
+
+using JLD2, Serialization, CodecZlib
 
 # Generate data
 g = 9.81        # m/s^2 - Gravity
@@ -109,9 +111,100 @@ function scaledata(sims)
 end
 
 # -----------------------------------------------------------------------------
+# Save and load functions
+
+function saveθ(filename, xlist, θlist, losslist, keylist, cvt)
+
+    # Save parameter
+    file = jldopen(filename, "a")
+
+    if "x" in keys(file)
+        file["x"] = hcat(hcat(xlist...), file["x"])
+    else
+        file["x"] = hcat(xlist...)
+    end
+
+    if "loss" in keys(file)
+        file["loss"] = vcat(Float64.(losslist), file["loss"])
+    else
+        file["loss"] = Float64.(losslist)
+    end
+
+    if "key" in keys(file)
+        file["key"] = vcat(keylist, file["key"])
+    else
+        file["key"] = keylist
+    end
+
+    # Store the θ indexes separately
+    for k in keys(cvt)
+        s = String(k)
+        v = hcat(cvt[k].(θlist)...)
+        if s in keys(file)
+            file[s] = hcat(v, file[s])
+        else
+            file[s] = v
+        end
+    end
+
+    close(file)
+
+end
+
+function loadθ(filename; filesim=nothing, re_rng=nothing)
+
+    # Parameters file
+    file = jldopen(filename, "r")
+    
+    x = file["x"]
+    j = file["loss"]
+    keylist = file["key"]
+    
+    Θ = collect(setdiff(Set(keys(file)), Set(["x", "loss", "key"])))
+
+    # filter parameters according to Reynolds
+    if !isnothing(filesim) & !isnothing(re_rng)
+        # Load sim file
+        sfile = jldopen(filesim, "r")
+        
+        re_key = collect(keys(getre(sfile, re_rng[1], re_rng[2])))
+
+        msk = [i for (i, k) in enumerate(keylist) if k in re_key]
+
+        x = x[:, msk]
+        j = j[msk]
+        keylist = keylist[msk]
+
+        θ = Dict(Symbol(k) => file[k][msk] for k in Θ)
+
+        close(sfile)
+    else
+        θ = Dict(Symbol(k) => file[k] for k in Θ)
+    end
+
+    close(file)
+
+    return x, θ, j, keylist
+end
+
+function savezlib(filename, var)
+    stream = ZlibCompressorStream(open(filename, "w"))
+    serialize(stream, var)
+    close(stream)
+end
+
+function loadzlib(filename)
+    stream = ZlibDecompressorStream(open(filename, "r"), stop_on_end=true)
+    out = deepcopy(deserialize(stream))
+    close(stream)
+    return out
+end
+
+
+# -----------------------------------------------------------------------------
 # Plot functions
 
-function plotsims(sims, p=missing, prob=missing)
+function plotsims(sims, p=missing, prob=missing, t=nothing)
     plt = plot()
     for (i, s) in enumerate(sims)
         # Color palette selection
@@ -124,12 +217,12 @@ function plotsims(sims, p=missing, prob=missing)
                 for (j, k) in enumerate(keys(prob))
                     label = ("Sim."*string(i)*"."*string(k))
                     ls = [:solid :dashdot :dashdotdot][j]
-                    y = predict(p[k], s, prob[k])
+                    y = predict(p[k], s, prob[k], t)
                     # plot!(s["t"], y; ls=ls, lc=c, label=label)
                     plot!(s["t"], y; ls=ls, label=label)
                 end
             else
-                plot!(s["t"], predict(p, s, prob); lc=c, label=("Sim."*string(i)))
+                plot!(s["t"], predict(p, s, prob, t); lc=c, label=("Sim."*string(i)))
             end
         end
     end

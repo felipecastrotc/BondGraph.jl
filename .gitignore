@@ -6,6 +6,7 @@ _matlab/
 *.jld2
 *.bson
 *.dat
+*.zdat
 
 # Binary files
 *.out
