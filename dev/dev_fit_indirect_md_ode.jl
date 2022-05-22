@@ -30,15 +30,9 @@ end
 # Get data
 
 # file = jldopen("../numerical/data/sim_doe1.jld2")
-file = jldopen("../numerical/data/sim_doe4.jld2", "r")
-file = jldopen("../numerical/data/sim_doe3.jld2", "r")
+# file = jldopen("../numerical/data/sim_doe4.jld2", "r")
+# file = jldopen("../numerical/data/sim_doe3.jld2", "r")
 file = jldopen("../numerical/data/sim_doe5.jld2", "r")
-
-plot(file["1"]["V"][1:100])
-plot(file["1"]["H"][1:10000] .- file["1"]["Hf"])
-keys(file["1"])
-file["1"]["Hr"]
-
 
 # sims_tmp = [s for s in sims_tmp if s["Rᵥ"] < 1e7];
 # sims_all = gendata(file, 30, 8000, 10000, remove_slow = 0.9);
@@ -46,14 +40,12 @@ file["1"]["Hr"]
 sims_all = gendata(file, 30, 0, 2200, remove_slow = 0.9);
 # sims = sims_tmp
 sims = sims_all;
-Re = [i for (i, s) in enumerate(sims_all) if s["Re"] > 3500]
-Re = [i for (i, s) in enumerate(sims_all) if s["Re"] < 2200]
-sims = sims_all[[1, 3, 8]]
-sims = sims_all[[9, 12, 14, 15]]  # lam
-sims = sims_all[[3, 47, 55]]  # turb
-sims = sims_all[Re]  # turb
-
-findfirst("1" .== [k["key"] for k in sims])
+# Re = [i for (i, s) in enumerate(sims_all) if s["Re"] > 3500]
+# Re = [i for (i, s) in enumerate(sims_all) if s["Re"] < 2200]
+# sims = sims_all[[1, 3, 8]]
+# sims = sims_all[[9, 12, 14, 15]]  # lam
+# sims = sims_all[[3, 47, 55]]  # turb
+# sims = sims_all[Re]  # turb
 
 # -----------------------------------------------------------------------------
 # Approx functions
@@ -90,7 +82,7 @@ dθ = [1e6];
 # end
 
 function diffeq!(du, u, p, t)
-    return du[1] = (p[1] - d̂!(u[1], p[3])) / m̂!(u[1], p[5])
+    return du[1] = (p[1] - d̂!(u[1], p[2])) / m̂!(u[1], p[3])
 end
 
 nsim = sims[1]
