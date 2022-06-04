@@ -13,6 +13,7 @@ sim = Dict()
 # sim[:name] = "sim_doe3";
 sim[:name] = "sim_doe5";
 # sim[:npoitns], sim[:minRe], sim[:maxRe] = 30, 0, Inf
+sim[:n], sim[:minRe], sim[:maxRe] = 30, 4000, 6000
 sim[:n], sim[:minRe], sim[:maxRe] = 30, 0, 2200
 
 file = jldopen("../numerical/data/" * sim[:name] * ".jld2", "r")
@@ -25,6 +26,7 @@ sims = sims_all;
 
 # k̂!(u, p) = p[1] * u[2]^2;
 k̂!(u, p) = p[1] * u[2];
+k̂!(u, p) = 0 * u[2];
 d̂!(u, p) = p[1] * u[1];
 m̂!(u, p) = p[1];
 
@@ -80,6 +82,7 @@ function lossout(p, prob)
 end
 
 # Generate gradient functions
+θ = [1e6, 1e6, 1e6];
 ∇θ = gradient((p) -> loss(p, prob), θ)
 
 # -----------------------------------------------------------------------------
@@ -95,9 +98,9 @@ info = Dict(
     :eta => 0.0,
 )
 
-idxs = 1:3
 idxs = 1:length(sims_all)
 θlist, losslist, timelist, keylist, xlist = [], [], [], [], []
+idxs = 1:1
 for (j, s) in enumerate(idxs)
     global sims, θ
 
@@ -142,12 +145,53 @@ for (j, s) in enumerate(idxs)
     info[:tik] = tik
 end
 
+θ
 # Visualize fit
-i = 600
+i = 1
 θ = θlist[i]
 nsim = sims_all[i]
+nsim["Re"]
 plot(nsim["t"], nsim["y"])
 plot!(nsim["t"], predict(θ, nsim, prob), legend=false)
+
+
+function predict(s, nsim, prob, t=nothing)
+    saveat = isnothing(t) ? nsim["trng"] : t
+    if s == :bg
+        p = vcat(nsim["Δp"], nsim["Rᵥ"], nsim["Iᵥ"])
+        tmp_prob = remake(prob; u0=nsim["u0"], p=p)
+    else
+        p = [nsim["Δp"], s]
+        println(p)
+        tmp_prob = remake(prob; u0 = vcat(nsim["u0"], 0.0), p = p)
+    end
+    out = solve(tmp_prob, Tsit5(); saveat=saveat, reltol=1e-8, abstol=1e-8)
+    return vec(out[1, :]) ./ nsim["A"]
+end
+
+
+plt = plot()
+# Color palette selection
+c = palette(:default)[i % 15]
+# Plot the reference
+plt = plot!(nsim["t"], nsim["y"]; ls=:dash, lc=c, label="Ref. PDE", xaxis="Time (s)", yaxis="Velocity (m/s)")
+ls = [:solid :dashdot :dashdotdot][1]
+tmp_prob = remake(prob; u0 = vcat(nsim["u0"], 0.0), p =vcat(nsim["Δp"], θ))
+out = solve(tmp_prob, Tsit5(); saveat=nsim["trng"], reltol=1e-8, abstol=1e-8)
+ys = vec(out[1, :]) ./ nsim["A"]
+label = ("Sim. fit")
+plot!(nsim["t"], ys; ls=ls, label=label)
+ls = [:solid :dashdot :dashdotdot][2]
+tmp_prob = remake(probbg; u0 = vcat(nsim["u0"], 0.0), p =vcat(nsim["Δp"], nsim["Rᵥ"], nsim["Iᵥ"]))
+out = solve(tmp_prob, Tsit5(); saveat=nsim["trng"], reltol=1e-8, abstol=1e-8)
+yb= vec(out[1, :]) ./ nsim["A"]
+label = ("Sim. BG")
+plot!(nsim["t"], yb; ls=ls, label=label, legend=:bottomright)
+plot!(xlim=[0.1, 0.8], ylim=[3.0, 6.0])
+
+
+metrics(nsim["y"], ys)
+metrics(nsim["y"], yb)
 
 # -----------------------------------------------------------------------------
 # Save θ

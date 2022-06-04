@@ -1504,6 +1504,12 @@ git-tree-sha1 = "027185efff6be268abbaf30cfd53ca9b59e3c857"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
 version = "0.11.10"
 
+[[deps.ParameterizedFunctions]]
+deps = ["DataStructures", "DiffEqBase", "DocStringExtensions", "Latexify", "LinearAlgebra", "ModelingToolkit", "Reexport", "SciMLBase"]
+git-tree-sha1 = "2f48f745e976dc5575bbc301e6c63b8fb5f12155"
+uuid = "65888b18-ceab-5e60-b2b9-181511a3b968"
+version = "5.13.1"
+
 [[deps.Parameters]]
 deps = ["OrderedCollections", "UnPack"]
 git-tree-sha1 = "34c0e9ad262e5f7fc75b10a9952ca7692cfc5fbe"

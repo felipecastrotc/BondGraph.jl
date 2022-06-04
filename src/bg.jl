@@ -21,13 +21,35 @@ end
 function Se(expr; name)
     sts = @variables e(t) = 0.0
     eqs = [sts[1] ~ expr]
-    ODESystem(eqs, t, sts, []; name = name)
+    
+    if isvariable(expr)
+        ps = [expr]
+    elseif istree(unwrap(expr))
+        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
+        ps = filter(x -> isindependent(Num(x)), vars)
+    else
+        ps = []
+    end
+
+    ODESystem(eqs, t, sts, ps; name = name)
 end
 
 function Sf(expr; name)
     sts = @variables f(t) = 0.0
     eqs = [sts[1] ~ expr]
-    ODESystem(eqs, t, sts, []; name = name)
+
+    if isvariable(expr)
+        ps = [expr]
+    elseif istree(unwrap(expr))
+        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
+        ps = filter(x -> isindependent(Num(x)), vars)
+    else
+        ps = []
+    end
+
+    ODESystem(eqs, t, sts, ps; name = name)
 end
 
 function Dq(; name, x = 0.0)
@@ -155,7 +177,7 @@ function mGY(subsys...; name, g = 1.0)
     if isvariable(g)
         sts, ps = [], [g]
     elseif istree(unwrap(g))
-        vars = collect(Set(ModelingToolkit.get_variables(r)))
+        vars = collect(Set(ModelingToolkit.get_variables(g)))
         sts = filter(x -> ~isindependent(Num(x)), vars)
         ps = filter(x -> isindependent(Num(x)), vars)
     else
@@ -276,4 +298,28 @@ function Damper(; name, c = 10)
     ps = @parameters R = c
     eqs = [e ~ f * R]
     ODESystem(eqs, t, [e, f], ps; name = name)
+end
+
+function GenericDamper(expr; name)
+    e, f = Power()
+
+    eqs = [e ~ expr]
+
+    # Check the expression
+    if isvariable(expr)
+        sts, ps = [], [expr]
+    elseif istree(unwrap(expr))
+        vars = collect(Set(ModelingToolkit.get_variables(expr)))
+        sts = filter(x -> ~isindependent(Num(x)), vars)
+        ps = filter(x -> isindependent(Num(x)), vars)
+    else
+        sts, ps = [], []
+    end
+
+    if (@isdefined e) | (@isdefined f)
+        # sts = [e, f]
+        push!(sts, e, f)
+    end
+
+    ODESystem(eqs, t, sts, ps; name = name)
 end

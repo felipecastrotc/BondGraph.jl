@@ -12,13 +12,13 @@ import ModelingToolkit: getname, rename, setmetadata
 import ModelingToolkit: namespace_equations, equations
 
 
-function namespace_equation(eq::Equation, sys, couple)
-    _lhs = namespace_expr(eq.lhs, sys, couple)
-    _rhs = namespace_expr(eq.rhs, sys, couple)
+function namespace_equation_couple(eq::Equation, sys, couple)
+    _lhs = namespace_expr_couple(eq.lhs, sys, couple)
+    _rhs = namespace_expr_couple(eq.rhs, sys, couple)
     _lhs ~ _rhs
 end
 
-function namespace_expr(O, sys, couple) where {T}
+function namespace_expr_couple(O, sys, couple) where {T}
     ivs = independent_variables(sys)
     O = unwrap(O)
     if any(isequal(O), ivs)
@@ -26,7 +26,7 @@ function namespace_expr(O, sys, couple) where {T}
     elseif isvariable(O)
         renamespace(sys, O, couple)
     elseif istree(O)
-        renamed = map(a -> namespace_expr(a, sys, couple), arguments(O))
+        renamed = map(a -> namespace_expr_couple(a, sys, couple), arguments(O))
         if symtype(operation(O)) <: FnType
             renamespace(sys, O, couple)
         else
@@ -74,7 +74,7 @@ end
 function namespace_equations(sys::ODESystem, couple)
     eqs = equations(sys)
     isempty(eqs) && return Equation[]
-    map(eq -> namespace_equation(eq, sys, couple), eqs)
+    map(eq -> namespace_equation_couple(eq, sys, couple), eqs)
 end
 
 function equations(sys::Array{ODESystem,1})
@@ -85,4 +85,59 @@ function equations(sys::Array{ODESystem,1})
     eqs = reduce(vcat, namespace_equations.(sys, Ref(couple)); init = Equation[])
 
     return eqs
+end
+
+
+# Rename variables
+
+function namespace_equation_ren(eq::Equation, sys, old::Num, new::Num)
+    _lhs = namespace_expr_ren(eq.lhs, sys, old, new)
+    _rhs = namespace_expr_ren(eq.rhs, sys, old, new)
+    _lhs ~ _rhs
+end
+
+function namespace_expr_ren(O, sys, old::Num, new::Num) where {T}
+    ivs = independent_variables(sys)
+    O = unwrap(O)
+    if any(isequal(O), ivs)
+        return O
+    elseif isvariable(O)
+        renamespace(sys, O, old, new)
+    elseif istree(O)
+        renamed = map(a -> namespace_expr_ren(a, sys, old, new), arguments(O))
+        if symtype(operation(O)) <: FnType
+            renamespace(sys, O, old, new)
+        else
+            similarterm(O, operation(O), renamed)
+        end
+    elseif O isa Array
+        map(Base.Fix2(namespace_expr_ren, sys), O)
+    else
+        O
+    end
+end
+
+function renamespace(sys, x, old::Num, new::Num)
+    x = unwrap(x)
+    if isequal(x, old)
+        unwrap(new)
+    else
+        x
+    end
+end
+
+
+function renamevars(sys::ODESystem, pairs::Dict)
+    
+    eqs = equations(sys)
+
+    if isempty(eqs)
+        return sys
+    else
+        for (old, new) in pairs
+            eqs = map(eq -> namespace_equation_ren(eq, sys, old, new), eqs)
+        end
+    end
+
+    return ODESystem(eqs; name = sys.name)
 end

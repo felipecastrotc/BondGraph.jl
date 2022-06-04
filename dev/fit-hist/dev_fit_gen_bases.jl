@@ -20,7 +20,8 @@ include("lib_sparse_units.jl")
 @variables m, kg, s, K
 units = Dict(ρ => kg/m^3, μ => kg/(m*s), L => m, V => m/s, ΔP => kg/(m*s^2), ϵ => m, a => m/s, A => m^2, d => m, Q => m^3/s)
 
-var_array = [ρ, μ, d, L, ϵ, a, A];
+# var_array = [ρ, μ, d, L, ϵ, a, A, V];
+var_array = [ρ, μ, d, L, ϵ, A, V];
 
 # Create an array of units
 var_units = [units[s] for s in var_array];
@@ -28,10 +29,12 @@ var_dict = Dict(zip(var_array, var_units));
 
 exps = collect(-5:5);
 
-out_unit = (units[μ]*units[L]/(units[d]^4))
-@time Bₛ = genbases(var_dict, exps, out_unit, true);      # HEAVY!!!!
+# out_unit = (units[μ]*units[L]/(units[d]^4))
+out_unit = (units[ρ]*units[L]/units[d])*units[V]
+# @time Bₛ = genbases(var_dict, exps, out_unit, true);      # HEAVY!!!!
 @time Bₛ = genbasesprl(var_dict, exps, out_unit, true);      # HEAVY!!!!
 
+Bₛ
 filename = "./data/model_damper.out"
 # open(filename, "w") do f
 #     serialize(f, Bₛ);

@@ -11,6 +11,8 @@ export SgnODESystem, Power, Se, Sf, Dq, Junction1, Junction0, mGY, mTF, Mass, Sp
 
 export ODESystem2D, SgnODESystem2D, Junction12D, Junction02D, mTF2Dtrans, M2Dtrans, get2Dsystem, Mass2D, Spring2D, Damper2D, equations, states, parameters
 
+export renamevars, GenericDamper
+
 
 include("mtk.jl")
 include("utils.jl")
