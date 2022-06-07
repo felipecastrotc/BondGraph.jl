@@ -90,13 +90,13 @@ end
 
 # Rename variables
 
-function namespace_equation_ren(eq::Equation, sys, old::Num, new::Num)
+function namespace_equation_ren(eq::Equation, sys, old::Union{Num,String}, new::Union{Num,Symbol})
     _lhs = namespace_expr_ren(eq.lhs, sys, old, new)
     _rhs = namespace_expr_ren(eq.rhs, sys, old, new)
     _lhs ~ _rhs
 end
 
-function namespace_expr_ren(O, sys, old::Num, new::Num) where {T}
+function namespace_expr_ren(O, sys, old::Union{Num,String}, new::Union{Num,Symbol}) where {T}
     ivs = independent_variables(sys)
     O = unwrap(O)
     if any(isequal(O), ivs)
@@ -121,6 +121,15 @@ function renamespace(sys, x, old::Num, new::Num)
     x = unwrap(x)
     if isequal(x, old)
         unwrap(new)
+    else
+        x
+    end
+end
+
+function renamespace(sys, x, old::String, new::Symbol)
+    x = unwrap(x)
+    if isequal(string(x), old)
+        rename(x, new)
     else
         x
     end

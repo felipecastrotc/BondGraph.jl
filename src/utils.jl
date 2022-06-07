@@ -1,4 +1,5 @@
-import Base: +, -
+# =============================================================================
+# Support junction functions
 
 # Deprecated -> use ModelingToolkit.get_variables
 function extract_vars(O)
@@ -10,21 +11,10 @@ function extract_vars(O)
     end
 end
 
-# =============================================================================
-# Support junction functions
-
-struct SgnODESystem
-    ode::ODESystem
-    sgn::Num
-end
-
--(sys::ODESystem) = SgnODESystem(sys, -1)
-+(sys::ODESystem) = SgnODESystem(sys, 1)
-
 function addsgnODE(sys)
     if typeof(sys) == ODESystem
         +sys
-    elseif typeof(sys) == SgnODESystem
+    elseif typeof(sys) == BgODESystem
         sys
     end
 end
@@ -32,7 +22,7 @@ end
 function rmsgnODE(sys)
     if typeof(sys) == ODESystem
         sys
-    elseif typeof(sys) == SgnODESystem
+    elseif typeof(sys) == BgODESystem
         sys.ode
     end
 end
@@ -44,7 +34,7 @@ function isdefnothing(c::ODESystem, sym::String)
     isnothing(ModelingToolkit.get_defaults(c)[st])
 end
 
-function sumvar(con::Vector{SgnODESystem}, var::String)
+function sumvar(con::Vector{BgODESystem}, var::String)
     sym = Symbol(var)
     C = filter(c -> hasproperty(c.ode, sym), con)
     if length(C) == 0
@@ -65,7 +55,7 @@ function filterexpr(expr::Equation; ignore::Vector{Num} = Num[])
     length(vars) > 0
 end
 
-function equalityeqs(con::Vector{SgnODESystem}, var::String; couple = false, sgn = 1)
+function equalityeqs(con::Vector{BgODESystem}, var::String; couple = false, sgn = 1)
     sym = Symbol(var)
     C = filter(c -> hasproperty(c.ode, sym), con)
 
@@ -139,5 +129,50 @@ function isindependent(var::Num)
         !istree(unwrap(var))
     else
         true
+    end
+end
+
+# =============================================================================
+# Function to handle subsystem
+
+function addsubsys(sys, pss)
+    
+    ps = pss isa BgODESystem ? [pss] : collect(pss)
+
+    if BgODESystem in typeof.(ps)
+        
+        eqs, names = Equation[], Symbol[]
+
+        rename = Dict()
+
+        filter!(x -> x isa BgODESystem, ps);
+
+        for p in ps
+            for s in p.subsys
+
+                if !(s.name in names)
+                    push!(names, s.name)
+                    eqs = vcat(eqs, equations(s))
+                end
+
+                pname = string(p.name)*"₊"
+                sname = string(s.name)*"₊"
+                pname = pname*sname
+
+                for st in s.states
+                    str_st = string(st)
+                    sym_st = split(str_st, "(")[1]
+                    rename[pname*str_st] = Symbol(sname*sym_st)
+                end
+            end
+        end
+
+        sys = renamevars(sys, rename)
+        return sys
+        # Remove duplicate equations
+        # eqs = collect(Set(vcat(equations(sys), eqs)))
+    #    return ODESystem(eqs; name = sys.name)
+    else
+        return sys
     end
 end

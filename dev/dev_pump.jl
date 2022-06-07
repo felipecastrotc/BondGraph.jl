@@ -108,7 +108,7 @@ b2 = 0.0093;     # m - PBG1 external constant
 
 gyp = γa*ω - γb*Q
 
-
+# -------------------------
 # Electrical motor
 @named dUₐ = Se(T)
 @named dL = Mass(m = 0.1)
@@ -117,6 +117,7 @@ gyp = γa*ω - γb*Q
 @named je = Junction1(dUₐ, -dR, -dL, sgn = -1)
 @named dgy = mGY(je, g = 0.01)
 
+# -------------------------
 # Pipe
 @parameters RP, Ip
 @variables Qₚ₁(t), Qₚ₂(t)
@@ -126,12 +127,13 @@ Ipᵥ = ρᵥ * Lᵥ / Aᵥ;
 
 @named pI = Mass(m=Ipᵥ)
 @named pR = Damper(c=Rpᵥ)
-@named pJ0 = Junction0(-pR, -pI)
+@named pJ1 = Junction1(-pR, -pI)
 
-# Coupling Pipe impeller
-@named p2i = Junction0(pJ0, sgn=-1)
-@named i2p = Junction0(-pJ0)
+# # Coupling Pipe impeller
+# @named p2i = Junction0(pJ0, sgn=-1)
+# @named i2p = Junction0(-pJ0)
 
+# -------------------------
 # Shaft
 # T = 10
 # @named sT = Se(T)
@@ -140,14 +142,27 @@ Ipᵥ = ρᵥ * Lᵥ / Aᵥ;
 # @named sJ1 = Junction1(sT, -sI, -sR1, sgn=-1)
 @named sJ1 = Junction1(dgy, -sI, -sR1, sgn=-1)
 
+# -------------------------
 # Impeller
 @parameters RL, RT
 
+# Impeller system
 @named iI = Mass(m=1.0)
 @named iRL = Damper(c = 10)
 @named iRT = Damper(c = RT)
+
+# Impeller recirculation
+@named iRR = Damper(c = 10)
+@named iRes = Junction1(-iRR)
+@named iIn = Junction0(-pJ1, subsys = [iRes])
+@named iOut = Junction0(pJ1, subsys = [-iRes])
+
+# Impeller junction
 # @named iJ1 = Junction1(-iI, -iRL, -iRT)
-@named iJ1 = Junction1(-iI, -iRL, -iRT, p2i, i2p)
+# @named iJ1 = Junction1(-iI, -iRL, -iRT, p2i, i2p)
+@named iJ1 = Junction1(-iI, -iRL, -iRT, iIn, -iOut, couple=false)
+structural_simplify(iJ1)
+
 
 # mGY Connection
 @named gy = mGY(sJ1, iJ1, g = gyp)
@@ -171,17 +186,16 @@ parameters(mdl)
 # Ifᵥ = ρᵥ*10/A
 Ifᵥ = 0.02
 τᵥ = 30.0;
-τᵥ = 3000;
+τᵥ = 300;
 
 # @register τf(t)
 # τf(t) = max(30, 1e-1*t)
 
-1/(Aᵥ^2)*1e-5
-vals = [T => τᵥ, ρ => ρᵥ, γa => γaᵥ, γb => γbᵥ, sJ1.sR1.R => 0.0005, Is => 0.02, If => 0.0005, RT => 1e8, RL => 0.0, RP => Rpᵥ, Ip => Ipᵥ/100]
+vals = [T => τᵥ, ρ => ρᵥ, γa => γaᵥ, γb => γbᵥ, sJ1.sR1.R => 0.0005, Is => 0.02, If => 0.0005, RT => 0e8, RL => 0.0, RP => Rpᵥ, Ip => Ipᵥ/100]
 # vals = [ρ => ρᵥ, γa => γaᵥ, γb => γbᵥ, sJ1.sR1.R => 100, Is => 1000.0, If => Ifᵥ, RT => 100, RL => 100, RP => Rpᵥ, Ip => Ipᵥ]
 # prob = ODEProblem(mdl, [0.0, 0.0, 0.0, 0.0], (0.0, 100.0), vals)
 # prob = ODEProblem(mdl, [0.0, 0.0], (0.0, 100.0), vals)
-prob = ODEProblem(mdl, [0.0, 0.0, 0.0, 0.0, 0.0], (0.0, 1.0), vals)
+prob = ODEProblem(mdl, [0.0, 0.0, 0.0, 0.0, 0.0], (0.0, 5.0), vals)
 
 equations(mdl)
 sol = solve(prob, reltol=1e-8, abstol=1e-8)
@@ -189,8 +203,9 @@ plot(sol)
 
 0.01*sol[sJ1.dgy.je.dL.f]
 
+
 plot(sol.t, sol[1, :])
-plot(sol.t, sol[2, :]/(2*π))
+plot(sol.t, 60*sol[2, :]/(2*π))
 plot(sol.t, sol[3, :]/Aᵥ)
 plot!(sol.t, sol[4, :]/Aᵥ)
 plot!(sol.t, sol[5, :]/Aᵥ)
@@ -201,7 +216,7 @@ i = 1
 (sol[i+2, end]*60 , sol[i+1, end]/(2*π)*60)
 (sol[i+2, end]/Aᵥ , sol[i+1, end]/(2*π)*60)
 
-ωᵥ, Qᵥ = sol[1:2, end]
+ωᵥ, Qᵥ = sol[2:3, end]
 (-1e5*Qᵥ - 1e5*(Qᵥ^2) - γaᵥ*ωᵥ*ωᵥ + γbᵥ*Qᵥ*ωᵥ) / Ifᵥ
 
 u₁ = ωᵥ*r1ᵥ
@@ -211,6 +226,7 @@ Vₙ₂ = Qᵥ/(2*π*b2)
 ρᵥ*Qᵥ*(u₂*Vₙ₂*cotd(β2) - u₁*Vₙ₁*cotd(β1))
 
 ρᵥ*Qᵥ*(u₂*Vₙ₂*cotd(β2) - u₁*Vₙ₁*cotd(β1))/ωᵥ
+
 
 (τᵥ - 0.1*ωᵥ)*ωᵥ
 
@@ -327,3 +343,12 @@ plot(sol.t, sol[2, :]./A)
 (τᵥ - (γaᵥ*ωᵥ - γbᵥ*Qᵥ)*Qᵥ - 100*ωᵥ) / 3000
 
 (-hΔPl(ρᵥ, ωᵥ, Qᵥ, dᵥ, k6ᵥ) - hΔPt(ρᵥ, ωᵥ, Qᵥ, dᵥ, k4ᵥ, k5ᵥ) - (γaᵥ*ωᵥ - γbᵥ*Qᵥ)*ωᵥ)/3000
+
+
+@parameters d, q, Ω
+
+expr = d^5*ρ*Ω^3*(1/2 - 2*q/(d^3*Ω))^2*(μ/(d^2*ρ*Ω) + (1/2 - 2*q/(d^3*Ω)))
+simplify(expand(expand(expr)))
+
+
+0.125*ρ*d^5*ω^3 + 0.25μ*d^3*ω^2 + μ*d^3*((-2*Q)^2/d^6) + ρ*(d^5)*(-2*Q)^3/(d^9)+ 1.5*ρ*(d^5)*((-2Q)^2 * ω / (d^6)) - 2μ*Q*ω - 1.5ρ*(d^2)*(ω^2)*Q

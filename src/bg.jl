@@ -10,7 +10,7 @@ It = Integral(t in DomainSets.ClosedInterval(0, t))
 #     ODESystem(Equation[], t, sts, []; name = name)
 # end
 
-function Power(; effort = 0.0, flow = 0.0)
+function Power(; effort = 0.0, flow = 0.0,)
     sts = @variables e(t) = effort f(t) = flow
     sts
 end
@@ -65,11 +65,11 @@ end
 
 function Junction1(ps...; name, subsys = [], couple = true, sgn = 1)
     # Check subsys type
-    sys = subsys isa ODESystem ? [subsys] : subsys
+    subsysv = subsys isa ODESystem ? [subsys] : subsys
 
     # Get connections
     ps = Base.Flatten([ps])
-    con = addsgnODE.(collect(Base.Flatten([ps, sys])))
+    con = addsgnODE.(collect(Base.Flatten([ps, subsysv])))
 
     if couple
         e, f = Power()
@@ -99,17 +99,22 @@ function Junction1(ps...; name, subsys = [], couple = true, sgn = 1)
         sys = ODESystem(eqs, t, [], []; name = name)
     end
 
-
-    compose(sys, rmsgnODE.(ps)...)
+    out = compose(sys, rmsgnODE.(ps)...)
+    # out = addsubsys(out, ps)
+    if length(subsysv) == 0
+        return BgODESystem(out, :j1)
+    else
+        BgODESystem(out, 1, rmsgnODE.(subsysv), :j1)
+    end
 end
 
 function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
     # Check subsys type
-    sys = subsys isa ODESystem ? [subsys] : subsys
+    subsysv = subsys isa ODESystem ? [subsys] : subsys
 
     # Get connections
     ps = Base.Flatten([ps])
-    con = addsgnODE.(collect(Base.Flatten([ps, sys])))
+    con = addsgnODE.(collect(Base.Flatten([ps, subsysv])))
 
     if couple
         e, f = Power()
@@ -139,7 +144,13 @@ function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
         sys = ODESystem(eqs, t, [], []; name = name)
     end
 
-    compose(sys, rmsgnODE.(ps)...)
+    out = compose(sys, rmsgnODE.(ps)...)
+    # out = addsubsys(out, ps)
+    if length(subsysv) == 0
+        return BgODESystem(out, :j0)
+    else
+        BgODESystem(out, 1, rmsgnODE.(subsysv), :j0)
+    end
 end
 
 function mGY(subsys...; name, g = 1.0)
