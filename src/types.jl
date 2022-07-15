@@ -11,21 +11,24 @@ struct BgODESystem <: ModelingToolkit.AbstractODESystem
     ode::ODESystem
     sgn::Num
     subsys::Array{ODESystem, 1}
-    con::Symbol
-    name::Symbol
+    couple::Num
 end
 
-function BgODESystem(ode::ODESystem, sgn, subsys::Array{ODESystem, 1})
-    BgODESystem(ode, sgn, subsys, :missing, ode.name)
+function BgODESystem(bg::BgODESystem, couple)
+    BgODESystem(bg.ode, bg.sgn, bg.subsys, couple)
 end
 
-function BgODESystem(ode::ODESystem, sgn, subsys::Array{ODESystem, 1}, con::Symbol)
-    BgODESystem(ode, sgn, subsys, con, ode.name)
-end
+# function BgODESystem(ode::ODESystem, sgn, subsys::Array{ODESystem, 1})
+#     BgODESystem(ode, sgn, subsys, :missing, ode.name)
+# end
 
-function BgODESystem(ode::ODESystem, con::Symbol)
-    BgODESystem(ode, 1, ODESystem[], con, ode.name)
-end
+# function BgODESystem(ode::ODESystem, sgn, subsys::Array{ODESystem, 1}, con::Symbol)
+#     BgODESystem(ode, sgn, subsys, con, ode.name)
+# end
+
+# function BgODESystem(ode::ODESystem, con::Symbol)
+#     BgODESystem(ode, 1, ODESystem[], con, ode.name)
+# end
 
 # Set basic functions for the BgODESystem
 
@@ -65,8 +68,17 @@ function reducedobs(sys::BgODESystem)
     reducedobs(sys.ode)
 end
 
--(sys::ODESystem) = BgODESystem(sys, -1, ODESystem[])
-+(sys::ODESystem) = BgODESystem(sys, 1, ODESystem[])
+function reducedobs(sys::BgODESystem)
+    reducedobs(sys.ode)
+end
+
+function Base.nameof(item::BgODESystem)
+    getproperty(item, :name)
+end
+
+
+-(sys::ODESystem) = BgODESystem(sys, sgn = -1)
++(sys::ODESystem) = BgODESystem(sys, sgn = 1)
 
 -(sys::BgODESystem) = BgODESystem(sys.ode, -1*sys.sgn, sys.subsys)
 +(sys::BgODESystem) = BgODESystem(sys.ode, 1*sys.sgn, sys.subsys)
