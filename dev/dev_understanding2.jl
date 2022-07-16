@@ -153,6 +153,8 @@ function Base.merge(csets::AbstractVector{<:ModelingToolkit.ConnectionSet})
     mcsets
 end
 
+
+
 @connector function Power(; name, effort=0.0, flow=0.0, type=op)
     sts = @variables e(t) = effort [connect = bg] f(t) = flow [connect = bg]
     sts = set_bg_metadata.(sts, [[type, bgeffort], [type, bgflow]])
@@ -160,39 +162,35 @@ end
 end
 
 function Mass(; name, m = 1.0, u = 0.0)
-    @named power = Power(flow=u)
-    @unpack e, f = power
-    
+    @named power = Power(flow=u)    
     ps = @parameters I = m
 
     eqs = [
-        D(f) ~ e / I,
+        D(power.f) ~ power.e / I,
     ]
-    extend(ODESystem(eqs, t, [], ps; name = name), power)
+    compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
 function Damper(; name, c = 10, u=1.0)
     @named power = Power(flow=u)
-    @unpack e, f = power
     
     ps = @parameters R = c
-    eqs = [e ~ f * R]
+    eqs = [power.e ~ power.f * R]
 
-    extend(ODESystem(eqs, t, [], ps; name = name), power)
+    compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
 function Spring(; name, k = 10, x = 0.0)
     @named power = Power()
-    @unpack e, f = power
 
     @variables q(t) = x
     ps = @parameters C = 1 / k
 
     eqs = [
-        e ~ q / C
-        D(q) ~ f
+        power.e ~ q / C
+        D(q) ~ power.f
     ]
-    extend(ODESystem(eqs, t, [q], ps; name = name), power)
+    compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
 # function Junction1(ps...; name, couple=true)
@@ -284,6 +282,7 @@ end
 
 @named m = Mass()
 @named d = Damper()
+@named d2 = Damper()
 @named s = Spring()
 
 @named b1 = Junction1(m, d)
@@ -329,7 +328,7 @@ equations(alias_elimination(mdl))
 eqs = equations(mdl)
 
 # nDOF
-@named sd = Junction1(d)
+@named sd = Junction1(d, d2)
 @named mj = Junction1(m)
 
 @named b1 = Junction0(mj, sd)
@@ -338,9 +337,11 @@ equations(b2)
 
 @named b0 = Junction1(m, d)
 
-# @named psys = ODESystem([connect(b2.power, b1.mj.power), connect(b1.power, b0.power)], t)
-@named psys = ODESystem([connect(b2.power, b1.mj.power)], t)
-mdl = compose(psys, b1, b0, b2)
+@named psys = ODESystem([connect(b2.power, b1.mj.power), connect(b1.power, b0.power)], t)
+# mdl = compose(psys, b1, b0, b2)
+# @named psys = ODESystem([connect(b2.power, b1.mj.power)], t)
+# @named psys = ODESystem([connect(b1.mj.power, b2.power)], t)
+mdl = compose(psys, b1, b2, b0)
 
 equations(mdl)
 emdl = expand_connections(mdl)
@@ -354,29 +355,20 @@ equations(structural_simplify(emdl))
 # sys = compose(psys, b1, b0,b2)
 sys = compose(psys, b1, b0)
 
-# generate connection set
+# ==========================================================
+# New test with multiple outputs for pump leakage
 
-connectionsets = ModelingToolkit.ConnectionSet[]
-sys = ModelingToolkit.generate_connection_set!(connectionsets, mdl)
+@named lek = Junction1(d)
 
-equations(sys)
+@named suc = Junction1(m)
+@named pm = Junction0()
 
-csets = deepcopy(connectionsets)
+@named imp = Junction1(m)
 
-ale, alf, str2con = csets2adjlist(csets);
+@named val = Junction1(m)
+@named pj = Junction0()
 
-ame = list2mtx(ale)
-amf = list2mtx(alf)
 
-aled = mtx2list(am2dam(ame), ale)
-alfd = mtx2list(am2dam(amf), alf)
-al = merge(aled, alfd)
-
-ale
-aled
-
-adjlist2csets(alf, str2con)
-
-adjlist2csets(ale, str2con)
-
-generate_graph(mdl, :f)
+cons = [connect(suc.power, pm.power), connect(lek.power, pm.power), connect(pm.power, imp.power), connect(imp.power, pj.power), connect(pj.power, lek.power), connect(pj.power, val.power)]
+@named psys = ODESystem(cons, t)
+mdl = compose(psys, lek, suc, pm, imp, pj, val)
