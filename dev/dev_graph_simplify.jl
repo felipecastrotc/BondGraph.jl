@@ -1,3 +1,4 @@
+using ModelingToolkit
 using GraphRecipes
 using Plots
 using LinearAlgebra
@@ -136,20 +137,21 @@ vtype = get_connection_type(csets[1].set[1].v)
 # Generate name to systems from csets
 for cset in csets
     n = Vector{String}()
-    for e in cset.set
-        @unpack sys, v, isouter = e
-        k = String(nameof(sys)) * "₊" * String(Symbol(v))
-        push!(n, k)
-        e = deepcopy(e)
-        ModelingToolkit.@set! e.isouter = false
-        str2con[k] = e
+    for ele in cset.set
+        # @unpack sys, v, isouter = e
+        k = String(Symbol(ModelingToolkit.namespaced_var(ele)))
+        # push!(n, k)
+        # e = deepcopy(e)
+        # ModelingToolkit.@set! e.isouter = false
+        str2con[k] = ele
     end
 end
 
 # filter out flow
 filterflow = true
+filterstr = "f(t)"
 if filterflow
-    filter!(d -> occursin("e(t)", d[1]), str2con)
+    filter!(d -> occursin(filterstr, d[1]), str2con)
 end
 
 # Generate adjacency matrix from csets
@@ -161,7 +163,7 @@ for cset in csets
     for (i, e) in enumerate(cset.set)
         @unpack sys, v, isouter = e
         k = String(nameof(sys)) * "₊" * String(Symbol(v))
-        if String(Symbol(v)) != "e(t)" && filterflow
+        if String(Symbol(v)) != filterstr && filterflow
             continue
         end
         if i == 1
@@ -191,66 +193,229 @@ for cset in csets
 end
 
 # Visualize
-idx2k = [i => k for (i, k) in enumerate(keys(str2con))]
-nm = [idx2k[i][2] for i in 1:length(idx2k)]
+idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
+nm = [idx2k[i] for i in 1:length(idx2k)]
 # Plot connection graph
 graphplot(am, names=nm, nodeshape=:rect, size=(700, 700), method=:stress)
 
-al = Dict{String, Vector{String}}()    # Adjacency list for effort variable
-am_con = sum(am, dims=1)
-for (i, v) in idx2k
-    i, v = idx2k[1]
-    if am_con[i] > 0
-        idx = get(al, v, nothing)
-        if idx === nothing
-            al[v] = String[]
+function get_var(idx, idx2k, str2con)
+    return ModelingToolkit.namespaced_var(str2con[idx2k[idx]])
+end
+
+function add_idx(var, idx)
+    v = deepcopy(var)
+    vstr = String(ModelingToolkit.getname(v))
+    newname = Symbol(vstr*string(idx))
+    return ModelingToolkit.rename(v, newname)
+end
+
+
+in_vec = sum(am, dims=1)[:]
+out_vec = sum(am, dims=2)[:]
+
+idx_con = (1:size(am, 1))
+in_con = idx_con[in_vec .> 0]
+out_con = idx_con[out_vec .> 0]
+
+eqs = Equation[]
+for i in in_con
+    v = get_var(i, idx2k, str2con)
+    # Get variables leaving the node
+    vout = Num[]
+    if out_vec[i] == 1
+        push!(vout, -get_var(i, idx2k, str2con))
+    elseif out_vec[i] > 1
+        for j in 1:out_vec[i]
+            push!(vout, -add_idx(v, j))
         end
-        push!(al[v], [k for (j, k) in idx2k[am[:, i] .> 0]])
+    end
+    # Get variables being added to the node
+    vin = Num[]
+    for (j, k) in enumerate(am[:, i])
+        # k is a value checking if there is a connection or not
+        if k > 0
+            # Check if the input has multiple outputs
+            msk= am[j, :] .> 0
+            chk = sum(msk) > 1 ? findfirst(sort(idx_con[msk]) .== i) : nothing
+            if !isnothing(chk)
+                # Create the variable for the i node
+                push!(vin, add_idx(get_var(j, idx2k, str2con), chk))
+            else
+                push!(vin, get_var(j, idx2k, str2con))
+            end
+        end
+    end
+    # Apply the junction type
+    jtype = get_bg_junction(v)[1]
+    vtype = get_bg_junction(v)[2]
+    if jtype === j0
+        if vtype === bgeffort
+            push!(eqs, equalityeqs(vcat(vout, vin))...)
+        elseif vtype === bgflow
+            push!(eqs, sumvar(vcat(vout, vin)))
+        end
+    elseif jtype === j1
+        if vtype === bgeffort
+            push!(eqs, sumvar(vcat(vout, vin)))
+        elseif vtype === bgflow
+            push!(eqs, equalityeqs(vcat(vout, vin))...)
+
+        end
     end
 end
 
+eqs
 
-
-am
-
-sum(am, dims=1)
-
-idx2k[1]
-
-csets = deepcopy(connectionsets)
-# al = csets2adjlist(csets, "f(t)");
-al = csets2adjlist(csets, "");
-if filterflow
-    filter!(x -> occursin("e(t)", x[1]), al)
-end
-csets = adjlist2csets(al, str2con)
-al
-
-csets
-
-
-
-
-
-
-
-
-
-
-al
+ceqs = deepcopy(eqs)
 
 tol = 1e-10
 debug = false
 
-sys = mdl
+sys, csets = ModelingToolkit.generate_connection_set(mdl)
 ceqs, instream_csets = ModelingToolkit.generate_connection_equations_and_stream_connections(csets)
 ceqs
 _sys = ModelingToolkit.expand_instream(instream_csets, sys; debug = debug, tol = tol)
 sys = flatten(sys, true)
 ModelingToolkit.@set! sys.eqs = [equations(_sys); ceqs]
 
+states(sys)
 equations(sys)
 
 equations(alias_elimination(sys))
 
-generate_graph(mdl, :f)
+@named syss = reducedobs(structural_simplify(sys))
+
+# ============================================================================
+# Tiding up the 2nd trial
+
+# Generate connection set
+connectionsets = ModelingToolkit.ConnectionSet[]
+sys = ModelingToolkit.generate_connection_set!(connectionsets, mdl)
+
+csets = deepcopy(connectionsets)
+mcsets = ModelingToolkit.ConnectionSet[]
+str2con = Dict{String, ModelingToolkit.ConnectionElement}()
+
+# Generate name to systems from csets
+for cset in csets
+    n = Vector{String}()
+    for ele in cset.set
+        k = String(Symbol(ModelingToolkit.namespaced_var(ele)))
+        str2con[k] = ele
+    end
+end
+
+# filter out flow
+filterflow = true
+filterstr = "f(t)"
+if filterflow
+    filter!(d -> occursin(filterstr, d[1]), str2con)
+end
+
+# Generate adjacency matrix from csets
+k2idx = Dict(k => i for (i, k) in enumerate(keys(str2con)))
+
+am = zeros(Int, length(str2con), length(str2con))
+for cset in csets
+    h = 0
+    for (i, e) in enumerate(cset.set)
+        @unpack sys, v, isouter = e
+        k = String(nameof(sys)) * "₊" * String(Symbol(v))
+        if String(Symbol(v)) != filterstr && filterflow
+            continue
+        end
+        if i == 1
+            h = k2idx[k]
+        else
+            am[h, k2idx[k]] = 1
+        end
+    end
+end
+
+# Visualize
+idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
+nm = [idx2k[i] for i in 1:length(idx2k)]
+# Plot connection graph
+graphplot(am, names=nm, nodeshape=:rect, size=(700, 700), method=:stress)
+
+function get_var(idx, idx2k, str2con)
+    return ModelingToolkit.namespaced_var(str2con[idx2k[idx]])
+end
+
+function add_idx(var, idx)
+    v = deepcopy(var)
+    vstr = String(ModelingToolkit.getname(v))
+    newname = Symbol(vstr*string(idx))
+    return ModelingToolkit.rename(v, newname)
+end
+
+in_vec = sum(am, dims=1)[:]
+out_vec = sum(am, dims=2)[:]
+
+idx_con = (1:size(am, 1))
+in_con = idx_con[in_vec .> 0]
+
+eqs = Equation[]
+for i in in_con
+    v = get_var(i, idx2k, str2con)
+    # Get variables leaving the node
+    vout = Num[]
+    if out_vec[i] == 1
+        push!(vout, -get_var(i, idx2k, str2con))
+    elseif out_vec[i] > 1
+        for j in 1:out_vec[i]
+            push!(vout, -add_idx(v, j))
+        end
+    end
+    # Get variables being added to the node
+    vin = Num[]
+    for (j, k) in enumerate(am[:, i])
+        # k is a value checking if there is a connection or not
+        if k > 0
+            # Check if the input has multiple outputs
+            msk= am[j, :] .> 0
+            chk = sum(msk) > 1 ? findfirst(sort(idx_con[msk]) .== i) : nothing
+            if !isnothing(chk)
+                # Create the variable for the i node
+                push!(vin, add_idx(get_var(j, idx2k, str2con), chk))
+            else
+                push!(vin, get_var(j, idx2k, str2con))
+            end
+        end
+    end
+    # Apply the junction type
+    jtype = get_bg_junction(v)[1]
+    vtype = get_bg_junction(v)[2]
+    if jtype === j0
+        if vtype === bgeffort
+            push!(eqs, equalityeqs(vcat(vout, vin))...)
+        elseif vtype === bgflow
+            push!(eqs, sumvar(vcat(vout, vin)))
+        end
+    elseif jtype === j1
+        if vtype === bgeffort
+            push!(eqs, sumvar(vcat(vout, vin)))
+        elseif vtype === bgflow
+            push!(eqs, equalityeqs(vcat(vout, vin))...)
+
+        end
+    end
+end
+
+eqs
+tol = 1e-10
+debug = false
+
+sys, csets = ModelingToolkit.generate_connection_set(mdl)
+ceqs, instream_csets = ModelingToolkit.generate_connection_equations_and_stream_connections(csets)
+_sys = ModelingToolkit.expand_instream(instream_csets, sys; debug = debug, tol = tol)
+sys = flatten(sys, true)
+ceqs = deepcopy(eqs)
+ModelingToolkit.@set! sys.eqs = [equations(_sys); ceqs]
+
+states(sys)
+equations(sys)
+
+equations(alias_elimination(sys))
+
+@named syss = reducedobs(structural_simplify(sys))

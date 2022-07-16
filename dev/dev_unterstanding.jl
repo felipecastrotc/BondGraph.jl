@@ -215,9 +215,8 @@ end
 #     compose(sys, power, ps...)
 # end
 
-function Junction0(ps...; name)
-    @named pin = Power(type=j0)
-    @named pout = Power(type=j0)
+function Junction0(ps...; name, couple=true)
+    @named power = Power(type=j0)
 
     # couple = true
     # ps = [mj, sd]
@@ -249,9 +248,9 @@ function Junction0(ps...; name)
     compose(sys, power, oneport..., multiport...)
 end
 
-function Junction1(ps...; name)
-    @named pin = Power(type=j1)
-    @named pout = Power(type=j1)
+function Junction1(ps...; name, couple=true)
+
+    @named power = Power(type=j1)
 
     # couple = true
     # ps = [mj, sd]

@@ -30,6 +30,40 @@ function extract_vars(O)
     end
 end
 
+function sumvar_legacy(con, sym::Symbol)
+    sum(c -> getsign(c)*getsym(c, sym), con; init=0.0)
+end
+
+function equalityeqs_legacy(con, sym::Symbol, signs, vars)
+    
+    vars = isa(vars, AbstractArray) ? vars : [vars]
+
+    start_con = 1
+    start_vars = 1
+    
+    base = 0.0
+    if length(con) > 0
+        base += getsym(con[1], sym) 
+        start_con = 2
+    elseif length(sign) > 0
+        base += sign[1]*vars[1]
+        start_vars = 2
+    else
+        return []
+    end
+
+    eqs = Equation[]
+
+    for i in start_con:length(con)
+        push!(eqs, base ~ getsym(con[i], sym))
+    end
+
+    for i in start_vars:length(signs)
+        push!(eqs, base ~ signs[i]*vars[i])
+    end
+
+    return eqs
+end
 # =============================================================================
 # Support junction functions
 
@@ -73,8 +107,12 @@ function getmultiport(con)
     filter(c -> hasproperty(c, :power), con)
 end
 
-function sumvar(con, sym::Symbol)
-    sum(c -> getsign(c)*getsym(c, sym), con; init=0.0)
+function sumvar(con)
+    if length(con) > 0 
+        return 0 ~ sum(con)
+    else
+        return []
+    end
 end
 
 function sumcoupling(vars, signs::Vector)
@@ -87,32 +125,18 @@ function sumcoupling(vars, signs::Vector)
     end
 end
 
-function equalityeqs(con, sym::Symbol, signs, vars)
-    
-    vars = isa(vars, AbstractArray) ? vars : [vars]
-
-    start_con = 1
-    start_vars = 1
+function equalityeqs(con)
     
     base = 0.0
-    if length(con) > 0
-        base += getsym(con[1], sym) 
-        start_con = 2
-    elseif length(sign) > 0
-        base += sign[1]*vars[1]
-        start_vars = 2
+    if length(con) > 1
+        base += con[1]
     else
         return []
     end
 
     eqs = Equation[]
-
-    for i in start_con:length(con)
-        push!(eqs, base ~ getsym(con[i], sym))
-    end
-
-    for i in start_vars:length(signs)
-        push!(eqs, base ~ signs[i]*vars[i])
+    for i in 2:length(con)
+        push!(eqs, base ~ con[i])
     end
 
     return eqs
