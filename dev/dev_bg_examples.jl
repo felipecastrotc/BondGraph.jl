@@ -56,3 +56,28 @@ equations(sdofn)
 
 # ============================================================================
 # MGY problems
+
+@named L = Mass(m = 0.5)
+@named R = Damper(c = 1.0)
+@named Uₐ = Se(-12.0)
+
+@named J = Mass(m = 0.01)
+@named b = Damper(c = 0.1)
+@named Tₗ = Se(-1.0)
+
+g = 0.01
+
+@named jm = Junction1(Tₗ, b, J)
+@named je = Junction1(Uₐ, R, L)
+# @named jm = Junction1(b, J)
+@named gy = mGY(je,jm, g = g)
+equations(gy)
+
+@named mdl = compose(gy, je, jm)
+generate_graph(mdl)
+emdl = expand_connections(mdl)
+@named sys = reducedobs(structural_simplify(emdl))
+equations(sys)
+
+# Example coherent with literature
+# https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&section=SystemModeling

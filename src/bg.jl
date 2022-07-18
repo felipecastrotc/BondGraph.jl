@@ -126,45 +126,45 @@ function mGY(subsys...; name, g = 1.0)
     c = c[pos]
     @assert !isempty(c)
 
-    # If only one subsys is passed it automatically generates an open  
-    # connection
-    if sum(pos) == 1
-        e, f = Power()
-        # Set variables according to the position
-        if pos[1]
-            e₁, f₁ = e, f
-            e₂, f₂ = c[1].e, c[1].f
-        else
-            e₂, f₂ = e, f
-            e₁, f₁ = c[1].e, c[1].f
-        end
-    else
-        @assert length(c) == 2
-        e₁, f₁ = c[1].e, c[1].f
-        e₂, f₂ = c[2].e, c[2].f
-    end
+    # Generate the in and out connection
+    @named pin = Power(type=tpgy)
+    @named pout = Power(type=tpgy)
+
+    # Alias for simpler view about the mGY port
+    e₁, f₁ = pin.e, pin.f
+    e₂, f₂ = pout.e, pout.f
 
     # Gyrator equation
-    eqs = [e₂ ~ g * f₁, e₁ ~ g * f₂]
+    eqs = [e₂ ~ g * f₁, e₁ ~ g * -f₂]
+    # TODO: check why adding the - on f₂ solves the signal issue on DC motor
+    # TODO: I already tried to change the signal on the port type tpgy at 
+    #       adjmtx2eqs
 
     # Check if it is a modulated gyrator
     if isvariable(g)
         sts, ps = [], [g]
     elseif istree(unwrap(g))
-        vars = collect(Set(ModelingToolkit.get_variables(g)))
-        sts = filter(x -> ~isindependent(Num(x)), vars)
-        ps = filter(x -> isindependent(Num(x)), vars)
+        sts = []
+        ps = collect(Set(ModelingToolkit.get_variables(g)))
     else
         sts, ps = [], []
     end
 
-    if (@isdefined e) | (@isdefined f)
-        push!(sts, e, f)
+    # Apply connections
+    if sum(pos) == 1
+        if pos[1]
+            push!(eqs, connect(c[1].power, pin))
+        else
+            push!(eqs, connect(pout, c[1].power))
+        end
+    else
+        @assert length(c) == 2
+        push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
 
-    sys = ODESystem(eqs, t, sts, ps; name = name)
-
-    compose(sys, c...)
+    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
+    println(1)
+    return sys
 end
 
 function mTF(subsys...; name, r = 1.0)
