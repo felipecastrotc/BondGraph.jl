@@ -20,9 +20,12 @@ end
 # Sources
 
 function Se(expr; name)
-    sts = @variables e(t) = 0.0
-    eqs = [sts[1] ~ expr]
+
+    @named power = Power(type=op)
+
+    eqs = [power.e ~ expr]
     
+    sts = []
     if isvariable(expr)
         ps = [expr]
     elseif istree(unwrap(expr))
@@ -33,13 +36,16 @@ function Se(expr; name)
         ps = []
     end
 
-    ODESystem(eqs, t, sts, ps; name = name)
+    compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end
 
 function Sf(expr; name)
-    sts = @variables f(t) = 0.0
-    eqs = [sts[1] ~ expr]
 
+    @named power = Power(type=op)
+
+    eqs = [power.f ~ expr]
+    
+    sts = []
     if isvariable(expr)
         ps = [expr]
     elseif istree(unwrap(expr))
@@ -50,7 +56,7 @@ function Sf(expr; name)
         ps = []
     end
 
-    ODESystem(eqs, t, sts, ps; name = name)
+    compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end
 
 function Dq(; name, x = 0.0)

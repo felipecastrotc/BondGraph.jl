@@ -19,20 +19,19 @@ function mGY(subsys...; name, g = 1.0)
     # If only one subsys is passed it automatically generates an open  
     # connection
     if sum(pos) == 1
-        @named power = Power()
-        @unpack e, f = power
+        @named power = Power(type=tp)
         # Set variables according to the position
         if pos[1]
-            e₁, f₁ = e, f
-            e₂, f₂ = c[1].e, c[1].f
+            e₁, f₁ = power.e, power.f
+            e₂, f₂ = c[1].power.e, c[1].power.f
         else
-            e₂, f₂ = e, f
-            e₁, f₁ = c[1].e, c[1].f
+            e₂, f₂ = power.e, power.f
+            e₁, f₁ = c[1].power.e, c[1].power.f
         end
     else
         @assert length(c) == 2
-        e₁, f₁ = c[1].e, c[1].f
-        e₂, f₂ = c[2].e, c[2].f
+        e₁, f₁ = c[1].power.e, c[1].power.f
+        e₂, f₂ = c[2].power.e, c[2].power.f
     end
 
     # Gyrator equation
@@ -51,10 +50,10 @@ function mGY(subsys...; name, g = 1.0)
     sys = ODESystem(eqs, t, sts, ps; name = name)
 
     if @isdefined power
-        sys = extend(sys, power)
+        return sys = compose(sys, power, c...)
+    else
+        return sys = compose(sys, c...)
     end
-
-    compose(sys, c...)
 end
 
 # =============================================================================
