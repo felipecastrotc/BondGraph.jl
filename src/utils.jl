@@ -1,7 +1,9 @@
+using GraphRecipes
 
 import ModelingToolkit: ConnectionSet, ConnectionElement
 import ModelingToolkit: namespaced_var, get_connection_type, getname
 import ModelingToolkit: rename, generate_connection_set!
+
 
 # =============================================================================
 # Functions to replace variables on equations by the observed variables
