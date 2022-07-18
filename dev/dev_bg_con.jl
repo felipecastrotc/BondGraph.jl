@@ -1,5 +1,8 @@
 using ModelingToolkit
 using Symbolics
+using GraphRecipes
+using Plots
+
 import Symbolics: unwrap, wrap
 
 @variables t
@@ -22,11 +25,7 @@ get_connection_type(s) = getmetadata(Symbolics.unwrap(s), ModelingToolkit.Variab
 
 # One idea is to set the metadata after like this
 @variables e(t) [connect = bg]
-
 e = Symbolics.wrap(setmetadata(Symbolics.unwrap(e), bg, j1))
-
-getmetadata(e, bg)
-get_connection_type(e)
 
 # BG functions
 
@@ -72,88 +71,6 @@ function convert_bg_metadata(cset)
     return ModelingToolkit.ConnectionSet(newconnectionset)
 end
 
-# Update this function to handle the bond graph type
-function ModelingToolkit.generate_connection_equations_and_stream_connections(csets::AbstractVector{
-                                                                                    <:ModelingToolkit.ConnectionSet
-                                                                                    })
-    eqs = Equation[]
-    stream_connections = ModelingToolkit.ConnectionSet[]
-
-    for cset in csets
-        v = cset.set[1].v
-        if hasmetadata(v, Symbolics.GetindexParent)
-            v = getparent(v)
-        end
-        vtype = get_connection_type(v)
-        if vtype === Stream
-            push!(stream_connections, cset)
-            continue
-        elseif vtype === Flow
-            rhs = 0
-            for ele in cset.set
-                v = ModelingToolkit.namespaced_var(ele)
-                rhs += ele.isouter ? -v : v
-            end
-            push!(eqs, 0 ~ rhs)
-        elseif vtype === bg
-            ncset = convert_bg_metadata(cset)
-            neqs, _ = ModelingToolkit.generate_connection_equations_and_stream_connections([ncset])
-            push!(eqs, neqs...)
-        else # Equality
-            base = ModelingToolkit.namespaced_var(cset.set[1])
-            for i in 2:length(cset.set)
-                v = ModelingToolkit.namespaced_var(cset.set[i])
-                push!(eqs, base ~ v)
-            end
-        end
-    end
-    eqs, stream_connections
-end
-
-function Base.merge(csets::AbstractVector{<:ModelingToolkit.ConnectionSet})
-    mcsets = ModelingToolkit.ConnectionSet[]
-    ele2idx = Dict{ModelingToolkit.ConnectionElement, Int}()
-    cacheset = Set{ModelingToolkit.ConnectionElement}()
-
-    for cset in csets
-        if get_connection_type(cset.set[1].v) != bg
-            idx = nothing
-            for e in cset.set
-                idx = get(ele2idx, e, nothing)
-                idx !== nothing && break
-            end
-            if idx === nothing
-                push!(mcsets, cset)
-                for e in cset.set
-                    ele2idx[e] = length(mcsets)
-                end
-            else
-                for e in mcsets[idx].set
-                    push!(cacheset, e)
-                end
-                for e in cset.set
-                    push!(cacheset, e)
-                end
-                empty!(mcsets[idx].set)
-                for e in cacheset
-                    ele2idx[e] = idx
-                    push!(mcsets[idx].set, e)
-                end
-                empty!(cacheset)
-            end
-        end
-    end
-
-    # bg
-    str2con = name2sys(csets)
-    if length(str2con) > 1
-        al = csets2adjlist(csets)
-        push!(mcsets, adjlist2csets(al, str2con)...)
-    end
-    mcsets
-end
-
-
 @connector function Power(; name, effort=0.0, flow=0.0, type=op)
     sts = @variables e(t) = effort [connect = bg] f(t) = flow [connect = bg]
     sts = set_bg_metadata.(sts, [[type, bgeffort], [type, bgflow]])
@@ -192,25 +109,6 @@ function Spring(; name, k = 10, x = 0.0)
     compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
-# function Junction1(ps...; name, couple=true)
-#     @named power = Power(type=j1)
-
-#     # Get connections
-#     ps = collect(Base.Flatten([ps]))
-#     con = collect(Base.Flatten([ps, []]))
-
-#     e = couple ? power.e : 0.0
-#     sgns, f = couple ? ([1], power.f) : ([], [])
-#     # Σ efforts
-#     eqs = [0 ~ sumvar(con, :e) + e]
-#     # f₁ = f₂ = f₃
-#     eqs = vcat(eqs, equalityeqs(con, :f, sgns, f))
-
-#     # Build subsystem
-#     sys = ODESystem(eqs, t, [], [], name = name)
-    
-#     compose(sys, power, ps...)
-# end
 
 function Junction0(ps...; name, couple=true)
     @named power = Power(type=j0)
@@ -279,55 +177,13 @@ function Junction1(ps...; name, couple=true)
     compose(sys, power, oneport..., multiport...)
 end
 
+# ndof
 @named m = Mass()
 @named d = Damper()
 @named d2 = Damper()
 @named s = Spring()
 
-@named b1 = Junction1(m, d)
-@named b2 = Junction1(m, d)
-@named b3 = Junction1(m, d)
-
-# Huge information on how it is organized
-# https://github.com/SciML/ModelingToolkit.jl/blob/28b36c8f9932acfc6c54737c51437d35b192b0d7/test/stream_connectors.jl
-@named sys = ODESystem([connect(b1.power, b2.power)], t)
-sys = expand_connections(sys)
-
-nsys, csets = ModelingToolkit.generate_connection_set(sys)
-
-ceqs, instream_csets = ModelingToolkit.generate_connection_equations_and_stream_connections(csets)
-
-equations(sys)
-mdl = compose(sys, b1, b2)
-mdl = alias_elimination(mdl)
-equations(mdl)
-
-@named mdl = reducedobs(structural_simplify(mdl))
-equations(mdl)
-
-# Simple MSD
-@named sys = Junction1(m, s, d, couple=false)
-equations(sys)
-equations(alias_elimination(sys))
-
-
-# 2DOF
-@named sd = Junction1(d)
-@named mj = Junction1(m)
-@named b1 = Junction0(mj, sd)
-
-@named b0 = Junction1(m, d)
-
-@named sys = ODESystem([connect(b0.power, b1.power)], t)
-mdl = compose(sys, b1, b0)
-mdl = expand_connections(mdl)
-equations(mdl)
-equations(alias_elimination(mdl))
-@named mdl = reducedobs(structural_simplify(mdl))
-eqs = equations(mdl)
-
-# nDOF
-@named sd = Junction1(d, d2)
+@named sd = Junction1(d, s)
 @named mj = Junction1(m)
 
 @named b1 = Junction0(mj, sd)
@@ -336,39 +192,79 @@ equations(b2)
 
 @named b0 = Junction1(m, d)
 
-# @named psys = ODESystem([connect(b2.power, b1.mj.power), connect(b1.power, b0.power)], t)
-# mdl = compose(psys, b1, b0, b2)
+@named psys = ODESystem([connect(b1.mj.power, b2.power), connect(b1.power, b0.power)], t)
+mdl = compose(psys, b1, b0, b2)
 # @named psys = ODESystem([connect(b2.power, b1.mj.power)], t)
-@named psys = ODESystem([connect(b1.mj.power, b2.power)], t)
-mdl = compose(psys, b1, b2)
+# @named psys = ODESystem([connect(b1.mj.power, b2.power)], t)
+# mdl = compose(psys, b1, b2)
+generate_graph(mdl)
 
 equations(mdl)
 emdl = expand_connections(mdl)
 
 equations(emdl)
-
 equations(alias_elimination(emdl))
-equations(structural_simplify(emdl))
+sys = structural_simplify(emdl)
+equations(sys)
 
+@named sys = reducedobs(sys)
+equations(sys)
 
-@named psys = ODESystem([connect(b0.power, b1.power)], t)
-# sys = compose(psys, b1, b0,b2)
-sys = compose(psys, b1, b0)
+# ==========================================================
+# 1dof
+
+@named b = Junction1(m, s, d)
+emdl = expand_connections(b)
+sys = structural_simplify(emdl)
+@named sys = reducedobs(sys)
+equations(sys)
+generate_graph(b)
+
+# ==========================================================
+# 2dof
+
+@named sd = Junction1(s, d)
+@named mj = Junction1(m)
+@named b1 = Junction0(mj, sd)
+
+@named b0 = Junction1(m, s, d)
+
+@named sys = ODESystem([connect(b0.power, b1.power)], t)
+mdl = compose(sys, b1, b0)
+generate_graph(mdl)
+
+emdl = expand_connections(mdl)
+equations(emdl)
+@named emdl = reducedobs(structural_simplify(emdl))
+equations(emdl)
+
 
 # ==========================================================
 # New test with multiple outputs for pump leakage
 
 @named lek = Junction1(d)
 
-@named suc = Junction1(m)
+@named suc = Junction1(d)
 @named pm = Junction0()
 
 @named imp = Junction1(m)
 
-@named val = Junction1(m)
+@named val = Junction1(d)
 @named pj = Junction0()
 
 
 cons = [connect(suc.power, pm.power), connect(lek.power, pm.power), connect(pm.power, imp.power), connect(imp.power, pj.power), connect(pj.power, lek.power), connect(pj.power, val.power)]
 @named psys = ODESystem(cons, t)
 mdl = compose(psys, lek, suc, pm, imp, pj, val)
+generate_graph(mdl)
+
+equations(mdl)
+emdl = expand_connections(mdl)
+
+equations(emdl)
+equations(alias_elimination(emdl))
+sys = structural_simplify(emdl)
+equations(sys)
+
+@named sys = reducedobs(sys)
+equations(sys)

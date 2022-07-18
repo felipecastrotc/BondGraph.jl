@@ -397,7 +397,9 @@ debug = false
 
 sys, csets = ModelingToolkit.generate_connection_set(mdl)
 ceqs, instream_csets = ModelingToolkit.generate_connection_equations_and_stream_connections(csets)
+equations(sys)
 _sys = ModelingToolkit.expand_instream(instream_csets, sys; debug = debug, tol = tol)
+equations(_sys)
 sys = flatten(sys, true)
 ceqs = deepcopy(eqs)
 ModelingToolkit.@set! sys.eqs = [equations(_sys); ceqs]
