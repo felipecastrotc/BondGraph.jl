@@ -78,42 +78,41 @@ function Junction0(ps...; name, couple=true)
     ps = collect(Base.Flatten([ps]))
     
     # Split connections
-    oneport = getoneport(ps)
-    multiport = getmultiport(ps)
+    direct = directcon(ps)
+    connector = haspower(ps)
 
     eqs = Equation[]
-    if length(oneport) > 0
+    if length(direct) > 0
         sgns, e = couple ? ([1], power.e) : ([], [])
         f = couple ? power.f : 0.0
         # Σ efforts
-        push!(eqs, 0 ~ sumvar(oneport, :f) + f)
+        push!(eqs, 0 ~ sumvar(direct, :f) + f)
         # f₁ = f₂ = f₃
-        push!(eqs, equalityeqs(oneport, :e, sgns, e)...)
+        push!(eqs, equalityeqs(direct, :e, sgns, e)...)
     end
-    if length(multiport) > 0
-        for m in multiport
+    if length(connector) > 0
+        for m in connector
             push!(eqs, connect(m.power, power))
         end
     end
 
     # Build subsystem
     sys = ODESystem(eqs, t, [], [], name = name)
-    compose(sys, power, oneport..., multiport...)
+    compose(sys, power, oneport..., connector...)
 end
 
 function Junction1(ps...; name, couple=true)
 
     @named power = Power(type=j1)
-
     # Get connections
     ps = collect(Base.Flatten([ps]))
     
     # Split connections
-    oneport = getoneport(ps)
-    multiport = getmultiport(ps)
+    direct = directcon(ps)
+    connector = haspower(ps)
 
     eqs = Equation[]
-    if length(oneport) > 0
+    if length(direct) > 0
         sgns, f = couple ? ([1], power.f) : ([], [])
         e = couple ? power.e : 0.0
         # Σ efforts
@@ -121,15 +120,15 @@ function Junction1(ps...; name, couple=true)
         # f₁ = f₂ = f₃
         push!(eqs, equalityeqs(oneport, :f, sgns, f)...)
     end
-    if length(multiport) > 0
-        for m in multiport
+    if length(connector) > 0
+        for m in connector
             push!(eqs, connect(m.power, power))
         end
     end
 
     # Build subsystem
     sys = ODESystem(eqs, t, [], [], name = name)
-    compose(sys, power, oneport..., multiport...)
+    compose(sys, power, oneport..., connector...)
 end
 
 function mGY(subsys...; name, g = 1.0)
