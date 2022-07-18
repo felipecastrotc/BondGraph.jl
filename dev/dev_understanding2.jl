@@ -192,26 +192,6 @@ function Spring(; name, k = 10, x = 0.0)
     compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
-# function Junction1(ps...; name, couple=true)
-#     @named power = Power(type=j1)
-
-#     # Get connections
-#     ps = collect(Base.Flatten([ps]))
-#     con = collect(Base.Flatten([ps, []]))
-
-#     e = couple ? power.e : 0.0
-#     sgns, f = couple ? ([1], power.f) : ([], [])
-#     # Σ efforts
-#     eqs = [0 ~ sumvar(con, :e) + e]
-#     # f₁ = f₂ = f₃
-#     eqs = vcat(eqs, equalityeqs(con, :f, sgns, f))
-
-#     # Build subsystem
-#     sys = ODESystem(eqs, t, [], [], name = name)
-    
-#     compose(sys, power, ps...)
-# end
-
 function Junction0(ps...; name, couple=true)
     @named power = Power(type=j0)
 
