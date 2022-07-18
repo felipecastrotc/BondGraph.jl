@@ -374,20 +374,34 @@ for i in in_con
         # Check if the input has multiple outputs
         msk= am[j, :] .> 0
         chk = sum(msk) > 1 ? findfirst(sort(idx_con[msk]) .== i) : nothing
+        jtype = get_bg_junction(get_var(j, idx2k, str2con))[1]
         if !isnothing(chk)
             # Create the variable for the i node
             push!(vin, add_idx(get_var(j, idx2k, str2con), chk))
+        elseif (jtype === tpgy) || (jtype === tptf)
+            push!(vin, -get_var(j, idx2k, str2con))
         else
             push!(vin, get_var(j, idx2k, str2con))
         end
     end
+    
     # Apply the junction type
     jtype = get_bg_junction(v)[1]
     vtype = get_bg_junction(v)[2]
-    if (jtype == j0  && vtype === bgeffort) || (jtype === j1 && vtype === bgflow)
+    if (jtype === j0  && vtype === bgeffort) || (jtype === j1 && vtype === bgflow)
         push!(eqs, equalityeqs(vcat(vout, vin))...)
-    elseif (jtype == j0  && vtype === bgflow) || (jtype === j1 && vtype === bgeffort)
+    elseif (jtype === j0  && vtype === bgflow) || (jtype === j1 && vtype === bgeffort)
         push!(eqs, sumvar(vcat(vout, vin)))
+    elseif (jtype === tpgy) || (jtype === tptf)
+        lvin, lvout = length(vin), length(vout)
+        if (lvin <= 1) && (lvout <= 1) && (lvout + lvout == 1)
+            throw(DomainError("The "*string(jtype)*" type only allows one connection in and one connection out"))
+        end
+        if lvin == 1
+            push!(eqs, equalityeqs(vcat(vin, v))...)
+        elseif lvout == 1
+            push!(eqs, equalityeqs(vcat(vout, v))...)
+        end
     end
 end
 

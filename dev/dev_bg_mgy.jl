@@ -1,5 +1,7 @@
 using BondGraph, Plots, Symbolics.Latexify
-import BondGraph: t, D
+import BondGraph: t, D, mGY, tp
+import ModelingToolkit: isvariable, istree
+import Symbolics: unwrap, wrap
 
 using DifferentialEquations
 
@@ -16,26 +18,19 @@ function mGY(subsys...; name, g = 1.0)
     c = c[pos]
     @assert !isempty(c)
 
-    # If only one subsys is passed it automatically generates an open  
-    # connection
-    if sum(pos) == 1
-        @named power = Power(type=tp)
-        # Set variables according to the position
-        if pos[1]
-            e₁, f₁ = power.e, power.f
-            e₂, f₂ = c[1].power.e, c[1].power.f
-        else
-            e₂, f₂ = power.e, power.f
-            e₁, f₁ = c[1].power.e, c[1].power.f
-        end
-    else
-        @assert length(c) == 2
-        e₁, f₁ = c[1].power.e, c[1].power.f
-        e₂, f₂ = c[2].power.e, c[2].power.f
-    end
+    # Generate the in and out connection
+    @named pin = Power(type=tpgy)
+    @named pout = Power(type=tpgy)
+
+    # Alias for simpler view about the mGY port
+    e₁, f₁ = pin.e, pin.f
+    e₂, f₂ = pout.e, pout.f
 
     # Gyrator equation
-    eqs = [e₂ ~ g * f₁, e₁ ~ g * f₂]
+    eqs = [e₂ ~ g * f₁, e₁ ~ g * -f₂]
+    # TODO: check why adding the - on f₂ solves the signal issue on DC motor
+    # TODO: I already tried to change the signal on the port type tpgy at 
+    #       adjmtx2eqs
 
     # Check if it is a modulated gyrator
     if isvariable(g)
@@ -47,13 +42,21 @@ function mGY(subsys...; name, g = 1.0)
         sts, ps = [], []
     end
 
-    sys = ODESystem(eqs, t, sts, ps; name = name)
-
-    if @isdefined power
-        return sys = compose(sys, power, c...)
+    # Apply connections
+    if sum(pos) == 1
+        if pos[1]
+            push!(eqs, connect(c[1].power, pin))
+        else
+            push!(eqs, connect(pout, c[1].power))
+        end
     else
-        return sys = compose(sys, c...)
+        @assert length(c) == 2
+        push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
+
+    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
+    println(1)
+    return sys
 end
 
 # =============================================================================
@@ -117,62 +120,24 @@ plot(sol)
 
 @named L = Mass(m = 0.5)
 @named R = Damper(c = 1.0)
-@named Uₐ = Se(12.0)
+@named Uₐ = Se(-12.0)
 
 @named J = Mass(m = 0.01)
 @named b = Damper(c = 0.1)
-@named Tₗ = Se(1.0)
+@named Tₗ = Se(-1.0)
 
 g = 0.01
 
-ps = (Uₐ, [-1, R], [-1, L])
-
-
-@named power = Power(type=j1)
-println(ps[2])
-# Get connections
-ps = collect(Base.Flatten([ps]))
-
-println("---------------------------")
-println(ps[2])
-
-# Split connections
-direct = directcon(ps)
-connector = haspower(ps)
-isa(ps[1], ModelingToolkit.AbstractSystem)
-
-function flatinput(ps)
-
-    subsys = ModelingToolkit.AbstractSystem[]
-    signs = Int[]
-
-    for (i, p) in enumerate(ps)
-        if isa(p, ModelingToolkit.AbstractSystem)
-            push!(subsys, p)
-            push!(signs, 1)
-        elseif isa(p, AbstractVector)
-            if (length(p) == 2) && isa(p[1], Int) && isa(p[2], ModelingToolkitAbstractSystem)
-                push!(subsys, p[2])
-                push!(signs, p[1])
-            else
-                throw(DomainError("The input number ", i, " is not valid, a valid element has a two elements AbstractVector, where the first is an integer and the second is an AbstractSystem"))
-            end
-        else
-            throw(DomainError("The input number ", i, " is not valid. The valid are: AbstractSystem or a two element AbstractVector."))
-        end
-    end
-
-    return subsys, signs
-end
-
-@named je = Junction1(Uₐ, [-1, R], [-1, L])
-
-@named je = Junction1(Uₐ, -R, -L, sgn = -1)
-@named jm = Junction1(Tₗ, -b, -J)
-@named gy = mGY(je, jm, g = g)
-
+@named jm = Junction1(Tₗ, b, J)
+@named je = Junction1(Uₐ, R, L)
+# @named jm = Junction1(b, J)
+@named gy = mGY(je,jm, g = g)
 equations(gy)
-@named sys = reducedobs(structural_simplify(gy))
+
+@named mdl = compose(gy, je, jm)
+generate_graph(mdl)
+emdl = expand_connections(mdl)
+@named sys = reducedobs(structural_simplify(emdl))
 equations(sys)
 
 prob = ODEProblem(sys, [], (0.0, 4.0))
@@ -203,7 +168,7 @@ sysₚ = structural_simplify(sysₚ)
 probₚ = ODEProblem(sysₚ, [], (0.0, 4.0))
 solₚ = solve(probₚ, reltol = 1e-8, abstol = 1e-8)
 plot(solₚ.t, solₚ[θ̇])
-plot(solₚ.t, solₚ[i])
+plot!(solₚ.t, solₚ[i])
 
 # ------------------------------------------------------------------------------
 # Comparison Solutions

@@ -12,9 +12,12 @@ import BondGraph: t, D
 @named F = Se(-5)
 
 # 1-DOF
+# @named dof1 = Junction1([-1, m], [-1, s], [-1, d], F)
 @named dof1 = Junction1(m, s, d, F)
 generate_graph(dof1)
 edof1 = expand_connections(dof1)
+
+equations(edof1)
 
 @named sdof1 = reducedobs(structural_simplify(edof1))
 equations(sdof1)

@@ -4,6 +4,17 @@ import ModelingToolkit: ConnectionSet, ConnectionElement
 import ModelingToolkit: namespaced_var, get_connection_type, getname
 import ModelingToolkit: rename, generate_connection_set!
 
+# =============================================================================
+# Depecrate function
+
+function directcon(con)
+    filter(c -> !hasproperty(c, :power), con)
+end
+
+function haspower(con)
+    filter(c -> hasproperty(c, :power), con)
+end
+
 
 # =============================================================================
 # Functions to replace variables on equations by the observed variables
@@ -94,14 +105,6 @@ function sumvar(con)
     end
 end
 
-function directcon(con)
-    filter(c -> !hasproperty(c, :power), con)
-end
-
-function haspower(con)
-    filter(c -> hasproperty(c, :power), con)
-end
-
 function flatinput(ps)
 
     subsys = ModelingToolkit.AbstractSystem[]
@@ -112,7 +115,7 @@ function flatinput(ps)
             push!(subsys, p)
             push!(signs, 1)
         elseif isa(p, AbstractVector)
-            if (length(p) == 2) && isa(p[1], Int) && isa(p[2], ModelingToolkitAbstractSystem)
+            if (length(p) == 2) && isa(p[1], Int) && isa(p[2], ModelingToolkit.AbstractSystem)
                 push!(subsys, p[2])
                 push!(signs, p[1])
             else
@@ -189,6 +192,7 @@ function csets2adjmtx(csets, str2con; filterstr="f(t)", filterflow=false)
     return am
 end
 
+# TODO: add support adding signs it has issues on the algorithm
 function adjmtx2eqs(am, str2con)
     
     idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
@@ -232,6 +236,16 @@ function adjmtx2eqs(am, str2con)
             push!(eqs, equalityeqs(vcat(vout, vin))...)
         elseif (jtype == j0  && vtype === bgflow) || (jtype === j1 && vtype === bgeffort)
             push!(eqs, sumvar(vcat(vout, vin)))
+        elseif (jtype === tpgy) || (jtype === tptf)
+            lvin, lvout = length(vin), length(vout)
+            if (lvin <= 1) && (lvout <= 1) && (lvout + lvout == 1)
+                throw(DomainError("The "*string(jtype)*" type only allows one connection in and one connection out"))
+            end
+            if lvin == 1
+                push!(eqs, equalityeqs(vcat(vin, v))...)
+            elseif lvout == 1
+                push!(eqs, equalityeqs(vcat(-vout, v))...)
+            end
         end
     end
 

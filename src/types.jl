@@ -8,7 +8,8 @@ struct bg end
 struct bgeffort end
 struct bgflow end
 struct op end
-struct tp end
+struct gy end
+struct tf end
 struct j0 end
 struct j1 end
 
