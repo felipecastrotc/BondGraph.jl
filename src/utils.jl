@@ -94,12 +94,36 @@ function sumvar(con)
     end
 end
 
-function getoneport(con)
+function directcon(con)
     filter(c -> !hasproperty(c, :power), con)
 end
 
-function getmultiport(con)
+function haspower(con)
     filter(c -> hasproperty(c, :power), con)
+end
+
+function flatinput(ps)
+
+    subsys = ModelingToolkit.AbstractSystem[]
+    signs = Int[]
+
+    for (i, p) in enumerate(ps)
+        if isa(p, ModelingToolkit.AbstractSystem)
+            push!(subsys, p)
+            push!(signs, 1)
+        elseif isa(p, AbstractVector)
+            if (length(p) == 2) && isa(p[1], Int) && isa(p[2], ModelingToolkitAbstractSystem)
+                push!(subsys, p[2])
+                push!(signs, p[1])
+            else
+                throw(DomainError("The input number "*string(i)*" is not valid, a valid element has a two elements AbstractVector, where the first is an integer and the second is an AbstractSystem"))
+            end
+        else
+            throw(DomainError(p, "The input number "*string(i)*" is not valid. The valid are: AbstractSystem or a two element AbstractVector."))
+        end
+    end
+
+    return subsys, signs
 end
 
 # =============================================================================

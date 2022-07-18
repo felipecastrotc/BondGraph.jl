@@ -125,6 +125,48 @@ plot(sol)
 
 g = 0.01
 
+ps = (Uₐ, [-1, R], [-1, L])
+
+
+@named power = Power(type=j1)
+println(ps[2])
+# Get connections
+ps = collect(Base.Flatten([ps]))
+
+println("---------------------------")
+println(ps[2])
+
+# Split connections
+direct = directcon(ps)
+connector = haspower(ps)
+isa(ps[1], ModelingToolkit.AbstractSystem)
+
+function flatinput(ps)
+
+    subsys = ModelingToolkit.AbstractSystem[]
+    signs = Int[]
+
+    for (i, p) in enumerate(ps)
+        if isa(p, ModelingToolkit.AbstractSystem)
+            push!(subsys, p)
+            push!(signs, 1)
+        elseif isa(p, AbstractVector)
+            if (length(p) == 2) && isa(p[1], Int) && isa(p[2], ModelingToolkitAbstractSystem)
+                push!(subsys, p[2])
+                push!(signs, p[1])
+            else
+                throw(DomainError("The input number ", i, " is not valid, a valid element has a two elements AbstractVector, where the first is an integer and the second is an AbstractSystem"))
+            end
+        else
+            throw(DomainError("The input number ", i, " is not valid. The valid are: AbstractSystem or a two element AbstractVector."))
+        end
+    end
+
+    return subsys, signs
+end
+
+@named je = Junction1(Uₐ, [-1, R], [-1, L])
+
 @named je = Junction1(Uₐ, -R, -L, sgn = -1)
 @named jm = Junction1(Tₗ, -b, -J)
 @named gy = mGY(je, jm, g = g)
