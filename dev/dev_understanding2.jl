@@ -154,7 +154,6 @@ function Base.merge(csets::AbstractVector{<:ModelingToolkit.ConnectionSet})
 end
 
 
-
 @connector function Power(; name, effort=0.0, flow=0.0, type=op)
     sts = @variables e(t) = effort [connect = bg] f(t) = flow [connect = bg]
     sts = set_bg_metadata.(sts, [[type, bgeffort], [type, bgflow]])

@@ -10,9 +10,10 @@ It = Integral(t in DomainSets.ClosedInterval(0, t))
 #     ODESystem(Equation[], t, sts, []; name = name)
 # end
 
-function Power(; effort = 0.0, flow = 0.0,)
-    sts = @variables e(t) = effort f(t) = flow
-    sts
+@connector function Power(; name, effort=0.0, flow=0.0, type=op)
+    sts = @variables e(t) = effort [connect = bg] f(t) = flow [connect = bg]
+    sts = set_bg_metadata.(sts, [[type, bgeffort], [type, bgflow]])
+    ODESystem(Equation[], t, sts, []; name=name)
 end
 
 # =============================================================================
@@ -63,94 +64,66 @@ end
 # =============================================================================
 # Ports
 
-function Junction1(ps...; name, subsys = [], couple = true, sgn = 1)
-    # Check subsys type
-    subsysv = subsys isa ODESystem ? [subsys] : subsys
-
+function Junction0(ps...; name, couple=true)
+    
+    @named power = Power(type=j0)
+    
     # Get connections
-    ps = Base.Flatten([ps])
-    con = addsgnODE.(collect(Base.Flatten([ps, subsysv])))
+    ps = collect(Base.Flatten([ps]))
+    
+    # Split connections
+    oneport = getoneport(ps)
+    multiport = getmultiport(ps)
 
-    if couple
-        e, f = Power()
-    else
-        e, f = 0.0, nothing
+    eqs = Equation[]
+    if length(oneport) > 0
+        sgns, e = couple ? ([1], power.e) : ([], [])
+        f = couple ? power.f : 0.0
+        # Σ efforts
+        push!(eqs, 0 ~ sumvar(oneport, :f) + f)
+        # f₁ = f₂ = f₃
+        push!(eqs, equalityeqs(oneport, :e, sgns, e)...)
     end
-
-    # Σ efforts
-    eqs = [0 ~ sumvar(con, "e") + sgn * e]
-    # f₁ = f₂ = f₃
-    eqs = vcat(eqs, equalityeqs(con, "f", couple = couple))
-    # Remove empty equations
-    if couple
-        filter!(x -> filterexpr(x, ignore = [e, f]), eqs)
+    if length(multiport) > 0
+        for m in multiport
+            push!(eqs, connect(m.power, power))
+        end
     end
-    # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
-    # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
-    # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
-    # Example: https://www.20sim.com/webhelp/modeling_tutorial_bond_graphs_frombondgraphtoequations.php
-    # The example considers the convention only for the sum in the
-    # equality it does not consider the arrow direction
 
     # Build subsystem
-    if couple
-        sys = ODESystem(eqs, t, [e, f], []; name = name)
-    else
-        sys = ODESystem(eqs, t, [], []; name = name)
-    end
-
-    out = compose(sys, rmsgnODE.(ps)...)
-    # out = addsubsys(out, ps)
-    if length(subsysv) == 0
-        return BgODESystem(out, :j1)
-    else
-        BgODESystem(out, 1, rmsgnODE.(subsysv), :j1)
-    end
+    sys = ODESystem(eqs, t, [], [], name = name)
+    compose(sys, power, oneport..., multiport...)
 end
 
-function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
-    # Check subsys type
-    subsysv = subsys isa ODESystem ? [subsys] : subsys
+function Junction1(ps...; name, couple=true)
+
+    @named power = Power(type=j1)
 
     # Get connections
-    ps = Base.Flatten([ps])
-    con = addsgnODE.(collect(Base.Flatten([ps, subsysv])))
+    ps = collect(Base.Flatten([ps]))
+    
+    # Split connections
+    oneport = getoneport(ps)
+    multiport = getmultiport(ps)
 
-    if couple
-        e, f = Power()
-    else
-        e, f = nothing, 0.0
+    eqs = Equation[]
+    if length(oneport) > 0
+        sgns, f = couple ? ([1], power.f) : ([], [])
+        e = couple ? power.e : 0.0
+        # Σ efforts
+        push!(eqs, 0 ~ sumvar(oneport, :e) + e)
+        # f₁ = f₂ = f₃
+        push!(eqs, equalityeqs(oneport, :f, sgns, f)...)
     end
-
-    # Σ flows
-    eqs = [0 ~ sumvar(con, "f") + sgn * f]
-    # e₁ = e₂ = e₃
-    eqs = vcat(eqs, equalityeqs(con, "e", couple = couple, sgn = sgn))
-    # Remove empty equations
-    if couple
-        filter!(x -> filterexpr(x, ignore = [e, f]), eqs)
+    if length(multiport) > 0
+        for m in multiport
+            push!(eqs, connect(m.power, power))
+        end
     end
-    # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
-    # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
-    # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
-    # Example: https://www.20sim.com/webhelp/modeling_tutorial_bond_graphs_frombondgraphtoequations.php
-    # The example considers the convention only for the sum in the
-    # equality it does not consider the arrow direction
 
     # Build subsystem
-    if couple
-        sys = ODESystem(eqs, t, [e, f], []; name = name)
-    else
-        sys = ODESystem(eqs, t, [], []; name = name)
-    end
-
-    out = compose(sys, rmsgnODE.(ps)...)
-    # out = addsubsys(out, ps)
-    if length(subsysv) == 0
-        return BgODESystem(out, :j0)
-    else
-        BgODESystem(out, 1, rmsgnODE.(subsysv), :j0)
-    end
+    sys = ODESystem(eqs, t, [], [], name = name)
+    compose(sys, power, oneport..., multiport...)
 end
 
 function mGY(subsys...; name, g = 1.0)
@@ -203,7 +176,6 @@ function mGY(subsys...; name, g = 1.0)
 
     compose(sys, c...)
 end
-
 
 function mTF(subsys...; name, r = 1.0)
 
@@ -260,61 +232,58 @@ end
 # Elements
 
 function Mass(; name, m = 1.0, u = 0.0)
-    e, f = Power(flow = u)
+    @named power = Power(flow=u)    
     ps = @parameters I = m
-    @variables p(t)
 
     eqs = [
-        # It(e) ~ f*I
-        # D(p) ~ e,
-        # p ~ I * f,
-        # f ~ p/I,
-        D(f) ~ e / I,
+        D(power.f) ~ power.e / I,
     ]
-    # ODESystem(eqs, t, [e, f, p], ps; name = name)
-    ODESystem(eqs, t, [e, f], ps; name = name)
-    # ODESystem(eqs, t, [], ps; name = name)
-    # extend(ODESystem(eqs, t, [p], ps; name = name), power)
+    compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
 function Spring(; name, k = 10, x = 0.0)
-    e, f = Power()
+    @named power = Power()
+
     @variables q(t) = x
     ps = @parameters C = 1 / k
 
     eqs = [
-        e ~ q / C
-        D(q) ~ f
-        # D(e) ~ f/C
+        power.e ~ q / C
+        D(q) ~ power.f
     ]
-    ODESystem(eqs, t, [e, f, q], ps; name = name)
+    compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
 function Spring3(; name, k = 10, x = 0.0)
-    e, f = Power()
+    # TODO: check if this function is working
+    @named power = Power()
+
     @variables q(t) = x
     ps = @parameters C = 1 / k
 
     eqs = [
-        e ~ q^3 / C
-        D(q) ~ f
-        # D(e) ~ f/C
+        power.e ~ q^3 / C
+        D(q) ~ power.f
     ]
-    ODESystem(eqs, t, [e, f, q], ps; name = name)
+    
+    compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
-function Damper(; name, c = 10)
-    e, f = Power()
-
+function Damper(; name, c = 10, u=1.0)
+    @named power = Power(flow=u)
+    
     ps = @parameters R = c
-    eqs = [e ~ f * R]
-    ODESystem(eqs, t, [e, f], ps; name = name)
+    eqs = [power.e ~ power.f * R]
+
+    compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
 function GenericDamper(expr; name)
-    e, f = Power()
+    # TODO: check if this function is working
 
-    eqs = [e ~ expr]
+    @named power = Power(flow=u)
+
+    eqs = [power.e ~ expr]
 
     # Check the expression
     if isvariable(expr)
@@ -327,10 +296,5 @@ function GenericDamper(expr; name)
         sts, ps = [], []
     end
 
-    if (@isdefined e) | (@isdefined f)
-        # sts = [e, f]
-        push!(sts, e, f)
-    end
-
-    ODESystem(eqs, t, sts, ps; name = name)
+    compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end
