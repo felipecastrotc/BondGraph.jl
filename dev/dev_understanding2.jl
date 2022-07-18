@@ -337,11 +337,11 @@ equations(b2)
 
 @named b0 = Junction1(m, d)
 
-@named psys = ODESystem([connect(b2.power, b1.mj.power), connect(b1.power, b0.power)], t)
+# @named psys = ODESystem([connect(b2.power, b1.mj.power), connect(b1.power, b0.power)], t)
 # mdl = compose(psys, b1, b0, b2)
 # @named psys = ODESystem([connect(b2.power, b1.mj.power)], t)
-# @named psys = ODESystem([connect(b1.mj.power, b2.power)], t)
-mdl = compose(psys, b1, b2, b0)
+@named psys = ODESystem([connect(b1.mj.power, b2.power)], t)
+mdl = compose(psys, b1, b2)
 
 equations(mdl)
 emdl = expand_connections(mdl)
@@ -350,6 +350,7 @@ equations(emdl)
 
 equations(alias_elimination(emdl))
 equations(structural_simplify(emdl))
+
 
 @named psys = ODESystem([connect(b0.power, b1.power)], t)
 # sys = compose(psys, b1, b0,b2)

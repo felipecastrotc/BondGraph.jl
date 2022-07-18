@@ -369,36 +369,25 @@ for i in in_con
     end
     # Get variables being added to the node
     vin = Num[]
-    for (j, k) in enumerate(am[:, i])
-        # k is a value checking if there is a connection or not
-        if k > 0
-            # Check if the input has multiple outputs
-            msk= am[j, :] .> 0
-            chk = sum(msk) > 1 ? findfirst(sort(idx_con[msk]) .== i) : nothing
-            if !isnothing(chk)
-                # Create the variable for the i node
-                push!(vin, add_idx(get_var(j, idx2k, str2con), chk))
-            else
-                push!(vin, get_var(j, idx2k, str2con))
-            end
+    # Iterate over the connections
+    for j in idx_con[am[:, i] .> 0]
+        # Check if the input has multiple outputs
+        msk= am[j, :] .> 0
+        chk = sum(msk) > 1 ? findfirst(sort(idx_con[msk]) .== i) : nothing
+        if !isnothing(chk)
+            # Create the variable for the i node
+            push!(vin, add_idx(get_var(j, idx2k, str2con), chk))
+        else
+            push!(vin, get_var(j, idx2k, str2con))
         end
     end
     # Apply the junction type
     jtype = get_bg_junction(v)[1]
     vtype = get_bg_junction(v)[2]
-    if jtype === j0
-        if vtype === bgeffort
-            push!(eqs, equalityeqs(vcat(vout, vin))...)
-        elseif vtype === bgflow
-            push!(eqs, sumvar(vcat(vout, vin)))
-        end
-    elseif jtype === j1
-        if vtype === bgeffort
-            push!(eqs, sumvar(vcat(vout, vin)))
-        elseif vtype === bgflow
-            push!(eqs, equalityeqs(vcat(vout, vin))...)
-
-        end
+    if (jtype == j0  && vtype === bgeffort) || (jtype === j1 && vtype === bgflow)
+        push!(eqs, equalityeqs(vcat(vout, vin))...)
+    elseif (jtype == j0  && vtype === bgflow) || (jtype === j1 && vtype === bgeffort)
+        push!(eqs, sumvar(vcat(vout, vin)))
     end
 end
 
