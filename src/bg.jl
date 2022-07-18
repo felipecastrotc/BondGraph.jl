@@ -73,32 +73,24 @@ end
 function Junction0(ps...; name, couple=true)
     
     @named power = Power(type=j0)
-    
     # Get connections
     ps = collect(Base.Flatten([ps]))
-    
-    # Split connections
-    direct = directcon(ps)
-    connector = haspower(ps)
+
+    # Get signs and subsystems 
+    subsys, signs = flatinput(ps)
 
     eqs = Equation[]
-    if length(direct) > 0
-        sgns, e = couple ? ([1], power.e) : ([], [])
-        f = couple ? power.f : 0.0
-        # Σ efforts
-        push!(eqs, 0 ~ sumvar(direct, :f) + f)
-        # f₁ = f₂ = f₃
-        push!(eqs, equalityeqs(direct, :e, sgns, e)...)
-    end
-    if length(connector) > 0
-        for m in connector
-            push!(eqs, connect(m.power, power))
+    for (s, sign) in zip(subsys, signs)
+        if sign == 1
+            push!(eqs, connect(s.power, power))
+        elseif sign == -1
+            push!(eqs, connect(power, s.power))
         end
     end
 
     # Build subsystem
     sys = ODESystem(eqs, t, [], [], name = name)
-    compose(sys, power, oneport..., connector...)
+    compose(sys, power, subsys...)
 end
 
 function Junction1(ps...; name, couple=true)
@@ -106,29 +98,22 @@ function Junction1(ps...; name, couple=true)
     @named power = Power(type=j1)
     # Get connections
     ps = collect(Base.Flatten([ps]))
-    
-    # Split connections
-    direct = directcon(ps)
-    connector = haspower(ps)
+
+    # Get signs and subsystems 
+    subsys, signs = flatinput(ps)
 
     eqs = Equation[]
-    if length(direct) > 0
-        sgns, f = couple ? ([1], power.f) : ([], [])
-        e = couple ? power.e : 0.0
-        # Σ efforts
-        push!(eqs, 0 ~ sumvar(oneport, :e) + e)
-        # f₁ = f₂ = f₃
-        push!(eqs, equalityeqs(oneport, :f, sgns, f)...)
-    end
-    if length(connector) > 0
-        for m in connector
-            push!(eqs, connect(m.power, power))
+    for (s, sign) in zip(subsys, signs)
+        if sign == 1
+            push!(eqs, connect(s.power, power))
+        elseif sign == -1
+            push!(eqs, connect(power, s.power))
         end
     end
 
     # Build subsystem
     sys = ODESystem(eqs, t, [], [], name = name)
-    compose(sys, power, oneport..., connector...)
+    compose(sys, power, subsys...)
 end
 
 function mGY(subsys...; name, g = 1.0)
