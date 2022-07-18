@@ -2,6 +2,11 @@
 import Symbolics: Symbolic
 # equations functions
 import SymbolicUtils: FnType
+import ModelingToolkit: expand_connections, generate_connection_set
+import ModelingToolkit: generate_connection_equations_and_stream_connections
+import ModelingToolkit: expand_instream, @set!, AbstractSystem, ConnectionSet
+import ModelingToolkit: generate_connection_set!
+
 import ModelingToolkit: namespace_equation, namespace_expr
 import ModelingToolkit: independent_variables, unwrap
 import ModelingToolkit: isvariable, renamespace
@@ -11,6 +16,26 @@ import ModelingToolkit: similarterm, getmetadata
 import ModelingToolkit: getname, rename, setmetadata
 import ModelingToolkit: namespace_equations, equations
 
+
+# Connection functions
+
+function expand_connections(sys::AbstractSystem; debug = false, tol = 1e-10)
+    sys, csets = generate_connection_set(sys)
+    bgeqs = generate_bg_eqs!(csets)
+    ceqs, instream_csets = generate_connection_equations_and_stream_connections(csets)
+    _sys = expand_instream(instream_csets, sys; debug = debug, tol = tol)
+    sys = flatten(sys, true)
+    @set! sys.eqs = [equations(_sys); ceqs; bgeqs]
+end
+
+function generate_connection_set(sys::AbstractSystem)
+    connectionsets = ConnectionSet[]
+    sys = generate_connection_set!(connectionsets, sys)
+    bgconnectionsets = get_bg_connection_set!(connectionsets)
+    sys, vcat(merge(connectionsets), bgconnectionsets)
+end
+
+# TODO: Check for legacy functions
 
 function namespace_equation_couple(eq::Equation, sys, couple)
     _lhs = namespace_expr_couple(eq.lhs, sys, couple)

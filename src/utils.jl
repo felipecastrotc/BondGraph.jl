@@ -205,6 +205,7 @@ function adjmtx2eqs(am, str2con)
     return eqs
 end
 
+# =============================================================================
 # Main functions
 function generate_bg_eqs!(connectionsets)
 
@@ -213,24 +214,6 @@ function generate_bg_eqs!(connectionsets)
     am = csets2adjmtx(bgconnectionsets, str2con)
     eqs = adjmtx2eqs(am, str2con)
     return eqs
-end
-
-function ModelingToolkit.expand_connections(sys::ModelingToolkit.AbstractSystem; debug = false, tol = 1e-10)
-    sys, csets = ModelingToolkit.generate_connection_set(sys)
-
-    bgeqs = generate_bg_eqs!(csets)
-
-    ceqs, instream_csets = ModelingToolkit.generate_connection_equations_and_stream_connections(csets)
-    _sys = ModelingToolkit.expand_instream(instream_csets, sys; debug = debug, tol = tol)
-    sys = flatten(sys, true)
-    ModelingToolkit.@set! sys.eqs = [equations(_sys); ceqs; bgeqs]
-end
-
-function ModelingToolkit.generate_connection_set(sys::ModelingToolkit.AbstractSystem)
-    connectionsets = ModelingToolkit.ConnectionSet[]
-    sys = ModelingToolkit.generate_connection_set!(connectionsets, sys)
-    bgconnectionsets = get_bg_connection_set!(connectionsets)
-    sys, vcat(merge(connectionsets), bgconnectionsets)
 end
 
 # Support functions
