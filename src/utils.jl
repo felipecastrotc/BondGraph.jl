@@ -1,5 +1,7 @@
-# =============================================================================
-# Function to handle bond graph connections
+
+import ModelingToolkit: ConnectionSet, ConnectionElement
+import ModelingToolkit: namespaced_var, get_connection_type, getname
+import ModelingToolkit: rename, generate_connection_set!
 
 # =============================================================================
 # Functions to replace variables on equations by the observed variables
@@ -49,10 +51,12 @@ function isindependent(var::Num)
 end
 
 # =============================================================================
+# Function to handle bond graph connections
+# =============================================================================
 # Interface functions
 function check_bg_con(connectionset)
-    ele = ModelingToolkit.namespaced_var(connectionset.set[1])
-    return ModelingToolkit.get_connection_type(ele) === bg
+    ele = namespaced_var(connectionset.set[1])
+    return get_connection_type(ele) === bg
 end
 
 function get_bg_connection_set!(connectionsets)
@@ -98,27 +102,30 @@ end
 
 # =============================================================================
 # Util functions
+
 function get_var(idx, idx2k, str2con)
-    return ModelingToolkit.namespaced_var(str2con[idx2k[idx]])
+    return namespaced_var(str2con[idx2k[idx]])
 end
 
 function add_idx(var, idx)
     v = deepcopy(var)
-    vstr = String(ModelingToolkit.getname(v))
+    vstr = String(getname(v))
     newname = Symbol(vstr*string(idx))
-    return ModelingToolkit.rename(v, newname)
+    return rename(v, newname)
 end
 
 # =============================================================================
 # Algorithm functions
+
 function csets2dict(csets)
-    str2con = Dict{String, ModelingToolkit.ConnectionElement}()
+    
+    str2con = Dict{String, ConnectionElement}()
 
     # Generate name to systems from csets
     for cset in csets
         n = Vector{String}()
         for ele in cset.set
-            k = String(Symbol(ModelingToolkit.namespaced_var(ele)))
+            k = String(Symbol(namespaced_var(ele)))
             str2con[k] = ele
         end
     end
@@ -219,8 +226,8 @@ end
 # Support functions
 function generate_graph(mdl, var=:e)
 
-    connectionsets = ModelingToolkit.ConnectionSet[]
-    sys = ModelingToolkit.generate_connection_set!(connectionsets, mdl)
+    connectionsets = ConnectionSet[]
+    sys = generate_connection_set!(connectionsets, mdl)
 
     bgconnectionsets = get_bg_connection_set!(connectionsets)
     str2con = csets2dict(bgconnectionsets)
