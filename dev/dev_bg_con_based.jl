@@ -9,6 +9,8 @@ struct bg end
 struct bgeffort end
 struct bgflow end
 struct op end
+struct tpgy end
+struct tptf end
 struct j0 end
 struct j1 end
 
@@ -192,71 +194,70 @@ function Spring(; name, k = 10, x = 0.0)
     compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
-function Junction0(ps...; name, couple=true)
-    @named power = Power(type=j0)
+function Se(expr; name)
 
-    # couple = true
-    # ps = [mj, sd]
-    # name = :oi
+    @named power = Power(type=op)
+
+    eqs = [power.e ~ expr]
+    
+    sts = []
+    if ModelingToolkit.isvariable(expr)
+        ps = [expr]
+    elseif ModelingToolkit.istree(ModelingToolkit.unwrap(expr))
+        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
+        ps = filter(x -> isindependent(Num(x)), vars)
+    else
+        ps = []
+    end
+
+    compose(ODESystem(eqs, t, sts, ps; name = name), power)
+end
+
+function Junction0(ps...; name, couple=true)
+    
+    @named power = Power(type=j0)
     # Get connections
     ps = collect(Base.Flatten([ps]))
-    
-    # Split connections
-    oneport = getoneport(ps)
-    multiport = getmultiport(ps)
+
+    # Get signs and subsystems 
+    subsys, signs = flatinput(ps)
 
     eqs = Equation[]
-    if length(oneport) > 0
-        sgns, e = couple ? ([1], power.e) : ([], [])
-        f = couple ? power.f : 0.0
-        # Σ efforts
-        push!(eqs, 0 ~ sumvar(oneport, :f) + f)
-        # f₁ = f₂ = f₃
-        push!(eqs, equalityeqs(oneport, :e, sgns, e)...)
-    end
-    if length(multiport) > 0
-        for m in multiport
-            push!(eqs, connect(m.power, power))
+    for (s, sign) in zip(subsys, signs)
+        if sign == 1
+            push!(eqs, connect(s.power, power))
+        elseif sign == -1
+            push!(eqs, connect(power, s.power))
         end
     end
 
     # Build subsystem
     sys = ODESystem(eqs, t, [], [], name = name)
-    compose(sys, power, oneport..., multiport...)
+    compose(sys, power, subsys...)
 end
 
 function Junction1(ps...; name, couple=true)
 
     @named power = Power(type=j1)
-
-    # couple = true
-    # ps = [mj, sd]
-    # name = :oi
     # Get connections
     ps = collect(Base.Flatten([ps]))
-    
-    # Split connections
-    oneport = getoneport(ps)
-    multiport = getmultiport(ps)
+
+    # Get signs and subsystems 
+    subsys, signs = flatinput(ps)
 
     eqs = Equation[]
-    if length(oneport) > 0
-        sgns, f = couple ? ([1], power.f) : ([], [])
-        e = couple ? power.e : 0.0
-        # Σ efforts
-        push!(eqs, 0 ~ sumvar(oneport, :e) + e)
-        # f₁ = f₂ = f₃
-        push!(eqs, equalityeqs(oneport, :f, sgns, f)...)
-    end
-    if length(multiport) > 0
-        for m in multiport
-            push!(eqs, connect(m.power, power))
+    for (s, sign) in zip(subsys, signs)
+        if sign == 1
+            push!(eqs, connect(s.power, power))
+        elseif sign == -1
+            push!(eqs, connect(power, s.power))
         end
     end
 
     # Build subsystem
     sys = ODESystem(eqs, t, [], [], name = name)
-    compose(sys, power, oneport..., multiport...)
+    compose(sys, power, subsys...)
 end
 
 @named m = Mass()
@@ -334,6 +335,16 @@ equations(structural_simplify(emdl))
 @named psys = ODESystem([connect(b0.power, b1.power)], t)
 # sys = compose(psys, b1, b0,b2)
 sys = compose(psys, b1, b0)
+
+# ==========================================================
+# MSD test for signal
+
+@named F = Se(10)
+
+@named b = Junction1([1, m], [1, s], [1, d], F)
+
+mdl = b
+
 
 # ==========================================================
 # New test with multiple outputs for pump leakage

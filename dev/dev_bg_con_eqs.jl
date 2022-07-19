@@ -349,6 +349,18 @@ function add_idx(var, idx)
     return ModelingToolkit.rename(v, newname)
 end
 
+sm = deepcopy(am)
+
+# Identify the one port elements to apply the signal
+cord = findall(am .> 0)
+filter!(x -> get_bg_junction(get_var(x[2], idx2k, str2con))[1] === op, cord)
+# Convert the connections and apply the signal matrix sm
+for c in cord
+    flipc = CartesianIndex(c[2], c[1])
+    am[c], am[flipc] = 0, 1
+    sm[c], sm[flipc] = 0, -1
+end
+
 in_vec = sum(am, dims=1)[:]
 out_vec = sum(am, dims=2)[:]
 
@@ -380,6 +392,10 @@ for i in in_con
             push!(vin, add_idx(get_var(j, idx2k, str2con), chk))
         elseif (jtype === tpgy) || (jtype === tptf)
             push!(vin, -get_var(j, idx2k, str2con))
+        elseif (jtype === op)
+            # Apply the signal matrix
+            sgn = sm[j, i]
+            push!(vin, sgn*get_var(j, idx2k, str2con))
         else
             push!(vin, get_var(j, idx2k, str2con))
         end
@@ -406,6 +422,8 @@ for i in in_con
 end
 
 eqs
+
+eqs
 tol = 1e-10
 debug = false
 
@@ -424,3 +442,5 @@ equations(sys)
 equations(alias_elimination(sys))
 
 @named syss = reducedobs(structural_simplify(sys))
+
+equations(syss)

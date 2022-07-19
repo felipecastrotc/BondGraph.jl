@@ -86,21 +86,15 @@ R = GlobalScope(R)
 
 @named p = Junction1(pT, pj, pf)
 @named r = Junction1(rm, rk, rf)
-@named tf = mTF(p, r, r = R + g + 10)
+@named tf = mTF(p, r, r = 10)
 equations(tf)
 
-mdl = compose(tf, p, r)
-mdl = compose(tf, r)
+mdl = compose(tf, r, p)
 equations(mdl)
 generate_graph(mdl)
-
 emdl = expand_connections(mdl)
 equations(emdl)
-
 @named sys = reducedobs(structural_simplify(emdl))
-
-mdl = structural_simplify(tf)
-equations(mdl)
 
 eqs = equations(sys)
 
@@ -121,20 +115,20 @@ latexify(simplify(eqs[4]))
 R = 2.0
 
 eqs = [
-    0 ~ 3.0 - pj.e - pf.e - e₁,
-    pj.f ~ pf.f,
-    pf.f ~ f₁,
+    0 ~ 3.0 - pj.power.e - pf.power.e - e₁,
+    pj.power.f ~ pf.power.f,
+    pf.power.f ~ f₁,
     e₁ ~ e₂ * R,
     f₂ ~ f₁ * R,
-    0 ~ -rm.e - rf.e - rk.e + e₂,
-    rm.f ~ rf.f,
-    rf.f ~ rk.f,
-    rk.f ~ f₂,
+    0 ~ -rm.power.e - rf.power.e - rk.power.e + e₂,
+    rm.power.f ~ rf.power.f,
+    rf.power.f ~ rk.power.f,
+    rk.power.f ~ f₂,
 ]
 
 mdl = compose(ODESystem(eqs, t, [], []; name = :tst), rm, rf, rk, pj, pf)
 equations(mdl)
-sys = structural_simplify(mdl)
+@named sys = reducedobs(structural_simplify(mdl))
 equations(sys)
 
 latexify(equations(sys)[4])
