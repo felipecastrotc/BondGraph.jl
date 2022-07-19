@@ -1,3 +1,4 @@
+using Plots
 using GraphRecipes
 
 import ModelingToolkit: ConnectionSet, ConnectionElement
@@ -192,10 +193,30 @@ function csets2adjmtx(csets, str2con; filterstr="f(t)", filterflow=false)
     return am
 end
 
+function get_sm_mtx!(am, idx2k, str2con)
+    # Get the signal matrix and remove the op elements as receiving node
+
+    sm = deepcopy(am)
+
+    # Identify the one port elements to apply the signal
+    cord = findall(am .> 0)
+    filter!(x -> get_bg_junction(get_var(x[2], idx2k, str2con))[1] === op, cord)
+    # Convert the connections and apply the signal matrix sm
+    for c in cord
+        flipc = CartesianIndex(c[2], c[1])
+        am[c], am[flipc] = 0, 1
+        sm[c], sm[flipc] = 0, -1
+    end
+
+    return sm
+end
+
 # TODO: add support adding signs it has issues on the algorithm
 function adjmtx2eqs(am, str2con)
     
     idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
+
+    sm = get_sm_mtx!(am, idx2k, str2con)
 
     in_vec = sum(am, dims=1)[:]
     out_vec = sum(am, dims=2)[:]
@@ -228,6 +249,10 @@ function adjmtx2eqs(am, str2con)
                 push!(vin, add_idx(get_var(j, idx2k, str2con), chk))
             elseif (jtype === tpgy) || (jtype === tptf)
                 push!(vin, -get_var(j, idx2k, str2con))
+            elseif (jtype === op)
+                # Apply the signal matrix
+                sgn = sm[j, i]
+                push!(vin, sgn*get_var(j, idx2k, str2con))
             else
                 push!(vin, get_var(j, idx2k, str2con))
             end
@@ -268,7 +293,7 @@ function generate_bg_eqs!(connectionsets)
 end
 
 # Support functions
-function generate_graph(mdl, var=:e)
+function generate_graph(mdl, var=:e; method=:sfdp)
 
     connectionsets = ConnectionSet[]
     sys = generate_connection_set!(connectionsets, mdl)
@@ -282,6 +307,6 @@ function generate_graph(mdl, var=:e)
     idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
     nm = [idx2k[i] for i in 1:length(idx2k)]
 
-    graphplot(am, names=nm, nodeshape=:rect, size=(600, 700), method=:stress)
+    graphplot(am, names=nm, nodeshape=:rect, size=(800, 600), method=method, arrow=arrow(:simple, :head, 1, 1), curves=false)
 
 end

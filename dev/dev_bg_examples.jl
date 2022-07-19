@@ -9,7 +9,7 @@ import BondGraph: t, D
 @named s = Spring(k = 1, x = 0.1)
 @named s3 = Spring3(k = 1, x = 0.2)
 @named d = Damper(c = 1)
-@named F = Se(-5)
+@named F = Se(5)
 
 # 1-DOF
 # @named dof1 = Junction1([-1, m], [-1, s], [-1, d], F)
@@ -47,7 +47,7 @@ equations(sdof2)
 @named b0 = Junction1(m, s, d)
 
 @named dofn = ODESystem([connect(b2.power, b1.mj.power), connect(b1.power, b0.power)], t)
-cdofn = compose(psys, b1, b2, b0)
+cdofn = compose(dofn, b1, b2, b0)
 generate_graph(cdofn)
 
 edofn = expand_connections(cdofn)
