@@ -1,5 +1,5 @@
 using BondGraph, Plots, Symbolics.Latexify
-import BondGraph: t, D, mGY, tp
+import BondGraph: t, D, mGY, tpgy
 import ModelingToolkit: isvariable, istree
 import Symbolics: unwrap, wrap
 
@@ -36,8 +36,9 @@ function mGY(subsys...; name, g = 1.0)
     if isvariable(g)
         sts, ps = [], [g]
     elseif istree(unwrap(g))
-        sts = []
-        ps = collect(Set(ModelingToolkit.get_variables(g)))
+        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        sts = filter(x -> ~isindependent(Num(x)), vars)
+        ps = filter(x -> isindependent(Num(x)), vars)
     else
         sts, ps = [], []
     end
@@ -54,9 +55,7 @@ function mGY(subsys...; name, g = 1.0)
         push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
 
-    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
-    println(1)
-    return sys
+    return compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 end
 
 # =============================================================================
@@ -135,6 +134,7 @@ g = 0.01
 equations(gy)
 
 @named mdl = compose(gy, je, jm)
+equations(mdl)
 generate_graph(mdl)
 emdl = expand_connections(mdl)
 @named sys = reducedobs(structural_simplify(emdl))
