@@ -128,8 +128,8 @@ function mGY(subsys...; name, g = 1.0, coneqs=[])
     e₂, f₂ = pout.e, pout.f
 
     # Gyrator equation
-    eqs = [e₂ ~ g * f₁, e₁ ~ g * -f₂]
-    # TODO: check why adding the - on f₂ solves the signal issue on DC motor
+    eqs = [e₂ ~ -g * f₁, e₁ ~ g * f₂]
+    # TODO: check why adding the - on f₁ solves the signal issue on DC motor
     # TODO: I already tried to change the signal on the port type tpgy at 
     #       adjmtx2eqs
 

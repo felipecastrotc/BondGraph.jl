@@ -38,16 +38,16 @@ gyp = γa*ω - γb*Q
 
 @named iI = Mass(m=1.0)
 @named iRL = Damper(c = 10)
-# @named iRT = Damper(c = 5.5)
 @named iRT = Damper(c = RT)
 @named iJ1 = Junction1([-1, iI], [-1, iRL], [-1, iRT])
 
 # mGY Connection
 eqs = []
-@named gy = mGY(sJ1, iJ1, g = gyp, get_con=eqs)
+@named gy = mGY(sJ1, iJ1, g = gyp, coneqs=eqs)
 
 push!(eqs, [gy.pin.f ~ gy.ω, gy.pout.f ~ gy.Q]...)
 @named sys = ODESystem(eqs, t) 
+
 sys = compose(sys, gy, sJ1, iJ1)
 equations(sys)
 
@@ -59,7 +59,7 @@ states(sys)
 equations(mdl)
 
 # human = Dict(sJ1.sI.f => ω, iJ1.iI.f => Q, sJ1.sI.I => Is, iJ1.iI.I => If, sJ1.sT.T => T, iJ1.iRT.RT => RT, iJ1.iRL.R => RL)
-human = Dict(sJ1.sI.f => ω, iJ1.iI.f => Q, sJ1.sI.I => Is, iJ1.iI.I => If, sJ1.sT.T => T, iJ1.iRT.R => RT*Q, iJ1.iRL.R => RL)
+human = Dict(sJ1.sI.power.f => ω, iJ1.iI.power.f => Q, sJ1.sI.I => Is, iJ1.iI.I => If, sJ1.sT.T => T, iJ1.iRT.R => RT*Q, iJ1.iRL.R => RL, gy.γa => γa, gy.γb => γb)
 mdl = renamevars(mdl, human)
 
 equations(mdl)

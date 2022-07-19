@@ -119,21 +119,24 @@ plot(sol)
 
 @named L = Mass(m = 0.5)
 @named R = Damper(c = 1.0)
-@named Uₐ = Se(-12.0)
+@named Uₐ = Se(12.0)
 
 @named J = Mass(m = 0.01)
 @named b = Damper(c = 0.1)
-@named Tₗ = Se(-1.0)
+@named Tₗ = Se(1.0)
 
 g = 0.01
 
-@named jm = Junction1(Tₗ, b, J)
-@named je = Junction1(Uₐ, R, L)
-# @named jm = Junction1(b, J)
-@named gy = mGY(je,jm, g = g)
+@named jm = Junction1(Tₗ, [-1, b], [-1, J])
+@named je = Junction1(Uₐ, [-1, R], [-1, L])
+
+eqs = []
+@named gy = mGY(je,jm, g = g, coneqs=eqs)
 equations(gy)
 
-@named mdl = compose(gy, je, jm)
+@named mdl = ODESystem(eqs, t)
+mdl = compose(mdl, gy, je, jm)
+
 equations(mdl)
 generate_graph(mdl)
 emdl = expand_connections(mdl)
