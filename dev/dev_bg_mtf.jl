@@ -1,8 +1,11 @@
-using BondGraph, Plots, Symbolics.Latexify, DifferentialEquations
-using ModelingToolkit
+using BondGraph, Plots, Symbolics.Latexify
+import BondGraph: t, D, mTF, tp
+import ModelingToolkit: isvariable, istree
+import Symbolics: unwrap, wrap
 
-import BondGraph: t, D, mTF
-import ModelingToolkit: isvariable, istree, unwrap
+using DifferentialEquations
+
+struct tptf end
 
 # =============================================================================
 # Transformer
@@ -17,23 +20,13 @@ function mTF(subsys...; name, r = 1.0)
     c = c[pos]
     @assert !isempty(c)
 
-    # If only one subsys is passed it automatically generates an open  
-    # connection
-    if sum(pos) == 1
-        e, f = Power()
-        # Set variables according to the position
-        if pos[1]
-            e₁, f₁ = e, f
-            e₂, f₂ = c[1].e, c[1].f
-        else
-            e₂, f₂ = e, f
-            e₁, f₁ = c[1].e, c[1].f
-        end
-    else
-        @assert length(c) == 2
-        e₁, f₁ = c[1].e, c[1].f
-        e₂, f₂ = c[2].e, c[2].f
-    end
+    # Generate the in and out connection
+    @named pin = Power(type=tptf)
+    @named pout = Power(type=tptf)
+
+    # Alias for simpler view about the mTF port
+    e₁, f₁ = pin.e, pin.f
+    e₂, f₂ = pout.e, pout.f
 
     # Transformer equation
     eqs = [f₁ * r ~ f₂, e₂ * r ~ e₁]
@@ -49,13 +42,19 @@ function mTF(subsys...; name, r = 1.0)
         sts, ps = [], []
     end
 
-    if (@isdefined e) | (@isdefined f)
-        push!(sts, e, f)
+    # Apply connections
+    if sum(pos) == 1
+        if pos[1]
+            push!(eqs, connect(c[1].power, pin))
+        else
+            push!(eqs, connect(pout, c[1].power))
+        end
+    else
+        @assert length(c) == 2
+        push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
-
-    sys = ODESystem(eqs, t, sts, ps; name = name)
-
-    compose(sys, c...)
+    
+    return compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 end
 
 # =============================================================================
@@ -82,17 +81,27 @@ end
 
 # Gear radius
 @variables R
+@variables g(t)
 R = GlobalScope(R)
 
-@named p = Junction1(pT, -pj, -pf, sgn = -1)
-@named r = Junction1(-rm, -rk, -rf)
-@named tf = mTF(p, r, r = 10)
-
+@named p = Junction1(pT, pj, pf)
+@named r = Junction1(rm, rk, rf)
+@named tf = mTF(p, r, r = R + g + 10)
 equations(tf)
+
+mdl = compose(tf, p, r)
+mdl = compose(tf, r)
+equations(mdl)
+generate_graph(mdl)
+
+emdl = expand_connections(mdl)
+equations(emdl)
+
+@named sys = reducedobs(structural_simplify(emdl))
+
 mdl = structural_simplify(tf)
 equations(mdl)
 
-@named sys = reducedobs(structural_simplify(tf))
 eqs = equations(sys)
 
 latexify(eqs[4])

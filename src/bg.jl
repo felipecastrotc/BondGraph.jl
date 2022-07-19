@@ -116,6 +116,7 @@ function Junction1(ps...; name, couple=true)
     compose(sys, power, subsys...)
 end
 
+# TODO:ISSUE -> the compose only works when the gyrator systems is the first
 function mGY(subsys...; name, g = 1.0)
 
     # Get connections
@@ -144,8 +145,9 @@ function mGY(subsys...; name, g = 1.0)
     if isvariable(g)
         sts, ps = [], [g]
     elseif istree(unwrap(g))
-        sts = []
-        ps = collect(Set(ModelingToolkit.get_variables(g)))
+        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        sts = filter(x -> ~isindependent(Num(x)), vars)
+        ps = filter(x -> isindependent(Num(x)), vars)
     else
         sts, ps = [], []
     end
@@ -162,11 +164,10 @@ function mGY(subsys...; name, g = 1.0)
         push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
 
-    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
-    println(1)
-    return sys
+    return compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 end
 
+# TODO:ISSUE -> the compose only works when the transform systems is the first
 function mTF(subsys...; name, r = 1.0)
 
     # Get connections
@@ -177,23 +178,13 @@ function mTF(subsys...; name, r = 1.0)
     c = c[pos]
     @assert !isempty(c)
 
-    # If only one subsys is passed it automatically generates an open  
-    # connection
-    if sum(pos) == 1
-        e, f = Power()
-        # Set variables according to the position
-        if pos[1]
-            e₁, f₁ = e, f
-            e₂, f₂ = c[1].e, c[1].f
-        else
-            e₂, f₂ = e, f
-            e₁, f₁ = c[1].e, c[1].f
-        end
-    else
-        @assert length(c) == 2
-        e₁, f₁ = c[1].e, c[1].f
-        e₂, f₂ = c[2].e, c[2].f
-    end
+    # Generate the in and out connection
+    @named pin = Power(type=tptf)
+    @named pout = Power(type=tptf)
+
+    # Alias for simpler view about the mTF port
+    e₁, f₁ = pin.e, pin.f
+    e₂, f₂ = pout.e, pout.f
 
     # Transformer equation
     eqs = [f₁ * r ~ f₂, e₂ * r ~ e₁]
@@ -209,13 +200,19 @@ function mTF(subsys...; name, r = 1.0)
         sts, ps = [], []
     end
 
-    if (@isdefined e) | (@isdefined f)
-        push!(sts, e, f)
+    # Apply connections
+    if sum(pos) == 1
+        if pos[1]
+            push!(eqs, connect(c[1].power, pin))
+        else
+            push!(eqs, connect(pout, c[1].power))
+        end
+    else
+        @assert length(c) == 2
+        push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
-
-    sys = ODESystem(eqs, t, sts, ps; name = name)
-
-    compose(sys, c...)
+    
+    return compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 end
 
 # =============================================================================

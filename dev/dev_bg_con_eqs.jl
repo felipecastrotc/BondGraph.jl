@@ -306,7 +306,7 @@ for cset in csets
 end
 
 # filter out flow
-filterflow = true
+filterflow = false
 filterstr = "f(t)"
 if filterflow
     filter!(d -> occursin(filterstr, d[1]), str2con)
