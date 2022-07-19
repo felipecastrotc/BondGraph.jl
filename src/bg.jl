@@ -117,15 +117,7 @@ function Junction1(ps...; name, couple=true)
 end
 
 # TODO:ISSUE -> the compose only works when the gyrator systems is the first
-function mGY(subsys...; name, g = 1.0)
-
-    # Get connections
-    c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
-
-    # Remove nothing from c array
-    pos = .!isnothing.(c)
-    c = c[pos]
-    @assert !isempty(c)
+function mGY(subsys...; name, g = 1.0, get_con=[])
 
     # Generate the in and out connection
     @named pin = Power(type=tpgy)
@@ -152,19 +144,11 @@ function mGY(subsys...; name, g = 1.0)
         sts, ps = [], []
     end
 
-    # Apply connections
-    if sum(pos) == 1
-        if pos[1]
-            push!(eqs, connect(c[1].power, pin))
-        else
-            push!(eqs, connect(pout, c[1].power))
-        end
-    else
-        @assert length(c) == 2
-        push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
-    end
+    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 
-    return compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
+    gen_tp_con!(get_con, sys, subsys)
+
+    return sys
 end
 
 # TODO:ISSUE -> the compose only works when the transform systems is the first
@@ -176,7 +160,7 @@ function mTF(subsys...; name, r = 1.0)
     # Remove nothing from c array
     pos = .!isnothing.(c)
     c = c[pos]
-    @assert !isempty(c)
+    # @assert !isempty(c)
 
     # Generate the in and out connection
     @named pin = Power(type=tptf)
@@ -201,17 +185,18 @@ function mTF(subsys...; name, r = 1.0)
     end
 
     # Apply connections
-    if sum(pos) == 1
-        if pos[1]
-            push!(eqs, connect(c[1].power, pin))
-        else
-            push!(eqs, connect(pout, c[1].power))
+    if length(c) > 0
+        if sum(pos) == 1
+            if pos[1]
+                push!(eqs, connect(c[1].power, pin))
+            else
+                push!(eqs, connect(pout, c[1].power))
+            end
+        elseif length(c) == 2
+            push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
         end
-    else
-        @assert length(c) == 2
-        push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
-    
+
     return compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 end
 

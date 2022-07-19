@@ -31,21 +31,29 @@ gyp = γa*ω - γb*Q
 @named sT = Se(T)
 @named sI = Mass(m=1.0)
 @named sR1 = Damper(c=10.0)
-@named sJ1 = Junction1(sT, -sI, -sR1, sgn=-1)
+@named sJ1 = Junction1(sT, [-1, sI], [-1, sR1])
 
 # Impeller
 @parameters RL, RT
 
 @named iI = Mass(m=1.0)
 @named iRL = Damper(c = 10)
+# @named iRT = Damper(c = 5.5)
 @named iRT = Damper(c = RT)
-@named iJ1 = Junction1(-iI, -iRL, -iRT, sgn=-1)
+@named iJ1 = Junction1([-1, iI], [-1, iRL], [-1, iRT])
 
 # mGY Connection
-@named gy = mGY(sJ1, iJ1, g = gyp)
+eqs = []
+@named gy = mGY(sJ1, iJ1, g = gyp, get_con=eqs)
 
-equality = [sJ1.f ~ ω, iJ1.f ~ Q]
-@named sys = ODESystem(vcat(equations(gy), equality)) 
+push!(eqs, [gy.pin.f ~ gy.ω, gy.pout.f ~ gy.Q]...)
+@named sys = ODESystem(eqs, t) 
+sys = compose(sys, gy, sJ1, iJ1)
+equations(sys)
+
+generate_graph(sys)
+
+states(sys)
 @named mdl = reducedobs(structural_simplify(sys))
 
 equations(mdl)

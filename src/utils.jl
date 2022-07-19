@@ -144,6 +144,30 @@ function add_idx(var, idx)
     return rename(v, newname)
 end
 
+function gen_tp_con!(eqs, sys, subsys)
+
+    # Get connections
+    c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
+
+    # Remove nothing from c array
+    pos = .!isnothing.(c)
+    c = c[pos]
+    # @assert !isempty(c)
+
+    # Apply connections
+    if length(c) > 0
+        if sum(pos) == 1
+            if pos[1]
+                push!(eqs, connect(c[1].power, sys.pin))
+            else
+                push!(eqs, connect(sys.pout, c[1].power))
+            end
+        elseif length(c) == 2
+            push!(eqs, connect(c[1].power, sys.pin), connect(sys.pout, c[2].power))
+        end
+    end
+end
+
 # =============================================================================
 # Algorithm functions
 
@@ -293,7 +317,7 @@ function generate_bg_eqs!(connectionsets)
 end
 
 # Support functions
-function generate_graph(mdl, var=:e; method=:sfdp)
+function generate_graph(mdl, var=:e; method=:stress)
 
     connectionsets = ConnectionSet[]
     sys = generate_connection_set!(connectionsets, mdl)
