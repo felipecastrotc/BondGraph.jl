@@ -29,7 +29,7 @@ function Se(expr; name)
     if isvariable(expr)
         ps = [expr]
     elseif istree(unwrap(expr))
-        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        vars = collect(Set(ModelingToolkit.get_variables(expr)))
         sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
         ps = filter(x -> isindependent(Num(x)), vars)
     else
@@ -49,7 +49,7 @@ function Sf(expr; name)
     if isvariable(expr)
         ps = [expr]
     elseif istree(unwrap(expr))
-        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        vars = collect(Set(ModelingToolkit.get_variables(expr)))
         sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
         ps = filter(x -> isindependent(Num(x)), vars)
     else

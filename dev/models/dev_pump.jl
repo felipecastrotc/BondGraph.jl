@@ -63,13 +63,14 @@ human = Dict(sJ1.sI.power.f => ω, iJ1.iI.power.f => Q, sJ1.sI.I => Is, iJ1.iI.I
 mdl = renamevars(mdl, human)
 
 equations(mdl)
+latexify(mdl)
 
 # [12, 60]/8
 
 A = (π*((0.05/2)^2))
 Ifᵥ = ρᵥ*10/A
 
-τᵥ = -2;
+τᵥ = 1;
 
 # vals = [T => τᵥ, ρ => ρᵥ, γa => γaᵥ, γb => γbᵥ, sJ1.sR1.R => 0.1, Is => 0.02, If => 0.0005, RT => 1000, RL => 0]
 vals = [T => τᵥ, ρ => ρᵥ, γa => γaᵥ, γb => γbᵥ, sJ1.sR1.R => 1, Is => 50, If => Ifᵥ, RT => 1e5, RL => 0]
@@ -79,11 +80,13 @@ equations(mdl)
 sol = solve(prob, reltol=1e-8, abstol=1e-8)
 plot(sol)
 
-plot(sol.t, -sol[2, :]/A)
-plot(sol.t, -sol[1, :])
+plot(sol.t, sol[2, :]/A)
+plot!(sol.t, sol[1, :])
 
 ωᵥ, Qᵥ = -7.698944611469807, -0.003926997971959516
 (-1e5*Qᵥ - 1e5*(Qᵥ^2) - γaᵥ*ωᵥ*ωᵥ + γbᵥ*Qᵥ*ωᵥ) / Ifᵥ
+
+# I compared with the 2017 paper look annotations
 
 # -----------------------------------------------------------------------------
 # SIMPLER + pipe
@@ -122,8 +125,7 @@ gyp = γa*ω - γb*Q
 @named dL = Mass(m = 0.1)
 @named dR = Damper(c = 1.0)
 
-@named je = Junction1(dUₐ, -dR, -dL, sgn = -1)
-@named dgy = mGY(je, g = 0.01)
+@named je = Junction1(dUₐ, [-1, dR], [-1, dL])
 
 # -------------------------
 # Pipe
@@ -135,7 +137,7 @@ Ipᵥ = ρᵥ * Lᵥ / Aᵥ;
 
 @named pI = Mass(m=Ipᵥ)
 @named pR = Damper(c=Rpᵥ)
-@named pJ1 = Junction1(-pR, -pI)
+@named pJ1 = Junction1([-1, pR], [-1, pI])
 
 # # Coupling Pipe impeller
 # @named p2i = Junction0(pJ0, sgn=-1)
@@ -148,36 +150,41 @@ Ipᵥ = ρᵥ * Lᵥ / Aᵥ;
 @named sI = Mass(m=1.0)
 @named sR1 = Damper(c=10.0)
 # @named sJ1 = Junction1(sT, -sI, -sR1, sgn=-1)
-@named sJ1 = Junction1(dgy, -sI, -sR1, sgn=-1)
+@named sJ1 = Junction1([-1, sI], [-1, sR1])
 
 # -------------------------
 # Impeller
 @parameters RL, RT
 
-# Impeller system
 @named iI = Mass(m=1.0)
 @named iRL = Damper(c = 10)
 @named iRT = Damper(c = RT)
-
-# Impeller recirculation
-@named iRR = Damper(c = 10)
-@named iRes = Junction1(-iRR)
-@named iIn = Junction0(-pJ1, subsys = [iRes])
-@named iOut = Junction0(pJ1, subsys = [-iRes])
+@named iJ1 = Junction1([-1, iI], [-1, iRL], [-1, iRT])
 
 # Impeller junction
 # @named iJ1 = Junction1(-iI, -iRL, -iRT)
 # @named iJ1 = Junction1(-iI, -iRL, -iRT, p2i, i2p)
-@named iJ1 = Junction1(-iI, -iRL, -iRT, iIn, -iOut, couple=false)
-structural_simplify(iJ1)
+# @named iJ1 = Junction1(-iI, -iRL, -iRT, iIn, -iOut, couple=false)
+# structural_simplify(iJ1)
 
+# Connect subsystems
+eqs = []
+# Connect shaft to impeller
+@named s2i = mGY(sJ1, iJ1, g = gyp, coneqs=eqs)
+# Connect motor to shaft
+@named m2s = mGY(je, sJ1, g = 1.0, coneqs=eqs)
 
-# mGY Connection
-@named gy = mGY(sJ1, iJ1, g = gyp)
+# Add alias variables
+push!(eqs, [sJ1.power.f ~ ω, iJ1.power.f ~ Q]...)
+@named sys = ODESystem(eqs, t) 
 
-equality = [sJ1.f ~ ω, iJ1.f ~ Q]
-@named sys = ODESystem(vcat(equations(gy), equality)) 
-@named mdl = reducedobs(structural_simplify(sys))
+sys = compose(sys, m2s, s2i, iJ1, sJ1, je)
+generate_graph(sys)
+
+esys = expand_connections(sys)
+alias_elimination(esys)
+
+@named mdl = reducedobs(structural_simplify(esys))
 
 # human = Dict(sJ1.sI.f => ω, iJ1.iI.f => Q, sJ1.sI.I => Is, iJ1.iI.I => If, sJ1.sT.T => T, iJ1.iRT.RT => RT, iJ1.iRL.R => RL)
 # human = Dict(sJ1.sI.f => ω, iJ1.iI.f => Q, sJ1.sI.I => Is, iJ1.iI.I => If, sJ1.sT.T => T, iJ1.iRT.R => RT*Q, iJ1.iRL.R => RL)
