@@ -21,7 +21,8 @@ r2ᵥ = d2ᵥ/2;      # m - impeller external radiu
 b1 = 1.75*0.0254;     # in  - internal constant
 b2 = 1.75*0.0254;     # in  - external constant
 γaᵥ = ρᵥ*(r2ᵥ^2 - r1ᵥ^2);
-γbᵥ = (ρᵥ/(2*π))*(cotd(β2)/b2 - cotd(β1)/b1);
+γbᵥ = (ρᵥ/(2*π))*(cotd(β2)/b2 - cotd(β1)/b1)
+γbᵥ = (1/(2*π))*(cotd(β2)/b2 - cotd(β1)/b1)
 
 gyp = γa*ω - γb*Q
 gyp = γa*ω - γb*Q
