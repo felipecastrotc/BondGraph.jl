@@ -5,20 +5,19 @@ using Plots
 # ==========================================================
 # Utils
 
-function ReEq(ρ, q, d, μ)
-    A = π * (d / 2)^2
-    return (ρ * (q / A) * d) / μ
+function AEq(d)
+    return π * (d / 2)^2
 end
 
-function darcyq(q, Δs, d, ϵ, ρ, μ)
-    Re = ReEq(ρ, q, d, μ)
-    # Re = ReEq(ρ, q, d, μ) + 0.01
-    # return Δs * cheng(Re, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
-    if Re > 0.0
-        return Δs * cheng(Re + 0.01, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
-    else
-        return Δs * cheng(0.01, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
-    end
+function ReEq(ρ, q, d, μ)
+    return (ρ * (q / AEq(d)) * d) / μ
+end
+
+function darcyq(q, Δs, d, ϵ, ρ, μ, ρa, g)
+    Re = max(ReEq(ρ, q, d, μ), 1e-6)
+    fd = cheng(Re, ϵ, d)
+    dp = Δs * fd * (ρ / (2 * d * ρa * g))
+    return dp * ((1 / AEq(d))^2)
 end
 
 function colebrook(Re, ϵ, d)
@@ -61,19 +60,19 @@ end
 # Model manual -  1 upstream 1 downstream - Source of effort
 function pump_pipe!(du, u, p, t)
     Qi, ω, Q1, Q3, P2, P4 = u[:]
-    Δsi, di, Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L = p[:]
+    Δsi, di, Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L, ρa, g = p[:]
     # du = zeros(size(u))
     # Impeller
-    du[1] = ((P2 - P4)*g*ρa + ρ * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δs, d, ϵ, ρ, μ) * (Qi^2)) / Ii
+    du[1] = (P2 - P4 + (ρ/(ρa*g)) * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δs, d, ϵ, ρ, μ, ρa, g) * (Qi^2)) / Ii
     # Shaft
     du[2] = (τ(t) - ca * ω - ρ * (γa * Qi - γb * ω) * Qi) / Ia
     # Pipeline
     # Upstream
     # Q1
-    du[3] = ((Pi - P2)*g*ρa - Kf * darcyq(Q1, Δs, d, ϵ, ρ, μ) * (Q1^2)) / L
+    du[3] = (Pi - P2 - Kf * darcyq(Q1, Δs, d, ϵ, ρ, μ, ρa, g) * (Q1^2))*ρa*g/ L
     # Downstream
     # Q3
-    du[4] = ((P4 - Po)*g*ρa - Kf * darcyq(Q3, Δs, d, ϵ, ρ, μ) * (Q3^2)) / L
+    du[4] = (P4 - Po - Kf * darcyq(Q3, Δs, d, ϵ, ρ, μ, ρa, g) * (Q3^2))*ρa*g/ L
     # Pressures
     du[5] = (Q1 - Qi) / (Kc * C*g*ρa)           # P2 Upstream inlet
     du[6] = (Qi - Q3) / (Kc * C*g*ρa)           # P4 Downstream coupling pump
@@ -87,8 +86,8 @@ g = 9.81
 # ρ = 998                 # kg/mˆ3 water
 # μ = 1e-3                # Pa*s water
 a = 1290                # m/s petroleum
-ρ = 850                 # kg/mˆ3 petroleum
-μ = 800e-3              # Pa*s petroleum
+ρ = 880                 # kg/mˆ3 petroleum
+μ = 300e-3              # Pa*s petroleum
 # Pipeline
 d = 75 / 1000             # m Pipe diameter
 Δs = 7.5                # m Pipe length
@@ -104,7 +103,7 @@ R = 32 * μ / (A * d^2) * Δs
 di = d      # Impeller's diameter
 
 # State conditions
-q = 1e-4
+q = 2e-2
 # Reynolds check
 Re = (ρ * (q / A) * d) / μ
 ReEq(ρ, q, d, μ)
@@ -114,8 +113,8 @@ ReEq(ρ, q, d, μ)
 # http://www.druckverlust.de/Online-Rechner/dp.php
 cheng(Re, ϵ, d)
 colebrook(Re, ϵ, d)
-Δs * cheng(Re, ϵ, d) * (ρ / (2 * d)) * ((q / A)^2)
-darcyq(q, Δs, d, ϵ, ρ, μ) * (q^2)
+Δs * cheng(Re, ϵ, d) * (ρ / (2 * d*ρa*g)) * ((q / A)^2)
+darcyq(q, Δs, d, ϵ, ρ, μ, ρa, g) * (q^2)
 
 # P100
 γa = 0.002
@@ -125,11 +124,16 @@ darcyq(q, Δs, d, ϵ, ρ, μ) * (q^2)
 Ii = 0.8504
 Ia = 5e-4
 ca = 0.1
-Kf = 2
-Kc = 50
+Kf = 1
+Kc = 1
 
 # Inputs
-τ = (t) -> t > 0.5 ? 80 : 0.01    # Torque
+τ = (t) -> t > 0.5 ? min(80*(t-0.5)*1, 80) : 0.001    # Torque
+plot(sol.t, τ.(sol.t))
+
+Re = max(ReEq(ρ, 1e-2, d, μ), 1e-6)
+fd = cheng(Re, ϵ, d)
+
 # q = 0                      # flow-rate
 # q = 1e-4                  # flow-rate
 Po = 0
@@ -140,7 +144,7 @@ q = 0
 q0 = q * 1.5
 ω0 = 0.0
 u0 = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-p = [Δsi*40, di, Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L]
+p = [Δsi*40, di, Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L, ρa, g]
 
 tspan = (0.0, 2.5)
 prob = ODEProblem(pump_pipe!, u0, tspan, p)

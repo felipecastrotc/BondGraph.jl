@@ -5,20 +5,33 @@ using Plots
 # ==========================================================
 # Utils
 
+function AEq(d)
+    return π * (d / 2)^2
+end
+
 function ReEq(ρ, q, d, μ)
     A = π * (d / 2)^2
     return (ρ * (q / A) * d) / μ
 end
 
+# function darcyq(q, Δs, d, ϵ, ρ, μ)
+#     Re = ReEq(ρ, q, d, μ)
+#     # Re = ReEq(ρ, q, d, μ) + 0.01
+#     # return Δs * cheng(Re, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
+#     if Re > 0.0
+#         return Δs * cheng(Re + 0.01, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
+#     else
+#         return Δs * cheng(0.01, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
+#     end
+# end
+
 function darcyq(q, Δs, d, ϵ, ρ, μ)
-    Re = ReEq(ρ, q, d, μ)
-    # Re = ReEq(ρ, q, d, μ) + 0.01
-    # return Δs * cheng(Re, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
-    if Re > 0.0
-        return Δs * cheng(Re + 0.01, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
-    else
-        return Δs * cheng(0.01, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
-    end
+    Re = max(ReEq(ρ, q, d, μ), 1)
+    # Initial linear friction model
+    # fd = cheng(Re, ϵ, d)
+    fd = 64/Re
+    dp = Δs * fd * (ρ / (2 * d))
+    return dp * ((1 / AEq(d))^2)
 end
 
 
@@ -124,11 +137,13 @@ darcyq(q, Δs, d, ϵ, ρ, μ) * (q^2)
 Ii = 0.8504
 Ia = 5e-4
 ca = 0.1
-Kf = 2
+Kf = 1
 Kc = 50
 
 # Inputs
-τ = (t) -> t > 0.5 ? 80 : 0.01    # Torque
+τ = (t) -> t > 0.25 ? min((80 * (t - 0.25) * 100), 80) : 0.01    # Torque
+# plot(sol.t, τ.(sol.t))
+
 # q = 0                      # flow-rate
 # q = 1e-4                  # flow-rate
 Po = 0
@@ -139,13 +154,21 @@ q = 0
 q0 = q * 1.5
 ω0 = 0.0
 u0 = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-p = [Δsi*40, di, Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L]
+p = [Δsi * 40, di, Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L]
 
-tspan = (0.0, 2.5)
+tspan = (0.0, 1.0)
 prob = ODEProblem(pump_pipe!, u0, tspan, p)
 sol = solve(prob, reltol=1e-8, abstol=1e-8)
 
-sol
+sol[1, 3000]
+sol.t[3000]
+plot(ReEq.(ρ, sol[3, 2:end], d, μ), yscale=:log10)
+
+plot(sol.t, sol[3, :])
+plot(sol.t, ReEq.(ρ, sol[3, :], d, μ))
+plot(sol.t, darcyq.(sol[3, :], Δs, d, ϵ, ρ, μ))
+plot(sol.t, ReEq.(ρ, sol[3, :], d, μ))
+
 # Q, ω
 plot(sol.t, sol[1, :])
 plot(sol.t, sol[2, :])
@@ -191,3 +214,6 @@ plot(nsol)
 write(file, "sol", Matrix(nsol))
 write(file, "t", collect(t))
 close(file)
+
+
+64/(ρ*q*d/μ)*q^2
