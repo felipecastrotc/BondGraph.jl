@@ -1,5 +1,4 @@
 using DifferentialEquations
-using ModelingToolkit
 using Plots
 
 # ==========================================================
@@ -14,80 +13,39 @@ function ReEq(ρ, q, d, μ)
     return (ρ * (q / A) * d) / μ
 end
 
-# function darcyq(q, Δs, d, ϵ, ρ, μ)
-#     Re = ReEq(ρ, q, d, μ)
-#     # Re = ReEq(ρ, q, d, μ) + 0.01
-#     # return Δs * cheng(Re, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
-#     if Re > 0.0
-#         return Δs * cheng(Re + 0.01, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
-#     else
-#         return Δs * cheng(0.01, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
-#     end
-# end
+function darcyq(Δs, d, μ)
+    # using SymPy
+    # ρ, μ, q, d, l, f, A = symbols("ρ, μ, q, d, l, f, A")
 
-function darcyq(q, Δs, d, ϵ, ρ, μ)
-    Re = max(ReEq(ρ, q, d, μ), 1)
-    # Initial linear friction model
-    # fd = cheng(Re, ϵ, d)
-    fd = 64/Re
-    dp = Δs * fd * (ρ / (2 * d))
-    return dp * ((1 / AEq(d))^2)
-end
-
-
-function colebrook(Re, ϵ, d)
-    # Return the friction factor as 0 for reynolds number equals to 0
-    if Re < 2300
-        return min(64 / Re, 64)
-    end
-    # Niazkar approximation
-    # https://link.springer.com/article/10.1007/s12205-019-2217-1
-    A = -2 * log10((ϵ / d) / 3.7 + 4.5547 / (Re^0.8784))
-    B = -2 * log10((ϵ / d) / 3.7 + 2.51 * A / (Re))
-    C = -2 * log10((ϵ / d) / 3.7 + 2.51 * B / (Re))
-    # Estimate f
-    rhs = A - ((B - A)^2) / (C - 2 * B + A)
-    f = 1 / (rhs^2)
-
-    # # Set the Niazkar approximation as an initial guess to iterate
-    # f₀ = f
-    # for i in 1:20
-    #     # Colebrook equation
-    #     f = (1 / (-2 * log10(ϵ / (3.7 * d) + 2.51 / (Re * sqrt(f₀)))))^2
-    #     # Absolute error with tolerance of 1e-7
-    #     if abs(f - f₀) < 1e-7
-    #         continue
-    #     end
-    #     f₀ = f
-    # end
-    return f
-end
-
-# Friction factor
-function cheng(Re, ϵ, d)
-    a = 1 / (1 + (Re / 2720)^9)
-    b = 1 / (1 + (Re / (160 * (d / ϵ)))^2)
-    invf = ((Re / 64)^a) * ((1.8 * log10(Re / 6.8))^(2 * (1 - a) * b)) * ((2.0 * log10(3.7 * d / ϵ))^(2 * (1 - a) * (1 - b)))
-    return 1 / invf
+    # Ad = A
+    # Ad = π*(d/2)^2
+    # Re = (ρ * (q/Ad) * d / μ)
+    # fd = f
+    # fd = 64/Re
+    # l*fd*(ρ/(2*d))*(q/Ad)^2
+    # string(l * fd * (ρ / (2 * d)) * (q / Ad)^2)
+    return 128 * Δs * μ / (pi * d^4)
 end
 
 # -------------------------------------------------------------------
 # Model manual -  1 upstream 1 downstream - Source of effort
 function pump_pipe!(du, u, p, t)
+    Pi = 0.0
+    Po = 0.0
     Qi, ω, Q1, Q3, P2, P4 = u[:]
     Δsi, di, Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L = p[:]
     # du = zeros(size(u))
     # Impeller
-    du[1] = (P2 - P4 + ρ * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δsi, di, ϵ, ρ, μ) * (Qi^2)) / Ii
+    du[1] = (P2 - P4 + ρ * (γa * Qi - γb * ω) * ω - darcyq(Δs, d, μ)*Qi) / Ii
     # Shaft
     du[2] = (τ(t) - ca * ω - ρ * (γa * Qi - γb * ω) * Qi) / Ia
     # Pipeline
     # Upstream
     # Q1
-    du[3] = (Pi - P2 - Kf * darcyq(Q1, Δs, d, ϵ, ρ, μ) * (Q1^2)) / L
+    du[3] = (Pi - P2 - Kf * darcyq(Δs, d, μ)*Q1) / L
     # Downstream
     # Q3
-    du[4] = (P4 - Po - Kf * darcyq(Q3, Δs, d, ϵ, ρ, μ) * (Q3^2)) / L
+    du[4] = (P4 - Po - Kf * darcyq(Δs, d, μ)*Q3) / L
     # Pressures
     du[5] = (Q1 - Qi) / (Kc * C)           # P2 Upstream inlet
     du[6] = (Qi - Q3) / (Kc * C)           # P4 Downstream coupling pump
@@ -95,9 +53,6 @@ end
 
 # Properties
 # Fluid
-# a = 1500                # m/s water
-# ρ = 998                 # kg/mˆ3 water
-# μ = 1e-3                # Pa*s water
 a = 1290                # m/s petroleum
 ρ = 850                 # kg/mˆ3 petroleum
 μ = 800e-3              # Pa*s petroleum
@@ -110,49 +65,35 @@ A = π * (d / 2)^2       # m^2 Pipe area
 # https://sci-hub.se/10.1109/IECON.2000.972506
 L = ρ * Δs / A
 C = A * Δs / (ρ * a^2)
-R = 32 * μ / (A * d^2) * Δs
 # Impeller
 Δsi = 0.2       # Equivalent length
 di = 0.108      # Impeller's diameter
 
-# State conditions
-q = 1e-4
-# Reynolds check
-Re = (ρ * (q / A) * d) / μ
-ReEq(ρ, q, d, μ)
-
-# Friction check
-# Check these values, including Reynolds with
-# http://www.druckverlust.de/Online-Rechner/dp.php
-cheng(Re, ϵ, d)
-colebrook(Re, ϵ, d)
-Δs * cheng(Re, ϵ, d) * (ρ / (2 * d)) * ((q / A)^2)
-darcyq(q, Δs, d, ϵ, ρ, μ) * (q^2)
-
 # P100
 γa = 0.002
 γb = -1.7317
-# γa = 0.2
-# γb = -10.7317
 Ii = 0.8504
 Ia = 5e-4
 ca = 0.1
 Kf = 1
-Kc = 50
+Kc = 1
 
+0.7-0.25
 # Inputs
-τ = (t) -> t > 0.25 ? min((80 * (t - 0.25) * 100), 80) : 0.01    # Torque
-# plot(sol.t, τ.(sol.t))
+# τ = (t) -> (tanh.(50 .*(t .- 0.31)) .+ 1)*(80/2)
+τ = (t) -> (tanh.(100 .*(t .- 0.275)) .+ 1.0001)*(80/2)
+τ = (t) -> (tanh.(100 .*(t .- 0.275)) .+ 1.0001)*(80/2)
+τ = (t) -> t > 0.25 ? min(80, 10000*(t - 0.25)) : 1e-4    # Torque
+τ = (t) -> t > 0.25 ? 80 : 1e-3    # Torque
+τ = (t) -> (tanh.(200 .*(t .- 0.265)) .+ 1.0001)*(80/2)
 
-# q = 0                      # flow-rate
-# q = 1e-4                  # flow-rate
-Po = 0
-Pi = 0
+# t = collect(0.23:0.0001:0.3)
+# plot(t, τ.(t))
+# plot!(t, 40 .*(tanh.(500 .*(t .- 0.2525)) .+ 1))
+# t = collect(0.24:0.0001:0.27)
+# plot(t, 40 .*(tanh.(250 .*(t .- 0.26)) .+ 1))
 
-# q = 1e-5
-q = 0
-q0 = q * 1.5
-ω0 = 0.0
+#      Qi,   ω,  Q1,  Q3,  P2, P4
 u0 = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 p = [Δsi * 40, di, Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L]
 
@@ -160,24 +101,21 @@ tspan = (0.0, 1.0)
 prob = ODEProblem(pump_pipe!, u0, tspan, p)
 sol = solve(prob, reltol=1e-8, abstol=1e-8)
 
-sol[1, 3000]
-sol.t[3000]
-plot(ReEq.(ρ, sol[3, 2:end], d, μ), yscale=:log10)
-
-plot(sol.t, sol[3, :])
-plot(sol.t, ReEq.(ρ, sol[3, :], d, μ))
-plot(sol.t, darcyq.(sol[3, :], Δs, d, ϵ, ρ, μ))
-plot(sol.t, ReEq.(ρ, sol[3, :], d, μ))
+plot(sol.t, sol[1, :])
+plot!(twinx(), sol.t, τ.(sol.t), c=:red)
 
 # Q, ω
 plot(sol.t, sol[1, :])
 plot(sol.t, sol[2, :])
+plot!(twinx(), sol.t, τ.(sol.t), c=:red)
 # Q1, Q3
 plot(sol.t, sol[3, :])
+plot!(twinx(), sol.t, τ.(sol.t), c=:red)
 plot!(sol.t, sol[4, :])
 # Q5, Q7
 plot(sol.t, sol[5, :])
-plot!(sol.t, sol[6, :])
+plot(sol.t, sol[6, :])
+plot!(twinx(), sol.t, τ.(sol.t), c=:red)
 # P2, P4
 plot(sol.t, sol[7, :])
 plot!(sol.t, sol[8, :])
@@ -185,8 +123,12 @@ plot!(sol.t, sol[8, :])
 plot(sol.t, sol[9, :])
 plot!(sol.t, sol[10, :])
 
-t = 0.499:0.0001:1
+t = 0:0.0001:1
 nsol = sol(t)
+
+idxs = Int(0.24 / 0.0001):Int(0.255 / 0.0001)
+plot(nsol.t[idxs], nsol[2, idxs])
+plot!(twinx(), nsol.t[idxs], τ.(nsol.t[idxs]), c=:red)
 
 Qs = [1, 3, 4]
 tl_q = ["Flow rate impeller", "Flow rate pipe 1", "Flow rate pipe 2", "Flow rate pipe 3", "Flow rate pipe 4"]
@@ -216,4 +158,4 @@ write(file, "t", collect(t))
 close(file)
 
 
-64/(ρ*q*d/μ)*q^2
+64 / (ρ * q * d / μ) * q^2
