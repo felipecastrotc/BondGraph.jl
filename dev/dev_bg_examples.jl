@@ -5,15 +5,15 @@ import BondGraph: t, D
 # Mass-spring-damper problems
 
 # Definitions
-@named m = Mass(m = 1)
-@named s = Spring(k = 1, x = 0.1)
-@named s3 = Spring3(k = 1, x = 0.2)
-@named d = Damper(c = 1)
+@named m = Mass(m=1)
+@named s = Spring(k=1, x=0.1)
+@named s3 = Spring3(k=1, x=0.2)
+@named d = Damper(c=1)
 @named F = Se(5)
 
 # 1-DOF
-# @named dof1 = Junction1([-1, m], [-1, s], [-1, d], F)
-@named dof1 = Junction1(m, s, d, F)
+# @named dof1 = Junction1(m, s, d, F)
+@named dof1 = Junction1([-1, m], [-1, s], [-1, d], F)
 generate_graph(dof1)
 edof1 = expand_connections(dof1)
 
@@ -21,9 +21,12 @@ equations(edof1)
 
 @named sdof1 = reducedobs(structural_simplify(edof1))
 equations(sdof1)
+prob = ODEProblem(sdof1, [0.0, 0.0], (0.0, 10))
+sol = solve(prob)
+plot(sol)
 
 # 2-DOF
-@named sd = Junction1(s, d)
+@named sd = Junction1(s, d, F)
 @named mj = Junction1(m)
 
 @named b1 = Junction0(mj, sd)
@@ -36,6 +39,11 @@ edof2 = expand_connections(cdof2)
 
 @named sdof2 = reducedobs(structural_simplify(edof2))
 equations(sdof2)
+
+states(sdof2)
+prob = ODEProblem(sdof2, [0.0, 0.0, 0.0, 0.0], (0.0, 10))
+sol = solve(prob)
+plot(sol)
 
 # n-DOF
 @named sd = Junction1(s, d)
@@ -57,12 +65,12 @@ equations(sdofn)
 # ============================================================================
 # MGY problems
 
-@named L = Mass(m = 0.5)
-@named R = Damper(c = 1.0)
+@named L = Mass(m=0.5)
+@named R = Damper(c=1.0)
 @named Uₐ = Se(-12.0)
 
-@named J = Mass(m = 0.01)
-@named b = Damper(c = 0.1)
+@named J = Mass(m=0.01)
+@named b = Damper(c=0.1)
 @named Tₗ = Se(-1.0)
 
 g = 0.01
@@ -70,7 +78,7 @@ g = 0.01
 @named jm = Junction1(Tₗ, b, J)
 @named je = Junction1(Uₐ, R, L)
 # @named jm = Junction1(b, J)
-@named gy = mGY(je,jm, g = g)
+@named gy = mGY(je, jm, g=g)
 equations(gy)
 
 @named mdl = compose(gy, je, jm)

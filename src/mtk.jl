@@ -28,9 +28,9 @@ function expand_connections(sys::AbstractSystem; debug = false, tol = 1e-10)
     @set! sys.eqs = [equations(_sys); ceqs; bgeqs]
 end
 
-function generate_connection_set(sys::AbstractSystem)
+function generate_connection_set(sys::AbstractSystem, find=nothing, replace=nothing)
     connectionsets = ConnectionSet[]
-    sys = generate_connection_set!(connectionsets, sys)
+    sys = generate_connection_set!(connectionsets, sys, find, replace)
     bgconnectionsets = get_bg_connection_set!(connectionsets)
     sys, vcat(merge(connectionsets), bgconnectionsets)
 end

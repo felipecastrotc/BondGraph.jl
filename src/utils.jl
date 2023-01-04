@@ -320,7 +320,7 @@ end
 function generate_graph(mdl, var=:e; method=:stress)
 
     connectionsets = ConnectionSet[]
-    sys = generate_connection_set!(connectionsets, mdl)
+    sys = generate_connection_set!(connectionsets, mdl, nothing, nothing)
 
     bgconnectionsets = get_bg_connection_set!(connectionsets)
     str2con = csets2dict(bgconnectionsets)
