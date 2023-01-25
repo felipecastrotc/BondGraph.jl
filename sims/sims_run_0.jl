@@ -1,9 +1,14 @@
+# =====================================================================
+# This file was used to generate the intial results on the PINN dataset
+# It is being kept for reproducibility
+# =====================================================================
+
 using DifferentialEquations
 using Plots
 using MAT, YAML
 
 include("lib_types.jl")
-include("lib_sim_models.jl")
+include("lib_sim.jl")
 include("lib_in_func.jl")
 include("utils.jl")
 
