@@ -1,5 +1,12 @@
-g = 9.81        # Gravity
-H = 9.81*1000   # MMCA
+struct ConvConst
+    g::Float64      # Gravity
+    H::Float64      # Convert Pascal to head
+    function ConvConst()
+        g = 9.81        # Gravity
+        H = 9.81*1000   # MMCA
+        new(g, H)
+    end
+end
 
 struct Fluid
     a::Float64      # (m/s) Speed of sound
@@ -11,72 +18,72 @@ struct Impeller
     # Impeller geometry
     γa::Float64
     γb::Float64
-    di::Float64         # (m) Impeller diameter
-    Δsi::Float64        # (m) Equivalent length
+    d::Float64         # (m) Impeller diameter
+    l::Float64        # (m) Equivalent length
     # These are an estimation thinking the impeller as a channel
-    di_m::Float64       # (m) Diâmetro médio do impelidor
-    hi_m::Float64       # (m) Altura média do impelidor
-    li::Float64         # (m) Comprimento médio do impelidor
-    Ii::Float64         # (m) Impeller Inertia
-    function Impeller(γa, γb, di, Δsi, di_m, hi_m, li, fluid::Fluid)
-        # di (mm)
-        # Δsi (m)
-        # di_m (mm)
-        # hi_m (mm)
-        # li (mm)
+    d_m::Float64       # (m) Diâmetro médio do impelidor
+    h_m::Float64       # (m) Altura média do impelidor
+    l_m::Float64         # (m) Comprimento médio do impelidor
+    I::Float64         # (m) Impeller Inertia
+    function Impeller(γa, γb, d, l, d_m, h_m, l_m, fluid::Fluid)
+        # d (mm)
+        # l (m)
+        # d_m (mm)
+        # h_m (mm)
+        # l_m (mm)
         # da (mm)
         # la (m)
 
         # Convert mm to m
-        di = di / 1000
-        di_m = di_m / 1000
-        hi_m = hi_m / 1000
-        li = li / 1000
+        di = d / 1000
+        di_m = d_m / 1000
+        h_m = h_m / 1000
+        l_m = l_m / 1000
 
         # Impeller inertia
-        Ii = fluid.ρ * li / (π * di_m * hi_m)
-        new(γa, γb, di, Δsi, di_m, hi_m, li, Ii)
+        I = fluid.ρ * l_m / (π * d_m * h_m)
+        new(γa, γb, d, l, d_m, h_m, l_m, I)
     end
 end
 
 struct Shaft
     # Axis
-    ca::Float64         # Axis damping coefficient
-    da::Float64         # (m) Axis diameter
-    la::Float64         # (m) Axis length
-    ρa::Float64         # (kg/m^3) Specific mass for steel
-    Ia::Float64         # Axis Inertia
-    function Shaft(ca, da, la, ρa)
-        # la (m)
-        # da (mm)
+    c::Float64         # Axis damping coefficient
+    d::Float64         # (m) Axis diameter
+    l::Float64         # (m) Axis length
+    ρ::Float64         # (kg/m^3) Specific mass for steel
+    I::Float64         # Axis Inertia
+    function Shaft(c, d, l, ρ)
+        # l (m)
+        # d (mm)
 
         # Convert mm to m
-        da = da / 1000
+        d = d / 1000
         # Axis inertia
-        Ia = ((ρa * π * (da / 2)^2 * la) * (da / 2)^2) / 2
-        new(ca, da, la, ρa, Ia)
+        I = ((ρ * π * (d / 2)^2 * l) * (d / 2)^2) / 2
+        new(c, d, l, ρ, I)
     end
 end
 
 struct Pipe
     d::Float64        # (m) Pipe diameter
-    Δs::Float64       # (m) Pipe length
+    l::Float64       # (m) Pipe length
     ϵ::Float64        # (m) Steel rugosity
     A::Float64        # (m^2) Pipe area
     # Pipeline dynamics -> using Tanaka pipe
     # https://sci-hub.se/10.1109/IECON.2000.972506
-    L::Float64
+    I::Float64
     C::Float64
-    function Pipe(d, Δs, ϵ, fluid::Fluid)
+    function Pipe(d, l, ϵ, fluid::Fluid)
         # d (mm)
-        # Δs (m)
+        # l (m)
 
         d = d / 1000
         A = π * (d / 2)^2
-        L = fluid.ρ * Δs / A
-        C = A * Δs / (fluid.ρ * fluid.a^2)
+        I = fluid.ρ * l / A
+        C = A * l / (fluid.ρ * fluid.a^2)
 
-        new(d, Δs, ϵ, A, L, C)
+        new(d, l, ϵ, A, I, C)
     end
 end
 
@@ -85,6 +92,10 @@ struct System
     pipe::Pipe
     shaft::Shaft
     pump::Impeller
+    conv::ConvConst
+    function System(fluid, pipe, shaft, pump)
+        new(fluid, pipe, shaft, pump, ConvConst())
+    end
 end
 
 struct Inputs
