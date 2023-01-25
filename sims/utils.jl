@@ -8,12 +8,6 @@ PATH_SIM_STORE = "/Users/fctc/me/doutorado/dev/pinn-jax/cfg-sim/"
 
 function store_sim(name, sol, sim, t, offset=0.0)
 
-    # Get the parameters used on the system
-    # ps_val = get_unpack(sim)(sim)
-    # ps_name = get_sim_ps(sim)()
-
-    # ps = Dict(k => val for (k, val) in zip(ps_name, ps_val))
-
     # Build a dictionary with all settings used
     sim_dct = sim2dict(sim)
     sim_dct[:ps] = Dict(:val => ps, :seq => ps_name)
