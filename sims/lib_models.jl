@@ -20,17 +20,27 @@ end
 # Pipeline with laminar friction only
 function pipe_lam(t, u, pipe, fluid, conv)
     # Unpack states
-    P_in, P_out, Q, Q_out = u[:]
+    P_in, P_out, Q = u[:]
     # Unpack properties
     μ = fluid.μ
     l, d, I, C = pipe.l, pipe.d, pipe.I, pipe.C
     # Unpack useful constants
     H = conv.H
     # Equation
-    return [
-        (P_in - P_out - darcyq_lam(l, d, μ) * Q / H) * H / I,
-        (Q - Q_out) / (C * H)
-    ]
+    return (P_in - P_out - darcyq_lam(l, d, μ) * Q / H) * H / I
+end
+
+
+# Pipeline pressure
+function pipe_p(t, u, pipe, fluid, conv)
+    # Unpack states
+    Q_in, Q_out = u[:]
+    # Unpack properties
+    C = pipe.C
+    # Unpack useful constants
+    H = conv.H
+    # Equation
+    return (Q_in - Q_out) / (C * H)
 end
 
 

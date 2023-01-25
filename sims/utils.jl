@@ -10,7 +10,6 @@ function store_sim(name, sol, sim, t, offset=0.0)
 
     # Build a dictionary with all settings used
     sim_dct = sim2dict(sim)
-    sim_dct[:ps] = Dict(:val => ps, :seq => ps_name)
 
     # Store info
     f = open(PATH_SIM_STORE * name * "_cfg.yml", "w")

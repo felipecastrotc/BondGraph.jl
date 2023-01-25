@@ -35,8 +35,8 @@ struct Impeller
         # la (m)
 
         # Convert mm to m
-        di = d / 1000
-        di_m = d_m / 1000
+        d = d / 1000
+        d_m = d_m / 1000
         h_m = h_m / 1000
         l_m = l_m / 1000
 
@@ -121,8 +121,7 @@ function sim2dict(x::System)
         :pipe => type2dict(x.pipe),
         :shaft => type2dict(x.shaft),
         :pump => type2dict(x.pump),
-        :g => g,
-        :H => 1000*g,
+        :const => type2dict(ConvConst()),
     )
 end
 

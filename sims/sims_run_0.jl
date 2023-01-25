@@ -30,7 +30,7 @@ pipe_oil = Pipe(75, 7.5, 0.1 * 1e-3, oil)
 
 # Impellers
 #  In the first simulations I used the impeller length and diameter as the pipe 
-p100_oil = Impeller(0.002, -1.7317, 0.075, 7.5, (108 + 60.5) / 2, (13 + 24) / 2, (108 - 60.5), oil)
+p100_oil = Impeller(0.002, -1.7317, 75, 7.5, (108 + 60.5) / 2, (13 + 24) / 2, (108 - 60.5), oil)
 # p100_oil = Impeller(0.002, -1.7317, 0.108, 0.2, (108 + 60.5) / 2, (13 + 24) / 2, (108 - 60.5), oil)
 
 # Systems
@@ -48,7 +48,7 @@ name = "hqp1i1_oil_p100_bshaft_w0"
 tspan = (0.0, 5.0)
 #      Qi,   ω,  Q1,  Q3,  P2, P4
 u0 = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-sim = Sim(sys_bshat, u0, tspan, hqp1i1!_new, inpt_w1)
+sim = Sim(sys_bshat, u0, tspan, hqp1i1!, inpt_w1)
 
 prob = ODEProblem(sim.model, sim.u0, sim.tspan, sim)
 sol = solve(prob, reltol=1e-8, abstol=1e-8)
