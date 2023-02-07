@@ -13,20 +13,37 @@ function ReQ(ρ, q, d, μ)
     # return (ρ * (q / A) * d) / μ
 end
 
-function darcyq_haal(q, Δs, d, ϵ, μ, ρ)
-    return ((2*Δs*ρ)/(π*d^3))*haaland(q, d, ϵ, μ, ρ)
-    # return (4*Δs*ρ)/(2*d*π*d^2)
+function darcyq_haal(q, l, d, ϵ, μ, ρ)
+    return haaland(q, d, ϵ, μ, ρ)*(8*l*ρ/(π^2*d^5))
+    # return (4*l*ρ)/(2*d*π*d^2)
 end
 
-function darcyq_lam(Δs, d, μ)
+function darcyq_cheng(q, l, d, ϵ, μ, ρ)
+    Re = max(ReQ(ρ, abs(q), d, μ), 0.1)
+    return cheng(Re, ϵ, d)*(8*l*ρ/(π^2*d^5))
+end
+
+function darcyq_lam(l, d, μ)
     # using SymPy
-    return 128 * Δs * μ / (pi * d^4)
+    return 128 * l * μ / (pi * d^4)
 end
 
 # -----------------------------------------------------------------------------
 # Friction functions
 function haaland(q, d, ϵ, μ, ρ)
-    return 1/((-1.8*log10(6.9/ReQ(ρ, q, d, μ) + ((ϵ/d)/3.7)^1.11))^2)
+    Re = max(ReQ(ρ, abs(q), d, μ), 0.1)
+    if Re < 2400
+        return 64/Re
+    else
+        return 1/((-1.8*log10(6.9/Re + ((ϵ/d)/3.7)^1.11))^2)
+    end
+end
+
+function cheng(Re, ϵ, d)
+    a = 1 / (1 + (Re / 2720)^9)
+    b = 1 / (1 + (Re / (160 * (d / ϵ)))^2)
+    invf = ((Re / 64)^a) * ((1.8 * log10(Re / 6.8))^(2 * (1 - a) * b)) * ((2.0 * log10(3.7 * d / ϵ))^(2 * (1 - a) * (1 - b)))
+    return 1 / invf
 end
 
 # -----------------------------------------------------------------------------
@@ -35,6 +52,22 @@ end
 # Valve Cv function of opening
 function cv_func(a, p)
     return p[1] + p[2] * a + p[3] * a^2 + p[4] * a^3 + p[5] * a^4 + p[6] * a^5
+end
+
+# Valve Cv function of opening
+function fd_func(a, p)
+    return p[1] + p[2] * a + p[3] * a^2 + p[4] * a^3 + p[5] * a^4 + p[6] * a^5
+end
+
+# -----------------------------------------------------------------------------
+# Progressing cavity pump
+function pcavity(Q, μ, ω, k1, k2, P_in=0)
+    return μ*(k1*ω - Q)/k2 + P_in
+end
+
+function ptwin(Q, μ, ω, k1, k2, P_in=0)
+    # return k2*μ*(k1*ω - Q) + P_in
+    return k1*μ*ω - k2*μ*Q + P_in
 end
 
 # -----------------------------------------------------------------------------
