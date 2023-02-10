@@ -1,6 +1,6 @@
 using DifferentialEquations
 using Plots
-using MAT, YAML, JSON
+using MAT, YAML, JSON, HDF5
 
 include("lib_types.jl")
 include("lib_sim.jl")
@@ -11,7 +11,7 @@ include("utils.jl")
 
 # ----------------------------------------------------------------------
 # Load experimental points
-exp_data = JSON.parsefile("./sims/run-points/cd61.json")
+exp_data = JSON.parsefile("./sims/exp-points/cd61.json")
 
 exp_idx = "12"
 μ = exp_data["mu"][exp_idx]

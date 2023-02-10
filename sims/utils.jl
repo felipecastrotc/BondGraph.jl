@@ -18,11 +18,13 @@ function store_sim(name, sol, sim, t, offset=0.0)
 
     # Store simulation
     nsol = sol(t)
+    dnsol = sol(t, Val{1})
     t .-= offset
 
     file = matopen(PATH_SIM_STORE * name * "_sim.h5", "w")
 
     write(file, "sol", Matrix(nsol))
+    write(file, "dsol", Matrix(dnsol))
     write(file, "t", collect(t))
     write(file, "dt", diff(t)[1])
 
