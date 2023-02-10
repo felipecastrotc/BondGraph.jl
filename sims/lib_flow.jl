@@ -5,6 +5,32 @@ function AEq(d)
 end
 
 # -----------------------------------------------------------------------------
+# Viscosity functions
+
+function mu_oil(T)
+    return (
+        0.00026436 * T^4 - 0.04864 * T^3 + 3.436 * T^2 - 114.28 * T + 1610.3
+    ) / 1000
+end
+
+function mu_water(T)
+    T = T + 273.15
+    A = 2.414 * 1e-5
+    B = 247.8
+    C = 140
+    return A * 10 ^ (B / (T - C))
+end
+
+function mu_func(omega, T)
+    return brinkman(omega, mu_oil(T))
+end
+
+function brinkman(omega, mu)
+    return mu * ((1 / (1 - omega)) ^ 2.5)
+end
+
+
+# -----------------------------------------------------------------------------
 # Flow functions
 
 function ReQ(ρ, q, d, μ)
@@ -44,6 +70,7 @@ function cheng(Re, ϵ, d)
     b = 1 / (1 + (Re / (160 * (d / ϵ)))^2)
     invf = ((Re / 64)^a) * ((1.8 * log10(Re / 6.8))^(2 * (1 - a) * b)) * ((2.0 * log10(3.7 * d / ϵ))^(2 * (1 - a) * (1 - b)))
     return 1 / invf
+    # return 64/Re
 end
 
 # -----------------------------------------------------------------------------

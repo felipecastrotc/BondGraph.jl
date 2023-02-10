@@ -16,7 +16,7 @@ struct Fluid
     μ::Float64      # (Pa*s) Viscosity
 end
 
-struct Impeller
+mutable struct Impeller
     # Impeller geometry
     γa::Float64
     γb::Float64

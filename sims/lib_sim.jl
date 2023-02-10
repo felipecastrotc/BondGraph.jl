@@ -283,3 +283,26 @@ function hqvp1i1tcvfit!(du, u, p, t)
     dP[1] = pipe_p(t, [Q[1], Q_p], s.pipe[1], s.fluid, s.conv)
     dP[2] = pipe_p(t, [Q_p, Q[2]], s.pipe[2], s.fluid, s.conv)
 end
+
+# -------------------------------------------------------------------
+# Model manual -  1 upstream 1 downstream - Twin pump
+# (H)ead Q-flow-rate (P)ipe-1 (I)mpeller-1 - Laminar - Cheng - Shock - Valve 
+
+function hqvp1i1lcvfit!(du, u, p, t)
+    P_i, P_o = 0.0, 0.0
+    s = p.sys
+    Q_p, ω = view(u, 1:2)
+    dQ, Q = view(du, 3:4), view(u, 3:4)
+    dP, P = view(du, 5:6), view(u, 5:6)
+    # Impeller with laminar friction
+    du[1] = impeller_fit1(t, [P[1], P[2], Q_p, ω], s.pump, s.fluid, s.conv)
+    # Shaft with first order friction only
+    du[2] = shaft_1st_fit(t, [Q_p, ω], p.input, s.shaft, s.pump, s.fluid, s.conv)
+    # Pipeline upstream
+    dQ[1] = pipe_lam_twin(t, [P_i, P[1], Q[1]], s.pipe[1], s.fluid, s.conv)
+    # Pipeline downstream
+    dQ[2] = pipe_lam_valve(t, [P[2], P_o, Q[2], a], s.pipe[2], s.fluid, s.conv)
+    # Pressure
+    dP[1] = pipe_p(t, [Q[1], Q_p], s.pipe[1], s.fluid, s.conv)
+    dP[2] = pipe_p(t, [Q_p, Q[2]], s.pipe[2], s.fluid, s.conv)
+end
