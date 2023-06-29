@@ -1,0 +1,87 @@
+\begin{align}
+  \frac{\mathrm{d} Q_i}{\mathrm{d}t} =& \frac{\left( \gamma_{a} Q_i - \gamma_{b} \omega \right) \omega + \frac{ - V_u}{k_u} + \frac{ - V_v}{k_v} -  f{Q_i}^{2} - f_s \left(1 - \frac{Q_i}{Q^*}\right)^2}{I_i} \\
+  \frac{\mathrm{d} Q_u}{\mathrm{d}t} =& \frac{ - P_t + \frac{V_u}{k_u} - f_{p i} {Q_u}^2}{I_{p i}} \\
+  \frac{\mathrm{d} Q_v}{\mathrm{d}t} =& \frac{ - P_t + \frac{V_v}{k_v} - f_{p o} {Q_v}^2}{I_{p o}} \\
+  \frac{\mathrm{d} \omega}{\mathrm{d}t} =& \frac{\tau + \left( \gamma_{b} \omega - \gamma_{a} Q_i \right) Q_i - {\omega}^{2} c_a}{I_a} \\
+  \frac{\mathrm{d} V_u}{\mathrm{d}t} =& Q_i + Q_u \\
+  \frac{\mathrm{d} V_v}{\mathrm{d}t} =&  - Q_i + Q_v
+\end{align}
+
+
+% Friction loss impeller
+\begin{equation}
+  f =  \frac{\rho L}{d_h\, A^2}\,K_f(Re)
+\end{equation}
+
+% Shock loss impeller
+\begin{equation}
+  f_s = 2\,K_s\,\rho \omega^2 {r}^2 
+\end{equation}
+
+% Friction loss pipe
+\begin{equation}
+  f_{px} = \frac{\rho L}{d_h\, A^2}\,K_p(Re)
+\end{equation}
+
+\begin{equation}
+  K_p = \left( \frac{1}{1.8 \log\left(\frac{Re}{6.8} \right)} \right)^{2} \left( 1 + \frac{-1}{1 + e^{\alpha_{l} \left( Re - \beta_{l} \right)}} + \frac{-1}{1 + e^{ - \alpha_{t} \left( Re + \beta_{t} - \epsilon_{t} \log\left( \kappa \right) \right)}} \right) + \frac{64}{Re \left( 1 + e^{\alpha_{l} \left( Re - \beta_{l} \right)} \right)} + \frac{\left( \frac{1}{2 \log\left( \frac{3.7 d}{\kappa} \right)} \right)^{2}}{1 + e^{ - \alpha_{t} \left( Re + \beta_{t} - \epsilon_{t} \log\left( \kappa \right) \right)}}
+\end{equation}
+
+
+\begin{equation}
+  \gamma_a = {r_2}^2 - {r_1}^2
+ \end{equation}
+ 
+ \begin{equation}
+  \gamma_b = \left(\frac{r_2}{A_2 \tan \beta_2} - \frac{r_1}{A_1 \tan \beta_1}\right)
+ \end{equation}
+ 
+
+% Pump
+\begin{align}
+  \frac{dQ_i}{dt} = & \frac{P_4 - P_6 + \rho \, (\gamma a \, Qi - \gamma b \,\omega) \,\omega - darcy(Qi, \Delta s, d, \epsilon, \rho, \mu) \, Qi^2}{Ii}\\
+  \frac{d\omega}{dt} = & \frac{\tau(t) - c_a \,\omega - \rho \, (\gamma a \, Qi - \gamma b \,\omega) \, Qi}{Ia} \\
+  \frac{dQ_1}{dt} = & \frac{P_i - P_2 - K_f \, darcy(Q_1, \Delta s, d, \epsilon, \rho, \mu) \, {Q_1}^2}{L}\\
+  \frac{dQ_3}{dt} = & \frac{P_2 - P_4 - K_f \, darcy(Q_3, \Delta s, d, \epsilon, \rho, \mu) \, {Q_3}^2}{L} \\
+  \frac{dQ_5}{dt} = & \frac{P_6 - K_f \, darcy(Q_5, \Delta s, d, \epsilon, \rho, \mu) \, {Q_5}^2}{L} \\
+  \frac{dQ_7}{dt} = & \frac{P_8 - P_o - K_f \, darcy(Q7, \Delta s, d, \epsilon, \rho, \mu) \, Q7^2}{L} \\
+  \frac{dP_2}{dt} = & \frac{Q_1 - Q_3}{K_c \, C} \\
+  \frac{dP_4}{dt} = & \frac{Q_3 - Q_i}{K_c \, C} \\
+  \frac{dP_6}{dt} = & \frac{Q_i - Q_5}{K_c \, C} \\
+  \frac{dP_8}{dt} = & \frac{Q_5 - Q_7}{K_c \, C}  \\
+\end{align}
+
+
+\begin{align}
+  darcy(Q, \Delta s, d, \epsilon, \rho, \mu) = & \Delta s \, cheng(Re, \epsilon, d) \, \frac{\rho}{2 \, d} \, \left (\frac{1}{A} \right )^2 \\
+  cheng(Re, \epsilon, d)  = & \frac{1}{f}\\
+  f(Re, \epsilon, d) = & {\frac{Re}{64}}^a \, {\left (1.8 \log\left (\frac{Re}{6.8} \right ) \right )} ^{2 (1 - a) b} \, {\left ( 2.0 \log \left (3.7 \frac{d}{\epsilon} \right ) \right )}^{2 (1 - a)(1 - b)} \\
+  a = & \frac{1}{1 + {\frac{Re}{2720}}^9}\\
+  b = & \frac{1}{1 + {\frac{Re}{\frac{160\,d}{\epsilon}}}^2}
+\end{align}
+
+
+\begin{align}
+  \frac{dQ_{p}}{dt} = & \frac{P_2 - P_4 + \rho \, (\gamma_a \, Q_{p} - \gamma_b \,\omega) \,\omega - darcy(Q_{p}, \Delta s, d, \epsilon, \rho, \mu) \, Q_{p}^2}{Ii}\\
+  \frac{d\omega}{dt} = & \frac{\tau(t) - c_a \,\omega - \rho \, (\gamma_a \, Q_{p} - \gamma_b \,\omega) \, Q_{p}}{Ia} \\
+  \frac{dQ_1}{dt} = & \frac{P_{in} - P_2 - K_f \, darcy(Q_1, \Delta s, d, \epsilon, \rho, \mu) \, {Q_1}^2}{L}\\
+  \frac{dQ_3}{dt} = & \frac{P_8 - P_{out} - K_f \, darcy(Q_3, \Delta s, d, \epsilon, \rho, \mu) \, Q_3^2}{L} \\
+  \frac{dP_2}{dt} = & \frac{Q_1 - Q_{i}}{C} \\
+  \frac{dP_4}{dt} = & \frac{Q_{i} - Q_3}{C} \\
+\end{align}
+
+% \documentclass{article}
+% \usepackage{amsmath}
+% \pagestyle{empty}
+% \begin{document}
+
+
+% \begin{align}
+%   darcy(Q, \Delta s, d, \epsilon, \rho, \mu) = & \Delta s \, cheng(Re, \epsilon, d) \, \frac{\rho}{2 \, d} \, \left (\frac{1}{A} \right )^2 \\
+%   cheng(Re, \epsilon, d)  = & \frac{1}{f}\\
+%   f(Re, \epsilon, d) = & {\frac{Re}{64}}^a \, {\left (1.8 \log\left (\frac{Re}{6.8} \right ) \right )} ^{2 (1 - a) b} \, {\left ( 2.0 \log \left (3.7 \frac{d}{\epsilon} \right ) \right )}^{2 (1 - a)(1 - b)} \\
+%   a = & \frac{1}{1 + {\frac{Re}{2720}}^9}\\
+%   b = & \frac{1}{1 + {\frac{Re}{\frac{160\,d}{\epsilon}}}^2}
+% \end{align}
+
+% \end{document}
