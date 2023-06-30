@@ -66,7 +66,7 @@ push!(plist, ds11, ds10);
 @parameters γa, γb
 
 gyp = ρ * (γa * ω - γb * Q)
-@named agy = mGY(g=gyp)
+@named agy = mGY(g = gyp)
 
 # ----------------------------------------------------------
 # Build connections
@@ -84,7 +84,14 @@ push!(cons, connect(ds11.power, ds10.power))
 
 # Impeller assembly
 # push!(cons, connect(us10.power, jus.power), connect(jus.power, imp.power), connect(imp.power, jds.power), connect(jds.power, olt.power), connect(olt.power, ds11.power))
-push!(cons, connect(us10.power, jus.power), connect(jus.power, imp.power), connect(imp.power, jds.power), connect(jds.power, olt.power), connect(olt.power, ds10.power))
+push!(
+    cons,
+    connect(us10.power, jus.power),
+    connect(jus.power, imp.power),
+    connect(imp.power, jds.power),
+    connect(jds.power, olt.power),
+    connect(olt.power, ds10.power),
+)
 
 # Axis - Impeller coupling
 push!(cons, connect(ax.power, agy.pin), connect(agy.pout, imp.power))
@@ -116,7 +123,17 @@ equations(sys)
 
 # olt.d.R => fₛ / Qᵢ * (1 - Qᵢ / Qₛ)^2
 # human = Dict(agy.γa => γ_a, agy.γb => γ_b, imp.m.power.f => Qᵢ, ax.m.power.f => ω, imp.m.I => Iᵢ, tnk.P.p => Pₜ, plds.m2.power.f => Qᵥ, plds.m2.I => Iₚₒ, ilt.m.I => Iₚᵢ, agy.ρ => ρ, ax.m.I => Iₐ, ax.d.R => cₐ * ω, ilt.m.power.f => Qᵤ, ax.T.τ => τ, ilt0.s.q => Vᵤ, plds0.s.q => Vᵥ, plds0.s.C => kᵥ, ilt0.s.C => kᵤ, tnk2.P.p => Pₜ)
-human = Dict(agy.γa => γ_a, agy.γb => γ_b, imp.m.power.f => Qᵢ, ax.m.power.f => ω, imp.m.I => Iᵢ, agy.ρ => ρ, ax.m.I => Iₐ, ax.d.R => cₐ * ω, ax.T.τ => τ)
+human = Dict(
+    agy.γa => γ_a,
+    agy.γb => γ_b,
+    imp.m.power.f => Qᵢ,
+    ax.m.power.f => ω,
+    imp.m.I => Iᵢ,
+    agy.ρ => ρ,
+    ax.m.I => Iₐ,
+    ax.d.R => cₐ * ω,
+    ax.T.τ => τ,
+)
 
 # Set the friction paramters
 human[olt.d.R] = fₛ
@@ -165,9 +182,20 @@ v0 = zeros(length(states(sys)))
 rpo["τ"] = 10
 #vals = Dict(p => float(param_range[string(p)][2]) for p in parameters(sys))
 # vals = Dict(p => float(rpo[string(p)]) for p in parameters(sys))
-vals = Dict(Iᵢ => rpo["Iᵢ"], γ_b => rpo["γ_b"], ρ => rpo["ρ"], f => rpo["f"], γ_a => rpo["γ_a"], cₐ => rpo["cₐ"], τ => rpo["τ"], Iₐ => rpo["Iₐ"], us11.P.p => 0.0, ds31.Po.po => 0.0)
+vals = Dict(
+    Iᵢ => rpo["Iᵢ"],
+    γ_b => rpo["γ_b"],
+    ρ => rpo["ρ"],
+    f => rpo["f"],
+    γ_a => rpo["γ_a"],
+    cₐ => rpo["cₐ"],
+    τ => rpo["τ"],
+    Iₐ => rpo["Iₐ"],
+    us11.P.p => 0.0,
+    ds31.Po.po => 0.0,
+)
 prob = ODEProblem(sys, v0, (0.0, 10), vals)
-sol = solve(prob, reltol=1e-14, abstol=1e-14)
+sol = solve(prob, reltol = 1e-14, abstol = 1e-14)
 # sol = solve(prob)
 
 states(sys)
@@ -175,16 +203,16 @@ plot(sol.t, sol[Qᵢ])
 plot(sol.t, sol[us10.pls.q])
 plot(sol)
 
-plot(sol.t, sol[us31.plm.power.f], label="Qu")
-plot!(sol.t, sol[ds11.plm.power.f], label="Qv")
+plot(sol.t, sol[us31.plm.power.f], label = "Qu")
+plot!(sol.t, sol[ds11.plm.power.f], label = "Qv")
 
-plot(sol.t, sol[ω], label="Qu")
-plot!(sol.t, sol[Qᵢ], label="Qv")
+plot(sol.t, sol[ω], label = "Qu")
+plot!(sol.t, sol[Qᵢ], label = "Qv")
 
 nsol = sol(0:0.00001:0.0005);
-plot(nsol.t, [nsol[ω], nsol[Qᵢ]], layout=(2, 1));
+plot(nsol.t, [nsol[ω], nsol[Qᵢ]], layout = (2, 1));
 
-plot(sol, layout=(14, 1))
+plot(sol, layout = (14, 1))
 
 equations(sys)
 states(sys)
@@ -195,7 +223,7 @@ l = @layout [grid(3, 1)]
 p1 = plot(...)
 p2 = plot(...)
 p3 = plot(...)
-plot(p1, p2, p3, layout=l)
+plot(p1, p2, p3, layout = l)
 
 
 tv = 0:0.001:10
@@ -210,12 +238,11 @@ labels = reshape(v, length(v), 1)
 
 [string(p) for p in sol_fast.syms[1:2]][:, :]
 
-plot(t_fast, sol_fast, layout=(2, 1), label=[])
+plot(t_fast, sol_fast, layout = (2, 1), label = [])
 
-plot(sol_fast.t, sol_fast[1:4, :]', layout=(4, 1), labels = tits)
+plot(sol_fast.t, sol_fast[1:4, :]', layout = (4, 1), labels = tits)
 
-plot(rand(100, 4), layout=(4), label=["a" "b" "c" "d"],
-    title=["1" "2" "3" "4"])
+plot(rand(100, 4), layout = (4), label = ["a" "b" "c" "d"], title = ["1" "2" "3" "4"])
 
 string.(sol_fast.syms[1:2])
 length(sol_fast.t)
@@ -231,7 +258,7 @@ using PyCall
 pyimport_conda("scipy.optimize", "scipy")
 signal = pyimport("scipy.signal")
 
-sos = signal.butter(5, 1.5, fs=1000)
+sos = signal.butter(5, 1.5, fs = 1000)
 filtered = signal.filtfilt(sos[1], sos[2], q)
 
 plot(tv, filtered)

@@ -76,15 +76,15 @@ Rᵥ = 128 * μ * l / (π * d^4)
 Cᵥ = A * l / B
 Iᵥ = ρ * l / A
 
-@named C = Spring(k=Cᵥ)
-@named R = Damper(c=Rᵥ)
-@named I = Mass(m=Iᵥ)
+@named C = Spring(k = Cᵥ)
+@named R = Damper(c = Rᵥ)
+@named I = Mass(m = Iᵥ)
 
 1 / Cᵥ
 Δh = 0.0001
 @named Pin = Se(Δh * ρ * g)
-@named j1 = Junction1(Pin, -I, -R, sgn=-1)
-@named j0 = Junction0(j1, -C, couple=false)
+@named j1 = Junction1(Pin, -I, -R, sgn = -1)
+@named j0 = Junction0(j1, -C, couple = false)
 equations(j0)
 equations(j1)
 @named sys = reducedobs(structural_simplify(j0))
@@ -92,7 +92,7 @@ equations(sys)
 
 ts = (0.0, 10.0)
 prob = ODEProblem(sys, [], ts)
-sol = solve(prob, reltol=1e-8, abstol=1e-8)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 
 plot(sol.t, sol[I.f] ./ A)
 
@@ -112,7 +112,7 @@ plot!(s.t, s[j1.I.f] ./ A)
 
 v = 27
 ϵ = 1e-5            # m Roughness
-for k in 1:20
+for k = 1:20
     Re = calcRe(v, ρ, μ, d)
     f = colebrook.(ϵ, d, Re)
     v = sqrt(Δh * 2 * g * d / (l * f))
@@ -143,10 +143,10 @@ B = 2.2 * 1e9       # Pa -> Fluid bulk modulus
 Rᵥ = 128 * μ * l / (π * d^4)
 Iᵥ = ρ * l / A
 
-@named R = Damper(c=Rᵥ)
-@named I = Mass(m=Iᵥ)
+@named R = Damper(c = Rᵥ)
+@named I = Mass(m = Iᵥ)
 
-@named j1 = Junction1(Pin, -I, -R, sgn=-1, couple=false)
+@named j1 = Junction1(Pin, -I, -R, sgn = -1, couple = false)
 equations(j1)
 @named sys = reducedobs(structural_simplify(j1))
 equations(sys)
@@ -155,8 +155,8 @@ ts = (0.0, 0.3)
 ts = (0.0, 20)
 ts = (0.0, 3.0)
 prob = ODEProblem(sys, [], ts)
-sol = solve(prob, reltol=1e-8, abstol=1e-8)
-sol = solve(prob, u0 = [0.0], p=[Iᵥ, Rᵥ], reltol=1e-8, abstol=1e-8)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
+sol = solve(prob, u0 = [0.0], p = [Iᵥ, Rᵥ], reltol = 1e-8, abstol = 1e-8)
 
 tr = ts[1]:(diff(collect(ts))/100)[1]:ts[2]
 s = sol(tr)
@@ -167,7 +167,7 @@ plot(s.t, Vbg)
 
 v = 0.1
 ϵ = 1e-5            # m Roughness
-for k in 1:20
+for k = 1:20
     Re = calcRe(v, ρ, μ, d)
     f = colebrook.(ϵ, d, Re)
     v = sqrt(Δh * 2 * g * d / (l * f))
@@ -179,8 +179,8 @@ calcRe(Vbg[end], ρ, μ, d)
 
 f1 = jldopen("../numerical/data/sim_laminar.jld2")
 f2 = jldopen("../numerical/data/sim_laminar2.jld2")
-plot(s.t, Vbg, ylabel="Velocity (m/s)", xlabel="Time (s)", label="BG")
-plot!(f1["t"], f1["V"], label="IAB")
+plot(s.t, Vbg, ylabel = "Velocity (m/s)", xlabel = "Time (s)", label = "BG")
+plot!(f1["t"], f1["V"], label = "IAB")
 
 # -----------------------------------------------------------------------------
 # Manual function debug - validation
@@ -189,7 +189,7 @@ using MacroTools
 @parameters Δhₛ
 @named Pinm = Se(Δhₛ)
 
-@named j1m = Junction1(Pinm, -I, -R, sgn=-1, couple=false)
+@named j1m = Junction1(Pinm, -I, -R, sgn = -1, couple = false)
 equations(j1m)
 @named sysm = reducedobs(structural_simplify(j1m))
 equations(sysm)
@@ -213,9 +213,10 @@ end
 # trng = 0:step(t):step(t)*(length(rng)-1)
 u0 = [y[1]]
 probm = ODEProblem(diffeq, u0, ts)
-solm = solve(probm, Tsit5(), u0=u0, p=[Iᵥ, Rᵥ, Δh*ρ*g], reltol=1e-8, abstol=1e-8)
+solm =
+    solve(probm, Tsit5(), u0 = u0, p = [Iᵥ, Rᵥ, Δh * ρ * g], reltol = 1e-8, abstol = 1e-8)
 
-plot(solm.t, Array(solm./ A)')
+plot(solm.t, Array(solm ./ A)')
 
 parameters(sys)
 
@@ -223,18 +224,18 @@ parameters(sys)
 # -----------------------------------------------------------------------------
 # Multiple
 
-ir = Junction1(-I, -R, sgn=-1, name=:ir)
+ir = Junction1(-I, -R, sgn = -1, name = :ir)
 
-M = [Junction1(Pin, -I, -R, sgn=-1, name=:s11)]
-push!(M, Junction0(-C, subsys=M[1], name=:s10))
-push!(M, Junction1(ir, subsys=M[2], name=:s21))
-push!(M, Junction0(-C, subsys=M[3], name=:s20))
-push!(M, Junction1(ir, subsys=M[4], name=:s31))
-push!(M, Junction0(-C, subsys=M[5], name=:s30))
-push!(M, Junction1(ir, subsys=M[6], name=:s41))
-push!(M, Junction0(-C, subsys=M[7], name=:s40, couple=false))
+M = [Junction1(Pin, -I, -R, sgn = -1, name = :s11)]
+push!(M, Junction0(-C, subsys = M[1], name = :s10))
+push!(M, Junction1(ir, subsys = M[2], name = :s21))
+push!(M, Junction0(-C, subsys = M[3], name = :s20))
+push!(M, Junction1(ir, subsys = M[4], name = :s31))
+push!(M, Junction0(-C, subsys = M[5], name = :s30))
+push!(M, Junction1(ir, subsys = M[6], name = :s41))
+push!(M, Junction0(-C, subsys = M[7], name = :s40, couple = false))
 
-model = ODESystem(equations(M), t; name=:tst)
+model = ODESystem(equations(M), t; name = :tst)
 
 @named sys = reducedobs(structural_simplify(model))
 equations(sys)

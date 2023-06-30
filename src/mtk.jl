@@ -6,6 +6,7 @@ import ModelingToolkit: expand_connections, generate_connection_set
 import ModelingToolkit: generate_connection_equations_and_stream_connections
 import ModelingToolkit: expand_instream, @set!, AbstractSystem, ConnectionSet
 import ModelingToolkit: generate_connection_set!
+import ModelingToolkit: is_domain_connector, domain_defaults, get_defaults
 
 import ModelingToolkit: namespace_equation, namespace_expr
 import ModelingToolkit: independent_variables, unwrap
@@ -19,21 +20,50 @@ import ModelingToolkit: namespace_equations, equations
 
 # Connection functions
 
-function expand_connections(sys::AbstractSystem; debug = false, tol = 1e-10)
-    sys, csets = generate_connection_set(sys)
-    bgeqs = generate_bg_eqs!(csets)
+# function expand_connections(sys::AbstractSystem; debug = false, tol = 1e-10)
+#     sys, csets = generate_connection_set(sys)
+#     bgeqs = generate_bg_eqs!(csets)
+#     ceqs, instream_csets = generate_connection_equations_and_stream_connections(csets)
+#     _sys = expand_instream(instream_csets, sys; debug = debug, tol = tol)
+#     sys = flatten(sys, true)
+#     @set! sys.eqs = [equations(_sys); ceqs; bgeqs]
+# end
+
+function expand_connections(
+    sys::AbstractSystem,
+    find = nothing,
+    replace = nothing;
+    debug = false,
+    tol = 1e-10,
+)
+    sys, (csets, domain_csets) = generate_connection_set(sys, find, replace)
+    bgeqs = generate_bg_eqs!(domain_csets)
     ceqs, instream_csets = generate_connection_equations_and_stream_connections(csets)
     _sys = expand_instream(instream_csets, sys; debug = debug, tol = tol)
     sys = flatten(sys, true)
     @set! sys.eqs = [equations(_sys); ceqs; bgeqs]
+    d_defs = domain_defaults(sys, domain_csets)
+    @set! sys.defaults = merge(get_defaults(sys), d_defs)
 end
 
-function generate_connection_set(sys::AbstractSystem, find=nothing, replace=nothing)
+function generate_connection_set(sys::AbstractSystem, find = nothing, replace = nothing)
     connectionsets = ConnectionSet[]
     sys = generate_connection_set!(connectionsets, sys, find, replace)
+
     bgconnectionsets = get_bg_connection_set!(connectionsets)
-    sys, vcat(merge(connectionsets), bgconnectionsets)
+
+    domain_free_connectionsets = filter(connectionsets) do cset
+        !any(s -> is_domain_connector(s.sys.sys), cset.set)
+    end
+    sys, (merge(domain_free_connectionsets), vcat(connectionsets, bgconnectionsets))
 end
+
+# function generate_connection_set(sys::AbstractSystem, find=nothing, replace=nothing)
+#     connectionsets = ConnectionSet[]
+#     sys = generate_connection_set!(connectionsets, sys, find, replace)
+#     bgconnectionsets = get_bg_connection_set!(connectionsets)
+#     sys, vcat(merge(connectionsets), bgconnectionsets)
+# end
 
 # TODO: Check for legacy functions
 
@@ -71,7 +101,7 @@ function renamespace(sys, x, couple)
             if scope isa LocalScope
                 sys_name = getname(sys)
                 var_name = getname(x)
-                
+
                 if isa(couple, Symbol)
                     couple = [couple]
                 end
@@ -115,13 +145,23 @@ end
 
 # Rename variables
 
-function namespace_equation_ren(eq::Equation, sys, old::Union{Num,String}, new::Union{Num,Symbol})
+function namespace_equation_ren(
+    eq::Equation,
+    sys,
+    old::Union{Num,String},
+    new::Union{Num,Symbol},
+)
     _lhs = namespace_expr_ren(eq.lhs, sys, old, new)
     _rhs = namespace_expr_ren(eq.rhs, sys, old, new)
     _lhs ~ _rhs
 end
 
-function namespace_expr_ren(O, sys, old::Union{Num,String}, new::Union{Num,Symbol}) where {T}
+function namespace_expr_ren(
+    O,
+    sys,
+    old::Union{Num,String},
+    new::Union{Num,Symbol},
+) where {T}
     ivs = independent_variables(sys)
     O = unwrap(O)
     if any(isequal(O), ivs)
@@ -162,7 +202,7 @@ end
 
 
 function renamevars(sys::ODESystem, pairs::Dict)
-    
+
     eqs = equations(sys)
 
     if isempty(eqs)

@@ -1,4 +1,4 @@
-const unicodedict = Dict{Char, String}(
+const unicodedict = Dict{Char,String}(
     '𝑅' => raw"\itR",
     '▐' => raw"\blockrighthalf",
     '♥' => raw"\varheartsuit",
@@ -2450,16 +2450,18 @@ const unicodedict = Dict{Char, String}(
     'Χ' => raw"\Chi",
     '⤮' => raw"\neovsearrow",
     '•' => raw"\bullet",
-    )
+)
 
 function unicode2latex(str::String)
     isascii(str) && return str
-    str_array = [get(unicodedict, char, char) for char in str] 
+    str_array = [get(unicodedict, char, char) for char in str]
     str_length = length(str_array)
 
     for (i, char) in enumerate(str)
         if str_array[i] isa String
-            if i < str_length && str_array[i+1] isa Char && (isletter(str_array[i+1]) || isdigit(str_array[i+1]))
+            if i < str_length &&
+               str_array[i+1] isa Char &&
+               (isletter(str_array[i+1]) || isdigit(str_array[i+1]))
                 str_array[i] = "{$(str_array[i])}"
             end
         end

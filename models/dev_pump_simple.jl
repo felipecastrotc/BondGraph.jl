@@ -24,9 +24,9 @@ using ModelingToolkit
 @named T = Se(τ)        # Shaft input torque
 
 # Pipeline elements
-@named plm = Mass(m=rpo["Iₚᵢ"])
-@named pld = Damper(c=rpo["fₚᵢ"])     # General damping element
-@named pls = Spring(k=-1/ rpo["kᵤ"])     # General compliance element
+@named plm = Mass(m = rpo["Iₚᵢ"])
+@named pld = Damper(c = rpo["fₚᵢ"])     # General damping element
+@named pls = Spring(k = -1 / rpo["kᵤ"])     # General compliance element
 
 # ------------------------------------------------------------------------------
 # Impeller Junctions
@@ -82,16 +82,40 @@ push!(plist, ds11, ds10, ds21, ds20, ds31, ds30, ds41, ds40);
 @parameters γa, γb
 
 gyp = ρ * (γa * ω - γb * Q)
-@named agy = mGY(g=gyp)
+@named agy = mGY(g = gyp)
 
 # ------------------------------------------------------------------------------
 # Build connections
 
 # Pipeline assembly
-cons = [connect(us11.power, us10.power), connect(us10.power, us21.power), connect(us21.power, us20.power), connect(us20.power, us31.power), connect(us31.power, us30.power), connect(us30.power, us41.power), connect(us41.power, us40.power)]
-push!(cons, connect(ds10.power, ds11.power), connect(ds11.power, ds20.power), connect(ds20.power, ds21.power), connect(ds21.power, ds30.power), connect(ds30.power, ds31.power), connect(ds31.power, ds40.power), connect(ds40.power, ds41.power))
+cons = [
+    connect(us11.power, us10.power),
+    connect(us10.power, us21.power),
+    connect(us21.power, us20.power),
+    connect(us20.power, us31.power),
+    connect(us31.power, us30.power),
+    connect(us30.power, us41.power),
+    connect(us41.power, us40.power),
+]
+push!(
+    cons,
+    connect(ds10.power, ds11.power),
+    connect(ds11.power, ds20.power),
+    connect(ds20.power, ds21.power),
+    connect(ds21.power, ds30.power),
+    connect(ds30.power, ds31.power),
+    connect(ds31.power, ds40.power),
+    connect(ds40.power, ds41.power),
+)
 # Impeller assembly
-push!(cons, connect(us40.power, jus.power), connect(jus.power, imp.power), connect(imp.power, jds.power), connect(jds.power, olt.power), connect(olt.power, ds10.power))
+push!(
+    cons,
+    connect(us40.power, jus.power),
+    connect(jus.power, imp.power),
+    connect(imp.power, jds.power),
+    connect(jds.power, olt.power),
+    connect(olt.power, ds10.power),
+)
 # push!(connect(us30.power, jus.power), connect(jus.power, ds10.power))
 
 # Axis - Impeller coupling
@@ -117,7 +141,17 @@ equations(sys)
 @parameters f, fₛ, fᵥ, fₚₒ, fₚᵢ, Iᵢ, Pₜ, Iₚₒ, Iₚᵢ, Iₐ, cₐ, kᵥ, kᵤ, γ_a, γ_b, Qₛ
 @variables Qᵢ(t), Qᵤ(t), Qᵥ(t), ω(t), Vᵤ(t), Vᵤ(t), Vᵥ(t)
 
-human = Dict(agy.γa => γ_a, agy.γb => γ_b, imp.m.power.f => Qᵢ, ax.m.power.f => ω, imp.m.I => Iᵢ, agy.ρ => ρ, ax.m.I => Iₐ, ax.d.R => cₐ * ω, ax.T.τ => τ)
+human = Dict(
+    agy.γa => γ_a,
+    agy.γb => γ_b,
+    imp.m.power.f => Qᵢ,
+    ax.m.power.f => ω,
+    imp.m.I => Iᵢ,
+    agy.ρ => ρ,
+    ax.m.I => Iₐ,
+    ax.d.R => cₐ * ω,
+    ax.T.τ => τ,
+)
 
 # Set the friction paramters
 human[olt.d.R] = fₛ
@@ -139,10 +173,21 @@ parameters(sys)
 
 v0 = zeros(length(states(sys)))
 rpo["τ"] = 20
-vals = Dict(Iᵢ => rpo["Iᵢ"], γ_b => rpo["γ_b"], ρ => rpo["ρ"], f => rpo["f"], γ_a => rpo["γ_a"], cₐ => rpo["cₐ"], τ => rpo["τ"], Iₐ => rpo["Iₐ"], us11.P.p => 0.0, ds41.Po.po => 0.0)
+vals = Dict(
+    Iᵢ => rpo["Iᵢ"],
+    γ_b => rpo["γ_b"],
+    ρ => rpo["ρ"],
+    f => rpo["f"],
+    γ_a => rpo["γ_a"],
+    cₐ => rpo["cₐ"],
+    τ => rpo["τ"],
+    Iₐ => rpo["Iₐ"],
+    us11.P.p => 0.0,
+    ds41.Po.po => 0.0,
+)
 prob = ODEProblem(sys, v0, (0.0, 30), vals)
 
-sol = solve(prob, reltol=1e-14, abstol=1e-14)
+sol = solve(prob, reltol = 1e-14, abstol = 1e-14)
 
 # ------------------------------------------------------------------------------
 # Plotting
@@ -161,7 +206,7 @@ function gen_label(l)
         else
             v *= "ᵥ"
         end
-        v *= string(l[3])*"(t)"
+        v *= string(l[3]) * "(t)"
         return v
     else
         return l
@@ -175,7 +220,7 @@ function plotsol(sol, t, idx)
     labels = reshape(labels, 1, length(labels))
     n_plots = length(labels)
 
-    plot(nsol.t, nsol[idx, :]', layout=(n_plots, 1), labels=labels, xlabel="Time (s)")
+    plot(nsol.t, nsol[idx, :]', layout = (n_plots, 1), labels = labels, xlabel = "Time (s)")
 end
 
 plot(sol.t, sol[us11.plm.power.f])

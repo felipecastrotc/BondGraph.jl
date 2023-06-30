@@ -10,10 +10,10 @@ It = Integral(t in DomainSets.ClosedInterval(0, t))
 #     ODESystem(Equation[], t, sts, []; name = name)
 # end
 
-@connector function Power(; name, effort=0.0, flow=0.0, type=op)
+@connector function Power(; name, effort = 0.0, flow = 0.0, type = op)
     sts = @variables e(t) = effort [connect = bg] f(t) = flow [connect = bg]
     sts = set_bg_metadata.(sts, [[type, bgeffort], [type, bgflow]])
-    ODESystem(Equation[], t, sts, []; name=name)
+    ODESystem(Equation[], t, sts, []; name = name)
 end
 
 # =============================================================================
@@ -21,10 +21,10 @@ end
 
 function Se(expr; name)
 
-    @named power = Power(type=op)
+    @named power = Power(type = op)
 
     eqs = [power.e ~ expr]
-    
+
     sts = []
     if isvariable(expr)
         ps = [expr]
@@ -41,10 +41,10 @@ end
 
 function Sf(expr; name)
 
-    @named power = Power(type=op)
+    @named power = Power(type = op)
 
     eqs = [power.f ~ expr]
-    
+
     sts = []
     if isvariable(expr)
         ps = [expr]
@@ -70,9 +70,9 @@ end
 # =============================================================================
 # Ports
 
-function Junction0(ps...; name, couple=true)
-    
-    @named power = Power(type=j0)
+function Junction0(ps...; name, couple = true)
+
+    @named power = Power(type = j0)
     # Get connections
     ps = collect(Base.Flatten([ps]))
 
@@ -93,9 +93,9 @@ function Junction0(ps...; name, couple=true)
     compose(sys, power, subsys...)
 end
 
-function Junction1(ps...; name, couple=true)
+function Junction1(ps...; name, couple = true)
 
-    @named power = Power(type=j1)
+    @named power = Power(type = j1)
     # Get connections
     ps = collect(Base.Flatten([ps]))
 
@@ -117,11 +117,11 @@ function Junction1(ps...; name, couple=true)
 end
 
 # TODO:ISSUE -> the compose only works when the gyrator systems is the first
-function mGY(subsys...; name, g = 1.0, coneqs=[])
+function mGY(subsys...; name, g = 1.0, coneqs = [])
 
     # Generate the in and out connection
-    @named pin = Power(type=tpgy)
-    @named pout = Power(type=tpgy)
+    @named pin = Power(type = tpgy)
+    @named pout = Power(type = tpgy)
 
     # Alias for simpler view about the mGY port
     e₁, f₁ = pin.e, pin.f
@@ -152,11 +152,11 @@ function mGY(subsys...; name, g = 1.0, coneqs=[])
 end
 
 # TODO:ISSUE -> the compose only works when the transform systems is the first
-function mTF(subsys...; name, r = 1.0, coneqs=[])
+function mTF(subsys...; name, r = 1.0, coneqs = [])
 
     # Generate the in and out connection
-    @named pin = Power(type=tptf)
-    @named pout = Power(type=tptf)
+    @named pin = Power(type = tptf)
+    @named pout = Power(type = tptf)
 
     # Alias for simpler view about the mTF port
     e₁, f₁ = pin.e, pin.f
@@ -187,12 +187,10 @@ end
 # Elements
 
 function Mass(; name, m = 1.0, u = 0.0)
-    @named power = Power(flow=u)    
+    @named power = Power(flow = u)
     ps = @parameters I = m
 
-    eqs = [
-        D(power.f) ~ power.e / I,
-    ]
+    eqs = [D(power.f) ~ power.e / I]
     compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
@@ -209,24 +207,9 @@ function Spring(; name, k = 10, x = 0.0)
     compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
-function Spring3(; name, k = 10, x = 0.0)
-    # TODO: check if this function is working
-    @named power = Power()
+function Damper(; name, c = 10, u = 1.0)
+    @named power = Power(flow = u)
 
-    @variables q(t) = x
-    ps = @parameters C = 1 / k
-
-    eqs = [
-        power.e ~ q^3 / C
-        D(q) ~ power.f
-    ]
-    
-    compose(ODESystem(eqs, t, [q], ps; name = name), power)
-end
-
-function Damper(; name, c = 10, u=1.0)
-    @named power = Power(flow=u)
-    
     ps = @parameters R = c
     eqs = [power.e ~ power.f * R]
 
@@ -236,7 +219,7 @@ end
 function GenericDamper(expr; name)
     # TODO: check if this function is working
 
-    @named power = Power(flow=u)
+    @named power = Power(flow = u)
 
     eqs = [power.e ~ expr]
 

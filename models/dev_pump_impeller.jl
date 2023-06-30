@@ -25,7 +25,14 @@ using ModelingToolkit
 @named val = Junction1([-1, d])
 @named pj = Junction0()
 
-cons = [connect(suc.power, pm.power), connect(lek.power, pm.power), connect(pm.power, imp.power), connect(imp.power, pj.power), connect(pj.power, lek.power), connect(pj.power, val.power)]
+cons = [
+    connect(suc.power, pm.power),
+    connect(lek.power, pm.power),
+    connect(pm.power, imp.power),
+    connect(imp.power, pj.power),
+    connect(pj.power, lek.power),
+    connect(pj.power, val.power),
+]
 
 #cons = [connect(suc.power, pm.power), connect(pm.power, imp.power), connect(imp.power, pj.power), connect(pj.power, val.power)]
 @named psys = ODESystem(cons, t)

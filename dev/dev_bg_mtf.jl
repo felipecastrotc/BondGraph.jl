@@ -21,8 +21,8 @@ function mTF(subsys...; name, r = 1.0)
     @assert !isempty(c)
 
     # Generate the in and out connection
-    @named pin = Power(type=tptf)
-    @named pout = Power(type=tptf)
+    @named pin = Power(type = tptf)
+    @named pout = Power(type = tptf)
 
     # Alias for simpler view about the mTF port
     e₁, f₁ = pin.e, pin.f
@@ -53,7 +53,7 @@ function mTF(subsys...; name, r = 1.0)
         @assert length(c) == 2
         push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
-    
+
     return compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 end
 

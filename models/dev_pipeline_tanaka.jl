@@ -11,7 +11,7 @@ end
 function darcyq(q, Δs, d, ϵ, ρ, μ)
     Re = ReEq(ρ, q, d, μ)
     if Re > 0.0
-        return Δs*cheng(Re, ϵ, d)*(ρ / (2 * d)) * ((1 / A)^2)
+        return Δs * cheng(Re, ϵ, d) * (ρ / (2 * d)) * ((1 / A)^2)
     else
         return 0.0
     end
@@ -48,10 +48,13 @@ end
 
 # Friction factor
 function cheng(Re, ϵ, d)
-    a = 1/(1 + (Re/2720)^9)
-    b = 1/(1 + (Re/(160*(d/ϵ)))^2)
-    invf = ((Re/64)^a)*((1.8*log10(Re/6.8))^(2*(1 - a)*b))*((2.0*log10(3.7*d/ϵ))^(2*(1-a)*(1-b)))
-    return 1/invf
+    a = 1 / (1 + (Re / 2720)^9)
+    b = 1 / (1 + (Re / (160 * (d / ϵ)))^2)
+    invf =
+        ((Re / 64)^a) *
+        ((1.8 * log10(Re / 6.8))^(2 * (1 - a) * b)) *
+        ((2.0 * log10(3.7 * d / ϵ))^(2 * (1 - a) * (1 - b)))
+    return 1 / invf
 end
 
 # ----------------------------------------------------------
@@ -64,9 +67,9 @@ a = 1500                # m/s water
 a = 1290                # m/s petroleum
 ρ = 850                 # kg/mˆ3 petroleum
 μ = 800e-3              # Pa*s petroleum
-d = 75/1000             # m Pipe diameter
+d = 75 / 1000             # m Pipe diameter
 Δs = 7.5                # m Pipe length
-ϵ = 0.1*1e-3            # m Steel rugosity
+ϵ = 0.1 * 1e-3            # m Steel rugosity
 A = π * (d / 2)^2       # m^2 Pipe area
 
 q = 1e-4                # Flowrate
@@ -84,13 +87,13 @@ R = 32 * μ / (A * d^2) * Δs
 # http://www.druckverlust.de/Online-Rechner/dp.php
 cheng(Re, ϵ, d)
 colebrook(Re, ϵ, d)
-Δs*cheng(Re, ϵ, d)*(ρ / (2 * d)) * ((q / A)^2)
-darcyq(q, Δs, d, ϵ, ρ, μ)*(q^2)
+Δs * cheng(Re, ϵ, d) * (ρ / (2 * d)) * ((q / A)^2)
+darcyq(q, Δs, d, ϵ, ρ, μ) * (q^2)
 
 # Bond graph elements
-@named m = Mass(m=L)       # General inertial element
-@named f = Damper(c=R)     # General damping element
-@named s = Spring(k=-1 / C)   # General compliance element
+@named m = Mass(m = L)       # General inertial element
+@named f = Damper(c = R)     # General damping element
+@named s = Spring(k = -1 / C)   # General compliance element
 @named Qi = Sf(Q0)           # Inlet pressure
 @named Po = Se(P0)          # Inlet pressure
 
@@ -191,14 +194,14 @@ Kf = 2
 function pipe!(du, u, p, t)
     Q2, P1 = u
     du[1] = ((P1 - 0) - Kf * darcyq(Q2, Δs, d, ϵ, ρ, μ) * (Q2^2)) / L
-    du[2] = (q - Q2) / (Kc*C)
+    du[2] = (q - Q2) / (Kc * C)
 end
 
 q
-u0 = [q*1.5; 0.0]
+u0 = [q * 1.5; 0.0]
 tspan = (0.0, 2)
 prob = ODEProblem(pipe!, u0, tspan)
-sol = solve(prob, reltol=1e-8, abstol=1e-8)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 
 plot(sol)
 plot(sol.t, sol[1, :])
@@ -209,14 +212,14 @@ function pipe!(du, u, p, t)
     Q2, Q4, P1, P3 = u
     du[1] = (P1 - P3 - Kf * darcyq(Q2, Δs, d, ϵ, ρ, μ) * (Q2^2)) / L
     du[2] = (P3 - Kf * darcyq(Q4, Δs, d, ϵ, ρ, μ) * (Q4^2)) / L
-    du[3] = (q - Q2) / (Kc*C)
-    du[4] = (Q2 - Q4) / (Kc*C)
+    du[3] = (q - Q2) / (Kc * C)
+    du[4] = (Q2 - Q4) / (Kc * C)
 end
 
-u0 = [q*1.5; q*1.5; 0.0; 0.0]
+u0 = [q * 1.5; q * 1.5; 0.0; 0.0]
 tspan = (0.0, 2)
 prob = ODEProblem(pipe!, u0, tspan)
-sol = solve(prob, reltol=1e-8, abstol=1e-8)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 
 plot(sol)
 plot(sol.t, sol[1, :])
@@ -230,15 +233,15 @@ function pipe!(du, u, p, t)
     du[1] = (P1 - P3 - Kf * darcyq(Q2, Δs, d, ϵ, ρ, μ) * (Q2^2)) / L
     du[2] = (P3 - P5 - Kf * darcyq(Q4, Δs, d, ϵ, ρ, μ) * (Q4^2)) / L
     du[3] = (P5 - Kf * darcyq(Q6, Δs, d, ϵ, ρ, μ) * (Q6^2)) / L
-    du[4] = (q - Q2) / (Kc*C)
-    du[5] = (Q2 - Q4) / (Kc*C)
-    du[6] = (Q4 - Q6) / (Kc*C)
+    du[4] = (q - Q2) / (Kc * C)
+    du[5] = (Q2 - Q4) / (Kc * C)
+    du[6] = (Q4 - Q6) / (Kc * C)
 end
 
-u0 = [q*1.5; q*1.5; q*1.5; 0.0; 0.0; 0.0]
+u0 = [q * 1.5; q * 1.5; q * 1.5; 0.0; 0.0; 0.0]
 tspan = (0.0, 3)
 prob = ODEProblem(pipe!, u0, tspan)
-sol = solve(prob, reltol=1e-8, abstol=1e-8)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 
 plot(sol)
 plot(sol.t, sol[1, :])

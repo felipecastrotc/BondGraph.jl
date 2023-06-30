@@ -41,7 +41,14 @@ using ModelingToolkit
 # ----------------------------------------------------------
 # Connections
 
-cons = [connect(ilt.power, jds.power), connect(lek.power, jds.power), connect(jds.power, imp.power), connect(imp.power, jus.power), connect(jus.power, lek.power), connect(jus.power, olt.power)]
+cons = [
+    connect(ilt.power, jds.power),
+    connect(lek.power, jds.power),
+    connect(jds.power, imp.power),
+    connect(imp.power, jus.power),
+    connect(jus.power, lek.power),
+    connect(jus.power, olt.power),
+]
 
 # ----------------------------------------------------------
 # System
@@ -69,27 +76,27 @@ equations(sys)
 q = Q
 
 # Friction losses -> Jorge eq 3.11 -> Look dev_pump_algebrics.jl
-ΔPₐ₁ = k2*q*μ/d^3
-ΔPₐ₂ = k3*q^(2-n)*ρ^(1-n)*d^(n-4)*μ^n
+ΔPₐ₁ = k2 * q * μ / d^3
+ΔPₐ₂ = k3 * q^(2 - n) * ρ^(1 - n) * d^(n - 4) * μ^n
 # BG - Divided by Q for BG default R*Q
-ΔPₐ₁ = ΔPₐ₁/q
-ΔPₐ₂ = k3*q^(1-n)*ρ^(1-n)*d^(n-4)*μ^n
+ΔPₐ₁ = ΔPₐ₁ / q
+ΔPₐ₂ = k3 * q^(1 - n) * ρ^(1 - n) * d^(n - 4) * μ^n
 
 # Vortex losses -> Jorge eq 3.15 -> Look dev_pump_algebrics.jl
 # It is important to note that it possibly includes recirculation effects
 # Look Paternost work
-ΔPₜ₁ = d^2*k4*ρ*ω^2
-ΔPₜ₂ = - 2*k4*k5*q*ρ*ω/d
-ΔPₜ₃ = k4*k5^2*q^2*ρ/d^4
+ΔPₜ₁ = d^2 * k4 * ρ * ω^2
+ΔPₜ₂ = -2 * k4 * k5 * q * ρ * ω / d
+ΔPₜ₃ = k4 * k5^2 * q^2 * ρ / d^4
 # BG - Divided by Q for BG default R*Q
-ΔPₜ₁ = ΔPₜ₁/q
-ΔPₜ₂ = ΔPₜ₂/q
-ΔPₜ₃ = ΔPₜ₃/q
+ΔPₜ₁ = ΔPₜ₁ / q
+ΔPₜ₂ = ΔPₜ₂ / q
+ΔPₜ₃ = ΔPₜ₃ / q
 
 # Localized loss -> Jorge eq 3.16 -> Look dev_pump_algebrics.jl
-ΔPₗ = k6*q^2*ρ/d^4 
+ΔPₗ = k6 * q^2 * ρ / d^4
 # BG - Divided by Q for BG default R*Q
-ΔPₗ = ΔPₗ/q
+ΔPₗ = ΔPₗ / q
 
 # ----------------------------------------------------------
 # Elements
@@ -122,7 +129,14 @@ q = Q
 # ----------------------------------------------------------
 # Connections
 
-cons = [connect(ilt.power, jds.power), connect(lek.power, jds.power), connect(jds.power, imp.power), connect(imp.power, jus.power), connect(jus.power, lek.power), connect(jus.power, olt.power)]
+cons = [
+    connect(ilt.power, jds.power),
+    connect(lek.power, jds.power),
+    connect(jds.power, imp.power),
+    connect(imp.power, jus.power),
+    connect(jus.power, lek.power),
+    connect(jus.power, olt.power),
+]
 
 # ----------------------------------------------------------
 # System
@@ -140,7 +154,7 @@ sys = ModelingToolkit.structural_simplify(emdl)
 @named sys = reducedobs(sys)
 equations(sys)
 
-kg*m^2/s^2
+kg * m^2 / s^2
 
 
-kg^2/m
+kg^2 / m

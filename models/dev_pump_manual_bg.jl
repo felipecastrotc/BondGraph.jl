@@ -50,7 +50,10 @@ end
 function cheng(Re, ϵ, d)
     a = 1 / (1 + (Re / 2720)^9)
     b = 1 / (1 + (Re / (160 * (d / ϵ)))^2)
-    invf = ((Re / 64)^a) * ((1.8 * log10(Re / 6.8))^(2 * (1 - a) * b)) * ((2.0 * log10(3.7 * d / ϵ))^(2 * (1 - a) * (1 - b)))
+    invf =
+        ((Re / 64)^a) *
+        ((1.8 * log10(Re / 6.8))^(2 * (1 - a) * b)) *
+        ((2.0 * log10(3.7 * d / ϵ))^(2 * (1 - a) * (1 - b)))
     return 1 / invf
 end
 
@@ -148,7 +151,7 @@ push!(plist, ds31, ds30, ds41, ds40);
 @parameters γa, γb, ρ
 
 gyp = ρ * (γa * ω - γb * Q)
-@named agy = mGY(g=gyp)
+@named agy = mGY(g = gyp)
 
 # ------------------------------------------------------------------------------
 # Build connections
@@ -157,18 +160,46 @@ gyp = ρ * (γa * ω - γb * Q)
 # cons = [connect(us10.power, us11.power), connect(us11.power, us20.power), connect(us20.power, us21.power)]
 # push!(cons, connect(ds10.power, ds11.power), connect(ds11.power, ds20.power), connect(ds20.power, ds21.power))
 # Pipeline assembly - source of effort
-cons = [connect(us11.power, us10.power), connect(us10.power, us21.power), connect(us21.power, us20.power)]
-push!(cons, connect(ds11.power, ds10.power), connect(ds10.power, ds21.power), connect(ds21.power, ds20.power))
+cons = [
+    connect(us11.power, us10.power),
+    connect(us10.power, us21.power),
+    connect(us21.power, us20.power),
+]
+push!(
+    cons,
+    connect(ds11.power, ds10.power),
+    connect(ds10.power, ds21.power),
+    connect(ds21.power, ds20.power),
+)
 # 4 elements
-push!(cons, connect(us20.power, us31.power), connect(us31.power, us30.power), connect(us30.power, us41.power), connect(us41.power, us40.power))
-push!(cons, connect(ds20.power, ds31.power), connect(ds31.power, ds30.power), connect(ds30.power, ds41.power), connect(ds41.power, ds40.power))
+push!(
+    cons,
+    connect(us20.power, us31.power),
+    connect(us31.power, us30.power),
+    connect(us30.power, us41.power),
+    connect(us41.power, us40.power),
+)
+push!(
+    cons,
+    connect(ds20.power, ds31.power),
+    connect(ds31.power, ds30.power),
+    connect(ds30.power, ds41.power),
+    connect(ds41.power, ds40.power),
+)
 
 # Impeller assembly - source of flow
 # push!(cons, connect(us21.power, jus.power), connect(jus.power, imp.power), connect(imp.power, jds.power), connect(jds.power, olt.power), connect(olt.power, ds10.power))
 # Impeller assembly - source of effort
 # push!(cons, connect(us20.power, jus.power), connect(jus.power, imp.power), connect(imp.power, jds.power), connect(jds.power, olt.power), connect(olt.power, ds10.power))
 # 4 elements pipe
-push!(cons, connect(us40.power, jus.power), connect(jus.power, imp.power), connect(imp.power, jds.power), connect(jds.power, olt.power), connect(olt.power, ds10.power))
+push!(
+    cons,
+    connect(us40.power, jus.power),
+    connect(jus.power, imp.power),
+    connect(imp.power, jds.power),
+    connect(jds.power, olt.power),
+    connect(olt.power, ds10.power),
+)
 
 # Axis - Impeller coupling
 push!(cons, connect(ax.power, agy.pin), connect(agy.pout, imp.power))
@@ -239,7 +270,8 @@ function pump_pipe!(du, u, p, t)
     Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L = p[:]
     # du = zeros(size(u))
     # Impeller
-    du[1] = (P5 - P7 + ρ * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δs, d, ϵ, ρ, μ) * (Qi^2)) / Ii
+    du[1] =
+        (P5 - P7 + ρ * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δs, d, ϵ, ρ, μ) * (Qi^2)) / Ii
     # Shaft
     du[2] = (τ - ca * ω^2 - ρ * (γa * Qi - γb * ω) * ω) / Ia
     # Pipeline
@@ -286,7 +318,7 @@ p = [Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L]
 
 tspan = (0.0, 2.5)
 prob = ODEProblem(pump_pipe!, u0, tspan, p)
-sol = solve(prob, reltol=1e-8, abstol=1e-8)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 
 u0 = sol[:, end]
 
@@ -303,7 +335,8 @@ function pump_pipe!(du, u, p, t)
     Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L = p[:]
     # du = zeros(size(u))
     # Impeller
-    du[1] = (P4 - P6 + ρ * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δs, d, ϵ, ρ, μ) * (Qi^2)) / Ii
+    du[1] =
+        (P4 - P6 + ρ * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δs, d, ϵ, ρ, μ) * (Qi^2)) / Ii
     # du[1] = (P2 - P6 + 8*ρ * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δs, d, ϵ, ρ, μ) * (Qi^2)) / Ii
     # Shaft
     du[2] = (τ(t) - ca * ω - ρ * (γa * Qi - γb * ω) * Qi) / Ia
@@ -354,7 +387,7 @@ p = [Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L]
 
 tspan = (0.0, 2.5)
 prob = ODEProblem(pump_pipe!, u0, tspan, p)
-sol = solve(prob, reltol=1e-8, abstol=1e-8)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 
 60 * 12 / (2 * π)
 
@@ -377,19 +410,54 @@ plot(sol.t, sol[9, :])
 plot!(sol.t, sol[10, :])
 
 Qs = [1, 3, 4, 5, 6]
-tl_q = ["Flow rate impeller", "Flow rate pipe segment 1", "Flow rate pipe segment 2", "Flow rate pipe segment 3", "Flow rate pipe segment 4"]
+tl_q = [
+    "Flow rate impeller",
+    "Flow rate pipe segment 1",
+    "Flow rate pipe segment 2",
+    "Flow rate pipe segment 3",
+    "Flow rate pipe segment 4",
+]
 
 Ps = [7, 8, 9, 10]
-tl_p = ["Pressure drop pipe 1", "Pressure drop pipe 2", "Pressure drop pipe 3", "Pressure drop pipe 3", "Pressure drop pipe 4"]
+tl_p = [
+    "Pressure drop pipe 1",
+    "Pressure drop pipe 2",
+    "Pressure drop pipe 3",
+    "Pressure drop pipe 3",
+    "Pressure drop pipe 4",
+]
 
-cfg = Dict(:titlefontsize => 8, :size => (800, 140 * length(Qs)), :legend => false, :xlabel => "Time (s)", :xguidefontsize => 8, :ylabel => "Q (m^3/s)", :yguidefontsize => 8)
-plot(sol.t, sol[Qs, :]', layout=(length(Qs), 1), titles=reshape(tl_q, 1, 5); cfg...)
+cfg = Dict(
+    :titlefontsize => 8,
+    :size => (800, 140 * length(Qs)),
+    :legend => false,
+    :xlabel => "Time (s)",
+    :xguidefontsize => 8,
+    :ylabel => "Q (m^3/s)",
+    :yguidefontsize => 8,
+)
+plot(sol.t, sol[Qs, :]', layout = (length(Qs), 1), titles = reshape(tl_q, 1, 5); cfg...)
 
-cfg = Dict(:titlefontsize => 8, :size => (800, 140 * length(Qs)), :legend => false, :xlabel => "Time (s)", :xguidefontsize => 8, :ylabel => "Pressure (Pa)", :yguidefontsize => 8)
-plot(sol.t, sol[Ps, :]', layout=(length(Ps), 1), titles=reshape(tl_p, 1, 5); cfg...)
+cfg = Dict(
+    :titlefontsize => 8,
+    :size => (800, 140 * length(Qs)),
+    :legend => false,
+    :xlabel => "Time (s)",
+    :xguidefontsize => 8,
+    :ylabel => "Pressure (Pa)",
+    :yguidefontsize => 8,
+)
+plot(sol.t, sol[Ps, :]', layout = (length(Ps), 1), titles = reshape(tl_p, 1, 5); cfg...)
 
-cfg = Dict(:titlefontsize => 8, :legend => false, :xlabel => "Time (s)", :xguidefontsize => 8, :ylabel => "Rotation (rad/s)", :yguidefontsize => 8)
-plot(sol.t, sol[2, :], titles="Shaft rotation velocity"; cfg...)
+cfg = Dict(
+    :titlefontsize => 8,
+    :legend => false,
+    :xlabel => "Time (s)",
+    :xguidefontsize => 8,
+    :ylabel => "Rotation (rad/s)",
+    :yguidefontsize => 8,
+)
+plot(sol.t, sol[2, :], titles = "Shaft rotation velocity"; cfg...)
 
 # -------------------------------------------------------------------
 # Model manual -  4 upstream 4 downstream - Source of effort
@@ -398,7 +466,8 @@ function pump_pipe4!(du, u, p, t)
     Δs, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L = p[:]
     # du = zeros(size(u))
     # Impeller
-    du[1] = (P8 - P10 + ρ * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δs, d, ϵ, ρ, μ) * (Qi^2)) / Ii
+    du[1] =
+        (P8 - P10 + ρ * (γa * Qi - γb * ω) * ω - darcyq(Qi, Δs, d, ϵ, ρ, μ) * (Qi^2)) / Ii
     # Shaft
     du[2] = (τ(t) - ca * ω - ρ * (γa * Qi - γb * ω) * Qi) / Ia
     # Pipeline
@@ -459,7 +528,7 @@ p = [Δs / 2, d, ϵ, ρ, μ, γa, γb, Ii, Ia, ca, Kf, Kc, L]
 
 tspan = (0.0, 2.0)
 prob = ODEProblem(pump_pipe4!, u0, tspan, p)
-sol = solve(prob, reltol=1e-8, abstol=1e-8)
+sol = solve(prob, reltol = 1e-8, abstol = 1e-8)
 
 plot(sol)
 
@@ -476,5 +545,3 @@ plot(sol.t, sol[7, :])
 plot!(sol.t, sol[8, :])
 plot!(sol.t, sol[9, :])
 plot!(sol.t, sol[10, :])
-
-

@@ -14,16 +14,16 @@ using ModelingToolkit
 Ap = π * (3 * 0.0254 / 2)^2
 m1 = 30 * 998 / (Ap)
 
-@named m = Mass(m=rpo["Iₚᵢ"])       # General inertial element
-@named m = Mass(m=m1)       # General inertial element
-@named d1 = Damper(c=rpo["fₚᵢ"] * 20)     # General damping element
+@named m = Mass(m = rpo["Iₚᵢ"])       # General inertial element
+@named m = Mass(m = m1)       # General inertial element
+@named d1 = Damper(c = rpo["fₚᵢ"] * 20)     # General damping element
 # @named d1 = Damper(c=0.2)     # General damping element
-@named d2 = Damper(c=rpo["fₚᵢ"]*20)     # General damping element
-@named d3 = Damper(c=rpo["fₚᵢ"]*20)     # General damping element
-@named s1 = Spring(k=-1 / rpo["kᵤ"])     # General compliance element
+@named d2 = Damper(c = rpo["fₚᵢ"] * 20)     # General damping element
+@named d3 = Damper(c = rpo["fₚᵢ"] * 20)     # General damping element
+@named s1 = Spring(k = -1 / rpo["kᵤ"])     # General compliance element
 # @named s1 = Spring(k=-0.1)     # General compliance element
-@named s2 = Spring(k=-1 / rpo["kᵤ"])     # General compliance element
-@named s3 = Spring(k=-1 / rpo["kᵤ"])     # General compliance element
+@named s2 = Spring(k = -1 / rpo["kᵤ"])     # General compliance element
+@named s3 = Spring(k = -1 / rpo["kᵤ"])     # General compliance element
 @named P = Se(p)        # Inlet pressure
 @named Po = Se(p)        # Inlet pressure
 @named P = Se(p)        # Inlet pressure
@@ -39,7 +39,13 @@ m1 = 30 * 998 / (Ap)
 @named s31 = Junction1([-1, d3], [-1, m])
 @named s30 = Junction0([-1, s3], [-1, Po])
 
-cons = [connect(s11.power, s10.power), connect(s10.power, s21.power), connect(s21.power, s20.power), connect(s20.power, s31.power), connect(s31.power, s30.power)]
+cons = [
+    connect(s11.power, s10.power),
+    connect(s10.power, s21.power),
+    connect(s21.power, s20.power),
+    connect(s20.power, s31.power),
+    connect(s31.power, s30.power),
+]
 # cons = [connect(s11.power, s10.power), connect(s10.power, s21.power), connect(s21.power, s20.power)]
 # cons = [connect(s11.power, s10.power)]
 
@@ -76,7 +82,7 @@ v0 = [0, 0, 0, 0, 0]
 prob = ODEProblem(sys, v0, (0.0, 30), vals)
 equations(sys)
 
-sol = solve(prob, reltol=1e-13, abstol=1e-13)
+sol = solve(prob, reltol = 1e-13, abstol = 1e-13)
 # sol = solve(prob)
 plot(sol)
 sol ./ Ap

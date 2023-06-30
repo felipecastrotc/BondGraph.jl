@@ -29,12 +29,18 @@ con = [connect(up0.power, lk.power), connect(lk.power, dw0.power)]
 # Pump parameters
 @parameters k1, k2
 
-@named c1 = mTF(r=k1)
-@named c2 = mTF(r=k1)
+@named c1 = mTF(r = k1)
+@named c2 = mTF(r = k1)
 
 @named p1 = Junction1(ω)
 
-push!(con, connect(up0.power, c1.pin), connect(c1.pout, p1.power), connect(p1.power, c2.pin), connect(c2.pout, dw0.power))
+push!(
+    con,
+    connect(up0.power, c1.pin),
+    connect(c1.pout, p1.power),
+    connect(p1.power, c2.pin),
+    connect(c2.pout, dw0.power),
+)
 
 # Pipe
 @named s11 = Junction1([-1, f], [-1, m])
@@ -58,4 +64,3 @@ equations(sys)
 
 # 1-element Vector{Equation}:
 #  Differential(t)(s11₊m₊power₊f(t)) ~ (up0₊Pi₊P0 + lk₊f₊R*(-s11₊m₊power₊f(t) - k1*p1₊ω₊Q0) - s10₊Po₊P2 - s11₊f₊R*s11₊m₊power₊f(t)) / s11₊m₊I
-
