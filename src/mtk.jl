@@ -20,15 +20,6 @@ import ModelingToolkit: namespace_equations, equations
 
 # Connection functions
 
-# function expand_connections(sys::AbstractSystem; debug = false, tol = 1e-10)
-#     sys, csets = generate_connection_set(sys)
-#     bgeqs = generate_bg_eqs!(csets)
-#     ceqs, instream_csets = generate_connection_equations_and_stream_connections(csets)
-#     _sys = expand_instream(instream_csets, sys; debug = debug, tol = tol)
-#     sys = flatten(sys, true)
-#     @set! sys.eqs = [equations(_sys); ceqs; bgeqs]
-# end
-
 function expand_connections(
     sys::AbstractSystem,
     find = nothing,
@@ -57,13 +48,6 @@ function generate_connection_set(sys::AbstractSystem, find = nothing, replace = 
     end
     sys, (merge(domain_free_connectionsets), vcat(connectionsets, bgconnectionsets))
 end
-
-# function generate_connection_set(sys::AbstractSystem, find=nothing, replace=nothing)
-#     connectionsets = ConnectionSet[]
-#     sys = generate_connection_set!(connectionsets, sys, find, replace)
-#     bgconnectionsets = get_bg_connection_set!(connectionsets)
-#     sys, vcat(merge(connectionsets), bgconnectionsets)
-# end
 
 # TODO: Check for legacy functions
 

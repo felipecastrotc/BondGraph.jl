@@ -30,7 +30,10 @@ export renamevars, GenericDamper, latexify, structural_simplify, addsubsys
 
 include("mtk.jl")
 include("types.jl")
-include("utils.jl")
+include("utils/bg_utils.jl")
+include("utils/connection_utils.jl")
+include("utils/graph.jl")
+include("utils/system_utils.jl")
 include("bg.jl")
 # include("mbg.jl")
 
