@@ -2,33 +2,67 @@
 D = Differential(t)
 It = Integral(t in DomainSets.ClosedInterval(0, t))
 
-# After updating the packages I am unable to create an empty equation ODESystem
-# I am replacing the  Power() connector with a simple function to return the
-# states e and f
-# @connector function Power(; name, effort = 0.0, flow = 0.0)
-#     sts = @variables e(t) = effort f(t) = flow
-#     ODESystem(Equation[], t, sts, []; name = name)
-# end
+# Base
 
+"""
+    Power(; name, effort = 0.0, flow = 0.0, type = op)
+
+Creates a power connector for the bond graph modeling.
+
+Arguments:
+- name: Name of the power connector.
+- effort: Initial effort value. Default is 0.0.
+- flow: Initial flow value. Default is 0.0.
+- type: Type of the power connector. Default is op (one-port).
+
+Returns:
+An ODESystem representing the power connector.
+
+Example:
+Power(name = "P1", effort = 1.0, flow = 2.0, type = tpgy)
+"""
 @connector function Power(; name, effort = 0.0, flow = 0.0, type = op)
+    # Define the symbolic variables for effort and flow
     sts = @variables e(t) = effort [connect = bg] f(t) = flow [connect = bg]
+
+    # Set the bond graph metadata for the symbolic variables
     sts = set_bg_metadata.(sts, [[type, bgeffort], [type, bgflow]])
+
+    # Create an ODESystem with empty equations, time variable t, the symbolic variables sts, and optional name
     ODESystem(Equation[], t, sts, []; name = name)
 end
 
-# =============================================================================
 # Sources
 
-function Se(expr; name)
+"""
+    Se(expr; name)
 
+Creates a source of effort element in the bond graph model.
+TODO: Improve
+
+Arguments:
+- expr: Expression representing the source value.
+- name: Name of the source element.
+
+Returns:
+An ODESystem representing the source element.
+
+Example:
+@named s1 = Se(2.0)
+"""
+function Se(expr; name)
+    # Create a Power connector with type op (one-port)
     @named power = Power(type = op)
 
+    # Define the equation between the power.e variable and the source expression
     eqs = [power.e ~ expr]
 
     sts = []
     if isvariable(expr)
+        # If the expression is a variable, add it to the list of states
         ps = [expr]
     elseif istree(unwrap(expr))
+        # If the expression is a tree, extract the variables
         vars = collect(Set(ModelingToolkit.get_variables(expr)))
         sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
         ps = filter(x -> isindependent(Num(x)), vars)
@@ -36,19 +70,39 @@ function Se(expr; name)
         ps = []
     end
 
+    # Compose the ODESystem with the equations, time variable t, states sts, parameter states ps, and name
     compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end
 
+"""
+    Sf(expr; name)
+
+Creates a source of flow in the bond graph model. CARAIOOOOO
+TODO: Improvess
+
+# Arguments:
+- expr: Expression representing the flow source value.
+- name: Name of the flow source element.
+
+# Returns:
+An ODESystem representing the flow source element.
+
+# Example:
+@named s2 = Sf(3.5)
+"""
 function Sf(expr; name)
+    # Create a Power connector with type op (one-port)
+    @named power = Power(type=op)
 
-    @named power = Power(type = op)
-
+    # Define the equation between the power.f variable and the flow source expression
     eqs = [power.f ~ expr]
 
     sts = []
     if isvariable(expr)
+        # If the expression is a variable, add it to the list of states
         ps = [expr]
     elseif istree(unwrap(expr))
+        # If the expression is a tree, extract the variables
         vars = collect(Set(ModelingToolkit.get_variables(expr)))
         sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
         ps = filter(x -> isindependent(Num(x)), vars)
@@ -56,7 +110,8 @@ function Sf(expr; name)
         ps = []
     end
 
-    compose(ODESystem(eqs, t, sts, ps; name = name), power)
+    # Compose the ODESystem with the equations, time variable t, states sts, parameter states ps, and name
+    compose(ODESystem(eqs, t, sts, ps; name=name), power)
 end
 
 function Dq(; name, x = 0.0)
@@ -67,7 +122,6 @@ function Dq(; name, x = 0.0)
     ODESystem(eqs, t, [q, f], []; name = name)
 end
 
-# =============================================================================
 # Ports
 
 function Junction0(ps...; name, couple = true)
@@ -183,7 +237,7 @@ function mTF(subsys...; name, r = 1.0, coneqs = [])
     return sys
 end
 
-# =============================================================================
+
 # Elements
 
 function Mass(; name, m = 1.0, u = 0.0)
