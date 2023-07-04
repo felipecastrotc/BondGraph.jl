@@ -9,17 +9,20 @@ It = Integral(t in DomainSets.ClosedInterval(0, t))
 
 Creates a power connector for the bond graph modeling.
 
-Arguments:
+# Arguments:
 - name: Name of the power connector.
 - effort: Initial effort value. Default is 0.0.
 - flow: Initial flow value. Default is 0.0.
 - type: Type of the power connector. Default is op (one-port).
 
-Returns:
+# Returns:
 An ODESystem representing the power connector.
 
-Example:
-Power(name = "P1", effort = 1.0, flow = 2.0, type = tpgy)
+# Example:
+```julia-repl
+julia> Power(name = "P1", effort = 1.0, flow = 2.0, type = tpgy)
+```
+
 """
 @connector function Power(; name, effort = 0.0, flow = 0.0, type = op)
     # Define the symbolic variables for effort and flow
@@ -40,15 +43,17 @@ end
 Creates a source of effort element in the bond graph model.
 TODO: Improve
 
-Arguments:
+# Arguments:
 - expr: Expression representing the source value.
 - name: Name of the source element.
 
-Returns:
+# Returns:
 An ODESystem representing the source element.
 
-Example:
-@named s1 = Se(2.0)
+# Example:
+```julia-repl
+julia> @named s1 = Se(2.0)
+```
 """
 function Se(expr; name)
     # Create a Power connector with type op (one-port)
@@ -77,18 +82,20 @@ end
 """
     Sf(expr; name)
 
-Creates a source of flow in the bond graph model. CARAIOOOOO
+Creates a source of flow in the bond graph model
 TODO: Improvess
 
 # Arguments:
-- expr: Expression representing the flow source value.
+- `expr`: Expression representing the flow source value.
 - name: Name of the flow source element.
 
 # Returns:
 An ODESystem representing the flow source element.
 
 # Example:
-@named s2 = Sf(3.5)
+```julia-repl
+julia>  @named s2 = Sf(3.5)
+```
 """
 function Sf(expr; name)
     # Create a Power connector with type op (one-port)

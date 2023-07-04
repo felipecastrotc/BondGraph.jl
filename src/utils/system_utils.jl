@@ -4,14 +4,14 @@ import ModelingToolkit: structural_simplify, expand_connections
 """
     simplifysys(sys::ODESystem; name)
 
-    Simplify an ODE system by expanding connections, performing structural simplification and reducing the observed variables.
+Simplify an ODE system by expanding connections, performing structural simplification and reducing the observed variables.
 
-    Arguments:
-    - sys::ODESystem: The ODE system to simplify.
-    - name: Optional name for the simplified system.
+# Arguments:
+- sys::ODESystem: The ODE system to simplify.
+- name: Optional name for the simplified system.
 
-    Returns:
-    - The simplified ODE system.
+# Returns:
+- The simplified ODE system.
 """
 function simplifysys(sys::ODESystem; name)
     exp_sys = expand_connections(sys)
@@ -23,19 +23,22 @@ end
 """
     reducedobs(sys::ODESystem; name)
 
-    Create a reduced ODESystem by substituting observed variables in the equations.
+Create a reduced ODESystem by substituting observed variables in the equations.
 
-    Arguments:
-    - sys::ODESystem: The original ODESystem object.
-    - name: Optional name for the reduced ODESystem.
+# Arguments:
+- sys::ODESystem: The original ODESystem object.
+- name: Optional name for the reduced ODESystem.
 
-    Returns:
-    A reduced ODESystem object with observed variables substituted.
+# Returns:
+A reduced ODESystem object with observed variables substituted.
 
-    TODO: create an example
-    Example:
-    sys = ODESystem([eq1, eq2], t)
-    reduced_sys = reducedobs(sys; name = "Reduced System")
+TODO: create an example
+
+# Example:
+```julia-repl
+julia> sys = ODESystem([eq1, eq2], t)
+julia> reduced_sys = reducedobs(sys; name = "Reduced System")
+```
 """
 function reducedobs(sys::ODESystem; name)
     eqs = map(eq -> substitute_observed(eq, sys), equations(sys))
@@ -47,15 +50,15 @@ end
 """
     substitute_dict(O, expr, sub)
 
-    Substitute the variables in `O` with their corresponding values from the dictionary `sub` in the expression `expr`.
+Substitute the variables in `O` with their corresponding values from the dictionary `sub` in the expression `expr`.
 
-    # Arguments
-    - `O`: The variable or expression to be substituted.
-    - `expr`: The expression in which the substitution should be performed.
-    - `sub`: A dictionary mapping variables to their corresponding values.
+# Arguments
+- `O`: The variable or expression to be substituted.
+- `expr`: The expression in which the substitution should be performed.
+- `sub`: A dictionary mapping variables to their corresponding values.
 
-    # Returns
-    The expression `expr` with the variables in `O` substituted using the values from `sub`.
+# Returns
+The expression `expr` with the variables in `O` substituted using the values from `sub`.
 """
 function substitute_dict(O, expr, sub)
     O = unwrap(O)  # Unwrap the variable if it is a ModelingToolkit variable
@@ -77,20 +80,22 @@ end
 """
     substitute_observed(eq::Equation, sys::ODESystem)
 
-    Substitute observed variables in the equation with their assigned values.
+Substitute observed variables in the equation with their assigned values.
 
-    Arguments:
-    - eq::Equation: The equation to be processed.
-    - sys::ODESystem: The ODESystem object containing the observed variables.
+# Arguments:
+- eq::Equation: The equation to be processed.
+- sys::ODESystem: The ODESystem object containing the observed variables.
 
-    Returns:
-    An equation with observed variables substituted by their assigned values.
+# Returns:
+An equation with observed variables substituted by their assigned values.
 
-    TODO: create an example
-    Example:
-    eq = @eq x'(t) = a * x(t) + b * y(t)
-    sys = ODESystem([eq], t)
-    substituted_eq = substitute_observed(eq, sys)
+TODO: create an example
+# Example:
+```julia-repl
+julia> eq = @eq x'(t) = a * x(t) + b * y(t)
+julia> sys = ODESystem([eq], t)
+julia> substituted_eq = substitute_observed(eq, sys)
+```
 """
 function substitute_observed(eq::Equation, sys::ODESystem)
 

@@ -7,13 +7,13 @@ import ModelingToolkit: namespaced_var, get_connection_type, getname
 """
     check_bg_con(connectionset)
 
-    Check if the connection set contains a bond-graph (bg) connection.
+Check if the connection set contains a bond-graph (bg) connection.
 
-    Arguments:
-    - connectionset: ConnectionSet object.
+# Arguments:
+- connectionset: ConnectionSet object.
 
-    Returns:
-    - Boolean indicating whether the connection set contains a bond-graph connection.
+# Returns:
+- Boolean indicating whether the connection set contains a bond-graph connection.
 """
 function check_bg_con(connectionset)
     ele = namespaced_var(connectionset.set[1])
@@ -24,13 +24,13 @@ end
 """
     get_bg_connection_set!(connectionsets)
 
-    Extracts the bond-graph (bg) connection sets from a list of connection sets.
+Extracts the bond-graph (bg) connection sets from a list of connection sets.
 
-    Arguments:
-    - connectionsets: Array of ConnectionSet objects.
+# Arguments:
+- connectionsets: Array of ConnectionSet objects.
 
-    Returns:
-    - Array of ConnectionSet objects containing only the bond-graph connection sets.
+# Returns:
+- Array of ConnectionSet objects containing only the bond-graph connection sets.
 """
 function get_bg_connection_set!(connectionsets)
     bgconnectionsets = filter(check_bg_con, connectionsets)  # Filter connection sets with bond-graph connections
@@ -47,18 +47,20 @@ end
 """
     add_idx(var, idx)
 
-    Adds an index to a variable by renaming it with the index appended to its name.
+Adds an index to a variable by renaming it with the index appended to its name.
 
-    Arguments:
-    - var: Variable to be indexed.
-    - idx: Index to be added to the variable name.
+# Arguments:
+- var: Variable to be indexed.
+- idx: Index to be added to the variable name.
 
-    Returns:
-    - Indexed variable with the index appended to its name.
+# Returns:
+- Indexed variable with the index appended to its name.
 
-    Example:
-    x = Variable(:x)
-    indexed_var = add_idx(x, 1)  # Renames "x" to "x1"
+# Example:
+```julia-repl
+julia> x = Variable(:x)
+julia> indexed_var = add_idx(x, 1)  # Renames "x" to "x1"
+```
 """
 function add_idx(var, idx)
     v = deepcopy(var)
@@ -67,25 +69,26 @@ function add_idx(var, idx)
     return rename(v, newname)  # Rename the variable with the indexed name
 end
 
-
 """
     gen_tp_con!(eqs, sys, subsys)
 
-    Generates bond graph connections between a system and its sub-systems for the junction 0 and 1 (two-port elements).
+Generates bond graph connections between a system and its sub-systems for the junction 0 and 1 (two-port elements).
 
-    Arguments:
-    - eqs: Array of equations to which the connections will be added.
-    - sys: The main system to which the connections will be made.
-    - subsys: Sub-systems to be connected to the main system.
+# Arguments:
+- eqs: Array of equations to which the connections will be added.
+- sys: The main system to which the connections will be made.
+- subsys: Sub-systems to be connected to the main system.
 
-    Returns:
-    - None
+# Returns:
+- None
 
-    Example:
-    eqs = Equation[]
-    sys = ODESystem([:x, :y], [dx, dy])
-    subsys = [ODESystem([:a], [da]), ODESystem([:b], [db])]
-    gen_tp_con!(eqs, sys, subsys)
+# Example:
+```julia-repl
+julia> eqs = Equation[]
+julia> sys = ODESystem([:x, :y], [dx, dy])
+julia> subsys = [ODESystem([:a], [da]), ODESystem([:b], [db])]
+julia> gen_tp_con!(eqs, sys, subsys)
+```
 """
 function gen_tp_con!(eqs, sys, subsys)
     # Get connections

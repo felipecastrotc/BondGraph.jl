@@ -9,13 +9,13 @@ import ModelingToolkit: namespaced_var, generate_connection_set!
 """
     generate_bg_eqs!(connectionsets)
 
-    Generates bond graph equations from connection sets.
+Generates bond graph equations from connection sets.
 
-    Arguments:
-    - connectionsets: Array of connection sets.
+# Arguments:
+- connectionsets: Array of connection sets.
 
-    Returns:
-    - eqs: Array of equations representing the bond graph.
+# Returns:
+- eqs: Array of equations representing the bond graph.
 """
 function generate_bg_eqs!(connectionsets)
     # Get the bond graph connection sets
@@ -37,15 +37,17 @@ end
 """
     generate_graph(mdl, var=:e; method=:stress)
 
-    Generates a graph visualization of the bond graph model.
+Generates a graph visualization of the bond graph model.
 
-    Arguments:
-    - mdl: Bond graph model.
-    - var: Variable to visualize connections for. Can be :e (effort) or :f (flow). Default is :e.
-    - method: Graph layout method. Default is :stress.
+# Arguments:
+- mdl: Bond graph model.
+- var: Variable to visualize connections for. Can be :e (effort) or :f (flow). Default is :e.
+- method: Graph layout method. Default is :stress.
 
-    Example:
-    generate_graph(mdl, var=:e, method=:stress)
+# Example:
+```julia-repl
+julia> generate_graph(mdl, var=:e, method=:stress)
+```
 """
 function generate_graph(mdl, var=:e; method=:stress)
 
@@ -89,13 +91,13 @@ end
 """
     csets2dict(csets)
 
-    Converts connection sets to a dictionary.
+Converts connection sets to a dictionary.
 
-    Arguments:
-    - csets: Array of connection sets.
+# Arguments:
+- csets: Array of connection sets.
 
-    Returns:
-    - str2con: Dictionary mapping connection set names to connection elements.
+# Returns:
+- str2con: Dictionary mapping connection set names to connection elements.
 """
 function csets2dict(csets)
     str2con = Dict{String,ConnectionElement}()
@@ -114,21 +116,23 @@ end
 """
     csets2adjmtx(csets, str2con; filterstr="f(t)", filterflow=false)
 
-    Generates an adjacency matrix from connection sets and a dictionary.
+Generates an adjacency matrix from connection sets and a dictionary.
 
-    Arguments:
-    - csets: Array of connection sets.
-    - str2con: Dictionary mapping connection set names to connection elements.
-    - filterstr: String to filter connections by name (default: "f(t)").
-    - filterflow: Boolean indicating whether to filter connections by flow (default: false).
+# Arguments:
+- csets: Array of connection sets.
+- str2con: Dictionary mapping connection set names to connection elements.
+- filterstr: String to filter connections by name (default: "f(t)").
+- filterflow: Boolean indicating whether to filter connections by flow (default: false).
 
-    Returns:
-    - am: Adjacency matrix representing the connections between connection elements.
+# Returns:
+- am: Adjacency matrix representing the connections between connection elements.
 
-    Example:
-    csets = [ConnectionSet([:a], [:b]), ConnectionSet([:c], [:d])]
-    str2con = csets2dict(csets)
-    am = csets2adjmtx(csets, str2con)
+# Example:
+```julia-repl
+julia> csets = [ConnectionSet([:a], [:b]), ConnectionSet([:c], [:d])]
+julia> str2con = csets2dict(csets)
+julia> am = csets2adjmtx(csets, str2con)
+```
 """
 function csets2adjmtx(csets, str2con; filterstr="f(t)", filterflow=false)
     
@@ -170,21 +174,23 @@ end
 """
     get_sm_mtx!(am, idx2k, str2con)
 
-    Generates the signal matrix by modifying the adjacency matrix.
+Generates the signal matrix by modifying the adjacency matrix.
 
-    Arguments:
-    - am: Adjacency matrix representing the connections between connection elements.
-    - idx2k: Dictionary mapping indices to connection element keys.
-    - str2con: Dictionary mapping connection set names to connection elements.
+# Arguments:
+- am: Adjacency matrix representing the connections between connection elements.
+- idx2k: Dictionary mapping indices to connection element keys.
+- str2con: Dictionary mapping connection set names to connection elements.
 
-    Returns:
-    - sm: Signal matrix representing the connections with modified entries.
+# Returns:
+- sm: Signal matrix representing the connections with modified entries.
 
-    Example:
-    am = [0 1 0; 0 0 1; 0 0 0]
-    idx2k = Dict(1 => "a", 2 => "b", 3 => "c")
-    str2con = Dict("a" => con1, "b" => con2, "c" => con3)
-    sm = get_sm_mtx!(am, idx2k, str2con)
+# Example:
+```julia-repl
+julia> am = [0 1 0; 0 0 1; 0 0 0]
+julia> idx2k = Dict(1 => "a", 2 => "b", 3 => "c")
+julia> str2con = Dict("a" => con1, "b" => con2, "c" => con3)
+julia> sm = get_sm_mtx!(am, idx2k, str2con)
+```
 """
 function get_sm_mtx!(am, idx2k, str2con)
     # Get the signal matrix and remove the one-port elements as receiving node
@@ -208,14 +214,14 @@ end
 """
     adjmtx2eqs(am, str2con)
 
-    Generates a set of equations from an adjacency matrix and connection element dictionary.
+Generates a set of equations from an adjacency matrix and connection element dictionary.
 
-    Arguments:
-    - am: Adjacency matrix representing the connections between connection elements.
-    - str2con: Dictionary mapping connection set names to connection elements.
+# Arguments:
+- am: Adjacency matrix representing the connections between connection elements.
+- str2con: Dictionary mapping connection set names to connection elements.
 
-    Returns:
-    - eqs: Array of equations generated from the adjacency matrix and connection elements.
+# Returns:
+- eqs: Array of equations generated from the adjacency matrix and connection elements.
 """
 # TODO: add support adding signs it has issues on the algorithm
 function adjmtx2eqs(am, str2con)

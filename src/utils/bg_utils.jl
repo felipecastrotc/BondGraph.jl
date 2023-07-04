@@ -2,24 +2,26 @@
 """
     equalityeqs(con)
 
-    Create a list of equality equations from a given array of expressions.
+Create a list of equality equations from a given array of expressions.
 
-    Arguments:
-    - con: Array of expressions.
+# Arguments:
+- con: Array of expressions.
 
-    Returns:
-    - Array of equality equations.
+# Returns:
+- Array of equality equations.
 
-    Example:
-    con = [a, b, c]
+# Example:
+```julia-repl
+julia> con = [a, b, c]
 
-    eqs = equalityeqs(con)
-    # eqs = [a ~ b, a ~ c]
+julia> eqs = equalityeqs(con)
+julia> # eqs = [a ~ b, a ~ c]
 
-    con = [a]
+julia> con = [a]
 
-    eqs = equalityeqs(con)
-    # eqs = []
+julia> eqs = equalityeqs(con)
+julia> # eqs = []
+```
 """
 function equalityeqs(con)
     base = 0.0
@@ -40,24 +42,26 @@ end
 """
     sumvar(con)
 
-    Create a sum variable equation from a given array of expressions.
+Create a sum variable equation from a given array of expressions.
 
-    Arguments:
-    - con: Array of expressions.
+# Arguments:
+- con: Array of expressions.
 
-    Returns:
-    - Sum variable equation if the array is non-empty, otherwise an empty array.
+# Returns:
+- Sum variable equation if the array is non-empty, otherwise an empty array.
 
-    Example:
-    con = [a, b, c]
+# Example:
+```julia-repl
+julia>  con = [a, b, c]
 
-    eq = sumvar(con)
-    # eq = 0 ~ (a + b + c)
+julia>  eq = sumvar(con)
+# eq = 0 ~ (a + b + c)
 
-    con = []
+julia> con = []
 
-    eq = sumvar(con)
-    # eq = []
+julia> eq = sumvar(con)
+# eq = []
+```
 """
 function sumvar(con)
     if length(con) > 0
@@ -70,20 +74,22 @@ end
 """
     flatinput(ps)
 
-    Flatten and process input systems and signs.
+Flatten and process input systems and signs.
 
-    Arguments:
-    - ps: Array of input systems or input vectors.
+# Arguments:
+- ps: Array of input systems or input vectors.
 
-    Returns:
-    - Tuple containing the flattened input systems and corresponding signs.
+# Returns:
+- Tuple containing the flattened input systems and corresponding signs.
 
-    Example:
-    ps = [sys1, [-1, sys2], sys3]
+# Example:
+```julia-repl
+julia> ps = [sys1, [-1, sys2], sys3]
 
-    subsys, signs = flatinput(ps)
-    # subsys = [sys1, sys2, sys3]
-    # signs = [1, -1, 1]
+julia> subsys, signs = flatinput(ps)
+# subsys = [sys1, sys2, sys3]
+# signs = [1, -1, 1]
+```
 """
 function flatinput(ps)
     subsys = ModelingToolkit.AbstractSystem[]  # Array to store the flattened input systems
@@ -125,14 +131,14 @@ end
 """
     isindependent(var::Num)
 
-    Check if a variable is independent.
+Check if a variable is independent.
 
-    Arguments:
-    - var::Num: The variable to check.
+# Arguments:
+- var::Num: The variable to check.
 
-    Returns:
-    - true if the variable is independent.
-    - false if the variable is not independent.
+# Returns:
+- true if the variable is independent.
+- false if the variable is not independent.
 """
 function isindependent(var::Num)
     if isvariable(var)
