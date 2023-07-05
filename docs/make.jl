@@ -48,12 +48,11 @@ for file in files
     )
 end
 
-examples_nav = get_nav.(files; suffix = "./examples/")
-print(examples_nav)
+# examples_nav = get_nav.(files; suffix = "./examples/")
 
 makedocs(
     modules = [BondGraph],
-    format = Documenter.HTML(prettyurls = false),
+    format=Documenter.HTML(prettyurls=false, sidebar_sitename=false),
     sitename = "BondGraph.jl",
     # doctest=true,
     clean = true,
