@@ -4,7 +4,7 @@
 # 
 # ![Mass-Spring-Damper System](../assets/block_2dof.png)
 # 
-# The motion of the harmonic oscillator is governed by the following differential equation:
+# The following differential equation governs the motion of the harmonic oscillator:
 # 
 # TODO: update the equation
 # $m\,\frac{d^2 x}{dt^2} + c\,\frac{d^2 x}{dt^2} + k\,x = F(t)$,
@@ -33,12 +33,12 @@ using JLD2
 # 
 # ### Setting the elements
 # 
-# Prior to the definition of a system, we need to define the single port elements of the system. Then, we define the mass, spring and damper elements as follows:
+# Before defining a system, we need to define the single port elements of the system. Then, we define the mass, spring, and damper elements as follows:
 @named m = Mass(m=1.0);      # (kg)
 @named s = Spring(k=1.0);    # (N/m)
 @named d = Damper(c=1.0);    # (N⋅m⋅s)
 
-# The forcing term can be set as an expression or even a Julia function. In this example, we will first intialize an generic forcing term that will be defined before solving the ODE.
+# The forcing term can be set as an expression or even a Julia function. In this example, we will first intialize a generic forcing term that will be defined before solving the ODE.
 @parameters F(t)
 @named f = Se(F)
 
@@ -77,7 +77,7 @@ generate_graph(mdl)
 # We can obtain the bond-graph equations using the code below.
 equations(expand_connections(mdl))
 
-# The equations of the model above were not simplified and represent the bond-graphs equations directly derived from the connections. Then, we simplify the DAE above and obtain the ODE. The simplified set of equations are required for using `solve` from `DifferentialEquations.jl`
+# The equations of the model above were not simplified and represent the bond-graphs equations directly derived from the connections. Then, we simplify the DAE above and obtain the ODE. The simplified set of equations is required for using `solve` from `DifferentialEquations.jl`
 @named sys = simplifysys(mdl)
 
 # Print system states
@@ -89,7 +89,7 @@ parameters(sys)
 # Print the system simplified equations
 equations(sys)
 
-# By comparison we can see that the equations above are the same as the canonical form of the harmonic oscillator, presented at the beggining.
+# By comparison, we can see that the equations above are the same as the canonical form of the harmonic oscillator presented at the beginning.
 
 # We can generate LaTeX code from the equations
 latexify(equations(sys))
@@ -103,7 +103,7 @@ sys_unforced = substitute(sys, Dict(m2_j1.f.F => 0.0))
 # Define the simulation time
 tspan = (0, 10)
 
-# When defining the ODEProblem as in the ModelingToolkit we can define the initial value of the states.
+# When defining the ODEProblem as in the ModelingToolkit, we can define the initial value of the states.
 prob = ODEProblem(sys_unforced, [m2_j1.m.power.f => 0.0, m2_sd.s.q => 1.0], tspan)
 
 # Use the `solve` to simulate the system.
