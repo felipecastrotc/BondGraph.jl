@@ -1,3 +1,5 @@
+# # [MSD system with N-DoF](@id msd-ndof)
+
 using BondGraph
 using BondGraph: t, D
 using DifferentialEquations

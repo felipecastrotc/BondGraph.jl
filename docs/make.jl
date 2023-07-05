@@ -14,10 +14,11 @@ ENV["JULIA_DEBUG"] = "Documenter"
 using Documenter, DocStringExtensions, Literate, BondGraph
 
 function get_nav(filename; suffix="./examples/")
-    file = replace(filename, ".jl" => "")
-    name = join([uppercase(s[1]) * s[2:end] for s in split(file, "_")], " ")
+    f = open(suffix * filename, "r")
+    name = split(split(readline(f), "[")[2], "]")[1]
+    close(f)
     path = suffix*replace(filename, ".jl" => ".md")
-    return name => path
+    return String(name) => path
 end
 
 # utility function from https://github.com/JuliaOpt/Convex.jl/blob/master/docs/make.jl
@@ -40,6 +41,7 @@ for file in files
 end
 
 examples_nav = get_nav.(files; suffix="./examples/")
+print(examples_nav)
 
 makedocs(modules=[BondGraph],
     format=Documenter.HTML(prettyurls=false),

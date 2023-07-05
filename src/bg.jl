@@ -247,40 +247,112 @@ end
 
 # Elements
 
-function Mass(; name, m = 1.0, u = 0.0)
-    @named power = Power(flow = u)
+"""
+    Mass(; name="", m=1.0, u=0.0)
+
+Create a mass element in the bond graph model.
+
+# Arguments
+- `name::String`: The name of the mass element (default: "").
+- `m::Float64`: The mass value (default: 1.0).
+- `u::Float64`: The initial value for the flow variable (default: 0.0).
+
+# Returns
+An `ODESystem` representing the mass element in the bond graph model.
+
+# Examples
+```julia-repl
+julia> mass = Mass(name="my_mass", m=2.0, u=1.0)
+```
+"""
+function Mass(; name="", m=1.0, u=0.0)
+    @named power = Power(flow=u)
     ps = @parameters I = m
 
     eqs = [D(power.f) ~ power.e / I]
-    compose(ODESystem(eqs, t, [], ps; name = name), power)
+    compose(ODESystem(eqs, t, [], ps; name=name), power)
 end
 
-function Spring(; name, k = 10, x = 0.0)
+
+"""
+    Spring(; name="", k=10, x=0.0)
+
+Create a spring element in the bond graph model.
+
+# Arguments
+- `name::String`: The name of the spring element (default: "").
+- `k::Float64`: The spring stiffness (default: 10).
+- `x::Float64`: The initial displacement (default: 0.0).
+
+# Returns
+An `ODESystem` representing the spring element in the bond graph model.
+
+# Examples
+```julia-repl
+julia> spring = Spring(name="my_spring", k=5.0, x=0.1)
+```
+"""
+function Spring(; name="", k=10, x=0.0)
     @named power = Power()
 
     @variables q(t) = x
     ps = @parameters C = 1 / k
 
     eqs = [
-        power.e ~ q / C
+        power.e ~ q / C,
         D(q) ~ power.f
     ]
-    compose(ODESystem(eqs, t, [q], ps; name = name), power)
+    compose(ODESystem(eqs, t, [q], ps; name=name), power)
 end
 
-function Damper(; name, c = 10, u = 1.0)
-    @named power = Power(flow = u)
+"""
+    Damper(; name="", c=10, u=1.0)
+
+Create a damper element in the bond graph model.
+
+# Arguments
+- `name::String`: The name of the damper element (default: "").
+- `c::Float64`: The damping coefficient (default: 10).
+- `u::Float64`: The initial flow variable value (default: 1.0).
+
+# Returns
+An `ODESystem` representing the damper element in the bond graph model.
+
+# Examples
+```julia-repl
+julia> damper = Damper(name="my_damper", c=5.0, u=0.1)
+```
+"""
+function Damper(; name="", c=10, u=1.0)
+    @named power = Power(flow=u)
 
     ps = @parameters R = c
     eqs = [power.e ~ power.f * R]
 
-    compose(ODESystem(eqs, t, [], ps; name = name), power)
+    compose(ODESystem(eqs, t, [], ps; name=name), power)
 end
 
-function GenericDamper(expr; name)
+
+"""
+    GenericDamper(expr; name="")
+
+Create a generic damper element in the bond graph model.
+
+# Arguments
+- `expr`: The expression defining the behavior of the damper element.
+- `name::String`: The name of the damper element (default: "").
+
+# Returns
+An `ODESystem` representing the generic damper element in the bond graph model.
+
+# Remarks
+- The `expr` can be any valid expression defining the behavior of the damper element.
+- The function automatically determines the state variables and parameters based on the `expr`.
+"""
+function GenericDamper(expr; name="")
     # TODO: check if this function is working
 
-    @named power = Power(flow = u)
+    @named power = Power()
 
     eqs = [power.e ~ expr]
 
@@ -295,5 +367,5 @@ function GenericDamper(expr; name)
         sts, ps = [], []
     end
 
-    compose(ODESystem(eqs, t, sts, ps; name = name), power)
+    compose(ODESystem(eqs, t, sts, ps; name=name), power)
 end

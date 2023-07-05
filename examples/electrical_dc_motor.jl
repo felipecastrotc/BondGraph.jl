@@ -1,3 +1,6 @@
+# # [DC Motor](@id dc-motor)
+
+#-
 using BondGraph
 using BondGraph: t, D
 using DifferentialEquations
