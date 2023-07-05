@@ -226,37 +226,35 @@ function Junction1(ps...; name="")
     compose(sys, power, subsys...)
 end
 
-function Junction1(ps...; name, couple = true)
+"""
+    mGY(subsys...; name="", g=1.0, coneqs=[])
 
-    @named power = Power(type = j1)
-    # Get connections
-    ps = collect(Base.Flatten([ps]))
+Create a gyrator element in the bond graph model.
 
-    # Get signs and subsystems 
-    subsys, signs = flatinput(ps)
+# Arguments
+- `subsys...`: One or more subsystems to be connected to the gyrator.
+- `name::String`: The name of the gyrator element (default: "").
+- `g::Number|Symbol`: A value or a expression representing the gyrator relationship (default: 1.0).
+- `coneqs::Vector{Equation}`: Additional output connection equations of the modulated gyrator (default: []).
 
-    eqs = Equation[]
-    for (s, sign) in zip(subsys, signs)
-        if sign == 1
-            push!(eqs, connect(s.power, power))
-        elseif sign == -1
-            push!(eqs, connect(power, s.power))
-        end
-    end
+# Returns
+An `ODESystem` representing the gyrator element in the bond graph model.
 
-    # Build subsystem
-    sys = ODESystem(eqs, t, [], [], name = name)
-    compose(sys, power, subsys...)
-end
+# Examples
+```julia-repl
+# Create a gyrator with a variable value
+@variables c
+julia> gyrator = mGY(subsys1, subsys2, g=c, name="gyrator")
+```
+"""
+function mGY(subsys...; name="", g=1.0, coneqs=[])
+    # TODO:ISSUE -> the compose only works when the gyrator systems is the first
 
-# TODO:ISSUE -> the compose only works when the gyrator systems is the first
-function mGY(subsys...; name, g = 1.0, coneqs = [])
+    # Generate the input and output connections
+    @named pin = Power(type=tpgy)
+    @named pout = Power(type=tpgy)
 
-    # Generate the in and out connection
-    @named pin = Power(type = tpgy)
-    @named pout = Power(type = tpgy)
-
-    # Alias for simpler view about the mGY port
+    # Alias for simpler view of the mGY port
     e₁, f₁ = pin.e, pin.f
     e₂, f₂ = pout.e, pout.f
 
@@ -277,25 +275,47 @@ function mGY(subsys...; name, g = 1.0, coneqs = [])
         sts, ps = [], []
     end
 
-    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
+    # Create the subsystem with the modulated gyrator equations
+    sys = compose(ODESystem(eqs, t, sts, ps; name=name), pin, pout)
 
+    # Generate the additional connection equations
     gen_tp_con!(coneqs, sys, subsys)
 
     return sys
 end
 
-# TODO:ISSUE -> the compose only works when the transform systems is the first
-function mTF(subsys...; name, r = 1.0, coneqs = [])
+"""
+    mTF(subsys...; name="", r=1.0, coneqs=[])
 
-    # Generate the in and out connection
-    @named pin = Power(type = tptf)
-    @named pout = Power(type = tptf)
+Create a transformer element in the bond graph model.
 
-    # Alias for simpler view about the mTF port
+# Arguments
+- `subsys...`: One or more subsystems to be connected to the transformer.
+- `name::String`: The name of the transformer element (default: "").
+- `r::Number|Symbol`: A value or a expression representing the transformer relationship (default: 1.0).
+- `coneqs::Vector{Equation}`: Additional output connection equations of the modulated gyrator (default: []).
+
+# Returns
+An `ODESystem` representing the transformer element in the bond graph model.
+
+# Examples
+```julia-repl
+# Create a transformer with a variable value
+@variables c
+julia> transformer = mTF(subsys1, subsys2, g=c, name="transformer")
+```
+"""
+function mTF(subsys...; name="", r=1.0, coneqs=[])
+    # TODO:ISSUE -> the compose only works when the transform systems is the first
+    # Generate the input and output connections
+    @named pin = Power(type=tptf)
+    @named pout = Power(type=tptf)
+
+    # Alias for simpler view of the mTF port
     e₁, f₁ = pin.e, pin.f
     e₂, f₂ = pout.e, pout.f
 
-    # Transformer equation
+    # Transformer equations
     eqs = [f₁ * r ~ f₂, e₂ * r ~ e₁]
 
     # Check if it is a modulated transformer
@@ -309,13 +329,14 @@ function mTF(subsys...; name, r = 1.0, coneqs = [])
         sts, ps = [], []
     end
 
-    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
+    # Create the subsystem with the modulated transformer equations
+    sys = compose(ODESystem(eqs, t, sts, ps; name=name), pin, pout)
 
+    # Generate the additional connection equations
     gen_tp_con!(coneqs, sys, subsys)
 
     return sys
 end
-
 
 # Elements
 

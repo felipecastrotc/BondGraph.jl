@@ -72,7 +72,7 @@ end
 """
     gen_tp_con!(eqs, sys, subsys)
 
-Generates bond graph connections between a system and its sub-systems for the junction 0 and 1 (two-port elements).
+Generates bond graph connections between a system and its sub-systems for the modulated gyrator and modulated transformer (two-port elements).
 
 # Arguments:
 - eqs: Array of equations to which the connections will be added.
