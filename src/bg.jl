@@ -130,17 +130,41 @@ function Dq(; name, x = 0.0)
 end
 
 # Ports
+"""
+    Junction0(ps...; name="", couple=true)
 
-function Junction0(ps...; name, couple = true)
+Create a zero-junction element in the bond graph model.
 
-    @named power = Power(type = j0)
-    # Get connections
+# Arguments
+- `ps...`: One or more elements to be connected to the zero-junction.
+- `name::String`: The name of the zero-junction element (default: "").
+
+# Returns
+An `ODESystem` representing the zero-junction element in the bond graph model.
+
+# Remarks
+- The `ps` argument accepts one or more elements to be connected to the zero-junction.
+- The function automatically determines the flow directions and subsystems based on the signs of the connections.
+
+# Examples
+```julia-repl
+# Create a zero-junction connecting multiple elements
+julia> junction = Junction0(damper1, damper2, spring1, spring2, name="junction")
+```
+"""
+function Junction0(ps...; name="")
+    # Create a new Power element for the zero-junction
+    @named power = Power(type=j0)
+
+    # Flatten the connections to handle variable number of arguments
     ps = collect(Base.Flatten([ps]))
 
-    # Get signs and subsystems 
+    # Get signs and subsystems
     subsys, signs = flatinput(ps)
 
     eqs = Equation[]
+
+    # Connect the elements based on the signs
     for (s, sign) in zip(subsys, signs)
         if sign == 1
             push!(eqs, connect(s.power, power))
@@ -149,8 +173,56 @@ function Junction0(ps...; name, couple = true)
         end
     end
 
-    # Build subsystem
-    sys = ODESystem(eqs, t, [], [], name = name)
+    # Build the subsystem with the zero-junction equations
+    sys = ODESystem(eqs, t, [], [], name=name)
+    compose(sys, power, subsys...)
+end
+
+"""
+    Junction1(ps...; name="", couple=true)
+
+Create a one-junction element in the bond graph model.
+
+# Arguments
+- `ps...`: One or more elements to be connected to the one-junction.
+- `name::String`: The name of the one-junction element (default: "").
+
+# Returns
+An `ODESystem` representing the one-junction element in the bond graph model.
+
+# Remarks
+- The `ps` argument accepts one or more elements to be connected to the one-junction.
+- The function automatically determines the flow directions and subsystems based on the signs of the connections.
+
+# Examples
+```julia-repl
+# Create a one-junction connecting multiple elements
+julia> junction = Junction1(damper1, damper2, spring1, spring2, name="junction")
+```
+"""
+function Junction1(ps...; name="")
+    # Create a new Power element for the one-junction
+    @named power = Power(type=j1)
+
+    # Flatten the connections to handle variable number of arguments
+    ps = collect(Base.Flatten([ps]))
+
+    # Get signs and subsystems
+    subsys, signs = flatinput(ps)
+
+    eqs = Equation[]
+
+    # Connect the elements based on the signs
+    for (s, sign) in zip(subsys, signs)
+        if sign == 1
+            push!(eqs, connect(s.power, power))
+        elseif sign == -1
+            push!(eqs, connect(power, s.power))
+        end
+    end
+
+    # Build the subsystem with the one-junction equations
+    sys = ODESystem(eqs, t, [], [], name=name)
     compose(sys, power, subsys...)
 end
 
