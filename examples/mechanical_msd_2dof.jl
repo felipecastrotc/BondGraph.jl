@@ -102,7 +102,7 @@ sys_unforced = substitute(sys, Dict(m2_j1.f.F => 0.0))
 # Define the simulation time
 tspan = (0, 10)
 
-# When defining the ODEProblem as in the ModelingToolkit, we can define the initial value of the states.
+# When defining the ODEProblem as in the ModelingToolkit, we can set the initial value of the states.
 prob = ODEProblem(sys_unforced, [m2_j1.m.power.f => 0.0, m2_sd.s.q => 1.0], tspan)
 
 # Use the `solve` to simulate the system.
