@@ -13,6 +13,7 @@ ENV["JULIA_DEBUG"] = "Documenter"
 
 using Documenter, DocStringExtensions, Literate, BondGraph
 
+# Generate the example navigation bar 
 function get_nav(filename; suffix = "./examples/")
     f = open(suffix * filename, "r")
     name = split(split(readline(f), "[")[2], "]")[1]

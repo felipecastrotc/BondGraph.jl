@@ -27,7 +27,6 @@ using DifferentialEquations
 using ModelingToolkit
 using Plots
 using Symbolics.Latexify
-using JLD2
 
 # ## Building the model
 # 

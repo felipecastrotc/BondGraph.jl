@@ -1,6 +1,5 @@
 # # [Duffing Equation](@id msd-duffing)
 # 
-# 
 # The Duffing equation is a nonlinear second-order ordinary differential equation commonly used to model various physical systems exhibiting nonlinear behavior, such as electrical circuits, mechanical systems, and biological systems. From the mechanical domain point of view, it is an extension of the simple mass-spring-damper system that incorporates a cubic spring. Despite its simple form, the Duffing equation exhibits chaotic behavior. The equation is given by:
 # 
 # $m\,\frac{d^2 x}{dt^2} + c\,\frac{d x}{dt} + k\,x + k_3\,x^3 = F(t),$
@@ -9,7 +8,7 @@
 # 
 # In standard bond graphs, the capacitance element is linear, while for the Duffing equation, we need a nonlinear capacitance for the cubic spring. Therefore, we need to introduce a nonlinear capacitance element to model the Duffing equation using the Bond Graph Toolkit. The library allows users to define custom elements and utilize the [`Power`](@ref) connector as interface.
 # 
-# Bond Graph Toolkit
+# # Bond Graph Toolkit
 # 
 # First, we import the Bond Graph Toolkit module to model the system and the `DifferentialEquations.jl` package to solve the resulting ordinary differential equation (ODE). Additionally, we import the independent variable `t` from the Bond Graph Toolkit, which will be used to define a custom forcing term.
 
@@ -27,21 +26,21 @@ using Symbolics.Latexify
 # We now define a custom element called `Spring3` to include the non-linearity of the Duffing equation. The element is defined by the function below.
 
 function Spring3(; name, k = 1.0, x = 0.0)
-    # Initialize the Power connector
+    ## Initialize the Power connector
     @named power = Power()
 
-    # Initialize the displacement state with its initial value `x`
+    ## Initialize the displacement state with its initial value `x`
     @variables q(t) = x
-    # Set the equation parameters
+    ## Set the equation parameters
     ps = @parameters C = 1 / k
 
-    # Define Spring3 element equations with the non-lineariyy of the cubic spring
+    ## Define Spring3 element equations with the non-lineariyy of the cubic spring
     eqs = [
         power.e ~ q^3 / C
         D(q) ~ power.f
     ]
 
-    # Build the system with the equations, state and connector.
+    ## Build the system with the equations, state and connector.
     compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
@@ -73,7 +72,7 @@ end
 @named f = Se(F)
 
 # Then, we build the system by simply passing the one-port elements to the 1-junction function as arguments.
-@named mdl = Junction1(m, d, s, s3, [-1, F])
+@named mdl = Junction1(m, d, s, s3, [-1, f])
 
 # ## Analysing the model
 # We can visualize the bond-graph connections by generating a graph plot of the model.
