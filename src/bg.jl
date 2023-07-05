@@ -99,7 +99,7 @@ julia>  @named s2 = Sf(3.5)
 """
 function Sf(expr; name)
     # Create a Power connector with type op (one-port)
-    @named power = Power(type=op)
+    @named power = Power(type = op)
 
     # Define the equation between the power.f variable and the flow source expression
     eqs = [power.f ~ expr]
@@ -118,7 +118,7 @@ function Sf(expr; name)
     end
 
     # Compose the ODESystem with the equations, time variable t, states sts, parameter states ps, and name
-    compose(ODESystem(eqs, t, sts, ps; name=name), power)
+    compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end
 
 function Dq(; name, x = 0.0)
@@ -152,9 +152,9 @@ An `ODESystem` representing the zero-junction element in the bond graph model.
 julia> junction = Junction0(damper1, damper2, spring1, spring2, name="junction")
 ```
 """
-function Junction0(ps...; name="")
+function Junction0(ps...; name = "")
     # Create a new Power element for the zero-junction
-    @named power = Power(type=j0)
+    @named power = Power(type = j0)
 
     # Flatten the connections to handle variable number of arguments
     ps = collect(Base.Flatten([ps]))
@@ -174,7 +174,7 @@ function Junction0(ps...; name="")
     end
 
     # Build the subsystem with the zero-junction equations
-    sys = ODESystem(eqs, t, [], [], name=name)
+    sys = ODESystem(eqs, t, [], [], name = name)
     compose(sys, power, subsys...)
 end
 
@@ -200,9 +200,9 @@ An `ODESystem` representing the one-junction element in the bond graph model.
 julia> junction = Junction1(damper1, damper2, spring1, spring2, name="junction")
 ```
 """
-function Junction1(ps...; name="")
+function Junction1(ps...; name = "")
     # Create a new Power element for the one-junction
-    @named power = Power(type=j1)
+    @named power = Power(type = j1)
 
     # Flatten the connections to handle variable number of arguments
     ps = collect(Base.Flatten([ps]))
@@ -222,7 +222,7 @@ function Junction1(ps...; name="")
     end
 
     # Build the subsystem with the one-junction equations
-    sys = ODESystem(eqs, t, [], [], name=name)
+    sys = ODESystem(eqs, t, [], [], name = name)
     compose(sys, power, subsys...)
 end
 
@@ -247,12 +247,12 @@ An `ODESystem` representing the gyrator element in the bond graph model.
 julia> gyrator = mGY(subsys1, subsys2, g=c, name="gyrator")
 ```
 """
-function mGY(subsys...; name="", g=1.0, coneqs=[])
+function mGY(subsys...; name = "", g = 1.0, coneqs = [])
     # TODO:ISSUE -> the compose only works when the gyrator systems is the first
 
     # Generate the input and output connections
-    @named pin = Power(type=tpgy)
-    @named pout = Power(type=tpgy)
+    @named pin = Power(type = tpgy)
+    @named pout = Power(type = tpgy)
 
     # Alias for simpler view of the mGY port
     e₁, f₁ = pin.e, pin.f
@@ -276,7 +276,7 @@ function mGY(subsys...; name="", g=1.0, coneqs=[])
     end
 
     # Create the subsystem with the modulated gyrator equations
-    sys = compose(ODESystem(eqs, t, sts, ps; name=name), pin, pout)
+    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 
     # Generate the additional connection equations
     gen_tp_con!(coneqs, sys, subsys)
@@ -305,11 +305,11 @@ An `ODESystem` representing the transformer element in the bond graph model.
 julia> transformer = mTF(subsys1, subsys2, g=c, name="transformer")
 ```
 """
-function mTF(subsys...; name="", r=1.0, coneqs=[])
+function mTF(subsys...; name = "", r = 1.0, coneqs = [])
     # TODO:ISSUE -> the compose only works when the transform systems is the first
     # Generate the input and output connections
-    @named pin = Power(type=tptf)
-    @named pout = Power(type=tptf)
+    @named pin = Power(type = tptf)
+    @named pout = Power(type = tptf)
 
     # Alias for simpler view of the mTF port
     e₁, f₁ = pin.e, pin.f
@@ -330,7 +330,7 @@ function mTF(subsys...; name="", r=1.0, coneqs=[])
     end
 
     # Create the subsystem with the modulated transformer equations
-    sys = compose(ODESystem(eqs, t, sts, ps; name=name), pin, pout)
+    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 
     # Generate the additional connection equations
     gen_tp_con!(coneqs, sys, subsys)
@@ -358,12 +358,12 @@ An `ODESystem` representing the mass element in the bond graph model.
 julia> mass = Mass(name="my_mass", m=2.0, u=1.0)
 ```
 """
-function Mass(; name="", m=1.0, u=0.0)
-    @named power = Power(flow=u)
+function Mass(; name = "", m = 1.0, u = 0.0)
+    @named power = Power(flow = u)
     ps = @parameters I = m
 
     eqs = [D(power.f) ~ power.e / I]
-    compose(ODESystem(eqs, t, [], ps; name=name), power)
+    compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
 
@@ -385,17 +385,14 @@ An `ODESystem` representing the spring element in the bond graph model.
 julia> spring = Spring(name="my_spring", k=5.0, x=0.1)
 ```
 """
-function Spring(; name="", k=10, x=0.0)
+function Spring(; name = "", k = 10, x = 0.0)
     @named power = Power()
 
     @variables q(t) = x
     ps = @parameters C = 1 / k
 
-    eqs = [
-        power.e ~ q / C,
-        D(q) ~ power.f
-    ]
-    compose(ODESystem(eqs, t, [q], ps; name=name), power)
+    eqs = [power.e ~ q / C, D(q) ~ power.f]
+    compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
 """
@@ -416,13 +413,13 @@ An `ODESystem` representing the damper element in the bond graph model.
 julia> damper = Damper(name="my_damper", c=5.0, u=0.1)
 ```
 """
-function Damper(; name="", c=10, u=1.0)
-    @named power = Power(flow=u)
+function Damper(; name = "", c = 10, u = 1.0)
+    @named power = Power(flow = u)
 
     ps = @parameters R = c
     eqs = [power.e ~ power.f * R]
 
-    compose(ODESystem(eqs, t, [], ps; name=name), power)
+    compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
 
@@ -442,7 +439,7 @@ An `ODESystem` representing the generic damper element in the bond graph model.
 - The `expr` can be any valid expression defining the behavior of the damper element.
 - The function automatically determines the state variables and parameters based on the `expr`.
 """
-function GenericDamper(expr; name="")
+function GenericDamper(expr; name = "")
     # TODO: check if this function is working
 
     @named power = Power()
@@ -460,5 +457,5 @@ function GenericDamper(expr; name="")
         sts, ps = [], []
     end
 
-    compose(ODESystem(eqs, t, sts, ps; name=name), power)
+    compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end

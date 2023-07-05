@@ -101,7 +101,9 @@ function flatinput(ps)
             push!(signs, 1)  # Add a positive sign (1) to the signs array (default)
         elseif isa(p, AbstractVector)
             # Check if the AbstractVector has two elements where the first is an integer and the second is an AbstractSystem
-            if (length(p) == 2) && isa(p[1], Int) && isa(p[2], ModelingToolkit.AbstractSystem)
+            if (length(p) == 2) &&
+               isa(p[1], Int) &&
+               isa(p[2], ModelingToolkit.AbstractSystem)
                 push!(subsys, p[2])
                 push!(signs, p[1])  # Add the sign (integer) to the signs array
             else

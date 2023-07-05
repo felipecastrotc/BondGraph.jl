@@ -5,7 +5,7 @@ if isfile("Project.toml") && isfile("Manifest.toml")
 end
 
 if isdir("./docs/build")
-    rm("./docs/build",recursive=true)
+    rm("./docs/build", recursive = true)
 end
 mkdir("./docs/build")
 
@@ -13,11 +13,11 @@ ENV["JULIA_DEBUG"] = "Documenter"
 
 using Documenter, DocStringExtensions, Literate, BondGraph
 
-function get_nav(filename; suffix="./examples/")
+function get_nav(filename; suffix = "./examples/")
     f = open(suffix * filename, "r")
     name = split(split(readline(f), "[")[2], "]")[1]
     close(f)
-    path = suffix*replace(filename, ".jl" => ".md")
+    path = suffix * replace(filename, ".jl" => ".md")
     return String(name) => path
 end
 
@@ -37,30 +37,38 @@ files = readdir(example_path)
 filter!(x -> endswith(x, ".jl"), files)
 
 for file in files
-    Literate.markdown(example_path * file, build_path; preprocess=fix_math_md, postprocess=postprocess, documenter=true, credit=true)
+    Literate.markdown(
+        example_path * file,
+        build_path;
+        preprocess = fix_math_md,
+        postprocess = postprocess,
+        documenter = true,
+        credit = true,
+    )
 end
 
-examples_nav = get_nav.(files; suffix="./examples/")
+examples_nav = get_nav.(files; suffix = "./examples/")
 print(examples_nav)
 
-makedocs(modules=[BondGraph],
-    format=Documenter.HTML(prettyurls=false),
-    sitename="BondGraph.jl",
+makedocs(
+    modules = [BondGraph],
+    format = Documenter.HTML(prettyurls = false),
+    sitename = "BondGraph.jl",
     # doctest=true,
-    clean=true,
-    src="docs/src",
-    force=true,
-    pages=[
-            "Home" => "index.md",
-            "Installation" => "man/installation.md",
-            "Getting Started" => "man/getting_started.md",
-            "Examples" => examples_nav,
-            "Library" => [
-                "Public" => "lib/public.md"
-                "Internals" => "lib/internals.md"
-            ],
-            "Contributing" => "contributing.md",
-            "Changelog" => "changelog.md",
+    clean = true,
+    src = "docs/src",
+    force = true,
+    pages = [
+        "Home" => "index.md",
+        "Installation" => "man/installation.md",
+        "Getting Started" => "man/getting_started.md",
+        "Examples" => examples_nav,
+        "Library" => [
+            "Public" => "lib/public.md"
+            "Internals" => "lib/internals.md"
         ],
+        "Contributing" => "contributing.md",
+        "Changelog" => "changelog.md",
+    ],
     pagesonly = true,
 )

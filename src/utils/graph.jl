@@ -49,7 +49,7 @@ Generates a graph visualization of the bond graph model.
 julia> generate_graph(mdl, var=:e, method=:stress)
 ```
 """
-function generate_graph(mdl, var=:e; method=:stress)
+function generate_graph(mdl, var = :e; method = :stress)
 
     connectionsets = ConnectionSet[]
 
@@ -64,7 +64,7 @@ function generate_graph(mdl, var=:e; method=:stress)
 
     # Filter the connection sets based on the variable
     varin = var == :e ? "e(t)" : "f(t)"
-    am = csets2adjmtx(bgconnectionsets, str2con, filterstr=varin, filterflow=true)
+    am = csets2adjmtx(bgconnectionsets, str2con, filterstr = varin, filterflow = true)
 
     # Create a dictionary mapping index to connection set names
     idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
@@ -76,12 +76,12 @@ function generate_graph(mdl, var=:e; method=:stress)
     # Generate the graph visualization using GraphPlot.jl
     graphplot(
         am,
-        names=nm,
-        nodeshape=:rect,
-        size=(800, 600),
-        method=method,
-        arrow=arrow(:simple, :head, 1, 1),
-        curves=false,
+        names = nm,
+        nodeshape = :rect,
+        size = (800, 600),
+        method = method,
+        arrow = arrow(:simple, :head, 1, 1),
+        curves = false,
     )
 end
 
@@ -134,8 +134,8 @@ julia> str2con = csets2dict(csets)
 julia> am = csets2adjmtx(csets, str2con)
 ```
 """
-function csets2adjmtx(csets, str2con; filterstr="f(t)", filterflow=false)
-    
+function csets2adjmtx(csets, str2con; filterstr = "f(t)", filterflow = false)
+
     # Filter str2con
     if filterflow
         filter!(d -> occursin(filterstr, d[1]), str2con)
@@ -149,7 +149,7 @@ function csets2adjmtx(csets, str2con; filterstr="f(t)", filterflow=false)
 
     # Iterate over each connection set
     for cset in csets
-        h = 0 
+        h = 0
         for (i, e) in enumerate(cset.set)
             @unpack sys, v, isouter = e
             k = String(nameof(sys)) * "₊" * String(Symbol(v))
@@ -232,8 +232,8 @@ function adjmtx2eqs(am, str2con)
     sm = get_sm_mtx!(am, idx2k, str2con)
 
     # Calculate the input and output vectors
-    in_vec = sum(am, dims=1)[:]
-    out_vec = sum(am, dims=2)[:]
+    in_vec = sum(am, dims = 1)[:]
+    out_vec = sum(am, dims = 2)[:]
 
     idx_con = 1:size(am, 1)
     in_con = idx_con[in_vec.>0]
@@ -288,7 +288,11 @@ function adjmtx2eqs(am, str2con)
             lvin, lvout = length(vin), length(vout)
 
             if (lvin <= 1) && (lvout <= 1) && (lvout + lvout == 1)
-                throw(DomainError("The $jtype type only allows one connection in and one connection out"))
+                throw(
+                    DomainError(
+                        "The $jtype type only allows one connection in and one connection out",
+                    ),
+                )
             end
 
             if lvin == 1

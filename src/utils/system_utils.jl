@@ -112,7 +112,7 @@ function substitute_observed(eq::Equation, sys::ODESystem)
         O = expr
         expr = substitute_dict(O, O, sub)
     end
-    
+
     # Return the equation with substituted observed variables
-    return eq.lhs ~ expr  
+    return eq.lhs ~ expr
 end
