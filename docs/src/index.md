@@ -47,10 +47,6 @@ TODO: Fix the links
 - [Library - Public](@ref public-documentation): Detailed documentation of all public functions provided by the Bond Graph Toolkit.
 - [Library - Internals](@ref internal-documentation): Detailed documentation of all internal functions and types used by the Bond Graph Toolkit.
 
-## Versioning and Changelog
-
-For information about the different versions of MyLibrary and the changes introduced in each version, please refer to the [Changelog](@ref).
-
 ## Library
 
 ```@contents
