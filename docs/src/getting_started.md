@@ -1,8 +1,7 @@
 # Getting Started
 
 This section will guide you through the steps required to install the library and provide a simple example to help you get started.
-
-## Installation
+## [Installation](@id install-guide)
 
 To use the Bond Graph Toolkit, you need to have Julia installed on your system. If you haven't installed Julia yet, follow the official [Julia documentation](https://docs.julialang.org/en/v1/manual/getting-started/) for instructions specific to your operating system or go directly to the [Julia Download](https://julialang.org/downloads/) page.
 
@@ -20,3 +19,11 @@ Once Julia is installed, you can proceed with installing the Bond Graph toolkit 
 Congratulations! You have successfully installed the library and are ready to start using it.
 
 @quick-example
+
+
+### Index
+
+```@contents
+Pages = ["getting_started.md"]
+Depth = 2
+```

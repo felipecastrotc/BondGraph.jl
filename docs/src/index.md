@@ -1,36 +1,65 @@
-# BongGraph.jl
+# Welcome to Bond Graph Toolkit Documentation
 
 *A bond graph toolkit for Julia.*
 
+The `BondGraphToolkit` is a user-friendly Julia library for modeling dynamic systems with bond graphs. 
+
 **Introduction**: Start with an introduction section that provides an overview of the library and its purpose. Explain what the library does, its main features, and its intended use cases. This section should provide a high-level understanding of the library's capabilities.
-
-A package for building documentation from docstrings and markdown files.
-
-!!! note
-
-    Please read through the
-    [Documentation](https://docs.julialang.org/en/v1/manual/documentation/) section
-    of the main Julia manual if this is your first time using Julia's documentation system.
-    Once you've read through how to write documentation for your code then come back here.
 
 ## Package Features
 
-TODO: Write
+The key features of the package include:
 
-- Write all your documentation in [Markdown](https://en.wikipedia.org/wiki/Markdown).
-- Minimal configuration.
-- Doctests Julia code blocks.
-- Cross references for docs and section headers.
-- [``\LaTeX`` syntax](@ref latex_syntax) support.
-- Checks for missing docstrings and incorrect cross references.
-- Generates tables of contents and docstring indexes.
-- Automatically builds and deploys docs from Travis to GitHub Pages.
+1. **Intuitive and Expressive Modeling Syntax**: The package provides an intuitive and expressive syntax that simplifies modeling dynamic systems with bond graphs.
+2. **Wide Range of Bond Graph Components**: It supports bond graph components and elements, including inertance, compliance, resistance, gyrators, transformers, and more.
+3. **Simulation Capabilities with `DifferentialEquations.jl` and `ModelingToolkit.jl`**: The package seamlessly integrates with `DifferentialEquations.jl` and `ModelingToolkit.jl` packages. Every bond graph component is an `ODESystem`.
+4. **Visualize Bond Graph Systems**: It offers a visualization tool that allows to generate visual representations of the bond graph created.
+5. **Customization and Modification**: Users can define their specialized bond graph components with a user-friendly API and extend the package's capabilities.
+6. **Extensible Architecture for Integration**. Integrating with other libraries and frameworks like `ModelingToolkit.jl` is simple.
 
-The [Package Guide](@ref) provides a tutorial explaining how to get started using Documenter.
+## Use Cases
 
-Some examples of packages using Documenter can be found on the [Examples](@ref) page.
+- Control systems design and analysis.
+- Robotics and mechatronics applications.
+- Electrical and electronic circuit simulation.
+- Biomedical systems modeling.
+- Chemical process simulation.
 
-See the [Index](@ref main-index) for the complete list of documented functions and types.
+## Installation
+
+To start using MyLibrary, you need to have Julia installed on your system. Follow the official [Julia documentation](https://docs.julialang.org/en/v1/manual/getting-started/) for instructions on installing Julia.
+
+Once Julia is installed, you can add the Bond Graph Toolkit to your project by running the following command in the Julia REPL or the Julia package manager:
+
+```julia
+pkg> add BondGraphToolkit.jl
+```
+
+For more detailed installation instructions, including information about dependencies, please refer to the [Installation](@ref install-guide).
+
+## Getting Started
+
+We recommend checking out the [Getting Started](@ref) to quickly get started with Bond Graph Toolkit. It will guide you through library installation and the modeling and simulation of a simple dynamic system. It provides step-by-step instructions and code examples to help you grasp the basics of using the library.
+
+## Documentation Sections
+
+TODO: Fix the links
+- [User guide](@ref): Learn how to model different types of dynamic systems and perform various analyses using MyLibrary.
+- [Examples](@ref): Explore a collection of real-world examples and use cases that demonstrate the capabilities of MyLibrary.
+- [Library - Public](@ref public-documentation): Detailed documentation of all public functions provided by the Bond Graph Toolkit.
+- [Library - Internals](@ref internal-documentation): Detailed documentation of all internal functions and types used by the Bond Graph Toolkit.
+
+## Community and Support
+
+If you have any questions, need support, or want to engage with the Bond Graph Toolkit community, you can:
+
+- Join the [MyLibrary Discussion Forum](https://forum.mylibrary.org) to ask questions and participate in discussions.
+- Chat with community members in the [#mylibrary](https://chat.mylibrary.org) channel on Slack.
+- Report bugs, request features, or contribute to the development of MyLibrary on [GitHub](https://github.com/mylibrary/mylibrary).
+
+## Versioning and Changelog
+
+For information about the different versions of MyLibrary and the changes introduced in each version, please refer to the [Changelog](@ref).
 
 ## Library
 
