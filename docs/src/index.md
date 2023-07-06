@@ -2,9 +2,7 @@
 
 *A bond graph toolkit for Julia.*
 
-The `BondGraphToolkit` is a user-friendly Julia library for modeling dynamic systems with bond graphs. 
-
-**Introduction**: Start with an introduction section that provides an overview of the library and its purpose. Explain what the library does, its main features, and its intended use cases. This section should provide a high-level understanding of the library's capabilities.
+The `BondGraphToolkit.jl` is a Julia library designed to simplify the modeling and simulation of dynamic systems using bond graphs. It offers a user-friendly syntax where engineers, researchers, and enthusiasts can express and analyze complex dynamic systems effortlessly. Built on top of the `ModelingToolkit.jl` ecosystem, the `BondGraphToolkit.jl` seamlessly integrates with existing tools, making it easy to use and customize.
 
 ## Package Features
 
