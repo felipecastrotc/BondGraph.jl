@@ -32,21 +32,6 @@ Some examples of packages using Documenter can be found on the [Examples](@ref) 
 
 See the [Index](@ref main-index) for the complete list of documented functions and types.
 
-## Manual Outline
-
-```@contents
-Pages = [
-    "man/guide.md",
-    "man/examples.md",
-    "man/syntax.md",
-    "man/doctests.md",
-    "man/hosting.md",
-    "man/latex.md",
-    "man/contributing.md",
-]
-Depth = 1
-```
-
 ## Library
 
 ```@contents

@@ -73,12 +73,12 @@ push!(cons, connect(m1.power, M[1][1].power))
 # ### Build the system 
 
 # We flatten the subsystem `Matrix` into a `Vector` for simplicity.
-M = vcat(M...);
+M_flat = vcat(M...);
 
 # We build the system by creating an `ODESystem` with the connections and setting the independent variable as t.
 @named mdl = ODESystem(cons, t)
 # Then, we need to add the subsystems to the model.
-mdl = compose(mdl, m1, M...)
+mdl = compose(mdl, m1, M_flat...)
 
 # ## Analysing the model
 # We can visualize the bond-graph connections by generating a graph plot of the model.
@@ -108,7 +108,7 @@ equations(sys)
 tspan = (0, 10)
 
 # When defining the ODEProblem as in the ModelingToolkit, we can define the initial value of the states.
-prob = ODEProblem(sys, [m2_j1.m.power.f => 0.0, m2_sd.s.q => 1.0], tspan)
+prob = ODEProblem(sys, [M[1][2].m.power.f => 0.0, M[1][1].sd.s.q => 1.0], tspan)
 
 # Use the `solve` to simulate the system.
 sol = solve(prob)

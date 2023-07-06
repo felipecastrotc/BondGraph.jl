@@ -112,13 +112,14 @@ makedocs(
         "Getting started" => "getting_started_auto.md",
         "User Guide" => [
         ],
-        # "Examples" => examples_nav,
+        "Examples" => examples_nav,
         "Library" => [
             "Public" => "lib/public.md"
             "Internals" => "lib/internals.md"
         ],
-        "Citing BGToolkit" => "citing.md",
+        "Citing BondGraphToolkit" => "citing.md",
         "Contributing" => "contributing.md",
+        "License" => "license.md",
         # "Changelog" => "changelog.md",
     ],
     pagesonly = true,
