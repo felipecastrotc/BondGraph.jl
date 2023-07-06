@@ -32,8 +32,6 @@ Create a reduced ODESystem by substituting observed variables in the equations.
 # Returns:
 A reduced ODESystem object with observed variables substituted.
 
-TODO: create an example
-
 # Example:
 ```julia-repl
 julia> sys = ODESystem([eq1, eq2], t)
@@ -89,7 +87,6 @@ Substitute observed variables in the equation with their assigned values.
 # Returns:
 An equation with observed variables substituted by their assigned values.
 
-TODO: create an example
 # Example:
 ```julia-repl
 julia> eq = @eq x'(t) = a * x(t) + b * y(t)

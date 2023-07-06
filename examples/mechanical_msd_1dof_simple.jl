@@ -1,4 +1,4 @@
-# # [Harmonic Oscillator](@id msd-1dof)
+# # [Harmonic Oscillator - Simple](@id msd-1dof-simple)
 # 
 # The harmonic oscillator is a classic example of a dynamic system characterized by oscillatory behavior. In the mechanical domain, it can be represented as a mass-spring-damper system, as illustrated below:
 # 
@@ -10,11 +10,11 @@
 # 
 # where $x$ is the position, $m$ is the mass, $c$ is the damping coefficient, $k$ is the spring stiffness, and $F(t)$ is an external force applied to the system.
 # 
-# To model the harmonic oscillator using the bond graph method, we can connect the inertance (I), capacitance (C), and resistance (R) elements to a 1-junction, as depicted in the bond graph diagram:
+# To model the harmonic oscillator using the bond graph method, we can connect the inertance (I), compliance (C), and resistance (R) elements to a 1-junction, as depicted in the bond graph diagram:
 
 # ![Bond Graph Representation](../assets/bg_1dof.png)
 
-# In this representation, the inertance element (I) corresponds to the mass (m) in the mechanical system, the capacitance element (C) corresponds to the spring constant (k), and the resistance element (R) represents the damping coefficient (c).
+# In this representation, the inertance element (I) corresponds to the mass (m) in the mechanical system, the compliance element (C) corresponds to the spring constant (k), and the resistance element (R) represents the damping coefficient (c).
 
 # ## Bond-graph toolkit
 
