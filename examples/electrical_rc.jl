@@ -14,7 +14,7 @@
 #
 # ### Bond Graph Toolkit
 #
-# To model the RC circuit using the Bond Graph, we can leverage the library's functionality. Let's dive into the code.
+# We can use the Bond Graph Toolkit to model and get the RC circuit equations and then solve the system, as presented in the code below.
 
 ## Import the required libraries
 using BondGraph

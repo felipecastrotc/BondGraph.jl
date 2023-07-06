@@ -13,7 +13,6 @@ Main module for [`BongGraph.jl`](@ref) -- a bond graph modeling toolkit based on
 - mTF
 - Mass
 - Spring
-- Spring3
 - Damper
 - reducedobs
 - isindependent
@@ -48,9 +47,7 @@ export Power,
     mTF,
     Mass,
     Spring,
-    Spring3,
     Damper,
-    reducedobs,
     isindependent,
     generate_graph,
     simplifysys
