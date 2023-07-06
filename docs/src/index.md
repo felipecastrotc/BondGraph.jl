@@ -45,17 +45,9 @@ We recommend checking out the [Getting Started](@ref) to quickly get started wit
 
 TODO: Fix the links
 - [User guide](@ref): Learn how to model different types of dynamic systems and perform various analyses using MyLibrary.
-- [Examples](@ref): Explore a collection of real-world examples and use cases that demonstrate the capabilities of MyLibrary.
+- [Examples](@ref): Collection of classical examples of dynamic systems in the mechanical and electrical domains and multiphysics systems.
 - [Library - Public](@ref public-documentation): Detailed documentation of all public functions provided by the Bond Graph Toolkit.
 - [Library - Internals](@ref internal-documentation): Detailed documentation of all internal functions and types used by the Bond Graph Toolkit.
-
-## Community and Support
-
-If you have any questions, need support, or want to engage with the Bond Graph Toolkit community, you can:
-
-- Join the [MyLibrary Discussion Forum](https://forum.mylibrary.org) to ask questions and participate in discussions.
-- Chat with community members in the [#mylibrary](https://chat.mylibrary.org) channel on Slack.
-- Report bugs, request features, or contribute to the development of MyLibrary on [GitHub](https://github.com/mylibrary/mylibrary).
 
 ## Versioning and Changelog
 
