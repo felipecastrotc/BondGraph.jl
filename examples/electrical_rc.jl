@@ -8,7 +8,7 @@
 #
 # $C \frac{dV}{dt} + \frac{V}{R} = 0$
 #
-# To model the RC circuit using the bond graph method, we can connect the capacitance (C) and resistance (R) elements to a zero-junction, as shown in the bond graph diagram:
+# To model the RC circuit using the bond graph method, we can connect the compliance (C) and resistance (R) elements to a zero-junction, as shown in the bond graph diagram:
 #
 # ![Bond Graph Representation](../assets/bg_1dof.png)
 #
@@ -55,7 +55,7 @@ parameters(sys)
 # Print the simplified equations of the system
 equations(sys)
 
-# In the code snippets, we start by importing the libraries `BondGraph`, `DifferentialEquations`, and `Plots`. Then, ee define the elements of the RC circuit, namely the capacitance `C` and the resistance `R`, using the functions `Spring` and `Damper` from the `BondGraphToolkit` package.
+# In the code snippets, we start by importing the libraries `BondGraph`, `DifferentialEquations`, and `Plots`. Then, ee define the elements of the RC circuit, namely the compliance `C` and the resistance `R`, using the functions `Spring` and `Damper` from the `BondGraphToolkit` package.
 
 # Next, we create the RC circuit model by connecting the elements `R` and `C` to a zero-junction using the `Junction0` function. We use the `simplifysys` function to obtain a more concise representation of the system, which is stored in the variable `sys`.
 

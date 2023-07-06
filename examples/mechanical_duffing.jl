@@ -6,7 +6,7 @@
 # 
 # where $x$ represents the position, $m$ is the mass, $c$ is the damping coefficient, $k$ is the spring stiffness, $k_3$ is the cubic spring stiffness, and $F(t)$ denotes an external force applied to the system.
 # 
-# In standard bond graphs, the capacitance element is linear, while for the Duffing equation, we need a nonlinear capacitance for the cubic spring. Therefore, we need to introduce a nonlinear capacitance element to model the Duffing equation using the Bond Graph Toolkit. The library allows users to define custom elements and utilize the [`Power`](@ref) connector as interface.
+# In standard bond graphs, the compliance element is linear, while for the Duffing equation, we need a nonlinear compliance for the cubic spring. Therefore, we need to introduce a nonlinear compliance element to model the Duffing equation using the Bond Graph Toolkit. The library allows users to define custom elements and utilize the [`Power`](@ref) connector as interface.
 # 
 # # Bond Graph Toolkit
 # 
@@ -21,7 +21,7 @@ using Symbolics.Latexify
 
 # ## Building the model
 # 
-# ### Custom capacitance
+# ### Custom compliance
 # 
 # We now define a custom element called `Spring3` to include the non-linearity of the Duffing equation. The element is defined by the function below.
 

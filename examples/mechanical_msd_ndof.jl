@@ -12,12 +12,12 @@
 # 
 # where $x_n$ is the position, $m_n$ is the mass, $c_n$ is the damping coefficient, $k_n$ is the spring stiffness, and $F(t)$ is an external force applied to the system.
 # 
-# To model the n-DoF system using the bond graph method, we need to connect inertance (I), capacitance (C), and resistance (R) elements to different 1-junctions and 0-junctions, as shown in the bond graph diagram:
+# To model the n-DoF system using the bond graph method, we need to connect inertance (I), compliance (C), and resistance (R) elements to different 1-junctions and 0-junctions, as shown in the bond graph diagram:
 # 
 # TODO: Generate the bond graph for the n-DoF system
 # ![Bond Graph Representation](../assets/bg_2dof.png)
 # 
-# In this representation, the inertance element (I) corresponds to the mass (m) in the mechanical system, the capacitance element (C) corresponds to the spring constant (k), and the resistance element (R) represents the damping coefficient (c). For simplicity, we assume they are equal for both degrees of freedom.
+# In this representation, the inertance element (I) corresponds to the mass (m) in the mechanical system, the compliance element (C) corresponds to the spring constant (k), and the resistance element (R) represents the damping coefficient (c). For simplicity, we assume they are equal for both degrees of freedom.
 # 
 # ## Bond Graph Toolkit
 # 

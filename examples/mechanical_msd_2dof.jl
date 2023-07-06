@@ -11,11 +11,11 @@
 # 
 # where $x$ is the position, $m$ is the mass, $c$ is the damping coefficient, $k$ is the spring stiffness, and $F(t)$ is an external force applied to the system.
 # 
-# To model the 2-DoF system using the bond graph method, we need to connect the inertance (I), capacitance (C), and resistance (R) elements to different 1-junctions and 0-junctions, as depicted in the bond graph diagram:
+# To model the 2-DoF system using the bond graph method, we need to connect the inertance (I), compliance (C), and resistance (R) elements to different 1-junctions and 0-junctions, as depicted in the bond graph diagram:
 # 
 # ![Bond Graph Representation](../assets/bg_2dof.png)
 # 
-# In this representation, the inertance element (I) corresponds to the mass (m) in the mechanical system, the capacitance element (C) corresponds to the spring constant (k), and the resistance element (R) represents the damping coefficient (c). They were considered, for simplicity, equal for both degrees of freedom.
+# In this representation, the inertance element (I) corresponds to the mass (m) in the mechanical system, the compliance element (C) corresponds to the spring constant (k), and the resistance element (R) represents the damping coefficient (c). They were considered, for simplicity, equal for both degrees of freedom.
 # 
 # ## Bond-graph toolkit
 # 

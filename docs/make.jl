@@ -101,7 +101,7 @@ filter!(x -> x[1] != "Quick Example", examples_nav)
 
 makedocs(
     modules = [BondGraph],
-    format=Documenter.HTML(prettyurls=false, sidebar_sitename=false),
+    format=Documenter.HTML(prettyurls=false, sidebar_sitename=false, assets = ["assets/favicon.ico"]),
     sitename = "BondGraph.jl",
     # doctest=true,
     clean = true,
