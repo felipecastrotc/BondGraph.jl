@@ -20,7 +20,7 @@ fix_math_md(content) = replace(content, r"\$\$(.*?)\$\$"s => s"```math\1```")
 function postprocess(cont)
     # Text to insert
     text = """
-     *The source files for all examples can be found in [/examples](https://github.com/oxfordcontrol/COSMO.jl/tree/master/examples/).*\n
+     *The source files for all examples can be found in [/examples](https://github.com/felipecastrotc/BondGraph.jl/tree/master/examples/).*\n
     """
 
     # Regular expression pattern to match the first heading
@@ -48,7 +48,7 @@ function insert_quick_example(quick_example)
     pattern = r"(?m)^#.*?\n\n"
 
     # Find the first heading to clean the text before it
-    heading_match = match(pattern, f)
+    heading_match = match(pattern, quickex)
     quickex = quickex[heading_match.offset:end]
 
     # Load the gettting_started.md
@@ -127,3 +127,5 @@ makedocs(
 
 # Cleaning
 rm(joinpath(@__DIR__, "src", "getting_started_auto.md"))
+
+deploydocs(repo = "github.com/felipecastrotc/BondGraph.jl.git")
