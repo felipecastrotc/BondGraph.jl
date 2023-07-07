@@ -2,6 +2,11 @@ docs/build/
 docs/src/examples/
 .DS_Store
 
+LocalPreferences.toml
+Manifest.toml
+/docs/Manifest.toml
+/docs/src/examples/*.md
+
 # My
 _table.xlsx
 _devel_tp.py
