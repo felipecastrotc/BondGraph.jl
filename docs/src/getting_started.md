@@ -18,6 +18,8 @@ Once Julia is installed, you can proceed with installing the Bond Graph toolkit 
 
 Congratulations! You have successfully installed the library and are ready to start using it.
 
+TODO: add instalation latest version
+
 @quick-example
 
 
