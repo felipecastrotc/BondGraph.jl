@@ -1,17 +1,18 @@
-using Pkg
+import Pkg;
 
-if isfile("Project.toml") && isfile("Manifest.toml")
-    Pkg.activate(".")
-end
-
-if isdir("./docs/build")
-    rm("./docs/build", recursive = true)
-end
-mkdir("./docs/build")
-
-ENV["JULIA_DEBUG"] = "Documenter"
+Pkg.add(path=".")
 
 using Documenter, DocStringExtensions, Literate, BondGraph
+
+# Clean docs/build directory
+if isdir("./docs/build")
+    rm("./docs/build", recursive=true)
+end
+
+mkdir("./docs/build")
+
+
+ENV["JULIA_DEBUG"] = "Documenter"
 
 # utility function from https://github.com/JuliaOpt/Convex.jl/blob/master/docs/make.jl
 fix_math_md(content) = replace(content, r"\$\$(.*?)\$\$"s => s"```math\1```")
@@ -58,13 +59,13 @@ function insert_quick_example(quick_example)
     # Find the quick-example position
     pos = findfirst("@quick-example", getstarted)
 
-    cont = string(getstarted[1:pos[1]-1], quickex, getstarted[pos[end] + 1:end])
+    cont = string(getstarted[1:pos[1]-1], quickex, getstarted[pos[end]+1:end])
 
-    write(joinpath(@__DIR__, "src","getting_started_auto.md"), cont)
+    write(joinpath(@__DIR__, "src", "getting_started_auto.md"), cont)
 end
 
 # Generate the example navigation bar 
-function get_nav(filename; suffix = "./examples/")
+function get_nav(filename; suffix="./examples/")
     f = open(suffix * filename, "r")
     name = split(split(readline(f), "[")[2], "]")[1]
     close(f)
@@ -83,15 +84,15 @@ for file in files
     Literate.markdown(
         example_path * file,
         build_path;
-        preprocess = fix_math_md,
-        postprocess = postprocess,
-        documenter = true,
-        credit = true,
+        preprocess=fix_math_md,
+        postprocess=postprocess,
+        documenter=true,
+        credit=true
     )
 end
 
 # get example paths
-examples_nav = get_nav.(files; suffix = "./examples/")
+examples_nav = get_nav.(files; suffix="./examples/")
 # Get the quick example
 quick_example = filter(x -> x[1] == "Quick Example", examples_nav)
 insert_quick_example(quick_example)
@@ -100,14 +101,14 @@ filter!(x -> x[1] != "Quick Example", examples_nav)
 
 
 makedocs(
-    modules = [BondGraph],
-    format=Documenter.HTML(prettyurls=false, sidebar_sitename=false, assets = ["assets/favicon.ico"]),
-    sitename = "BondGraph.jl",
+    modules=[BondGraph],
+    format=Documenter.HTML(prettyurls=false, sidebar_sitename=false, assets=["assets/favicon.ico"]),
+    sitename="BondGraph.jl",
     # doctest=true,
-    clean = true,
-    src = "docs/src",
-    force = true,
-    pages = [
+    clean=true,
+    src="docs/src",
+    force=true,
+    pages=[
         "Home" => "index.md",
         "Getting started" => "getting_started_auto.md",
         "User Guide" => [
@@ -122,10 +123,10 @@ makedocs(
         "License" => "license.md",
         # "Changelog" => "changelog.md",
     ],
-    pagesonly = true,
+    pagesonly=true,
 )
 
 # Cleaning
 rm(joinpath(@__DIR__, "src", "getting_started_auto.md"))
 
-deploydocs(repo = "github.com/felipecastrotc/BondGraph.jl.git")
+deploydocs(repo="github.com/felipecastrotc/BondGraph.jl.git")
