@@ -53,6 +53,7 @@ function mTF(subsys...; name, r = 1.0)
         @assert length(c) == 2
         push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
+
     return compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 end
 
