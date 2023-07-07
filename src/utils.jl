@@ -1,146 +1,21 @@
+using Plots
+using GraphRecipes
+
+import ModelingToolkit: ConnectionSet, ConnectionElement
+import ModelingToolkit: namespaced_var, get_connection_type, getname
+import ModelingToolkit: rename, generate_connection_set!
+
 # =============================================================================
-# Deprecate
+# Depecrate function
 
-# Consider deprecate
-function filterexpr(expr::Equation; ignore::Vector{Num} = Num[])
-
-    expr_rhs = Set(ModelingToolkit.get_variables(expr.rhs))
-    expr_lhs = Set(ModelingToolkit.get_variables(expr.lhs))
-    expr_var = union(expr_rhs, expr_lhs)
-
-    vars = collect(setdiff(expr_var, Set(ignore)))
-
-    length(vars) > 0
-end
-
-# Deprecated with the usage of hasproperty
-function isdefnothing(c::ODESystem, sym::String)
-    # sym = Symbol(var)
-    st = getproperty(c, sym, namespace = false)
-    isnothing(ModelingToolkit.get_defaults(c)[st])
-end
-
-# Deprecated -> use ModelingToolkit.get_variables
-function extract_vars(O)
-    O = unwrap(O)
-    if istree(O)
-        reduce(vcat, [extract_vars(o) for o in arguments(O) if !(o isa Number)])
-    elseif isvariable(O)
-        O
-    end
-end
-
-function sumvar_legacy(con, sym::Symbol)
-    sum(c -> getsign(c)*getsym(c, sym), con; init=0.0)
-end
-
-function equalityeqs_legacy(con, sym::Symbol, signs, vars)
-    
-    vars = isa(vars, AbstractArray) ? vars : [vars]
-
-    start_con = 1
-    start_vars = 1
-    
-    base = 0.0
-    if length(con) > 0
-        base += getsym(con[1], sym) 
-        start_con = 2
-    elseif length(sign) > 0
-        base += sign[1]*vars[1]
-        start_vars = 2
-    else
-        return []
-    end
-
-    eqs = Equation[]
-
-    for i in start_con:length(con)
-        push!(eqs, base ~ getsym(con[i], sym))
-    end
-
-    for i in start_vars:length(signs)
-        push!(eqs, base ~ signs[i]*vars[i])
-    end
-
-    return eqs
-end
-# =============================================================================
-# Support junction functions
-
-function addsgn(sys)
-    if typeof(sys) == ODESystem
-        +sys
-    elseif typeof(sys) == BgODESystem
-        sys
-    end
-end
-
-function rmsgn(sys)
-    if typeof(sys) == ODESystem
-        sys
-    elseif typeof(sys) == BgODESystem
-        sys.ode
-    end
-end
-
-function getsign(sys)
-    if hasproperty(sys, :sgn)
-        return getproperty(sys, :sgn)
-    else
-        return 1
-    end
-end
-
-function getsym(sys, sym::Symbol)
-    if hasproperty(sys, :power)
-        return getproperty(getproperty(sys, :power), sym)
-    else
-        return getproperty(sys,sym)
-    end
-end
-
-function getoneport(con)
+function directcon(con)
     filter(c -> !hasproperty(c, :power), con)
 end
 
-function getmultiport(con)
+function haspower(con)
     filter(c -> hasproperty(c, :power), con)
 end
 
-function sumvar(con)
-    if length(con) > 0 
-        return 0 ~ sum(con)
-    else
-        return []
-    end
-end
-
-function sumcoupling(vars, signs::Vector)
-    if length(signs) > 1
-        return sum([sgn*c for (c, sgn) in zip(vars, signs)])
-    elseif length(signs) == 1
-        return signs[1]*vars
-    else
-        return 0.0
-    end
-end
-
-function equalityeqs(con)
-    
-    base = 0.0
-    if length(con) > 1
-        base += con[1]
-    else
-        return []
-    end
-
-    eqs = Equation[]
-    for i in 2:length(con)
-        push!(eqs, base ~ con[i])
-    end
-
-    return eqs
-end
 
 # =============================================================================
 # Functions to replace variables on equations by the observed variables
@@ -190,182 +65,134 @@ function isindependent(var::Num)
 end
 
 # =============================================================================
-# Function to handle subsystem
-
-function addsubsys(sys, pss)
-    
-    ps = pss isa BgODESystem ? [pss] : collect(pss)
-
-    if BgODESystem in typeof.(ps)
-        
-        eqs, names = Equation[], Symbol[]
-
-        rename = Dict()
-
-        filter!(x -> x isa BgODESystem, ps);
-
-        for p in ps
-            for s in p.subsys
-
-                if !(s.name in names)
-                    push!(names, s.name)
-                    eqs = vcat(eqs, equations(s))
-                end
-
-                pname = string(p.name)*"₊"
-                sname = string(s.name)*"₊"
-                pname = pname*sname
-
-                for st in s.states
-                    str_st = string(st)
-                    sym_st = split(str_st, "(")[1]
-                    rename[pname*str_st] = Symbol(sname*sym_st)
-                end
-            end
-        end
-
-        sys = renamevars(sys, rename)
-        return sys
-        # Remove duplicate equations
-        # eqs = collect(Set(vcat(equations(sys), eqs)))
-    #    return ODESystem(eqs; name = sys.name)
-    else
-        return sys
-    end
-end
-
-# =============================================================================
-# Function to handle bond graph connections Deprecated
-using LinearAlgebra
-
-function csets2adjlist_bckp(csets)
-
-    ale = Dict{String, Vector{String}}()    # Adjacency list for effort variable
-    alf = Dict{String, Vector{String}}()    # Adjacency list for effort variable
-    str2con = Dict{String, ModelingToolkit.ConnectionElement}()
-
-    # Generate adjacency list from csets
-    for cset in csets
-        if get_connection_type(cset.set[1].v) === bg
-            n = Vector{String}()
-            for e in cset.set
-                @unpack sys, v, isouter = e
-                k = String(nameof(sys)) * "₊" * String(Symbol(v))
-                push!(n, k)
-                e = deepcopy(e)
-                ModelingToolkit.@set! e.isouter = false
-                str2con[k] = e
-            end
-            N = Set(n)
-            for e in cset.set
-                @unpack sys, v, isouter = e
-                al = String(Symbol(v)) == "f(t)" ? alf : ale
-                k = String(nameof(sys)) * "₊" * String(Symbol(v))
-                idx = get(al, k, nothing)
-                if idx === nothing
-                    al[k] = String[]
-                end
-                push!(al[k], collect(setdiff(N, [k]))...)
-            end
-        end
-    end
-
-    return ale, alf, str2con
-end
-
-function mtx2list(am, idx2k::Vector)
-    # Generate an adjacency list from the adjacency matrix
-
-    al = Dict{String, Vector{String}}()
-
-    for i in 1:size(am, 1)
-        k = idx2k[i][2]
-        # Initialize adjacency list key
-        idx = get(al, k, nothing)
-        if idx === nothing
-            al[k] = String[]
-        end
-        # Add connections to the adjacency list
-        for j in 1:size(am, 2)
-            if am[i, j] > 0
-                push!(al[k], idx2k[j][2])
-            end
-        end
-        if length(al[k]) == 0
-            delete!(al, k)
-        end
-    end
-
-    return al
-end
-
-function mtx2list(am, al::Dict)
-    idx2k = [i => k for (i, (k, vs)) in enumerate(al)]
-    return mtx2list(am, idx2k)
-end
-
-function am2dam(am)
-    # Convert undirected graph to directed graph by
-    # transforming the adjacency matrix in a upper 
-    # triangular matrix
-    # println(am)
-    return tril(am)'
-end
-
-# =============================================================================
 # Function to handle bond graph connections
+# =============================================================================
+# Interface functions
+function check_bg_con(connectionset)
+    ele = namespaced_var(connectionset.set[1])
+    return get_connection_type(ele) === bg
+end
 
-function name2sys(csets)
+function get_bg_connection_set!(connectionsets)
+    bgconnectionsets = filter(check_bg_con, connectionsets)
+    filter!(x -> !check_bg_con(x), connectionsets)
+    return bgconnectionsets
+end
 
-    str2con = Dict{String, ModelingToolkit.ConnectionElement}()
+# =============================================================================
+# BG functions
+function equalityeqs(con)
+    
+    base = 0.0
+    if length(con) > 1
+        base += con[1]
+    else
+        return []
+    end
+
+    eqs = Equation[]
+    for i in 2:length(con)
+        push!(eqs, base ~ con[i])
+    end
+
+    return eqs
+end
+
+function sumvar(con)
+    if length(con) > 0 
+        return 0 ~ sum(con)
+    else
+        return []
+    end
+end
+
+function flatinput(ps)
+
+    subsys = ModelingToolkit.AbstractSystem[]
+    signs = Int[]
+
+    for (i, p) in enumerate(ps)
+        if isa(p, ModelingToolkit.AbstractSystem)
+            push!(subsys, p)
+            push!(signs, 1)
+        elseif isa(p, AbstractVector)
+            if (length(p) == 2) && isa(p[1], Int) && isa(p[2], ModelingToolkit.AbstractSystem)
+                push!(subsys, p[2])
+                push!(signs, p[1])
+            else
+                throw(DomainError("The input number "*string(i)*" is not valid, a valid element has a two elements AbstractVector, where the first is an integer and the second is an AbstractSystem"))
+            end
+        else
+            throw(DomainError(p, "The input number "*string(i)*" is not valid. The valid are: AbstractSystem or a two element AbstractVector."))
+        end
+    end
+
+    return subsys, signs
+end
+
+# =============================================================================
+# Util functions
+
+function get_var(idx, idx2k, str2con)
+    return namespaced_var(str2con[idx2k[idx]])
+end
+
+function add_idx(var, idx)
+    v = deepcopy(var)
+    vstr = String(getname(v))
+    newname = Symbol(vstr*string(idx))
+    return rename(v, newname)
+end
+
+function gen_tp_con!(eqs, sys, subsys)
+
+    # Get connections
+    c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
+
+    # Remove nothing from c array
+    pos = .!isnothing.(c)
+    c = c[pos]
+    # @assert !isempty(c)
+
+    # Apply connections
+    if length(c) > 0
+        if sum(pos) == 1
+            if pos[1]
+                push!(eqs, connect(c[1].power, sys.pin))
+            else
+                push!(eqs, connect(sys.pout, c[1].power))
+            end
+        elseif length(c) == 2
+            push!(eqs, connect(c[1].power, sys.pin), connect(sys.pout, c[2].power))
+        end
+    end
+end
+
+# =============================================================================
+# Algorithm functions
+
+function csets2dict(csets)
+    
+    str2con = Dict{String, ConnectionElement}()
 
     # Generate name to systems from csets
     for cset in csets
-        if get_connection_type(cset.set[1].v) === bg
-            n = Vector{String}()
-            for e in cset.set
-                @unpack sys, v, isouter = e
-                k = String(nameof(sys)) * "₊" * String(Symbol(v))
-                push!(n, k)
-                e = deepcopy(e)
-                ModelingToolkit.@set! e.isouter = false
-                str2con[k] = e
-            end
+        n = Vector{String}()
+        for ele in cset.set
+            k = String(Symbol(namespaced_var(ele)))
+            str2con[k] = ele
         end
     end
 
     return str2con
 end
 
-function csets2adjlist(csets, var="")
+function csets2adjmtx(csets, str2con; filterstr="f(t)", filterflow=false)
 
-    al = Dict{String, Vector{String}}()    # Adjacency list for effort variable
-
-    # Generate adjacency list from csets
-    for cset in csets
-        h = ""
-        for (i, e) in enumerate(cset.set)
-            @unpack sys, v, isouter = e
-            k = String(nameof(sys)) * "₊" * String(Symbol(v))
-            if (var == String(Symbol(v))) || length(var) == 0
-                if i == 1
-                    h = k
-                    idx = get(al, k, nothing)
-                    if idx === nothing
-                        al[k] = String[]
-                    end
-                else
-                    push!(al[h], k)
-                end
-            end
-        end
+    # Filter str2con
+    if filterflow
+        filter!(d -> occursin(filterstr, d[1]), str2con)
     end
-
-    return al
-
-end
-
-function csets2adjmtx(csets, str2con)
 
     # Generate adjacency matrix from csets
     k2idx = Dict(k => i for (i, k) in enumerate(keys(str2con)))
@@ -376,6 +203,9 @@ function csets2adjmtx(csets, str2con)
         for (i, e) in enumerate(cset.set)
             @unpack sys, v, isouter = e
             k = String(nameof(sys)) * "₊" * String(Symbol(v))
+            if String(Symbol(v)) != filterstr && filterflow
+                continue
+            end
             if i == 1
                 h = k2idx[k]
             else
@@ -383,56 +213,124 @@ function csets2adjmtx(csets, str2con)
             end
         end
     end
+
     return am
 end
 
-function csets2adjmtx(csets)
-    str2con = name2sys(csets)
-    return csets2adjmtx(csets, str2con)
+function get_sm_mtx!(am, idx2k, str2con)
+    # Get the signal matrix and remove the op elements as receiving node
+
+    sm = deepcopy(am)
+
+    # Identify the one port elements to apply the signal
+    cord = findall(am .> 0)
+    filter!(x -> get_bg_junction(get_var(x[2], idx2k, str2con))[1] === op, cord)
+    # Convert the connections and apply the signal matrix sm
+    for c in cord
+        flipc = CartesianIndex(c[2], c[1])
+        am[c], am[flipc] = 0, 1
+        sm[c], sm[flipc] = 0, -1
+    end
+
+    return sm
 end
 
-function list2mtx(al)
-    # Generate adjacency matrix from the adjacency list
-    # k2idx = Dict(k => i for (i, (k, vs)) in enumerate(al))
-    K = collect(Set(vcat([k for (k, vs) in al], [vs for (k, vs) in al]...)))
-    k2idx = Dict(k => i for (i, k) in enumerate(K))
+# TODO: add support adding signs it has issues on the algorithm
+function adjmtx2eqs(am, str2con)
+    
+    idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
 
-    am = zeros(Int, length(k2idx), length(k2idx))
+    sm = get_sm_mtx!(am, idx2k, str2con)
 
-    for (k, vs) in al
-        for v in vs
-            if v in al[k]
-                am[k2idx[k], k2idx[v]] = 1
+    in_vec = sum(am, dims=1)[:]
+    out_vec = sum(am, dims=2)[:]
+
+    idx_con = (1:size(am, 1))
+    in_con = idx_con[in_vec .> 0]
+
+    eqs = Equation[]
+    for i in in_con
+        v = get_var(i, idx2k, str2con)
+        # Get variables leaving the node
+        vout = Num[]
+        if out_vec[i] == 1
+            push!(vout, -get_var(i, idx2k, str2con))
+        elseif out_vec[i] > 1
+            for j in 1:out_vec[i]
+                push!(vout, -add_idx(v, j))
+            end
+        end
+        # Get variables being added to the node
+        vin = Num[]
+        # Iterate over the connections
+        for j in idx_con[am[:, i] .> 0]
+            # Check if the input has multiple outputs
+            msk= am[j, :] .> 0
+            chk = sum(msk) > 1 ? findfirst(sort(idx_con[msk]) .== i) : nothing
+            jtype = get_bg_junction(get_var(j, idx2k, str2con))[1]
+            if !isnothing(chk)
+                # Create the variable for the i node
+                push!(vin, add_idx(get_var(j, idx2k, str2con), chk))
+            elseif (jtype === tpgy) || (jtype === tptf)
+                push!(vin, -get_var(j, idx2k, str2con))
+            elseif (jtype === op)
+                # Apply the signal matrix
+                sgn = sm[j, i]
+                push!(vin, sgn*get_var(j, idx2k, str2con))
+            else
+                push!(vin, get_var(j, idx2k, str2con))
+            end
+        end
+
+        # Apply the junction type
+        jtype = get_bg_junction(v)[1]
+        vtype = get_bg_junction(v)[2]
+        if (jtype === j0  && vtype === bgeffort) || (jtype === j1 && vtype === bgflow)
+            push!(eqs, equalityeqs(vcat(vout, vin))...)
+        elseif (jtype === j0  && vtype === bgflow) || (jtype === j1 && vtype === bgeffort)
+            push!(eqs, sumvar(vcat(vout, vin)))
+        elseif (jtype === tpgy) || (jtype === tptf)
+            lvin, lvout = length(vin), length(vout)
+            if (lvin <= 1) && (lvout <= 1) && (lvout + lvout == 1)
+                throw(DomainError("The "*string(jtype)*" type only allows one connection in and one connection out"))
+            end
+            if lvin == 1
+                push!(eqs, equalityeqs(vcat(vin, v))...)
+            elseif lvout == 1
+                push!(eqs, equalityeqs(vcat(-vout, v))...)
             end
         end
     end
 
-    return am, k2idx
+    return eqs
 end
 
-function adjlist2csets(al, str2con)
-    mcsets = ModelingToolkit.ConnectionSet[]
-    for (k, v) in al
-        vsys = [str2con[j] for j in v]
-        push!(mcsets, ModelingToolkit.ConnectionSet(vcat([str2con[k]], vsys)))
-    end
-    return mcsets
+# =============================================================================
+# Main functions
+function generate_bg_eqs!(connectionsets)
+
+    bgconnectionsets = get_bg_connection_set!(connectionsets)
+    str2con = csets2dict(bgconnectionsets)
+    am = csets2adjmtx(bgconnectionsets, str2con)
+    eqs = adjmtx2eqs(am, str2con)
+    return eqs
 end
 
-function generate_graph(mdl, var=:e)
-    connectionsets = ModelingToolkit.ConnectionSet[]
+# Support functions
+function generate_graph(mdl, var=:e; method=:stress)
 
-    sys = ModelingToolkit.generate_connection_set!(connectionsets, mdl)
+    connectionsets = ConnectionSet[]
+    sys = generate_connection_set!(connectionsets, mdl, nothing, nothing)
+
+    bgconnectionsets = get_bg_connection_set!(connectionsets)
+    str2con = csets2dict(bgconnectionsets)
 
     varin = var == :e ? "e(t)" : "f(t)"
-    al = csets2adjlist(connectionsets, varin);
+    am = csets2adjmtx(bgconnectionsets, str2con, filterstr=varin, filterflow=true)
     
-    am, k2idx = list2mtx(al)
-    
-    idx2k = [v => k for (k, v) in k2idx]
-    nm = [p[2] for p in idx2k]
+    idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
+    nm = [idx2k[i] for i in 1:length(idx2k)]
 
-    graphplot(am, names=nm, nodeshape=:rect, size=(600, 700), method=:stress)
-
+    graphplot(am, names=nm, nodeshape=:rect, size=(800, 600), method=method, arrow=arrow(:simple, :head, 1, 1), curves=false)
 
 end

@@ -10,46 +10,53 @@ It = Integral(t in DomainSets.ClosedInterval(0, t))
 #     ODESystem(Equation[], t, sts, []; name = name)
 # end
 
-function Power(; effort = 0.0, flow = 0.0,)
-    sts = @variables e(t) = effort f(t) = flow
-    sts
+@connector function Power(; name, effort=0.0, flow=0.0, type=op)
+    sts = @variables e(t) = effort [connect = bg] f(t) = flow [connect = bg]
+    sts = set_bg_metadata.(sts, [[type, bgeffort], [type, bgflow]])
+    ODESystem(Equation[], t, sts, []; name=name)
 end
 
 # =============================================================================
 # Sources
 
 function Se(expr; name)
-    sts = @variables e(t) = 0.0
-    eqs = [sts[1] ~ expr]
+
+    @named power = Power(type=op)
+
+    eqs = [power.e ~ expr]
     
+    sts = []
     if isvariable(expr)
         ps = [expr]
     elseif istree(unwrap(expr))
-        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        vars = collect(Set(ModelingToolkit.get_variables(expr)))
         sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
         ps = filter(x -> isindependent(Num(x)), vars)
     else
         ps = []
     end
 
-    ODESystem(eqs, t, sts, ps; name = name)
+    compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end
 
 function Sf(expr; name)
-    sts = @variables f(t) = 0.0
-    eqs = [sts[1] ~ expr]
 
+    @named power = Power(type=op)
+
+    eqs = [power.f ~ expr]
+    
+    sts = []
     if isvariable(expr)
         ps = [expr]
     elseif istree(unwrap(expr))
-        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        vars = collect(Set(ModelingToolkit.get_variables(expr)))
         sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
         ps = filter(x -> isindependent(Num(x)), vars)
     else
         ps = []
     end
 
-    ODESystem(eqs, t, sts, ps; name = name)
+    compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end
 
 function Dq(; name, x = 0.0)
@@ -63,126 +70,68 @@ end
 # =============================================================================
 # Ports
 
-function Junction1(ps...; name, subsys = [], couple = true, sgn = 1)
-    # Check subsys type
-    subsysv = subsys isa ODESystem ? [subsys] : subsys
-
+function Junction0(ps...; name, couple=true)
+    
+    @named power = Power(type=j0)
     # Get connections
-    ps = Base.Flatten([ps])
-    con = addsgnODE.(collect(Base.Flatten([ps, subsysv])))
+    ps = collect(Base.Flatten([ps]))
 
-    if couple
-        e, f = Power()
-    else
-        e, f = 0.0, nothing
-    end
+    # Get signs and subsystems 
+    subsys, signs = flatinput(ps)
 
-    # Σ efforts
-    eqs = [0 ~ sumvar(con, "e") + sgn * e]
-    # f₁ = f₂ = f₃
-    eqs = vcat(eqs, equalityeqs(con, "f", couple = couple))
-    # Remove empty equations
-    if couple
-        filter!(x -> filterexpr(x, ignore = [e, f]), eqs)
-    end
-    # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
-    # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
-    # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
-    # Example: https://www.20sim.com/webhelp/modeling_tutorial_bond_graphs_frombondgraphtoequations.php
-    # The example considers the convention only for the sum in the
-    # equality it does not consider the arrow direction
-
-    # Build subsystem
-    if couple
-        sys = ODESystem(eqs, t, [e, f], []; name = name)
-    else
-        sys = ODESystem(eqs, t, [], []; name = name)
-    end
-
-    out = compose(sys, rmsgnODE.(ps)...)
-    # out = addsubsys(out, ps)
-    if length(subsysv) == 0
-        return BgODESystem(out, :j1)
-    else
-        BgODESystem(out, 1, rmsgnODE.(subsysv), :j1)
-    end
-end
-
-function Junction0(ps...; name, subsys = [], couple = true, sgn = 1)
-    # Check subsys type
-    subsysv = subsys isa ODESystem ? [subsys] : subsys
-
-    # Get connections
-    ps = Base.Flatten([ps])
-    con = addsgnODE.(collect(Base.Flatten([ps, subsysv])))
-
-    if couple
-        e, f = Power()
-    else
-        e, f = nothing, 0.0
-    end
-
-    # Σ flows
-    eqs = [0 ~ sumvar(con, "f") + sgn * f]
-    # e₁ = e₂ = e₃
-    eqs = vcat(eqs, equalityeqs(con, "e", couple = couple, sgn = sgn))
-    # Remove empty equations
-    if couple
-        filter!(x -> filterexpr(x, ignore = [e, f]), eqs)
-    end
-    # TODO: CHECK WHY DISABILITATING THE SIGN IN THE EQUALITY 
-    # THE DC MOTOR MODEL MATCHES WITH THE LITERATURE
-    # TODO: CHECK IF THE SIGN CONVENTION IS ONLY FOR THE SUM
-    # Example: https://www.20sim.com/webhelp/modeling_tutorial_bond_graphs_frombondgraphtoequations.php
-    # The example considers the convention only for the sum in the
-    # equality it does not consider the arrow direction
-
-    # Build subsystem
-    if couple
-        sys = ODESystem(eqs, t, [e, f], []; name = name)
-    else
-        sys = ODESystem(eqs, t, [], []; name = name)
-    end
-
-    out = compose(sys, rmsgnODE.(ps)...)
-    # out = addsubsys(out, ps)
-    if length(subsysv) == 0
-        return BgODESystem(out, :j0)
-    else
-        BgODESystem(out, 1, rmsgnODE.(subsysv), :j0)
-    end
-end
-
-function mGY(subsys...; name, g = 1.0)
-
-    # Get connections
-    c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
-
-    # Remove nothing from c array
-    pos = .!isnothing.(c)
-    c = c[pos]
-    @assert !isempty(c)
-
-    # If only one subsys is passed it automatically generates an open  
-    # connection
-    if sum(pos) == 1
-        e, f = Power()
-        # Set variables according to the position
-        if pos[1]
-            e₁, f₁ = e, f
-            e₂, f₂ = c[1].e, c[1].f
-        else
-            e₂, f₂ = e, f
-            e₁, f₁ = c[1].e, c[1].f
+    eqs = Equation[]
+    for (s, sign) in zip(subsys, signs)
+        if sign == 1
+            push!(eqs, connect(s.power, power))
+        elseif sign == -1
+            push!(eqs, connect(power, s.power))
         end
-    else
-        @assert length(c) == 2
-        e₁, f₁ = c[1].e, c[1].f
-        e₂, f₂ = c[2].e, c[2].f
     end
+
+    # Build subsystem
+    sys = ODESystem(eqs, t, [], [], name = name)
+    compose(sys, power, subsys...)
+end
+
+function Junction1(ps...; name, couple=true)
+
+    @named power = Power(type=j1)
+    # Get connections
+    ps = collect(Base.Flatten([ps]))
+
+    # Get signs and subsystems 
+    subsys, signs = flatinput(ps)
+
+    eqs = Equation[]
+    for (s, sign) in zip(subsys, signs)
+        if sign == 1
+            push!(eqs, connect(s.power, power))
+        elseif sign == -1
+            push!(eqs, connect(power, s.power))
+        end
+    end
+
+    # Build subsystem
+    sys = ODESystem(eqs, t, [], [], name = name)
+    compose(sys, power, subsys...)
+end
+
+# TODO:ISSUE -> the compose only works when the gyrator systems is the first
+function mGY(subsys...; name, g = 1.0, coneqs=[])
+
+    # Generate the in and out connection
+    @named pin = Power(type=tpgy)
+    @named pout = Power(type=tpgy)
+
+    # Alias for simpler view about the mGY port
+    e₁, f₁ = pin.e, pin.f
+    e₂, f₂ = pout.e, pout.f
 
     # Gyrator equation
-    eqs = [e₂ ~ g * f₁, e₁ ~ g * f₂]
+    eqs = [e₂ ~ -g * f₁, e₁ ~ g * f₂]
+    # TODO: check why adding the - on f₁ solves the signal issue on DC motor
+    # TODO: I already tried to change the signal on the port type tpgy at 
+    #       adjmtx2eqs
 
     # Check if it is a modulated gyrator
     if isvariable(g)
@@ -195,43 +144,23 @@ function mGY(subsys...; name, g = 1.0)
         sts, ps = [], []
     end
 
-    if (@isdefined e) | (@isdefined f)
-        push!(sts, e, f)
-    end
+    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 
-    sys = ODESystem(eqs, t, sts, ps; name = name)
+    gen_tp_con!(coneqs, sys, subsys)
 
-    compose(sys, c...)
+    return sys
 end
 
+# TODO:ISSUE -> the compose only works when the transform systems is the first
+function mTF(subsys...; name, r = 1.0, coneqs=[])
 
-function mTF(subsys...; name, r = 1.0)
+    # Generate the in and out connection
+    @named pin = Power(type=tptf)
+    @named pout = Power(type=tptf)
 
-    # Get connections
-    c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
-
-    # Remove nothing from c array
-    pos = .!isnothing.(c)
-    c = c[pos]
-    @assert !isempty(c)
-
-    # If only one subsys is passed it automatically generates an open  
-    # connection
-    if sum(pos) == 1
-        e, f = Power()
-        # Set variables according to the position
-        if pos[1]
-            e₁, f₁ = e, f
-            e₂, f₂ = c[1].e, c[1].f
-        else
-            e₂, f₂ = e, f
-            e₁, f₁ = c[1].e, c[1].f
-        end
-    else
-        @assert length(c) == 2
-        e₁, f₁ = c[1].e, c[1].f
-        e₂, f₂ = c[2].e, c[2].f
-    end
+    # Alias for simpler view about the mTF port
+    e₁, f₁ = pin.e, pin.f
+    e₂, f₂ = pout.e, pout.f
 
     # Transformer equation
     eqs = [f₁ * r ~ f₂, e₂ * r ~ e₁]
@@ -247,74 +176,69 @@ function mTF(subsys...; name, r = 1.0)
         sts, ps = [], []
     end
 
-    if (@isdefined e) | (@isdefined f)
-        push!(sts, e, f)
-    end
+    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 
-    sys = ODESystem(eqs, t, sts, ps; name = name)
+    gen_tp_con!(coneqs, sys, subsys)
 
-    compose(sys, c...)
+    return sys
 end
 
 # =============================================================================
 # Elements
 
 function Mass(; name, m = 1.0, u = 0.0)
-    e, f = Power(flow = u)
+    @named power = Power(flow=u)    
     ps = @parameters I = m
-    @variables p(t)
 
     eqs = [
-        # It(e) ~ f*I
-        # D(p) ~ e,
-        # p ~ I * f,
-        # f ~ p/I,
-        D(f) ~ e / I,
+        D(power.f) ~ power.e / I,
     ]
-    # ODESystem(eqs, t, [e, f, p], ps; name = name)
-    ODESystem(eqs, t, [e, f], ps; name = name)
-    # ODESystem(eqs, t, [], ps; name = name)
-    # extend(ODESystem(eqs, t, [p], ps; name = name), power)
+    compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
 function Spring(; name, k = 10, x = 0.0)
-    e, f = Power()
+    @named power = Power()
+
     @variables q(t) = x
     ps = @parameters C = 1 / k
 
     eqs = [
-        e ~ q / C
-        D(q) ~ f
-        # D(e) ~ f/C
+        power.e ~ q / C
+        D(q) ~ power.f
     ]
-    ODESystem(eqs, t, [e, f, q], ps; name = name)
+    compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
 function Spring3(; name, k = 10, x = 0.0)
-    e, f = Power()
+    # TODO: check if this function is working
+    @named power = Power()
+
     @variables q(t) = x
     ps = @parameters C = 1 / k
 
     eqs = [
-        e ~ q^3 / C
-        D(q) ~ f
-        # D(e) ~ f/C
+        power.e ~ q^3 / C
+        D(q) ~ power.f
     ]
-    ODESystem(eqs, t, [e, f, q], ps; name = name)
+    
+    compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
-function Damper(; name, c = 10)
-    e, f = Power()
-
+function Damper(; name, c = 10, u=1.0)
+    @named power = Power(flow=u)
+    
     ps = @parameters R = c
-    eqs = [e ~ f * R]
-    ODESystem(eqs, t, [e, f], ps; name = name)
+    eqs = [power.e ~ power.f * R]
+
+    compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
 function GenericDamper(expr; name)
-    e, f = Power()
+    # TODO: check if this function is working
 
-    eqs = [e ~ expr]
+    @named power = Power(flow=u)
+
+    eqs = [power.e ~ expr]
 
     # Check the expression
     if isvariable(expr)
@@ -327,10 +251,5 @@ function GenericDamper(expr; name)
         sts, ps = [], []
     end
 
-    if (@isdefined e) | (@isdefined f)
-        # sts = [e, f]
-        push!(sts, e, f)
-    end
-
-    ODESystem(eqs, t, sts, ps; name = name)
+    compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end

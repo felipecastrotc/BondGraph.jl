@@ -1,8 +1,8 @@
-PWD /home/fctc/me/doutorado/dev/bg_mtk
+PWD /home/fctc/me/doutorado/dev/bg_lib/patches/unicode2latex-patch/ltx
 INPUT /usr/share/texmf-dist/web2c/texmf.cnf
 INPUT /var/lib/texmf/web2c/pdftex/pdflatex.fmt
-INPUT /home/fctc/me/doutorado/dev/bg_mtk/unicode2latex.tex
-OUTPUT /home/fctc/me/doutorado/dev/bg_mtk/unicode2latex.log
+INPUT /home/fctc/me/doutorado/dev/bg_lib/patches/unicode2latex-patch/ltx/unicode2latex.tex
+OUTPUT unicode2latex.log
 INPUT /usr/share/texmf-dist/tex/latex/base/report.cls
 INPUT /usr/share/texmf-dist/tex/latex/base/report.cls
 INPUT /usr/share/texmf-dist/tex/latex/base/report.cls
@@ -119,10 +119,10 @@ INPUT /usr/share/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT /usr/share/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT /usr/share/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 INPUT /usr/share/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
-INPUT /home/fctc/me/doutorado/dev/bg_mtk/unicode2latex.aux
-INPUT /home/fctc/me/doutorado/dev/bg_mtk/unicode2latex.aux
-INPUT /home/fctc/me/doutorado/dev/bg_mtk/unicode2latex.aux
-OUTPUT /home/fctc/me/doutorado/dev/bg_mtk/unicode2latex.aux
+INPUT ./unicode2latex.aux
+INPUT unicode2latex.aux
+INPUT unicode2latex.aux
+OUTPUT unicode2latex.aux
 INPUT /usr/share/texmf-dist/tex/latex/tipa/t3cmr.fd
 INPUT /usr/share/texmf-dist/tex/latex/tipa/t3cmr.fd
 INPUT /usr/share/texmf-dist/tex/latex/tipa/t3cmr.fd
@@ -130,8 +130,8 @@ INPUT /usr/share/texmf-dist/tex/latex/tipa/t3cmr.fd
 INPUT /usr/share/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm
 INPUT /usr/share/texmf-dist/fonts/tfm/public/tipa/tipa10.tfm
-OUTPUT /home/fctc/me/doutorado/dev/bg_mtk/unicode2latex.pdf
+OUTPUT unicode2latex.pdf
 INPUT /var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map
-INPUT /home/fctc/me/doutorado/dev/bg_mtk/unicode2latex.aux
+INPUT unicode2latex.aux
 INPUT /usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb
 INPUT /usr/share/texmf-dist/fonts/type1/public/tipa/tipa10.pfb
