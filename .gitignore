@@ -1,5 +1,6 @@
 docs/build/
 docs/src/examples/
+.DS_Store
 
 # My
 _table.xlsx
