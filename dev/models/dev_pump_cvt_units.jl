@@ -31,3 +31,31 @@ string(simplify(e * 100))
 simplify(e * 100)
 
 darcyq(Qi, Δs, d, ϵ, ρ, μ)
+
+m, s, kg, h = symbols("m, s, kg, h")
+
+
+a = m/s^2
+N = kg*a
+Pa = N/(m^2)
+Q = m^3/s
+Qh = m^3/h
+ρ = kg/m^3
+g = a
+cvt = 1/(g*ρ)
+H = Pa*cvt
+
+1/9000
+I = Pa/(Q/s)
+H*(g*ρ)/(I)
+
+# I/
+
+I/((g*ρ)*(3600*s/h))
+
+9.81*1000*3600
+
+Ih = H/(Qh/s)
+
+Ih/cvt
+
