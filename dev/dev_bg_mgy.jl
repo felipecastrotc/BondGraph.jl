@@ -1,5 +1,7 @@
 using BondGraph, Plots, Symbolics.Latexify
-import BondGraph: t, D
+import BondGraph: t, D, mGY, tpgy
+import ModelingToolkit: isvariable, istree
+import Symbolics: unwrap, wrap
 
 using DifferentialEquations
 
@@ -16,45 +18,44 @@ function mGY(subsys...; name, g = 1.0)
     c = c[pos]
     @assert !isempty(c)
 
-    # If only one subsys is passed it automatically generates an open  
-    # connection
-    if sum(pos) == 1
-        @named power = Power()
-        @unpack e, f = power
-        # Set variables according to the position
-        if pos[1]
-            e₁, f₁ = e, f
-            e₂, f₂ = c[1].e, c[1].f
-        else
-            e₂, f₂ = e, f
-            e₁, f₁ = c[1].e, c[1].f
-        end
-    else
-        @assert length(c) == 2
-        e₁, f₁ = c[1].e, c[1].f
-        e₂, f₂ = c[2].e, c[2].f
-    end
+    # Generate the in and out connection
+    @named pin = Power(type=tpgy)
+    @named pout = Power(type=tpgy)
+
+    # Alias for simpler view about the mGY port
+    e₁, f₁ = pin.e, pin.f
+    e₂, f₂ = pout.e, pout.f
 
     # Gyrator equation
-    eqs = [e₂ ~ g * f₁, e₁ ~ g * f₂]
+    eqs = [e₂ ~ g * f₁, e₁ ~ g * -f₂]
+    # TODO: check why adding the - on f₂ solves the signal issue on DC motor
+    # TODO: I already tried to change the signal on the port type tpgy at 
+    #       adjmtx2eqs
 
     # Check if it is a modulated gyrator
     if isvariable(g)
         sts, ps = [], [g]
     elseif istree(unwrap(g))
-        sts = []
-        ps = collect(Set(ModelingToolkit.get_variables(g)))
+        vars = collect(Set(ModelingToolkit.get_variables(g)))
+        sts = filter(x -> ~isindependent(Num(x)), vars)
+        ps = filter(x -> isindependent(Num(x)), vars)
     else
         sts, ps = [], []
     end
 
-    sys = ODESystem(eqs, t, sts, ps; name = name)
-
-    if @isdefined power
-        sys = extend(sys, power)
+    # Apply connections
+    if sum(pos) == 1
+        if pos[1]
+            push!(eqs, connect(c[1].power, pin))
+        else
+            push!(eqs, connect(pout, c[1].power))
+        end
+    else
+        @assert length(c) == 2
+        push!(eqs, connect(c[1].power, pin), connect(pout, c[2].power))
     end
 
-    compose(sys, c...)
+    return compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 end
 
 # =============================================================================
@@ -126,12 +127,20 @@ plot(sol)
 
 g = 0.01
 
-@named je = Junction1(Uₐ, -R, -L, sgn = -1)
-@named jm = Junction1(Tₗ, -b, -J)
-@named gy = mGY(je, jm, g = g)
+@named jm = Junction1(Tₗ, [-1, b], [-1, J])
+@named je = Junction1(Uₐ, [-1, R], [-1, L])
 
+eqs = []
+@named gy = mGY(je,jm, g = g, coneqs=eqs)
 equations(gy)
-@named sys = reducedobs(structural_simplify(gy))
+
+@named mdl = ODESystem(eqs, t)
+mdl = compose(mdl, gy, je, jm)
+
+equations(mdl)
+generate_graph(mdl)
+emdl = expand_connections(mdl)
+@named sys = reducedobs(structural_simplify(emdl))
 equations(sys)
 
 prob = ODEProblem(sys, [], (0.0, 4.0))
@@ -162,7 +171,7 @@ sysₚ = structural_simplify(sysₚ)
 probₚ = ODEProblem(sysₚ, [], (0.0, 4.0))
 solₚ = solve(probₚ, reltol = 1e-8, abstol = 1e-8)
 plot(solₚ.t, solₚ[θ̇])
-plot(solₚ.t, solₚ[i])
+plot!(solₚ.t, solₚ[i])
 
 # ------------------------------------------------------------------------------
 # Comparison Solutions
