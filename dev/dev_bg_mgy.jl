@@ -19,8 +19,8 @@ function mGY(subsys...; name, g = 1.0)
     @assert !isempty(c)
 
     # Generate the in and out connection
-    @named pin = Power(type=tpgy)
-    @named pout = Power(type=tpgy)
+    @named pin = Power(type = tpgy)
+    @named pout = Power(type = tpgy)
 
     # Alias for simpler view about the mGY port
     e₁, f₁ = pin.e, pin.f
@@ -131,7 +131,7 @@ g = 0.01
 @named je = Junction1(Uₐ, [-1, R], [-1, L])
 
 eqs = []
-@named gy = mGY(je,jm, g = g, coneqs=eqs)
+@named gy = mGY(je, jm, g = g, coneqs = eqs)
 equations(gy)
 
 @named mdl = ODESystem(eqs, t)

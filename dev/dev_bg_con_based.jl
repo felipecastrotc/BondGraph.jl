@@ -14,7 +14,11 @@ struct tptf end
 struct j0 end
 struct j1 end
 
-get_connection_type(s) = getmetadata(Symbolics.unwrap(s), ModelingToolkit.VariableConnectType, ModelingToolkit.Equality)
+get_connection_type(s) = getmetadata(
+    Symbolics.unwrap(s),
+    ModelingToolkit.VariableConnectType,
+    ModelingToolkit.Equality,
+)
 
 # How the connect is parsed
 # https://github.com/JuliaSymbolics/Symbolics.jl/blob/b7cae533e0a2aae8d7e227b2e0db4e25e6cb8d09/src/variable.jl
@@ -34,18 +38,19 @@ get_connection_type(e)
 
 set_bg_metadata(s, type) = wrap(setmetadata(unwrap(s), bg, type))
 get_bg_junction(s) = getmetadata(unwrap(s), bg)
-update_mtk_con(s, type) = wrap(setmetadata(unwrap(s), ModelingToolkit.VariableConnectType, type))
+update_mtk_con(s, type) =
+    wrap(setmetadata(unwrap(s), ModelingToolkit.VariableConnectType, type))
 
 # Convert the bg metadata to comply to the modelingtoolkit connection types
 function convert_bg_metadata(cset)
-    
+
     i = findall(x -> x.isouter, cset.set)
     i = length(i) > 0 ? i[1] : 1
 
     cfg = get_bg_junction(cset.set[i].v)
-    
+
     # get_bg_junction(cset.set[1].sys.sys.e)
-    
+
     # get_bg_junction(mj.power.e)
 
     # cset.set[2].isouter
@@ -62,11 +67,11 @@ function convert_bg_metadata(cset)
 
     for ele in cset.set
         namespace = ele.sys
-        
+
         v = deepcopy(ele.v)
         v = update_mtk_con(v, vartype)
-        
-        isouter  = ele.isouter
+
+        isouter = ele.isouter
 
         push!(newconnectionset, T(namespace, v, isouter))
     end
@@ -75,9 +80,9 @@ function convert_bg_metadata(cset)
 end
 
 # Update this function to handle the bond graph type
-function ModelingToolkit.generate_connection_equations_and_stream_connections(csets::AbstractVector{
-                                                                                    <:ModelingToolkit.ConnectionSet
-                                                                                    })
+function ModelingToolkit.generate_connection_equations_and_stream_connections(
+    csets::AbstractVector{<:ModelingToolkit.ConnectionSet},
+)
     eqs = Equation[]
     stream_connections = ModelingToolkit.ConnectionSet[]
 
@@ -99,11 +104,13 @@ function ModelingToolkit.generate_connection_equations_and_stream_connections(cs
             push!(eqs, 0 ~ rhs)
         elseif vtype === bg
             ncset = convert_bg_metadata(cset)
-            neqs, _ = ModelingToolkit.generate_connection_equations_and_stream_connections([ncset])
+            neqs, _ = ModelingToolkit.generate_connection_equations_and_stream_connections([
+                ncset,
+            ])
             push!(eqs, neqs...)
         else # Equality
             base = ModelingToolkit.namespaced_var(cset.set[1])
-            for i in 2:length(cset.set)
+            for i = 2:length(cset.set)
                 v = ModelingToolkit.namespaced_var(cset.set[i])
                 push!(eqs, base ~ v)
             end
@@ -114,7 +121,7 @@ end
 
 function Base.merge(csets::AbstractVector{<:ModelingToolkit.ConnectionSet})
     mcsets = ModelingToolkit.ConnectionSet[]
-    ele2idx = Dict{ModelingToolkit.ConnectionElement, Int}()
+    ele2idx = Dict{ModelingToolkit.ConnectionElement,Int}()
     cacheset = Set{ModelingToolkit.ConnectionElement}()
 
     for cset in csets
@@ -156,25 +163,23 @@ function Base.merge(csets::AbstractVector{<:ModelingToolkit.ConnectionSet})
 end
 
 
-@connector function Power(; name, effort=0.0, flow=0.0, type=op)
+@connector function Power(; name, effort = 0.0, flow = 0.0, type = op)
     sts = @variables e(t) = effort [connect = bg] f(t) = flow [connect = bg]
     sts = set_bg_metadata.(sts, [[type, bgeffort], [type, bgflow]])
-    ODESystem(Equation[], t, sts, []; name=name)
+    ODESystem(Equation[], t, sts, []; name = name)
 end
 
 function Mass(; name, m = 1.0, u = 0.0)
-    @named power = Power(flow=u)    
+    @named power = Power(flow = u)
     ps = @parameters I = m
 
-    eqs = [
-        D(power.f) ~ power.e / I,
-    ]
+    eqs = [D(power.f) ~ power.e / I]
     compose(ODESystem(eqs, t, [], ps; name = name), power)
 end
 
-function Damper(; name, c = 10, u=1.0)
-    @named power = Power(flow=u)
-    
+function Damper(; name, c = 10, u = 1.0)
+    @named power = Power(flow = u)
+
     ps = @parameters R = c
     eqs = [power.e ~ power.f * R]
 
@@ -196,10 +201,10 @@ end
 
 function Se(expr; name)
 
-    @named power = Power(type=op)
+    @named power = Power(type = op)
 
     eqs = [power.e ~ expr]
-    
+
     sts = []
     if ModelingToolkit.isvariable(expr)
         ps = [expr]
@@ -214,9 +219,9 @@ function Se(expr; name)
     compose(ODESystem(eqs, t, sts, ps; name = name), power)
 end
 
-function Junction0(ps...; name, couple=true)
-    
-    @named power = Power(type=j0)
+function Junction0(ps...; name, couple = true)
+
+    @named power = Power(type = j0)
     # Get connections
     ps = collect(Base.Flatten([ps]))
 
@@ -237,9 +242,9 @@ function Junction0(ps...; name, couple=true)
     compose(sys, power, subsys...)
 end
 
-function Junction1(ps...; name, couple=true)
+function Junction1(ps...; name, couple = true)
 
-    @named power = Power(type=j1)
+    @named power = Power(type = j1)
     # Get connections
     ps = collect(Base.Flatten([ps]))
 
@@ -276,7 +281,8 @@ sys = expand_connections(sys)
 
 nsys, csets = ModelingToolkit.generate_connection_set(sys)
 
-ceqs, instream_csets = ModelingToolkit.generate_connection_equations_and_stream_connections(csets)
+ceqs, instream_csets =
+    ModelingToolkit.generate_connection_equations_and_stream_connections(csets)
 
 equations(sys)
 mdl = compose(sys, b1, b2)
@@ -287,7 +293,7 @@ equations(mdl)
 equations(mdl)
 
 # Simple MSD
-@named sys = Junction1(m, s, d, couple=false)
+@named sys = Junction1(m, s, d, couple = false)
 equations(sys)
 equations(alias_elimination(sys))
 
@@ -360,6 +366,13 @@ mdl = b
 @named pj = Junction0()
 
 
-cons = [connect(suc.power, pm.power), connect(lek.power, pm.power), connect(pm.power, imp.power), connect(imp.power, pj.power), connect(pj.power, lek.power), connect(pj.power, val.power)]
+cons = [
+    connect(suc.power, pm.power),
+    connect(lek.power, pm.power),
+    connect(pm.power, imp.power),
+    connect(imp.power, pj.power),
+    connect(pj.power, lek.power),
+    connect(pj.power, val.power),
+]
 @named psys = ODESystem(cons, t)
 mdl = compose(psys, lek, suc, pm, imp, pj, val)

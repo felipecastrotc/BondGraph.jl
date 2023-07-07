@@ -12,7 +12,10 @@ const EMPTY_JAC = Matrix{Num}(undef, 0, 0)
 
 
 function ODESystem(
-    deqs::AbstractVector{<:Equation}, iv, dvs, ps;
+    deqs::AbstractVector{<:Equation},
+    iv,
+    dvs,
+    ps;
     controls = Num[],
     observed = Equation[],
     systems = ODESystem[],
@@ -24,9 +27,13 @@ function ODESystem(
     preface = nothing,
     continuous_events = nothing,
     checks = true,
-    var_to_name = Dict()
+    var_to_name = Dict(),
 )
-    name === nothing && throw(ArgumentError("The `name` keyword must be provided. Please consider using the `@named` macro"))
+    name === nothing && throw(
+        ArgumentError(
+            "The `name` keyword must be provided. Please consider using the `@named` macro",
+        ),
+    )
     deqs = scalarize(deqs)
     @assert all(control -> any(isequal.(control, ps)), controls) "All controls must also be parameters."
 
@@ -36,7 +43,11 @@ function ODESystem(
     ctrl′ = value.(scalarize(controls))
 
     if !(isempty(default_u0) && isempty(default_p))
-        Base.depwarn("`default_u0` and `default_p` are deprecated. Use `defaults` instead.", :ODESystem, force = true)
+        Base.depwarn(
+            "`default_u0` and `default_p` are deprecated. Use `defaults` instead.",
+            :ODESystem,
+            force = true,
+        )
     end
     defaults = todict(defaults)
     defaults = Dict{Any,Any}(value(k) => value(v) for (k, v) in pairs(defaults))
@@ -58,5 +69,27 @@ function ODESystem(
         throw(ArgumentError("System names must be unique."))
     end
     cont_callbacks = SymbolicContinuousCallbacks(continuous_events)
-    ODESystem(deqs, iv′, dvs′, ps′, var_to_name, ctrl′, observed, tgrad, jac, ctrl_jac, Wfact, Wfact_t, name, systems, defaults, nothing, connector_type, nothing, preface, cont_callbacks, checks = checks)
+    ODESystem(
+        deqs,
+        iv′,
+        dvs′,
+        ps′,
+        var_to_name,
+        ctrl′,
+        observed,
+        tgrad,
+        jac,
+        ctrl_jac,
+        Wfact,
+        Wfact_t,
+        name,
+        systems,
+        defaults,
+        nothing,
+        connector_type,
+        nothing,
+        preface,
+        cont_callbacks,
+        checks = checks,
+    )
 end
