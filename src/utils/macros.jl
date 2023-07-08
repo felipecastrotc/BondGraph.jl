@@ -40,3 +40,17 @@ macro oneport(ex)
     ex.args[2] = body
     return ex
 end
+
+function setinitialval(power; effort = nothing, flow = nothing)
+
+    if !isa(effort, Number)
+        effort = ModelingToolkit.getdefault(power.e)
+    end
+    if !isa(flow, Number)
+        flow = ModelingToolkit.getdefault(power.f)
+    end
+
+    type = get_bg_junction(power.e)[1]
+
+    return Power(name=power.name, effort=effort, flow=flow, type=type)
+end
