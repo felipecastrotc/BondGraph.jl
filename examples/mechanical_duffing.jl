@@ -23,7 +23,7 @@ using Symbolics.Latexify
 # 
 # ### Custom compliance
 # 
-# We now define a custom element called `Spring3` to include the non-linearity of the Duffing equation. The element is defined by the function below.
+# We now define a custom element called `Spring3` to include the non-linearity of the Duffing equation. The element definition can be simplified using the macro `@oneport` is defined by the function below.
 
 @oneport function Spring3(; name, k = 1.0, x = 0.0)
 

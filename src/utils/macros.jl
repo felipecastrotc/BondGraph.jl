@@ -4,7 +4,7 @@ using MacroTools
 # TODO: Add the support for initial states
 macro oneport(ex)
     block_initial = quote
-        @named power = Power()
+        @named power = Power(type=op)
     end
 
     block_midle = MacroTools.striplines(ex.args[2])
@@ -24,12 +24,12 @@ macro oneport(ex)
         # Get the parameters and states of the system
         if length(vars) > 0
             sts = filter(x -> ~isindependent(Num(x)), vars)
-            ps =  filter(x -> isindependent(Num(x)), vars)
+            ps = filter(x -> isindependent(Num(x)), vars)
         else
             sts, ps = [], []
         end
         # Generate the compatible system
-        compose(ODESystem(eqs, t, sts, ps; name = name), power)
+        compose(ODESystem(eqs, t, sts, ps; name=name), power)
     end
 
     # Create the function body
@@ -41,7 +41,7 @@ macro oneport(ex)
     return ex
 end
 
-function setinitialval(power; effort = nothing, flow = nothing)
+function setinitialval(power; effort=nothing, flow=nothing)
 
     if !isa(effort, Number)
         effort = ModelingToolkit.getdefault(power.e)
