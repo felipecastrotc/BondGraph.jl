@@ -2,6 +2,9 @@ import Pkg;
 
 Pkg.add(path=".")
 
+ENV["GKS_WSTYPE"] = 100
+ENV["JULIA_DEBUG"] = "Documenter"
+
 using Documenter, DocStringExtensions, Literate, BondGraph
 
 # Clean docs/build directory
@@ -10,9 +13,6 @@ if isdir("./docs/build")
 end
 
 mkdir("./docs/build")
-
-
-ENV["JULIA_DEBUG"] = "Documenter"
 
 # utility function from https://github.com/JuliaOpt/Convex.jl/blob/master/docs/make.jl
 fix_math_md(content) = replace(content, r"\$\$(.*?)\$\$"s => s"```math\1```")
