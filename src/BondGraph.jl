@@ -63,6 +63,7 @@ include("utils/bg_utils.jl")
 include("utils/connection_utils.jl")
 include("utils/graph.jl")
 include("utils/system_utils.jl")
+include("utils/macros.jl")
 include("bg.jl")
 # include("mbg.jl")
 
