@@ -266,7 +266,7 @@ function adjmtx2eqs(am, str2con)
                 # Create the variable for the i node
                 push!(vin, add_idx(get_var(j, idx2k, str2con), chk))
             elseif jtype === tpgy || jtype === tptf
-                push!(vin, -get_var(j, idx2k, str2con))
+                push!(vin, get_var(j, idx2k, str2con))
             elseif jtype === op
                 # Apply the signal matrix
                 sgn = sm[j, i]
