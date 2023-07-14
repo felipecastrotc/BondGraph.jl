@@ -251,7 +251,7 @@ An `ODESystem` representing the gyrator element in the bond graph model.
 julia> gyrator = mGY(subsys1, subsys2, g=c, name="gyrator")
 ```
 """
-function mGY(subsys...; name = "", g = 1.0, coneqs = [])
+function mGY(subsys...; name = "", g = 1.0, coneqs = nothing)
     # TODO:ISSUE -> the compose only works when the gyrator systems is the first
 
     # Generate the input and output connections
@@ -283,9 +283,15 @@ function mGY(subsys...; name = "", g = 1.0, coneqs = [])
     sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
 
     # Generate the additional connection equations
-    gen_tp_con!(coneqs, sys, subsys)
+    con = []
+    gen_tp_con!(con, sys, subsys)
 
-    return sys
+    if isnothing(coneqs)
+        return sys, coneqs
+    else
+        push!(coneqs, con...)
+        return sys
+    end
 end
 
 """
@@ -309,11 +315,11 @@ An `ODESystem` representing the transformer element in the bond graph model.
 julia> transformer = mTF(subsys1, subsys2, g=c, name="transformer")
 ```
 """
-function mTF(subsys...; name = "", r = 1.0, coneqs = [])
+function mTF(subsys...; name="", r=1.0, coneqs=nothing)
     # TODO:ISSUE -> the compose only works when the transform systems is the first
     # Generate the input and output connections
-    @named pin = Power(type = tptf)
-    @named pout = Power(type = tptf)
+    @named pin = Power(type=tptf)
+    @named pout = Power(type=tptf)
 
     # Alias for simpler view of the mTF port
     e₁, f₁ = pin.e, pin.f
@@ -334,12 +340,18 @@ function mTF(subsys...; name = "", r = 1.0, coneqs = [])
     end
 
     # Create the subsystem with the modulated transformer equations
-    sys = compose(ODESystem(eqs, t, sts, ps; name = name), pin, pout)
+    sys = compose(ODESystem(eqs, t, sts, ps; name=name), pin, pout)
 
     # Generate the additional connection equations
-    gen_tp_con!(coneqs, sys, subsys)
+    con = []
+    gen_tp_con!(con, sys, subsys)
 
-    return sys
+    if isnothing(coneqs)
+        return sys, coneqs
+    else
+        push!(coneqs, con...)
+        return sys
+    end
 end
 
 # Elements

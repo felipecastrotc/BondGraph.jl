@@ -16,6 +16,8 @@ import ModelingToolkit: symtype, operation
 import ModelingToolkit: similarterm, getmetadata
 import ModelingToolkit: getname, rename, setmetadata
 import ModelingToolkit: namespace_equations, equations
+import ModelingToolkit: single_named_expr, split_assign, check_name
+import ModelingToolkit: gensym, _named
 
 
 # Connection functions
@@ -48,6 +50,45 @@ function generate_connection_set(sys::AbstractSystem, find = nothing, replace = 
     end
     sys, (merge(domain_free_connectionsets), vcat(connectionsets, bgconnectionsets))
 end
+
+
+# Named replace function
+
+function split_assign(expr)
+    # specific case for var1, var2 = function(args...)
+    if expr isa Expr && expr.head === :tuple && expr.args[2].args[2].head === :call
+        name = :($(expr.args[1]), $(expr.args[2].args[1]))
+        call = expr.args[2].args[2]
+    elseif !(expr isa Expr && expr.head === :(=) && expr.args[2].head === :call)
+        throw(ArgumentError("expression should be of the form `sys = foo(a, b)`"))
+    else
+        name, call = expr.args
+    end
+    return name, call
+end
+
+function single_named_expr(expr)
+    name, call = split_assign(expr)
+    if Meta.isexpr(name, :ref)
+        name, idxs = name.args
+        check_name(name)
+        var = gensym(name)
+        ex = quote
+            $var = $(_named(name, call))
+            $name = map(i -> $rename($var, Symbol($(Meta.quot(name)), :_, i)), $idxs)
+        end
+        ex
+    else
+        if typeof(name) === Expr
+            varname, sysname = name, name.args[1]
+        else
+            varname, sysname = name, name
+        end
+        check_name(sysname)
+        :($varname = $(_named(sysname, call)))
+    end
+end
+
 
 # TODO: Check for legacy functions
 
