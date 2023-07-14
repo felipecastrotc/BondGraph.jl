@@ -287,7 +287,7 @@ function mGY(subsys...; name = "", g = 1.0, coneqs = nothing)
     gen_tp_con!(con, sys, subsys)
 
     if isnothing(coneqs)
-        return sys, coneqs
+        return sys, con
     else
         push!(coneqs, con...)
         return sys
@@ -347,7 +347,7 @@ function mTF(subsys...; name="", r=1.0, coneqs=nothing)
     gen_tp_con!(con, sys, subsys)
 
     if isnothing(coneqs)
-        return sys, coneqs
+        return sys, con
     else
         push!(coneqs, con...)
         return sys
