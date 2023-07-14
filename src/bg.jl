@@ -71,6 +71,8 @@ function Se(expr; name)
         vars = collect(Set(ModelingToolkit.get_variables(expr)))
         sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
         ps = filter(x -> isindependent(Num(x)), vars)
+        # Remove t from parameters
+        ps = filter(x -> Symbolics.wrap(x) !== t, ps)
     else
         ps = []
     end
@@ -113,6 +115,8 @@ function Sf(expr; name)
         vars = collect(Set(ModelingToolkit.get_variables(expr)))
         sts = vcat(sts, filter(x -> ~isindependent(Num(x)), vars))
         ps = filter(x -> isindependent(Num(x)), vars)
+        # Remove t from parameters
+        ps = filter(x -> Symbolics.wrap(x) !== t, ps)
     else
         ps = []
     end
