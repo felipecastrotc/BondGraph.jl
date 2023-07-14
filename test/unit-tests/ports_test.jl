@@ -1,5 +1,6 @@
 using BondGraph
-using BondGraph: t, D, bg
+using BondGraph: t, D, bg, j0, j1
+import BondGraph: get_bg_junction
 using ModelingToolkit
 using ModelingToolkit: getdefault
 using DifferentialEquations
@@ -9,62 +10,106 @@ using Symbolics
 name = :test
 split_str = "₊"
 
-@testset "Se" begin
+@testset "Se-cte" begin
     # Default values
-    cte = exp(1.0)
-    @parameters ω, A
-    expr = A*cos(2π*ω*t)
-    # Function
-    @named test_cte = Se(cte)
-    @named test_expr = Se(expr)
+    expr = exp(1.0)
+    # Naming
+    @named test = Se(expr)
+    # Check naming
     @test test.name == name
-    test = Mass(name=name, m = m, u = u)
+    test = Se(expr, name=name)
     @test test.name == name
     # Manual
-    @named power = Power(flow=u)
-    @parameters I = m
+    @named power = Power()
     # Test the power defaults
     @test getdefault(test.power.e) == 0.0
-    @test getdefault(test.power.f) ≈ u
-    @test getdefault(test.I) ≈ m
+    @test getdefault(test.power.f) == 0.0
     # Test equation generated
-    @test [D(power.f) ~ power.e/I] == equations(test)
+    @test [power.e ~ expr] == equations(test)
     # Check the parameters
     ps = parameters(test)
-    @test length(ps) == 1
-    @test Symbol(ps[1]) == Symbol(I)
-    # Check if the naming is corret
-    naming = split(String(Symbolics.tosymbol(test.I)), "₊")
-    @test Symbol(naming[1]) == name
-    @test Symbol(naming[2]) == Symbolics.tosymbol(I)
+    @test length(ps) == 0
 end
 
-@testset "Sf" begin
+@testset "Se-expr" begin
     # Default values
-    u = π
-    m = exp(1.0)
-    # Function
-    @named test = Mass(m = m, u = u)
+    @parameters ω, A
+    expr = A * cos(2π * ω * t)
+    # Naming
+    @named test = Se(expr)
+    # Check naming
     @test test.name == name
-    test = Mass(name=name, m = m, u = u)
+    test = Se(expr, name=name)
     @test test.name == name
     # Manual
-    @named power = Power(flow=u)
-    @parameters I = m
+    @named power = Power()
     # Test the power defaults
     @test getdefault(test.power.e) == 0.0
-    @test getdefault(test.power.f) ≈ u
-    @test getdefault(test.I) ≈ m
+    @test getdefault(test.power.f) == 0.0
     # Test equation generated
-    @test [D(power.f) ~ power.e/I] == equations(test)
+    @test [power.e ~ expr] == equations(test)
     # Check the parameters
     ps = parameters(test)
-    @test length(ps) == 1
-    @test Symbol(ps[1]) == Symbol(I)
+    @test length(ps) == 2
     # Check if the naming is corret
-    naming = split(String(Symbolics.tosymbol(test.I)), "₊")
+    naming = split(String(Symbolics.tosymbol(test.ω)), "₊")
     @test Symbol(naming[1]) == name
-    @test Symbol(naming[2]) == Symbolics.tosymbol(I)
+    @test Symbol(naming[2]) == Symbolics.tosymbol(ω)
+
+    naming = split(String(Symbolics.tosymbol(test.A)), "₊")
+    @test Symbol(naming[1]) == name
+    @test Symbol(naming[2]) == Symbolics.tosymbol(A)
+end
+
+@testset "Sf-cte" begin
+    # Default values
+    expr = exp(1.0)
+    # Naming
+    @named test = Sf(expr)
+    # Check naming
+    @test test.name == name
+    test = Sf(expr, name=name)
+    @test test.name == name
+    # Manual
+    @named power = Power()
+    # Test the power defaults
+    @test getdefault(test.power.e) == 0.0
+    @test getdefault(test.power.f) == 0.0
+    # Test equation generated
+    @test [power.f ~ expr] == equations(test)
+    # Check the parameters
+    ps = parameters(test)
+    @test length(ps) == 0
+end
+
+@testset "Sf-expr" begin
+    # Default values
+    @parameters ω, A
+    expr = A * cos(2π * ω * t)
+    # Naming
+    @named test = Sf(expr)
+    # Check naming
+    @test test.name == name
+    test = Sf(expr, name=name)
+    @test test.name == name
+    # Manual
+    @named power = Power()
+    # Test the power defaults
+    @test getdefault(test.power.e) == 0.0
+    @test getdefault(test.power.f) == 0.0
+    # Test equation generated
+    @test [power.f ~ expr] == equations(test)
+    # Check the parameters
+    ps = parameters(test)
+    @test length(ps) == 2
+    # Check if the naming is corret
+    naming = split(String(Symbolics.tosymbol(test.ω)), "₊")
+    @test Symbol(naming[1]) == name
+    @test Symbol(naming[2]) == Symbolics.tosymbol(ω)
+
+    naming = split(String(Symbolics.tosymbol(test.A)), "₊")
+    @test Symbol(naming[1]) == name
+    @test Symbol(naming[2]) == Symbolics.tosymbol(A)
 end
 
 @testset "Inertance" begin
@@ -72,9 +117,9 @@ end
     u = π
     m = exp(1.0)
     # Function
-    @named test = Mass(m = m, u = u)
+    @named test = Mass(m=m, u=u)
     @test test.name == name
-    test = Mass(name=name, m = m, u = u)
+    test = Mass(name=name, m=m, u=u)
     @test test.name == name
     # Manual
     @named power = Power(flow=u)
@@ -84,7 +129,7 @@ end
     @test getdefault(test.power.f) ≈ u
     @test getdefault(test.I) ≈ m
     # Test equation generated
-    @test [D(power.f) ~ power.e/I] == equations(test)
+    @test [D(power.f) ~ power.e / I] == equations(test)
     # Check the parameters
     ps = parameters(test)
     @test length(ps) == 1
@@ -94,7 +139,6 @@ end
     @test Symbol(naming[1]) == name
     @test Symbol(naming[2]) == Symbolics.tosymbol(I)
 end
-
 
 @testset "Compliance" begin
     # Default values
@@ -108,11 +152,11 @@ end
     # Manual
     @named power = Power()
     @variables q(t) = x
-    @parameters C = 1/k
+    @parameters C = 1 / k
     # Test the power defaults
     @test getdefault(test.power.e) == 0.0
     @test getdefault(test.power.f) == 0.0
-    @test getdefault(test.C) ≈ 1/k
+    @test getdefault(test.C) ≈ 1 / k
     # Test equation generated
     @test [power.e ~ q / C, D(q) ~ power.f] == equations(test)
     # Check the parameters
@@ -125,15 +169,14 @@ end
     @test Symbol(naming[2]) == Symbolics.tosymbol(C)
 end
 
-
 @testset "Resistance" begin
     # Default values
     u = π
     c = exp(1.0)
     # Function
-    @named test = Damper(c = c, u = u)
+    @named test = Damper(c=c, u=u)
     @test test.name == name
-    test = Damper(name=name, c = c, u = u)
+    test = Damper(name=name, c=c, u=u)
     @test test.name == name
     # Manual
     @named power = Power(flow=u)
@@ -143,7 +186,7 @@ end
     @test getdefault(test.power.f) ≈ u
     @test getdefault(test.R) ≈ c
     # Test equation generated
-    @test [power.e ~ power.f * R]  == equations(test)
+    @test [power.e ~ power.f * R] == equations(test)
     # Check the parameters
     ps = parameters(test)
     @test length(ps) == 1
@@ -154,3 +197,78 @@ end
     @test Symbol(naming[2]) == Symbolics.tosymbol(R)
 end
 
+@testset "Junction0" begin
+    # Default values
+    u = π
+    m = exp(1.0)
+    # Function
+    @named mass = Mass(m=m, u=u)
+    @named damper = Damper(c=m, u=u)
+    # Naming
+    @named test = Junction0(mass, [-1, damper])
+    # Check naming
+    @test test.name == name
+    test = Junction0(mass, [-1, damper], name=name)
+    @test test.name == name
+    # Check type junction
+    @test get_bg_junction(test.power.e)[1] === j0
+    @test get_bg_junction(test.power.f)[1] === j0
+    # Manual
+    @named power = Power(type=j0)
+    # Test the power defaults
+    @test getdefault(test.power.e) == 0.0
+    @test getdefault(test.power.f) == 0.0
+    # Test equation generated
+    eqs_func = equations(test)
+    eqs_manual = [
+        connect(mass.power, power),
+        connect(power, damper.power),
+    ]
+    push!(eqs_manual, equations(compose(ODESystem(Equation[], t, [], []; name=:mass), mass))...)
+    push!(eqs_manual, equations(compose(ODESystem(Equation[], t, [], []; name=:damper), damper))...)
+
+    @test length(eqs_func) == length(eqs_manual)
+    @test all([Symbol(eqs_manual[i]) == Symbol(eqs_func[i]) for i in 1:length(eqs_func)])
+
+    # Check the parameters
+    ps = parameters(test)
+    @test length(ps) == (length(parameters(mass)) +  length(parameters(damper)))
+end
+
+@testset "Junction1" begin
+    # Default values
+    u = π
+    m = exp(1.0)
+    # Function
+    @named mass = Mass(m=m, u=u)
+    @named damper = Damper(c=m, u=u)
+    # Naming
+    @named test = Junction1(mass, [-1, damper])
+    # Check naming
+    @test test.name == name
+    test = Junction1(mass, [-1, damper], name=name)
+    @test test.name == name
+    # Check type junction
+    @test get_bg_junction(test.power.e)[1] === j1
+    @test get_bg_junction(test.power.f)[1] === j1
+    # Manual
+    @named power = Power(type=j0)
+    # Test the power defaults
+    @test getdefault(test.power.e) == 0.0
+    @test getdefault(test.power.f) == 0.0
+    # Test equation generated
+    eqs_func = equations(test)
+    eqs_manual = [
+        connect(mass.power, power),
+        connect(power, damper.power),
+    ]
+    push!(eqs_manual, equations(compose(ODESystem(Equation[], t, [], []; name=:mass), mass))...)
+    push!(eqs_manual, equations(compose(ODESystem(Equation[], t, [], []; name=:damper), damper))...)
+
+    @test length(eqs_func) == length(eqs_manual)
+    @test all([Symbol(eqs_manual[i]) == Symbol(eqs_func[i]) for i in 1:length(eqs_func)])
+
+    # Check the parameters
+    ps = parameters(test)
+    @test length(ps) == (length(parameters(mass)) +  length(parameters(damper)))
+end
