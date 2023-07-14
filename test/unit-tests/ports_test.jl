@@ -9,6 +9,64 @@ using Symbolics
 name = :test
 split_str = "₊"
 
+@testset "Se" begin
+    # Default values
+    cte = exp(1.0)
+    @parameters ω, A
+    expr = A*cos(2π*ω*t)
+    # Function
+    @named test_cte = Se(cte)
+    @named test_expr = Se(expr)
+    @test test.name == name
+    test = Mass(name=name, m = m, u = u)
+    @test test.name == name
+    # Manual
+    @named power = Power(flow=u)
+    @parameters I = m
+    # Test the power defaults
+    @test getdefault(test.power.e) == 0.0
+    @test getdefault(test.power.f) ≈ u
+    @test getdefault(test.I) ≈ m
+    # Test equation generated
+    @test [D(power.f) ~ power.e/I] == equations(test)
+    # Check the parameters
+    ps = parameters(test)
+    @test length(ps) == 1
+    @test Symbol(ps[1]) == Symbol(I)
+    # Check if the naming is corret
+    naming = split(String(Symbolics.tosymbol(test.I)), "₊")
+    @test Symbol(naming[1]) == name
+    @test Symbol(naming[2]) == Symbolics.tosymbol(I)
+end
+
+@testset "Sf" begin
+    # Default values
+    u = π
+    m = exp(1.0)
+    # Function
+    @named test = Mass(m = m, u = u)
+    @test test.name == name
+    test = Mass(name=name, m = m, u = u)
+    @test test.name == name
+    # Manual
+    @named power = Power(flow=u)
+    @parameters I = m
+    # Test the power defaults
+    @test getdefault(test.power.e) == 0.0
+    @test getdefault(test.power.f) ≈ u
+    @test getdefault(test.I) ≈ m
+    # Test equation generated
+    @test [D(power.f) ~ power.e/I] == equations(test)
+    # Check the parameters
+    ps = parameters(test)
+    @test length(ps) == 1
+    @test Symbol(ps[1]) == Symbol(I)
+    # Check if the naming is corret
+    naming = split(String(Symbolics.tosymbol(test.I)), "₊")
+    @test Symbol(naming[1]) == name
+    @test Symbol(naming[2]) == Symbolics.tosymbol(I)
+end
+
 @testset "Inertance" begin
     # Default values
     u = π
