@@ -6,6 +6,7 @@ using Plots
 using Symbolics.Latexify
 
 import BondGraph: adjmtx2eqs, mGY, get_var, get_bg_junction, tpgy, tptf, op, j1, j0, equalityeqs
+import BondGraph: get_sm_mtx!, bgflow, bgeffort, sumvar, get_var
 
 @named L = Mass(m=0.5)        # (H) Electric inductance
 @named R = Damper(c=1.0)    # (Ohm) Electric resistance
@@ -17,11 +18,11 @@ import BondGraph: adjmtx2eqs, mGY, get_var, get_bg_junction, tpgy, tptf, op, j1,
 
 g = 0.01    # DC motor torque constant
 
+@named jm = Junction1([-1, c], [-1, J])    # Mechanical part
 @named jm = Junction1(τ, [-1, c], [-1, J])    # Mechanical part
 @named je = Junction1(V, [-1, R], [-1, L])    # Electical part
 
-eqs = []
-@named gy = mGY(je, jm, g=g, coneqs=eqs)
+@named gy, eqs = mGY(je, jm, g=g)
 
 equations(gy)
 
@@ -34,6 +35,14 @@ generate_graph(mdl)
 equations(expand_connections(mdl))
 
 @named sys = simplifysys(mdl)
+equations(sys)
+
+emdl = expand_connections(mdl)
+equations(emdl)
+equations(alias_elimination(emdl))
+sys = structural_simplify(emdl)
+observed(sys)
+equations(structural_simplify(emdl))
 
 tspan = (0, 10)
 
@@ -66,8 +75,7 @@ am = csets2adjmtx(bgconnectionsets, str2con)
 function adjmtx2eqs(am, str2con)
     # Create a dictionary mapping indices to connection element keys
     idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
-    # 6 e 16
-    idx2k
+
     # Generate the signal matrix
     sm = get_sm_mtx!(am, idx2k, str2con)
 
@@ -79,10 +87,9 @@ function adjmtx2eqs(am, str2con)
     in_con = idx_con[in_vec.>0]
 
     eqs = Equation[]
-    # in_con
-    # [get_var(i, idx2k, str2con) for i in in_con]
+    
     for i in in_con
-        # i = 7
+        # i = 16
         v = get_var(i, idx2k, str2con)
 
         # Get variables leaving the node
@@ -100,7 +107,7 @@ function adjmtx2eqs(am, str2con)
 
         # Iterate over the connections
         for j in idx_con[am[:, i].>0]
-            # j = idx_con[am[:, i].>0][3]
+            # j = 1
             # Check if the input has multiple outputs
             msk = am[j, :] .> 0
             chk = sum(msk) > 1 ? findfirst(sort(idx_con[msk]) .== i) : nothing
@@ -114,7 +121,10 @@ function adjmtx2eqs(am, str2con)
             elseif jtype === op
                 # Apply the signal matrix
                 sgn = sm[j, i]
-                push!(vin, sgn * get_var(j, idx2k, str2con))
+                var = get_var(j, idx2k, str2con)
+                # The negative direction in BG refers to the product e*f
+                sgn = get_bg_junction(var)[2] === bgflow ? abs(sgn) : sgn
+                push!(vin, sgn * var)
             else
                 push!(vin, get_var(j, idx2k, str2con))
             end
@@ -140,9 +150,11 @@ function adjmtx2eqs(am, str2con)
             end
 
             if lvin == 1
-                push!(eqs, equalityeqs(vcat(vin, v))...)
+                # The negative direction in BG refers to the product e*f
+                sgn = get_bg_junction(vin[1])[2] === bgflow ? -1 : 1
+                push!(eqs, equalityeqs(vcat(sgn*vin, v))...)
             elseif lvout == 1
-                push!(eqs, equalityeqs(vcat(-vout, v))...)
+                push!(eqs, equalityeqs(vcat(vout, v))...)
             end
         end
     end
@@ -150,18 +162,109 @@ function adjmtx2eqs(am, str2con)
     return eqs
 end
 
+# ----------------------------------------------------------------------
+# Check simple
 
 m = 10
 @named mass = Mass(m=m)
-@named f = Se(10)
-@named g = Se(9.81*m)
+@named damper = Damper(c=m)
+@named spring = Spring(k=m)
+@named f = Se(cos(t))
 
-@named mdl = Junction1(mass, f, [-1, g])
+@named mdl = Junction1([-1, mass], [-1, damper], [-1, spring], f)
+# @named mdl = Junction1([1, mass], [1, damper], [1, spring], [-1, f])
+generate_graph(mdl)
+equations(mdl)
 equations(expand_connections(mdl))
 
-@named left = Junction1(mass, [-1, g])
-@named right = Junction1(f)
+@named sys = simplifysys(mdl)
+equations(sys)
 
-@named tf, eqs = mTF(left, right, r = 1.0)
+# ----------------------------------------------------------------------
+# Check Wiley
+# https://onlinelibrary.wiley.com/doi/pdf/10.1002/9781119958376.app1
 
-isnothing(tf)
+using DelimitedFiles
+
+# Read the CSV file into a matrix
+matrix = readdlm("ref_wiley.csv", ',')
+sim20 = convert(Array{Float64}, matrix[2:end, :])
+
+@parameters V, g, n, ra, J_1, J_2, B, τ
+
+V = 1.0
+g = 1.0
+n = 1.0
+ra = 1.0
+J_1 = 1.0
+J_2 = 1.0
+B = 1.0
+τ = 1.0
+
+# Electric
+@named v = Se(V)
+@named Ra = Damper(c=ra)
+# M1
+@named J1 = Mass(m=J_1)
+@named Rb = Damper(c=B)
+# M2
+@named J2 = Mass(m=J_2)
+@named T = Se(τ)
+# MP
+@named je = Junction1(v, [-1, Ra])
+@named jm1 = Junction1([-1, Rb], [-1, J1])
+@named jm2 = Junction1([-1, J2], T)
+
+# TP
+@named gy, eqs = mGY(je, jm1, g=g)
+@named tf = mTF(jm1, jm2, r=n, coneqs=eqs)
+
+@named mdl = ODESystem(eqs, t)
+mdl = compose(mdl, tf, gy, je, jm1, jm2)
+
+generate_graph(mdl)
+
+equations(alias_elimination(expand_connections(mdl)))
+
+@named sys = simplifysys(mdl)
+
+equations(sys)
+
+prob = ODEProblem(sys, [], (0, 10))
+sol = solve(prob)
+
+plot(sol, label="BGToolkit")
+plot!(sim20[:, 1], sim20[:, 2:end], label="20-sim", line=(4, 0.5, :dash), linewidth=2)
+
+
+
+# ----------------------------------------------------------------------
+# Check TF simple Wikipedia
+
+m = 10
+@named i3 = Mass(m=m)
+@named r2 = Damper(c=m)
+@named c6 = Spring(k=m)
+@named r7 = Damper(c=m)
+@named f = Se(cos(t))
+@parameters r
+
+@named jl = Junction1([-1, i3], [-1, r2], f)
+@named jr = Junction0([-1, c6], [-1, r7])
+
+@named tf, eqs = mTF(jl, jr, r=1.0)
+
+@named mdl = ODESystem(eqs, t)
+mdl = compose(mdl, jl, jr, tf)
+
+generate_graph(mdl)
+equations(expand_connections(mdl))
+
+
+# @named mdl = Junction1([-1, mass], [-1, damper], [-1, spring], f)
+equations(mdl)
+
+@named sys = simplifysys(mdl)
+equations(sys)
+
+latexify(sys)
