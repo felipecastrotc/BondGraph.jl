@@ -49,7 +49,7 @@ Generates a graph visualization of the bond graph model.
 julia> generate_graph(mdl, var=:e, method=:stress)
 ```
 """
-function generate_graph(mdl, var = :e; method = :stress)
+function generate_graph(mdl, var=:e; method=:stress)
 
     connectionsets = ConnectionSet[]
 
@@ -64,7 +64,7 @@ function generate_graph(mdl, var = :e; method = :stress)
 
     # Filter the connection sets based on the variable
     varin = var == :e ? "e(t)" : "f(t)"
-    am = csets2adjmtx(bgconnectionsets, str2con, filterstr = varin, filterflow = true)
+    am = csets2adjmtx(bgconnectionsets, str2con, filterstr=varin, filterflow=true)
 
     # Create a dictionary mapping index to connection set names
     idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
@@ -76,12 +76,12 @@ function generate_graph(mdl, var = :e; method = :stress)
     # Generate the graph visualization using GraphPlot.jl
     graphplot(
         am,
-        names = nm,
-        nodeshape = :rect,
-        size = (800, 600),
-        method = method,
-        arrow = arrow(:simple, :head, 1, 1),
-        curves = false,
+        names=nm,
+        nodeshape=:rect,
+        size=(800, 600),
+        method=method,
+        arrow=arrow(:simple, :head, 1, 1),
+        curves=false,
     )
 end
 
@@ -134,7 +134,7 @@ julia> str2con = csets2dict(csets)
 julia> am = csets2adjmtx(csets, str2con)
 ```
 """
-function csets2adjmtx(csets, str2con; filterstr = "f(t)", filterflow = false)
+function csets2adjmtx(csets, str2con; filterstr="f(t)", filterflow=false)
 
     # Filter str2con
     if filterflow
@@ -223,7 +223,7 @@ Generates a set of equations from an adjacency matrix and connection element dic
 # Returns:
 - eqs: Array of equations generated from the adjacency matrix and connection elements.
 """
-# TODO: add support adding signs it has issues on the algorithm
+
 function adjmtx2eqs(am, str2con)
     # Create a dictionary mapping indices to connection element keys
     idx2k = Dict(i => k for (i, k) in enumerate(keys(str2con)))
@@ -232,8 +232,8 @@ function adjmtx2eqs(am, str2con)
     sm = get_sm_mtx!(am, idx2k, str2con)
 
     # Calculate the input and output vectors
-    in_vec = sum(am, dims = 1)[:]
-    out_vec = sum(am, dims = 2)[:]
+    in_vec = sum(am, dims=1)[:]
+    out_vec = sum(am, dims=2)[:]
 
     idx_con = 1:size(am, 1)
     in_con = idx_con[in_vec.>0]
@@ -270,7 +270,10 @@ function adjmtx2eqs(am, str2con)
             elseif jtype === op
                 # Apply the signal matrix
                 sgn = sm[j, i]
-                push!(vin, sgn * get_var(j, idx2k, str2con))
+                var = get_var(j, idx2k, str2con)
+                # The negative direction in BG refers to the product e*f
+                sgn = get_bg_junction(var)[2] === bgflow ? abs(sgn) : sgn
+                push!(vin, sgn * var)
             else
                 push!(vin, get_var(j, idx2k, str2con))
             end
@@ -296,9 +299,11 @@ function adjmtx2eqs(am, str2con)
             end
 
             if lvin == 1
-                push!(eqs, equalityeqs(vcat(vin, v))...)
+                # The negative direction in BG refers to the product e*f
+                sgn = get_bg_junction(vin[1])[2] === bgflow ? -1 : 1
+                push!(eqs, equalityeqs(vcat(sgn * vin, v))...)
             elseif lvout == 1
-                push!(eqs, equalityeqs(vcat(-vout, v))...)
+                push!(eqs, equalityeqs(vcat(vout, v))...)
             end
         end
     end
