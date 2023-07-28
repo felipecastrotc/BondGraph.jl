@@ -41,3 +41,5 @@ end
     expr = (a + b + c)/((x*y)^a)
     @test Symbol(substitute_dict(expr, expr, sub)) == Symbol((2*c + z)/(y^(2*c)))
 end
+
+# TODO: I need to find a system where the structural_simplify does not expand the observed
