@@ -7,9 +7,6 @@ import BondGraph: t
 import BondGraph: equalityeqs, sumvar, flatinput, isindependent
 import ModelingToolkit: unwrap, isvariable, istree
 
-name = :test
-split_str = "₊"
-
 @testset "equalityeqs" begin
 
     @variables x(t), y(t)
