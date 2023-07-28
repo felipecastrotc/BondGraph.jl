@@ -15,7 +15,7 @@ Check if the connection set contains a bond-graph (bg) connection.
 # Returns:
 - Boolean indicating whether the connection set contains a bond-graph connection.
 """
-function check_bg_con(connectionset)
+function check_bg_con(connectionset::ConnectionSet)
     ele = namespaced_var(connectionset.set[1])
     return get_connection_type(ele) === bg
 end
@@ -32,7 +32,7 @@ Extracts the bond-graph (bg) connection sets from a list of connection sets.
 # Returns:
 - Array of ConnectionSet objects containing only the bond-graph connection sets.
 """
-function get_bg_connection_set!(connectionsets)
+function get_bg_connection_set!(connectionsets::Array{ConnectionSet})
     bgconnectionsets = filter(check_bg_con, connectionsets)  # Filter connection sets with bond-graph connections
     filter!(x -> !check_bg_con(x), connectionsets)  # Remove the bond-graph connection sets from the original list
     return bgconnectionsets
