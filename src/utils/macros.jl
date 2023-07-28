@@ -41,6 +41,8 @@ macro oneport(ex)
     return esc(ex)
 end
 
+# TODO: Check why this function exists
+
 function setinitialval(power; effort=nothing, flow=nothing)
 
     if !isa(effort, Number)

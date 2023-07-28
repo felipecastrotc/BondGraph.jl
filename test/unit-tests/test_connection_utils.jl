@@ -41,7 +41,6 @@ import ModelingToolkit: generate_connection_set!
 
 end
 
-
 @testset "add_idx" begin
 
     @parameters x=π
