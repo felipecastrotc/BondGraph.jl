@@ -197,101 +197,121 @@ end
     @test Symbol(naming[2]) == Symbolics.tosymbol(R)
 end
 
-@testset "Junction0" begin
-    # Default values
-    u = π
-    m = exp(1.0)
-    sgn = -1
-    # Function
-    @named mass = Mass(m=m, u=u)
-    @named damper = Damper(c=m, u=u)
-    # Naming
-    @named test = Junction0(mass, [sgn, damper])
-    # Check naming
-    @test test.name == name
-    test = Junction0(mass, [sgn, damper], name=name)
-    @test test.name == name
-    # Check type junction
-    @test get_bg_junction(test.power.e)[1] === j0
-    @test get_bg_junction(test.power.f)[1] === j0
-    # Manual
-    @named power = Power(type=j0)
-    # Test the power defaults
-    @test getdefault(test.power.e) == 0.0
-    @test getdefault(test.power.f) == 0.0
-    # Test equation generated
-    eqs_func = equations(test)
-    eqs_manual = [
-        connect(mass.power, power),
-        connect(power, damper.power),
-    ]
-    eqs_elm = []
-    push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:mass), mass))...)
-    push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:damper), damper))...)
-    push!(eqs_manual, eqs_elm...)
+for sgn in [1, -1] 
+    @testset "Junction0 $sgn" begin
+        # Default values
+        u = π
+        m = exp(1.0)
+        # Function
+        @named mass = Mass(m=m, u=u)
+        @named damper = Damper(c=m, u=u)
+        # Naming
+        @named test = Junction0(mass, [sgn, damper])
+        # Check naming
+        @test test.name == name
+        test = Junction0(mass, [sgn, damper], name=name)
+        @test test.name == name
+        # Check type junction
+        @test get_bg_junction(test.power.e)[1] === j0
+        @test get_bg_junction(test.power.f)[1] === j0
+        # Manual
+        @named power = Power(type=j0)
+        # Test the power defaults
+        @test getdefault(test.power.e) == 0.0
+        @test getdefault(test.power.f) == 0.0
+        # Test equation generated
+        eqs_func = equations(test)
+        if sgn == -1
+            eqs_manual = [
+                connect(mass.power, power),
+                connect(power, damper.power),
+            ]
+        else
+            eqs_manual = [
+                connect(mass.power, power),
+                connect(damper.power, power),
+            ]
+        end
+        eqs_elm = []
+        push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:mass), mass))...)
+        push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:damper), damper))...)
+        push!(eqs_manual, eqs_elm...)
 
-    @test length(eqs_func) == length(eqs_manual)
-    @test all([Symbol(eqs_manual[i]) == Symbol(eqs_func[i]) for i in 1:length(eqs_func)])
+        eqs_manual
+        @test length(eqs_func) == length(eqs_manual)
+        @test all([Symbol(eqs_manual[i]) == Symbol(eqs_func[i]) for i in 1:length(eqs_func)])
 
-    # Check the parameters
-    ps = parameters(test)
-    @test length(ps) == (length(parameters(mass)) +  length(parameters(damper)))
+        # Check the parameters
+        ps = parameters(test)
+        @test length(ps) == (length(parameters(mass)) +  length(parameters(damper)))
 
-    # Expand equations
-    eqs_expd = equations(expand_connections(test))
-    # Check if the elements equations were maintaned
-    @test all([eqs_expd[i] == eqs_elm[i] for i in 1:2])
-    @test (0 ~ mass.power.f + sgn*damper.power.f) in eqs_expd
-    @test (mass.power.e ~ sgn*damper.power.e) in eqs_expd
+        # Expand equations
+        eqs_expd = equations(expand_connections(test))
+        # Check if the elements equations were maintaned
+        @test all([eqs_expd[i] == eqs_elm[i] for i in 1:2])
+        eqs_expd
+        @test (0 ~ mass.power.f + damper.power.f) in eqs_expd
+        @test (mass.power.e ~ sgn*damper.power.e) in eqs_expd
+    end
 end
 
-@testset "Junction1" begin
-    # Default values
-    u = π
-    m = exp(1.0)
-    sgn = -1
-    # Function
-    @named mass = Mass(m=m, u=u)
-    @named damper = Damper(c=m, u=u)
-    # Naming
-    @named test = Junction1(mass, [sgn, damper])
-    # Check naming
-    @test test.name == name
-    test = Junction1(mass, [sgn, damper], name=name)
-    @test test.name == name
-    # Check type junction
-    @test get_bg_junction(test.power.e)[1] === j1
-    @test get_bg_junction(test.power.f)[1] === j1
-    # Manual
-    @named power = Power(type=j1)
-    # Test the power defaults
-    @test getdefault(test.power.e) == 0.0
-    @test getdefault(test.power.f) == 0.0
-    # Test equation generated
-    eqs_func = equations(test)
-    eqs_manual = [
-        connect(mass.power, power),
-        connect(power, damper.power),
-    ]
-    eqs_elm = []
-    push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:mass), mass))...)
-    push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:damper), damper))...)
-    push!(eqs_manual, eqs_elm...)
+for sgn in [1, -1]
+    @testset "Junction1 $sgn" begin
+        # Default values
+        u = π
+        m = exp(1.0)
+        # Function
+        @named mass = Mass(m=m, u=u)
+        @named damper = Damper(c=m, u=u)
+        # Naming
+        @named test = Junction1(mass, [sgn, damper])
+        # Check naming
+        @test test.name == name
+        test = Junction1(mass, [sgn, damper], name=name)
+        @test test.name == name
+        # Check type junction
+        @test get_bg_junction(test.power.e)[1] === j1
+        @test get_bg_junction(test.power.f)[1] === j1
+        # Manual
+        @named power = Power(type=j1)
+        # Test the power defaults
+        @test getdefault(test.power.e) == 0.0
+        @test getdefault(test.power.f) == 0.0
+        # Test equation generated
+        eqs_func = equations(test)
+        if sgn == -1
+            eqs_manual = [
+                connect(mass.power, power),
+                connect(power, damper.power),
+            ]
+        else
+            eqs_manual = [
+                connect(mass.power, power),
+                connect(damper.power, power),
+            ]
+        end
+        eqs_elm = []
+        push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:mass), mass))...)
+        push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:damper), damper))...)
+        push!(eqs_manual, eqs_elm...)
 
-    @test length(eqs_func) == length(eqs_manual)
-    @test all([Symbol(eqs_manual[i]) == Symbol(eqs_func[i]) for i in 1:length(eqs_func)])
+        @test length(eqs_func) == length(eqs_manual)
+        @test all([Symbol(eqs_manual[i]) == Symbol(eqs_func[i]) for i in 1:length(eqs_func)])
 
-    # Check the parameters
-    ps = parameters(test)
-    @test length(ps) == (length(parameters(mass)) + length(parameters(damper)))
+        # Check the parameters
+        ps = parameters(test)
+        @test length(ps) == (length(parameters(mass)) +  length(parameters(damper)))
 
-    # Expand equations
-    eqs_expd = equations(expand_connections(test))
-    # Check if the elements equations were maintaned
-    @test all([eqs_expd[i] == eqs_elm[i] for i in 1:2])
-    @test (0 ~ mass.power.e + sgn * damper.power.e) in eqs_expd
-    @test (mass.power.f ~ sgn * damper.power.f) in eqs_expd
+        # Expand equations
+        eqs_expd = equations(expand_connections(test))
+        # Check if the elements equations were maintaned
+        @test all([eqs_expd[i] == eqs_elm[i] for i in 1:2])
+        eqs_expd
+        @test (0 ~ mass.power.e + sgn*damper.power.e) in eqs_expd
+        @test (mass.power.f ~ damper.power.f) in eqs_expd
+    end
 end
+
 
 # @testset "mGY" begin
 #     # Default values
