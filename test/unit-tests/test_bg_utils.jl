@@ -1,12 +1,11 @@
 using BondGraph
-using ModelingToolkit
-using DifferentialEquations
 using Test
 using Symbolics
+using ModelingToolkit
 
 import BondGraph: t
 import BondGraph: equalityeqs, sumvar, flatinput, isindependent
-import ModelingToolkit: getdefault, unwrap
+import ModelingToolkit: unwrap, isvariable, istree
 
 name = :test
 split_str = "₊"
@@ -86,4 +85,17 @@ end
     ps = [["1", mass], damper];
     @test_throws DomainError flatinput(ps)
 
+end
+
+@testset "isindependent" begin
+    @variables x(t), b
+    @parameters a, y(t)
+
+    @named power = Power()
+
+    @test isindependent(a)
+    @test isindependent(b)
+
+    @test !isindependent(x)
+    @test !isindependent(y)
 end
