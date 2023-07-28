@@ -35,7 +35,7 @@ A reduced ODESystem object with observed variables substituted.
 # Example:
 ```julia-repl
 julia> sys = ODESystem([eq1, eq2], t)
-julia> reduced_sys = reducedobs(sys; name = "Reduced System")
+julia> reduced_sys = reducedobs(sys; name = "ReducedSystem")
 ```
 """
 function reducedobs(sys::ODESystem; name)
@@ -51,7 +51,7 @@ end
 Substitute the variables in `O` with their corresponding values from the dictionary `sub` in the expression `expr`.
 
 # Arguments
-- `O`: The variable or expression to be substituted.
+- `O`: The variable or expression to be substituted. When passed an expression it will recursively get the variables from inside it.
 - `expr`: The expression in which the substitution should be performed.
 - `sub`: A dictionary mapping variables to their corresponding values.
 

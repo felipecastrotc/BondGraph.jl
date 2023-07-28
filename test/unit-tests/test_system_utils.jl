@@ -4,6 +4,7 @@ using Symbolics
 using ModelingToolkit
 
 import BondGraph: t, D
+import BondGraph: substitute_dict
 import ModelingToolkit: get_defaults
 
 @testset "simplifysys" begin
@@ -24,4 +25,19 @@ import ModelingToolkit: get_defaults
     dflt_simp = ModelingToolkit.get_defaults(sys_simp)
     dflt_simp = Dict(Symbol(k) => v  for (k, v) in dflt_simp)
     @test dflt_simp == dflt
+end
+
+@testset "substitute_dict" begin
+
+    @parameters a, b, c
+    @variables x(t), y(t), z(t)
+
+    # Simple expression test
+    sub = Dict(a => c, b => z)
+    expr = a + b + c
+    @test Symbol(substitute_dict(expr, expr, sub)) == Symbol(2*c + z)
+    # More complex expression test
+    sub = Dict(a => c, b => z, x => y)
+    expr = (a + b + c)/((x*y)^a)
+    @test Symbol(substitute_dict(expr, expr, sub)) == Symbol((2*c + z)/(y^(2*c)))
 end
