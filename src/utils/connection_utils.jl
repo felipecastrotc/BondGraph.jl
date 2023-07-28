@@ -40,10 +40,6 @@ end
 
 # General connection util functions
 
-function get_var(idx, idx2k, str2con)
-    return namespaced_var(str2con[idx2k[idx]])
-end
-
 """
     add_idx(var, idx)
 
@@ -58,7 +54,7 @@ Adds an index to a variable by renaming it with the index appended to its name.
 
 # Example:
 ```julia-repl
-julia> x = Variable(:x)
+julia> x = @parameters x
 julia> indexed_var = add_idx(x, 1)  # Renames "x" to "x1"
 ```
 """
@@ -90,9 +86,12 @@ julia> subsys = [ODESystem([:a], [da]), ODESystem([:b], [db])]
 julia> gen_tp_con!(eqs, sys, subsys)
 ```
 """
-function gen_tp_con!(eqs, sys, subsys)
+function gen_tp_con!(eqs::AbstractArray, sys::ODESystem, subsys)
     # Get connections
     c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
+
+    @assert hasproperty(sys, :pin)
+    @assert hasproperty(sys, :pout)
 
     # Remove nothing from c array
     pos = .!isnothing.(c)
