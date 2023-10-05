@@ -253,6 +253,8 @@ julia> gyrator = mGY(subsys1, subsys2, g=c, name="gyrator")
 """
 function mGY(subsys...; name = "", g = 1.0, coneqs = nothing)
     # TODO:ISSUE -> the compose only works when the gyrator systems is the first
+    # TODO: CHECK Constitutive relationships page 14. borutzky2011
+    # They should be positive and negative. I think I'm considering this in the connection graph. BUT check this again.
 
     # Generate the input and output connections
     @named pin = Power(type = tpgy)
@@ -317,6 +319,9 @@ julia> transformer = mTF(subsys1, subsys2, g=c, name="transformer")
 """
 function mTF(subsys...; name="", r=1.0, coneqs=nothing)
     # TODO:ISSUE -> the compose only works when the transform systems is the first
+    # TODO: CHECK Constitutive relationships page 14. borutzky2011
+    # They should be positive and negative. I think I'm considering this in the connection graph. BUT check this again.
+
     # Generate the input and output connections
     @named pin = Power(type=tptf)
     @named pout = Power(type=tptf)

@@ -4,7 +4,7 @@ using MacroTools
 # TODO: Add the support for initial states
 macro oneport(ex)
     block_initial = quote
-        @named power = Power(type=op)
+        @named power = Power(type=BondGraph.op)
     end
 
     block_midle = MacroTools.striplines(ex.args[2])
@@ -33,12 +33,12 @@ macro oneport(ex)
     end
 
     # Create the function body
-    body = Expr(:block, block_initial.args..., block_midle.args[1:end-1]..., block_eqs.args..., block_end.args...)
+    body = Expr(:block, block_initial.args..., block_midle.args[1:end-1]..., block_eqs, block_end.args...)
     # Cleanup
     body = MacroTools.striplines(body)
     # Build function
     ex.args[2] = body
-    return ex
+    return esc(ex)
 end
 
 function setinitialval(power; effort=nothing, flow=nothing)
