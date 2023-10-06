@@ -1,6 +1,6 @@
 using BondGraph
-using BondGraph: t, D, bg, j0, j1
-import BondGraph: get_bg_junction
+using BondGraph: t, D, bg, j0, j1, op, bgeffort, bgflow
+import BondGraph: get_bg_junction, get_bg_junction
 using ModelingToolkit
 using ModelingToolkit: getdefault
 using DifferentialEquations
@@ -9,6 +9,42 @@ using Symbolics
 
 name = :test
 split_str = "₊"
+
+@testset "Power" begin
+    @testset "Basic Functionality" begin
+        @named sys = Power()
+        @test isa(sys, ODESystem)
+        @test isempty(equations(sys))
+    end
+    @testset "Named Connector" begin
+        @named sys = Power(name=:connector_1)
+        @test sys.name == :connector_1
+    end
+    @testset "Default Values" begin
+        @named sys = Power()
+        e, f = states(sys)
+        @test getdefault(e) == 0.0
+        @test getdefault(f) == 0.0
+    end
+    @testset "Provided Values" begin
+        @named sys = Power(effort=π, flow=exp(1.0))
+        e, f = states(sys)
+        @test getdefault(e) == π
+        @test getdefault(f) == exp(1.0)
+    end
+    @testset "Type Metadata" begin
+        @named sys = Power(type=j0)
+        e, f = states(sys)
+        # Assertions to check metadata for e based on custom_type
+        metadata = get_bg_junction(e)
+        @test metadata[1] === j0
+        @test metadata[2] === bgeffort
+        # Assertions to check metadata for f based on custom_type
+        metadata = get_bg_junction(f)
+        @test metadata[1] === j0
+        @test metadata[2] === bgflow
+    end
+end
 
 @testset "Se-cte" begin
     # Default values
