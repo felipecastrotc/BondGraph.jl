@@ -106,8 +106,6 @@ makedocs(
     sitename="BondGraph.jl",
     # doctest=true,
     clean=true,
-    src="docs/src",
-    force=true,
     pages=[
         "Home" => "index.md",
         "Getting started" => "getting_started_auto.md",

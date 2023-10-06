@@ -26,3 +26,4 @@ end
 
 @info "All tests completed!"
 
+# TODO: higher level tests like in the example
