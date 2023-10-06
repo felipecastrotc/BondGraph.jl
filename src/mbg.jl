@@ -1,5 +1,7 @@
 import ModelingToolkit: states, parameters
 
+# TODO: This is was initial conception for multidimension bond graph. It still require to develop it. It is based on a older version of the code. So, for now it is not working.
+
 # =============================================================================
 # Types
 const planar_labels = ["x", "y", "θ"]
