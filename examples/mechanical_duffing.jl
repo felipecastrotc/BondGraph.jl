@@ -23,25 +23,20 @@ using Symbolics.Latexify
 # 
 # ### Custom compliance
 # 
-# We now define a custom element called `Spring3` to include the non-linearity of the Duffing equation. The element is defined by the function below.
+# We now define a custom element called `Spring3` to include the non-linearity of the Duffing equation. The element definition can be simplified using the macro `@oneport` is defined by the function below.
 
-function Spring3(; name, k = 1.0, x = 0.0)
-    ## Initialize the Power connector
-    @named power = Power()
+@oneport function Spring3(; name, k = 1.0, x = 0.0)
 
     ## Initialize the displacement state with its initial value `x`
     @variables q(t) = x
     ## Set the equation parameters
-    ps = @parameters C = 1 / k
+    @parameters C = 1 / k
 
     ## Define Spring3 element equations with the non-lineariyy of the cubic spring
-    eqs = [
+    [
         power.e ~ q^3 / C
         D(q) ~ power.f
     ]
-
-    ## Build the system with the equations, state and connector.
-    compose(ODESystem(eqs, t, [q], ps; name = name), power)
 end
 
 # The `Spring3` function creates a bond graph subsystem representing the cubic spring. You can specify the following parameters:

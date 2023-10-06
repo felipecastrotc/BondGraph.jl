@@ -55,6 +55,7 @@ export Power,
 # export ODESystem2D, SgnODESystem2D, Junction12D, Junction02D, mTF2Dtrans, M2Dtrans, get2Dsystem, Mass2D, Spring2D, Damper2D, equations, states, parameters
 
 export renamevars, GenericDamper, latexify, structural_simplify, addsubsys
+export @oneport
 
 
 include("mtk.jl")
@@ -63,6 +64,7 @@ include("utils/bg_utils.jl")
 include("utils/connection_utils.jl")
 include("utils/graph.jl")
 include("utils/system_utils.jl")
+include("utils/macros.jl")
 include("bg.jl")
 # include("mbg.jl")
 
