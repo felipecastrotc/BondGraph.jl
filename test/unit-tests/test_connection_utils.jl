@@ -26,7 +26,8 @@ import ModelingToolkit: generate_connection_set!
 
     # Based on the generate_connection_set function from MTK library
     connectionsets = ConnectionSet[]
-    sys = generate_connection_set!(connectionsets, sys, nothing, nothing)
+    domain_csets = ConnectionSet[]
+    sys = generate_connection_set!(connectionsets, domain_csets, sys, nothing, nothing)
 
     # The number of connections must be the double of equations due to effort 
     # and flow variables
