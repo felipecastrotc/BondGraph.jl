@@ -89,6 +89,11 @@ end
 
 # Graph-based algorithm functions
 
+function get_var(idx, idx2k, str2con)
+    return namespaced_var(str2con[idx2k[idx]])
+end
+
+
 """
     csets2dict(csets)
 
