@@ -1,14 +1,12 @@
-using SparseArrays
 using BondGraph
-using BondGraph: t, D, bg, j0, j1, op, bgeffort, bgflow
-import BondGraph: get_bg_junction, get_bg_junction
-import BondGraph: csets2dict,csets2adjmtx
+using BondGraph: t, D
+import BondGraph: csets2dict, csets2adjmtx
 
 using ModelingToolkit
-using ModelingToolkit: getdefault
-import ModelingToolkit: expand_connections, generate_connection_set
+import ModelingToolkit: generate_connection_set
 import ModelingToolkit: ConnectionElement, namespaced_var
-using DifferentialEquations
+
+using SparseArrays
 using Test
 using Symbolics
 
