@@ -53,9 +53,10 @@ julia> generate_graph(mdl, var=:e, method=:stress)
 function generate_graph(mdl, var=:e; method=:stress)
 
     connectionsets = ConnectionSet[]
+    domain_csets = ConnectionSet[]
 
     # Generate the bond graph connection sets
-    sys = generate_connection_set!(connectionsets, mdl, nothing, nothing)
+    sys = generate_connection_set!(connectionsets, domain_csets, mdl, nothing, nothing)
 
     # Get the bond graph connection sets
     bgconnectionsets = get_bg_connection_set!(connectionsets)
