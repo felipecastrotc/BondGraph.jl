@@ -1,7 +1,7 @@
 name = "BondGraph"
 uuid = "41e83443-7082-4de0-b466-8936bcd80675"
 authors = ["Felipe de Castro <felipecastrotc@gmail.com>"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
