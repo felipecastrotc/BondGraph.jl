@@ -418,8 +418,8 @@ end
     end
 
     @testset "Named System" begin
-        sys, con = mGY(mass, damper, name=:gyrator, g=g)
-        @test sys.name == :gyrator
+        sys, con = mTF(mass, damper, name=:transformer, r=r)
+        @test sys.name == :transformer
     end
 
     @testset "Transformer Equations" begin
