@@ -265,10 +265,7 @@ function mGY(subsys...; name = "", g = 1.0, coneqs = nothing)
     e₂, f₂ = pout.e, pout.f
 
     # Gyrator equation
-    eqs = [e₂ ~ g * f₁, e₁ ~ g * f₂]
-    # TODO: check why adding the - on f₁ solves the signal issue on DC motor
-    # TODO: I already tried to change the signal on the port type tpgy at 
-    #       adjmtx2eqs
+    eqs = [e₂ ~ g * f₁, e₁ ~  g * f₂]
 
     # Check if it is a modulated gyrator
     if isvariable(g)
