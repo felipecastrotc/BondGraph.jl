@@ -197,7 +197,8 @@ end
     @test Symbol(naming[2]) == Symbolics.tosymbol(R)
 end
 
-for sgn in [1, -1] 
+
+for sgn in [1, -1]
     @testset "Junction0 $sgn" begin
         # Default values
         u = π
@@ -237,7 +238,6 @@ for sgn in [1, -1]
         push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:damper), damper))...)
         push!(eqs_manual, eqs_elm...)
 
-        eqs_manual
         @test length(eqs_func) == length(eqs_manual)
         @test all([Symbol(eqs_manual[i]) == Symbol(eqs_func[i]) for i in 1:length(eqs_func)])
 
@@ -249,9 +249,9 @@ for sgn in [1, -1]
         eqs_expd = equations(expand_connections(test))
         # Check if the elements equations were maintaned
         @test all([eqs_expd[i] == eqs_elm[i] for i in 1:2])
-        eqs_expd
-        @test (0 ~ mass.power.f + damper.power.f) in eqs_expd
-        @test (mass.power.e ~ sgn*damper.power.e) in eqs_expd
+
+        @test (0 ~ mass.power.f + sgn*damper.power.f) in eqs_expd
+        @test (mass.power.e ~ damper.power.e) in eqs_expd
     end
 end
 
@@ -312,110 +312,110 @@ for sgn in [1, -1]
     end
 end
 
-
-@named x, y = mGY(damper, mass)
-
-
-# @testset "mGY" begin
+@testset "Modulated Gyrator" begin
     # Default values
     u = π
     m = exp(1.0)
+    g = u*m
     # Function
-    # @named mass = Mass(m=m, u=u)
+    @named mass = Mass(m=m, u=u)
     @named damper = Damper(c=m, u=u)
-    # Naming
-    @named test = mGY(mass, [sgn, damper])
-    # Check naming
-    @test test.name == name
-    test = Junction1(mass, [sgn, damper], name=name)
-    @test test.name == name
-    # Check type junction
-    @test get_bg_junction(test.power.e)[1] === j1
-    @test get_bg_junction(test.power.f)[1] === j1
-    # Manual
-    @named power = Power(type=j1)
-    # Test the power defaults
-    @test getdefault(test.power.e) == 0.0
-    @test getdefault(test.power.f) == 0.0
-    # Test equation generated
-    eqs_func = equations(test)
-    if sgn == -1
-        eqs_manual = [
-            connect(mass.power, power),
-            connect(power, damper.power),
-        ]
-    else
-        eqs_manual = [
-            connect(mass.power, power),
-            connect(damper.power, power),
-        ]
+
+    @testset "Basic Functionality" begin
+        @named sys, con = mGY(mass, damper, g=g)
+        @test isa(sys, ODESystem)
+        @test isa(con, Vector)
     end
-    eqs_elm = []
-    push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:mass), mass))...)
-    push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:damper), damper))...)
-    push!(eqs_manual, eqs_elm...)
 
-    @test length(eqs_func) == length(eqs_manual)
-    @test all([Symbol(eqs_manual[i]) == Symbol(eqs_func[i]) for i in 1:length(eqs_func)])
+    @testset "Named System" begin
+        sys, con = mGY(mass, damper, name=:gyrator, g=g)
+        @test sys.name == :gyrator
+    end
 
-    # Check the parameters
-    ps = parameters(test)
-    @test length(ps) == (length(parameters(mass)) +  length(parameters(damper)))
+    @testset "Gyrator Equations" begin
+        @named sys, eqs = mGY(mass, damper, g=g)
+        # Check the number of equations
+        @test length(equations(sys)) == 2
+        @test length(eqs) == 2
+        # Manual deffinition of the GY ports
+        @named pin = Power()
+        @named pout = Power()
+        # Check the equations
+        @test (pin.e ~  g*pout.f ) in equations(sys)
+        @test (pout.e ~  g*pin.f ) in equations(sys)
+        # Check the connections
+        @test (connect(mass.power, sys.pin)) in eqs
+        @test (connect(sys.pout, damper.power)) in eqs
+    end
 
-    # Expand equations
-    eqs_expd = equations(expand_connections(test))
-    # Check if the elements equations were maintaned
-    @test all([eqs_expd[i] == eqs_elm[i] for i in 1:2])
-    eqs_expd
-    @test (0 ~ mass.power.e + sgn*damper.power.e) in eqs_expd
-    @test (mass.power.f ~ damper.power.f) in eqs_expd
-# end
+    @testset "Modulated Gyrator" begin
+        @parameters expr
+        @named sys, eqs = mGY(mass, damper, g=expr)
+        # Check the number of equations
+        @test length(equations(sys)) == 2
+        @test length(eqs) == 2
+        # Manual deffinition of the GY ports
+        @named pin = Power()
+        @named pout = Power()
+        # Check the equations
+        @test (pin.e ~  expr*pout.f ) in equations(sys)
+        @test (pout.e ~  expr*pin.f ) in equations(sys)
+        # Check the connections
+        @test (connect(mass.power, sys.pin)) in eqs
+        @test (connect(sys.pout, damper.power)) in eqs
+    end
+end
 
+@testset "Modulated Transformer" begin
+    # Default values
+    u = π
+    m = exp(1.0)
+    r = u*m
+    # Function
+    @named mass = Mass(m=m, u=u)
+    @named damper = Damper(c=m, u=u)
 
-# @testset "mGY" begin
-#     # Default values
-#     u = π
-#     m = exp(1.0)
-#     sgn = -1
-#     # Function
-#     @named mass = Mass(m=m, u=u)
-#     @named damper = Damper(c=m, u=u)
-#     # Naming
-#     @named test = Junction1(mass, [sgn, damper])
-#     # Check naming
-#     @test test.name == name
-#     test = Junction1(mass, [sgn, damper], name=name)
-#     @test test.name == name
-#     # Check type junction
-#     @test get_bg_junction(test.power.e)[1] === j1
-#     @test get_bg_junction(test.power.f)[1] === j1
-#     # Manual
-#     @named power = Power(type=j1)
-#     # Test the power defaults
-#     @test getdefault(test.power.e) == 0.0
-#     @test getdefault(test.power.f) == 0.0
-#     # Test equation generated
-#     eqs_func = equations(test)
-#     eqs_manual = [
-#         connect(mass.power, power),
-#         connect(power, damper.power),
-#     ]
-#     eqs_elm = []
-#     push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:mass), mass))...)
-#     push!(eqs_elm, equations(compose(ODESystem(Equation[], t, [], []; name=:damper), damper))...)
-#     push!(eqs_manual, eqs_elm...)
+    @testset "Basic Functionality" begin
+        @named sys, con = mTF(mass, damper, r=r)
+        @test isa(sys, ODESystem)
+        @test isa(con, Vector)
+    end
 
-#     @test length(eqs_func) == length(eqs_manual)
-#     @test all([Symbol(eqs_manual[i]) == Symbol(eqs_func[i]) for i in 1:length(eqs_func)])
+    @testset "Named System" begin
+        sys, con = mGY(mass, damper, name=:gyrator, g=g)
+        @test sys.name == :gyrator
+    end
 
-#     # Check the parameters
-#     ps = parameters(test)
-#     @test length(ps) == (length(parameters(mass)) + length(parameters(damper)))
+    @testset "Transformer Equations" begin
+        @named sys, eqs = mTF(mass, damper, r=r)
+        # Check the number of equations
+        @test length(equations(sys)) == 2
+        @test length(eqs) == 2
+        # Manual deffinition of the GY ports
+        @named pin = Power()
+        @named pout = Power()
+        # Check the equations
+        @test any((r*pin.f ~ pout.f) == eq for eq in equations(sys))
+        @test any((r*pout.e ~ pin.e) == eq for eq in equations(sys))
+        # Check the connections
+        @test (connect(mass.power, sys.pin)) in eqs
+        @test (connect(sys.pout, damper.power)) in eqs
+    end
 
-#     # Expand equations
-#     eqs_expd = equations(expand_connections(test))
-#     # Check if the elements equations were maintaned
-#     @test all([eqs_expd[i] == eqs_elm[i] for i in 1:2])
-#     @test (0 ~ mass.power.e + sgn * damper.power.e) in eqs_expd
-#     @test (mass.power.f ~ sgn * damper.power.f) in eqs_expd
-# end
+    @testset "Modulated Transformer" begin
+        @parameters expr
+        @named sys, eqs = mTF(mass, damper, r=expr)
+        # Check the number of equations
+        @test length(equations(sys)) == 2
+        @test length(eqs) == 2
+        # Manual deffinition of the GY ports
+        @named pin = Power()
+        @named pout = Power()
+        # Check the equations
+        @test any((expr*pin.f ~ pout.f) == eq for eq in equations(sys))
+        @test any((expr*pout.e ~ pin.e) == eq for eq in equations(sys))
+        # Check the connections
+        @test (connect(mass.power, sys.pin)) in eqs
+        @test (connect(sys.pout, damper.power)) in eqs
+    end
+end
