@@ -234,6 +234,13 @@ function adjmtx2eqs(adjacency_matrix, str2con)
             if aux_type == j0 || aux_type == j1
                 aux_var = gen_con_name(var, aux_var, s)
             end
+            # The sign assumption is for the product e(t)*f(t). Therefore, 
+            # one of the power variables should not follow the sign assumption.
+            # In this code I arbitrary defined the equality equations to not 
+            # follow. It will be a mix and match of e(t) and f(t). I 
+            # particularly find the sum of the variable easier to check for 
+            # inconsistencies in the algorithm.
+            s = apply_equalityeqs ? 1 : s
             push!(vars, s * aux_var)
         end
 
