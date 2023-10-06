@@ -42,4 +42,6 @@ end
     @test Symbol(substitute_dict(expr, expr, sub)) == Symbol((2*c + z)/(y^(2*c)))
 end
 
-# TODO: I need to find a system where the structural_simplify does not expand the observed
+# TODO: I need to find a system where the structural_simplify does not expand 
+# the observed. It is required for the reducedobs and substitute_observed 
+# functions.
