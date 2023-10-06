@@ -41,14 +41,16 @@ end
 
 function generate_connection_set(sys::AbstractSystem, find = nothing, replace = nothing)
     connectionsets = ConnectionSet[]
-    sys = generate_connection_set!(connectionsets, sys, find, replace)
+    domain_csets = ConnectionSet[]
+    sys = generate_connection_set!(connectionsets, domain_csets, sys, find, replace)
 
+    # Add the bgconnectionsets
     bgconnectionsets = get_bg_connection_set!(connectionsets)
 
-    domain_free_connectionsets = filter(connectionsets) do cset
-        !any(s -> is_domain_connector(s.sys.sys), cset.set)
-    end
-    sys, (merge(domain_free_connectionsets), vcat(connectionsets, bgconnectionsets))
+    csets = merge(connectionsets)
+    domain_csets = merge([csets; domain_csets], true)
+
+    sys, (csets, vcat(domain_csets, bgconnectionsets))
 end
 
 
