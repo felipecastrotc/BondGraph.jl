@@ -15,7 +15,7 @@ Check if the connection set contains a bond-graph (bg) connection.
 # Returns:
 - Boolean indicating whether the connection set contains a bond-graph connection.
 """
-function check_bg_con(connectionset)
+function check_bg_con(connectionset::ConnectionSet)
     ele = namespaced_var(connectionset.set[1])
     return get_connection_type(ele) === bg
 end
@@ -32,17 +32,13 @@ Extracts the bond-graph (bg) connection sets from a list of connection sets.
 # Returns:
 - Array of ConnectionSet objects containing only the bond-graph connection sets.
 """
-function get_bg_connection_set!(connectionsets)
+function get_bg_connection_set!(connectionsets::Array{ConnectionSet})
     bgconnectionsets = filter(check_bg_con, connectionsets)  # Filter connection sets with bond-graph connections
     filter!(x -> !check_bg_con(x), connectionsets)  # Remove the bond-graph connection sets from the original list
     return bgconnectionsets
 end
 
 # General connection util functions
-
-function get_var(idx, idx2k, str2con)
-    return namespaced_var(str2con[idx2k[idx]])
-end
 
 """
     add_idx(var, idx)
@@ -58,7 +54,7 @@ Adds an index to a variable by renaming it with the index appended to its name.
 
 # Example:
 ```julia-repl
-julia> x = Variable(:x)
+julia> x = @parameters x
 julia> indexed_var = add_idx(x, 1)  # Renames "x" to "x1"
 ```
 """
@@ -90,9 +86,12 @@ julia> subsys = [ODESystem([:a], [da]), ODESystem([:b], [db])]
 julia> gen_tp_con!(eqs, sys, subsys)
 ```
 """
-function gen_tp_con!(eqs, sys, subsys)
+function gen_tp_con!(eqs::AbstractArray, sys::ODESystem, subsys)
     # Get connections
     c = subsys isa ODESystem ? [subsys, nothing] : collect(subsys)
+
+    @assert hasproperty(sys, :pin)
+    @assert hasproperty(sys, :pout)
 
     # Remove nothing from c array
     pos = .!isnothing.(c)

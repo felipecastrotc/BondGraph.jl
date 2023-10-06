@@ -23,7 +23,8 @@ julia> eqs = equalityeqs(con)
 julia> # eqs = []
 ```
 """
-function equalityeqs(con)
+function equalityeqs(con::AbstractArray)
+    # TODO: add restriction variables type, is AbstractArray enough?
     base = 0.0
     if length(con) > 1
         base += con[1]
@@ -63,7 +64,8 @@ julia> eq = sumvar(con)
 # eq = []
 ```
 """
-function sumvar(con)
+function sumvar(con::AbstractArray)
+    # TODO: add restriction variables type, is AbstractArray enough?
     if length(con) > 0
         return 0 ~ sum(con)  # Create a sum variable equation with 0 on the left-hand side and the sum of expressions on the right-hand side
     else
@@ -91,7 +93,9 @@ julia> subsys, signs = flatinput(ps)
 # signs = [1, -1, 1]
 ```
 """
-function flatinput(ps)
+function flatinput(ps::AbstractArray)
+    # TODO: add restriction variables type, is AbstractArray enough?
+
     subsys = ModelingToolkit.AbstractSystem[]  # Array to store the flattened input systems
     signs = Int[]  # Array to store the corresponding signs
 
@@ -102,10 +106,11 @@ function flatinput(ps)
         elseif isa(p, AbstractVector)
             # Check if the AbstractVector has two elements where the first is an integer and the second is an AbstractSystem
             if (length(p) == 2) &&
-               isa(p[1], Int) &&
+               isa(p[1], Number) &&
                isa(p[2], ModelingToolkit.AbstractSystem)
                 push!(subsys, p[2])
-                push!(signs, p[1])  # Add the sign (integer) to the signs array
+
+                push!(signs, sign(p[1]))  # Add the sign (integer) to the signs array
             else
                 throw(
                     DomainError(
