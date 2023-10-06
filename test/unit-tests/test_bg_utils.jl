@@ -77,7 +77,6 @@ end
     truth_sys = [mass, damper, mass, damper, mass];
     truth_signs = [1, 1, -1, -1, 1]
     check_flatinput_ps(ps, truth_sys, truth_signs)
-
     # Check heterogeneous ps with different sign deffinition
     ps = [["1", mass], damper];
     @test_throws DomainError flatinput(ps)
