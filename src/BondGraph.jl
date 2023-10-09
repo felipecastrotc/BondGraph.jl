@@ -25,7 +25,7 @@ $(IMPORTS)
 
 # License
 
-The [`LICENSE`](@ref) abbreviation can be used in the same way for the `LICENSE.md` file.
+The [`LICENSE`](@ref License) abbreviation can be used in the same way for the `LICENSE.md` file.
 
 """
 module BondGraph
