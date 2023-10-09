@@ -1,4 +1,4 @@
-# Getting Started
+# [Getting Started](@id getting-start)
 
 This section will guide you through the steps required to install the library and provide a simple example to help you get started.
 ## [Installation](@id install-guide)

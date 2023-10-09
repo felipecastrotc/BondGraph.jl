@@ -37,13 +37,13 @@ For more detailed installation instructions, including information about depende
 
 ## Getting Started
 
-We recommend checking out the [Getting Started](@ref) to quickly get started with Bond Graph Toolkit. It will guide you through library installation and the modeling and simulation of a simple dynamic system. It provides step-by-step instructions and code examples to help you grasp the basics of using the library.
+We recommend checking out the [Getting Started](@ref getting-start) to quickly get started with Bond Graph Toolkit. It will guide you through library installation and the modeling and simulation of a simple dynamic system. It provides step-by-step instructions and code examples to help you grasp the basics of using the library.
 
 ## Documentation Sections
 
 TODO: Fix the links
-- [User guide](@ref): Learn how to model different types of dynamic systems and perform various analyses using MyLibrary.
-- [Examples](@ref): Collection of classical examples of dynamic systems in the mechanical and electrical domains and multiphysics systems.
+- User guide: Learn how to model different types of dynamic systems and perform various analyses using MyLibrary.
+- Examples: Collection of classical examples of dynamic systems in the mechanical and electrical domains and multiphysics systems.
 - [Library - Public](@ref public-documentation): Detailed documentation of all public functions provided by the Bond Graph Toolkit.
 - [Library - Internals](@ref internal-documentation): Detailed documentation of all internal functions and types used by the Bond Graph Toolkit.
 
