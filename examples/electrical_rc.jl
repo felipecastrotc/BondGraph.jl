@@ -10,7 +10,7 @@
 #
 # To model the RC circuit using the bond graph method, we can connect the compliance (C) and resistance (R) elements to a zero-junction, as shown in the bond graph diagram:
 #
-# ![Bond Graph Representation](../assets/bg_1dof.png)
+# ![Bond Graph Representation](./assets/bg_1dof.png)
 #
 # ### Bond Graph Toolkit
 #

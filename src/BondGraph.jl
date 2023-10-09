@@ -1,5 +1,5 @@
 """
-Main module for [`BondGraph.jl`](@ref) -- a bond graph modeling toolkit based on [`ModelingToolkit.jl`](https://docs.sciml.ai/ModelingToolkit/stable/) Julia package.
+Main module for `BondGraph.jl` -- a bond graph modeling toolkit based on [`ModelingToolkit.jl`](https://docs.sciml.ai/ModelingToolkit/stable/) Julia package.
 
 # Exports
 
@@ -54,7 +54,7 @@ export Power,
 
 # export ODESystem2D, SgnODESystem2D, Junction12D, Junction02D, mTF2Dtrans, M2Dtrans, get2Dsystem, Mass2D, Spring2D, Damper2D, equations, states, parameters
 
-export renamevars, GenericDamper, latexify, structural_simplify, addsubsys
+export renamevars, latexify, structural_simplify, addsubsys
 export @oneport
 
 
