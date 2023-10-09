@@ -1,6 +1,15 @@
 import Pkg;
 
-Pkg.add(path=".")
+function current_git_branch(dir=".")
+    return chomp(read(`git -C $dir symbolic-ref --short HEAD`, String))
+end
+branch = current_git_branch()
+
+Pkg.activate("docs")
+Pkg.develop(path=".")
+# Pkg.add(path=".")
+Pkg.instantiate()
+Pkg.status("BondGraph")
 
 ENV["GKS_WSTYPE"] = 100
 ENV["JULIA_DEBUG"] = "Documenter"
@@ -104,7 +113,7 @@ makedocs(
     modules=[BondGraph],
     format=Documenter.HTML(prettyurls=false, sidebar_sitename=false, assets=["assets/favicon.ico"]),
     sitename="BondGraph.jl",
-    # doctest=true,
+    doctest=true,
     clean=true,
     pages=[
         "Home" => "index.md",
