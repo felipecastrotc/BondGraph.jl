@@ -1,0 +1,29 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+
+\input{base_tikzset.tex}
+
+\begin{document}
+
+\begin{tikzpicture}[line width=0.25mm, node distance=2cm]
+
+  % Dummy element (left)
+  \node[port] (D1) {};
+  
+  \node[right=of D1, port] (0junction) {0};
+  \drawbg{D1}{0junction}[PQ][a][i];
+  
+  % Dummy element (top)
+  \node[above=of 0junction, port] (D2) {C: \(C_{eq}\)};
+  \drawbg{0junction}{D2}[PQ][r][j];
+
+  % Dummy element (right)
+  \node[right=of 0junction, port] (D3) {};
+  \drawbg{0junction}{D3}[PQ][a][i+1];
+
+  
+\end{tikzpicture}
+  
+
+\end{document}
