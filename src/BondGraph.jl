@@ -1,5 +1,5 @@
 """
-Main module for [`BongGraph.jl`](@ref) -- a bond graph modeling toolkit based on [`ModelingToolkit.jl`](https://docs.sciml.ai/ModelingToolkit/stable/) Julia package.
+Main module for [`BondGraph.jl`](@ref) -- a bond graph modeling toolkit based on [`ModelingToolkit.jl`](https://docs.sciml.ai/ModelingToolkit/stable/) Julia package.
 
 # Exports
 

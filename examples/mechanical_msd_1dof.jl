@@ -12,7 +12,7 @@
 # 
 # To model the harmonic oscillator using the bond graph method, we can connect the inertance (I), compliance (C), and resistance (R) elements to a 1-junction, as depicted in the bond graph diagram:
 
-# ![Bond Graph Representation](../assets/bg_1dof.png)
+# ![Bond Graph Representation](../assets/bg_1dof.svg)
 
 # In this representation, the inertance element (I) corresponds to the mass (m) in the mechanical system, the compliance element (C) corresponds to the spring constant (k), and the resistance element (R) represents the damping coefficient (c).
 
