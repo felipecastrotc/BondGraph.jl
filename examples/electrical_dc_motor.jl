@@ -33,7 +33,7 @@
 # To model the DC motor depicted in the figure above, we can use the bond graph approach and represent the system with the following bond graph:
 # 
 # TODO: update the bond graph
-# ![Bond Graph Representation](../assets/bg_dcmotor.png)
+# ![Bond Graph Representation](../assets/bg_dcmotor.svg)
 # 
 # In this representation, the inertance elements (I) correspond to the moment of inertia of the rotor ($J$) in the mechanical domain and the armature inductance ($L$) in the electrical domain. The resistance elements (R) represent the viscous friction coefficient ($c$) in the mechanical domain and the armature electrical resistance ($R_a$). 
 # 

@@ -13,7 +13,7 @@
 # 
 # To model the 2-DoF system using the bond graph method, we need to connect the inertance (I), compliance (C), and resistance (R) elements to different 1-junctions and 0-junctions, as depicted in the bond graph diagram:
 # 
-# ![Bond Graph Representation](../assets/bg_2dof.png)
+# ![Bond Graph Representation](../assets/bg_2dof.svg)
 # 
 # In this representation, the inertance element (I) corresponds to the mass (m) in the mechanical system, the compliance element (C) corresponds to the spring constant (k), and the resistance element (R) represents the damping coefficient (c). They were considered, for simplicity, equal for both degrees of freedom.
 # 
