@@ -1,0 +1,33 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+
+\input{base_tikzset.tex}
+
+\begin{document}
+
+\begin{tikzpicture}[line width=0.25mm, node distance=1.5cm]
+
+  % Force
+  \node[port] (Se) {Se: \(F(t)\)};
+
+  \node[right=of Se, port] (1junction) {1};
+  \drawbg{Se}{1junction};
+  
+  % Inertance
+  \node[right=of 1junction, port] (I) {I: \(m\)};
+  \drawbg{1junction}{I};
+  
+  % Resistance
+  \node[above=of 1junction, port] (R) {R: \(c\)};
+  \drawbg{1junction}{R};
+  
+  % Compliance
+  \node[below=of 1junction, port] (C) {C: \(1/k\)};
+  \drawbg{1junction}{C};
+
+  
+\end{tikzpicture}
+  
+
+\end{document}

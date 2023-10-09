@@ -1,0 +1,109 @@
+\usepackage{ifthen}
+\usepackage{xparse}
+
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+
+% \newcommand{\scalefont}[2]{\scalebox{#1}[#2]} % Counter-scale the font
+% \newcommand{\scalefont}[2]{\scalebox{#1}[#2]} % Counter-scale the font
+
+\pgfdeclarearrow{
+  name = bgarrow,
+  parameters = { \the\pgfarrowlength },
+  setup code = {
+    \pgfarrowssettipend{0\pgfarrowlength}
+    \pgfarrowssetlineend{0\pgfarrowlength}
+    \pgfarrowssetvisualbackend{.5\pgfarrowlength}
+    \pgfarrowssavethe\pgfarrowlength
+  },
+  drawing code = {
+    \pgfpathmoveto{\pgfpoint{0\pgfarrowlength}{0pt}}
+    \pgfpathlineto{\pgfpoint{-10pt}{-0.45\pgfarrowlength}}
+    \pgfusepathqstroke
+  },
+  defaults = { length = 5mm }
+}
+
+\tikzstyle{port}=[circle, minimum width=1cm, minimum height=1cm, align=center]
+
+\NewDocumentCommand{\drawbg}{m m O{none} O{a} O{none} O{none} O{none}}{
+    % Arguments:
+    % #1 - start node
+    % #2 - end node
+    % #3 (optional) - Label type (PQ, TW, or EF), default is none
+    % #4 (optional) - label position (a or b), default is a
+    % #5 (optional) - subscript for labels, default is none
+    % #6 (optional) - marking at the start, default is none
+    % #7 (optional) - marking at the end, default is none
+
+    % Define decorations based on optional arguments
+    \tikzset{
+      addmarkings/.style={
+        postaction={
+          decorate, 
+          decoration={
+            markings, 
+            mark=at position 0 with {\ifthenelse{\equal{#6}{bar}}{\draw[-] (0,-6pt) -- (0,6pt);}{\relax}},
+            mark=at position 1 with {\ifthenelse{\equal{#7}{bar}}{\draw[-] (0,-6pt) -- (0,6pt);}{\relax}}
+          }
+        }
+      }
+    }
+
+    \draw[-bgarrow, addmarkings] (#1) -- (#2);
+
+    % Only define and place labels if the correct parameters are provided
+    \ifthenelse{\NOT\equal{#3}{none}}{
+        \ifthenelse{\equal{#5}{none}}{
+            \def\subtext{}
+        }{
+            \def\subtext{_{#5}}
+        }
+        \ifthenelse{\equal{#3}{PQ}}{
+            \def\effort{P}
+            \def\flow{Q}
+        }{
+            \ifthenelse{\equal{#3}{TW}}{
+                \def\effort{\tau}
+                \def\flow{\omega}
+            }{
+                \ifthenelse{\equal{#3}{EF}}{
+                    \def\effort{e}
+                    \def\flow{f}
+                }{}
+            }
+        }
+        \ifthenelse{\equal{#4}{a}}{
+            \path (#1) -- (#2) node[midway, above] {\(\effort\subtext\)} node[midway, below] {\(\flow\subtext\)};
+        }{
+            \path (#1) -- (#2) node[midway, left] {\(\effort\subtext\)} node[midway, right] {\(\flow\subtext\)};
+        }
+    }{}
+}
+
+\NewDocumentCommand{\drawellipsis}{m O{} O{x} O{a}}{
+  % Drawing ellipsis
+  \ifthenelse{\equal{#3}{x}}{
+    % Horizontal orientation
+    \foreach \x in {-0.15,0,0.15} {
+      \fill[black] ($(#1.west)!0.5!(#1.east)$) + (\x,0) circle (1pt);
+    }
+    \ifthenelse{\equal{#4}{a}}{
+      \node[above=0.2cm of $(#1.west)!0.5!(#1.east)$] {#2};
+    }{
+      \node[below=0.2cm of $(#1.west)!0.5!(#1.east)$] {#2};
+    }
+  }{
+    % Vertical orientation
+    \foreach \y in {-0.15,0,0.15} {
+      \fill[black] ($(#1.west)!0.5!(#1.east)$) + (0,\y) circle (1pt);
+    }
+    \ifthenelse{\equal{#4}{a}}{
+      \node[right=0.2cm of $(#1.west)!0.5!(#1.east)$] {#2};
+    }{
+      \node[left=0.2cm of $(#1.west)!0.5!(#1.east)$] {#2};
+    }
+  }
+}
