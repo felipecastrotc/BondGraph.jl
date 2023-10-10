@@ -45,4 +45,5 @@ Power
 generate_graph
 simplifysys
 isindependent
+BondGraph.GenericDamper
 ```

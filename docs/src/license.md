@@ -19,6 +19,6 @@ limitations under the License.
 ```
 TODO:update the license path
 
-To view the complete license text, please refer to the [LICENSE](../LICENSE) file located in the root directory of this project.
+To view the complete license text, please refer to the [LICENSE](https://github.com/felipecastrotc/BondGraph.jl/blob/main/LICENSE.md) file located in the root directory of this project.
 
 By using the BondGraphToolkit, you agree to the terms and conditions of the Apache License 2.0.

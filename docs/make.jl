@@ -1,32 +1,39 @@
+
 import Pkg;
 
-function current_git_branch(dir=".")
-    return chomp(read(`git -C $dir symbolic-ref --short HEAD`, String))
-end
-branch = current_git_branch()
-
-Pkg.activate("docs")
-Pkg.develop(path=".")
+# Set up project dependencies
+# Pkg.status("BondGraph")
+# Pkg.activate("docs")
 # Pkg.add(path=".")
+Pkg.develop(path=".")
 Pkg.instantiate()
-Pkg.status("BondGraph")
 
-ENV["GKS_WSTYPE"] = 100
-ENV["JULIA_DEBUG"] = "Documenter"
-
+# Import required packages
 using Documenter, DocStringExtensions, Literate, BondGraph
+
+# Function to check if display is available
+function has_display()
+    return haskey(ENV, "DISPLAY") && !isempty(ENV["DISPLAY"])
+end
+
+# Set environment variables
+if !has_display()
+    ENV["GKSwstype"] = "100"  # Set GR to non-interactive mode
+end
+ENV["JULIA_DEBUG"] = "Documenter"
 
 # Clean docs/build directory
 if isdir("./docs/build")
     rm("./docs/build", recursive=true)
 end
-
 mkdir("./docs/build")
 
-# utility function from https://github.com/JuliaOpt/Convex.jl/blob/master/docs/make.jl
+
+# Utility function to fix math in Markdown content
+# https://github.com/JuliaOpt/Convex.jl/blob/master/docs/make.jl
 fix_math_md(content) = replace(content, r"\$\$(.*?)\$\$"s => s"```math\1```")
 
-# Add a text after the first heading
+# Function to add text after the first heading in Markdown content
 function postprocess(cont)
     # Text to insert
     text = """
@@ -48,6 +55,7 @@ function postprocess(cont)
     return cont
 end
 
+# Function to generate the example navigation bar
 function insert_quick_example(quick_example)
     # Load the quick example file
     quickex = read(joinpath(@__DIR__, "src", quick_example[1][2]), String)
@@ -73,7 +81,7 @@ function insert_quick_example(quick_example)
     write(joinpath(@__DIR__, "src", "getting_started_auto.md"), cont)
 end
 
-# Generate the example navigation bar 
+# Function to generate the example navigation bar
 function get_nav(filename; suffix="./examples/")
     f = open(suffix * filename, "r")
     name = split(split(readline(f), "[")[2], "]")[1]
@@ -82,8 +90,8 @@ function get_nav(filename; suffix="./examples/")
     return String(name) => path
 end
 
-# code adapted from https://github.com/oxfordcontrol/COSMO.jl/blob/master/docs/make.jl
-# find all example source files
+# Find all example source files and convert them to Markdown
+# Adapted: https://github.com/oxfordcontrol/COSMO.jl/blob/master/docs/make.jl
 example_path = joinpath(@__DIR__, "../examples/")
 build_path = joinpath(@__DIR__, "src", "examples/")
 files = readdir(example_path)
@@ -100,20 +108,20 @@ for file in files
     )
 end
 
-# get example paths
+# Get example paths and remove the quick example from navigation
 examples_nav = get_nav.(files; suffix="./examples/")
-# Get the quick example
+# examples_nav = Dict("Duffing Equation" => "./examples/mechanical_duffing.md")
 quick_example = filter(x -> x[1] == "Quick Example", examples_nav)
 insert_quick_example(quick_example)
-# Remove the quick example from the examples navigation
 filter!(x -> x[1] != "Quick Example", examples_nav)
+rm("./docs/src/examples/electrical_rc.md")
 
-
+# Generate documentation using Documenter
 makedocs(
     modules=[BondGraph],
-    format=Documenter.HTML(prettyurls=false, sidebar_sitename=false, assets=["assets/favicon.ico"]),
+    format=Documenter.HTML(prettyurls=true, sidebar_sitename=false, assets=["assets/favicon.ico"]),
     sitename="BondGraph.jl",
-    doctest=true,
+    # doctest=true,
     clean=true,
     pages=[
         "Home" => "index.md",
@@ -131,9 +139,14 @@ makedocs(
         # "Changelog" => "changelog.md",
     ],
     pagesonly=true,
+    # draft=false,
+    # remotes=nothing,
+    # workdir = joinpath(@__DIR__, "build/assets")
+    # checkbounds=false,  # Ignore broken links
 )
 
 # Cleaning
 rm(joinpath(@__DIR__, "src", "getting_started_auto.md"))
 
+# Deploy documentation to GitHub Pages
 deploydocs(repo="github.com/felipecastrotc/BondGraph.jl.git")

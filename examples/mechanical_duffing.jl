@@ -1,14 +1,43 @@
 # # [Duffing Equation](@id msd-duffing)
 # 
-# The Duffing equation is a nonlinear second-order ordinary differential equation commonly used to model various physical systems exhibiting nonlinear behavior, such as electrical circuits, mechanical systems, and biological systems. From the mechanical domain point of view, it is an extension of the simple mass-spring-damper system that incorporates a cubic spring. Despite its simple form, the Duffing equation exhibits chaotic behavior. The equation is given by:
+# ## Introduction
 # 
-# $m\,\frac{d^2 x}{dt^2} + c\,\frac{d x}{dt} + k\,x + k_3\,x^3 = F(t),$
+# The Duffing equation represents a nonlinear second-order ordinary differential equation. Widely employed in the modeling of physical systems exhibiting nonlinear behavior, such as electrical circuits, mechanical setups, and even biological systems, this equation stands out for its rich dynamics. In the mechanical domain, the Duffing equation is an enhanced version of the conventional mass-spring-damper system, incorporating a cubic spring. The equation is mathematically represented as:
 # 
-# where $x$ represents the position, $m$ is the mass, $c$ is the damping coefficient, $k$ is the spring stiffness, $k_3$ is the cubic spring stiffness, and $F(t)$ denotes an external force applied to the system.
+# \[ m\,\frac{d^2 x}{dt^2} + c\,\frac{d x}{dt} + k\,x + k_3\,x^3 = F(t), \]
 # 
-# In standard bond graphs, the compliance element is linear, while for the Duffing equation, we need a nonlinear compliance for the cubic spring. Therefore, we need to introduce a nonlinear compliance element to model the Duffing equation using the Bond Graph Toolkit. The library allows users to define custom elements and utilize the Power connector as interface.
+# where:
 # 
-# # Bond Graph Toolkit
+# - \( x \): Position
+# - \( m \): Mass
+# - \( c \): Damping coefficient
+# - \( k \): Spring stiffness
+# - \( k_3 \): Cubic spring stiffness
+# - \( F(t) \): External force
+# 
+# For visualization, the system's free-body diagram is depicted below:
+# 
+# ```@raw html
+# <picture style="display: flex; justify-content: center; align-items: center;">
+#   <source srcset="../../assets/tikz/fbd_duffing-dark.svg" media="(prefers-color-scheme: dark)">
+#   <img src="../../assets/tikz/fbd_duffing.svg">
+# </picture>
+# ```
+# 
+# Its corresponding representation in bond graph notation is:
+# 
+# ```@raw html
+# <picture style="display: flex; justify-content: center; align-items: center;">
+#   <source srcset="../../assets/tikz/bg_duffing-dark.svg" media="(prefers-color-scheme: dark)">
+#   <img src="../../assets/tikz/bg_duffing.svg">
+# </picture>
+# ```
+# 
+# Given the Duffing equation's nonlinear nature, standard bond graphs require a modification. Specifically, a nonlinear compliance element is introduced to represent the cubic spring, all achieved through the Bond Graph Toolkit, which offers capabilities to customize and incorporate such elements through the `Power` connector.
+# 
+# ## Bond Graph Toolkit Implementation
+# 
+# ### Preliminary Steps
 # 
 # First, we import the Bond Graph Toolkit module to model the system and the `DifferentialEquations.jl` package to solve the resulting ordinary differential equation (ODE). Additionally, we import the independent variable `t` from the Bond Graph Toolkit, which will be used to define a custom forcing term.
 
@@ -19,11 +48,11 @@ using ModelingToolkit
 using Plots
 using Symbolics.Latexify
 
-# ## Building the model
+# ### Model Construction
 # 
-# ### Custom compliance
+# #### Custom Compliance for Cubic Spring
 # 
-# We now define a custom element called `Spring3` to include the non-linearity of the Duffing equation. The element definition can be simplified using the macro `@oneport` is defined by the function below.
+# To account for the Duffing equation's non-linearity we define a custom element called `Spring3`. The custom element definition can be simplified using the macro `@oneport` as shown below.
 
 @oneport function Spring3(; name, k = 1.0, x = 0.0)
 
@@ -32,24 +61,24 @@ using Symbolics.Latexify
     ## Set the equation parameters
     @parameters C = 1 / k
 
-    ## Define Spring3 element equations with the non-lineariyy of the cubic spring
+    ## Define Spring3 element equations with the non-linearity of the cubic spring
     [
         power.e ~ q^3 / C
         D(q) ~ power.f
     ]
 end
 
-# The `Spring3` function creates a bond graph subsystem representing the cubic spring. You can specify the following parameters:
+# The `Spring3` function creates a bond graph subsystem representing the cubic spring, which can be customized via:
 # 
 # - `name`: The name of the `Spring3` element (default: "").
 # - `k`: The cubic spring stiffness constant (default: 1.0).
 # - `x`: The initial displacement of the spring (default: 0.0).
 # 
-# ### Setting the elements
+# #### System Element Definitions
 # 
-# Now we initialize and define the cubic spring custom element and the remaining single port elements of the system (mass, spring, and damper) as follows:
+# The entire system's elements, including mass, damper, linear spring, and the newly defined `Spring3`, are initialized:
 
-# - The parameters values
+# - The parameter values
 α = 1.0
 β = 5.0
 δ = 0.02
@@ -62,21 +91,22 @@ end
 @named s3 = Spring3(k = β)
 @named d = Damper(c = δ)
 
-# The forcing term can be set as an expression or even a Julia function. In this example, we will first intialize a generic forcing term that will be defined before solving the ODE.
+# The forcing term can be set as an expression or even a Julia function. In this example, we will initialize a generic forcing term that will be defined later before solving the ODE.
 @parameters F(t)
 @named f = Se(F)
 
 # Then, we build the system by simply passing the one-port elements to the 1-junction function as arguments.
 @named mdl = Junction1(m, d, s, s3, [-1, f])
 
-# ## Analysing the model
+# ### Analysing the model
+# 
 # We can visualize the bond-graph connections by generating a graph plot of the model.
 generate_graph(mdl)
 
-# We can obtain the bond-graph equations using the code below.
+# The bond-graph equations can be extracted as:
 equations(expand_connections(mdl))
 
-# The equations of the model above were not simplified and represent the bond-graphs equations directly derived from the connections. Then, we simplify the DAE above and obtain the ODE. The simplified set of equations is required for using `solve` from `DifferentialEquations.jl`
+# The model's equations above were not simplified and represent the bond-graphs equations directly derived from the connections. Then, we simplify the DAE above and obtain the ODE. The simplified set of equations is required for using `solve` from `DifferentialEquations.jl`
 @named sys = simplifysys(mdl)
 
 # Print system states
@@ -85,21 +115,22 @@ states(sys)
 # Print system parameters
 parameters(sys)
 
-# Print the system simplified equations
+# Print the system's simplified equations
 equations(sys)
 
 # By comparison, we can see that the equations above are the same as the canonical form of the harmonic oscillator presented at the beginning.
 
-# We can generate LaTeX code from the equations
+# We can generate LaTeX code from the equations with the following code.
 latexify(equations(sys))
 
-# ## Simulate the system
+# ### System Simulations
 # 
-# ### Unforced case
+# #### Unforced System
+# 
 # Now, we are going to consider only the unforced case. Therefore, $F(t) = 0$. Thus, we update the force function on the system.
 sys_unforced = substitute(sys, Dict(f.F => 0.0))
 
-# Define the simulation time
+# Define the simulation time.
 tspan = (0, 10)
 
 # When defining the ODEProblem as in the ModelingToolkit, we can define the initial value of the states.
@@ -109,14 +140,14 @@ prob = ODEProblem(sys_unforced, [m.power.f => 0.0, s.q => 1.0, s3.q => 1.0], tsp
 sol = solve(prob)
 plot(sol, xlabel = "Time", ylabel = "Amplitude")
 
-# ### Forced case
+# #### Forced case
 # Now, we are going to consider the forced case, where $F(t) = sin(t)$. Thus, we update the force function on the system.
 sys_forced = substitute(sys, Dict(f.F => γ * cos(ω * t)))
 
 # Define the simulation time
 tspan = (0, 10)
 
-# When defining the ODEProblem as in the ModelingToolkit we can define the initial value of the states.
+# When defining the ODEProblem as in the ModelingToolkit, we can define the initial value of the states.
 prob = ODEProblem(sys_forced, [m.power.f => 0.0, s.q => 0.0], tspan)
 
 # Use the `solve` to simulate the system.
