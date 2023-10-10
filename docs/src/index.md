@@ -33,11 +33,11 @@ Once Julia is installed, you can add the Bond Graph Toolkit to your project by r
 pkg> add BondGraphToolkit.jl
 ```
 
-For more detailed installation instructions, including information about dependencies, please refer to the [Installation](@ref install-guide).
+For more detailed installation instructions, including information about dependencies, please refer to the Installation.
 
 ## Getting Started
 
-We recommend checking out the [Getting Started](@ref getting-start) to quickly get started with Bond Graph Toolkit. It will guide you through library installation and the modeling and simulation of a simple dynamic system. It provides step-by-step instructions and code examples to help you grasp the basics of using the library.
+We recommend checking out the Getting Started to quickly get started with Bond Graph Toolkit. It will guide you through library installation and the modeling and simulation of a simple dynamic system. It provides step-by-step instructions and code examples to help you grasp the basics of using the library.
 
 ## Documentation Sections
 
