@@ -1,7 +1,7 @@
 # Fix the sign convention and the meaning of bond direction
 
 Type: grilling
-Status: open
+Status: claimed
 Blocked by: 03
 
 ## Inputs
