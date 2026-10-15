@@ -1,0 +1,8 @@
+Differential(t)(m1₊m₊power₊f(t)) ~ ((-m1₊s₊q(t)) / m1₊s₊C + m2_j0₊sd₊s₊q(t) / m2_j0₊sd₊s₊C + (-m3_j0₊sd₊s₊q(t)) / m3_j0₊sd₊s₊C + m3_j0₊sd₊s₊q(t) / m3_j0₊sd₊s₊C + m4_j0₊sd₊s₊q(t) / m4_j0₊sd₊s₊C + (-m4_j0₊sd₊s₊q(t)) / m4_j0₊sd₊s₊C - m1₊d₊R*m1₊m₊power₊f(t) + m2_j0₊sd₊d₊R*(-m1₊m₊power₊f(t) + m2_j1₊m₊power₊f(t))) / m1₊m₊I
+Differential(t)(m1₊s₊q(t)) ~ m1₊m₊power₊f(t)
+Differential(t)(m2_j0₊sd₊s₊q(t)) ~ -m1₊m₊power₊f(t) + m2_j1₊m₊power₊f(t)
+Differential(t)(m2_j1₊m₊power₊f(t)) ~ ((-m2_j0₊sd₊s₊q(t)) / m2_j0₊sd₊s₊C + m3_j0₊sd₊s₊q(t) / m3_j0₊sd₊s₊C + m4_j0₊sd₊s₊q(t) / m4_j0₊sd₊s₊C + (-m4_j0₊sd₊s₊q(t)) / m4_j0₊sd₊s₊C + m2_j0₊sd₊d₊R*(m1₊m₊power₊f(t) - m2_j1₊m₊power₊f(t)) + m3_j0₊sd₊d₊R*(m3_j1₊m₊power₊f(t) - m2_j1₊m₊power₊f(t))) / m2_j1₊m₊I
+Differential(t)(m3_j0₊sd₊s₊q(t)) ~ m3_j1₊m₊power₊f(t) - m2_j1₊m₊power₊f(t)
+Differential(t)(m3_j1₊m₊power₊f(t)) ~ ((-m3_j0₊sd₊s₊q(t)) / m3_j0₊sd₊s₊C + m4_j0₊sd₊s₊q(t) / m4_j0₊sd₊s₊C - m3_j0₊sd₊d₊R*(m3_j1₊m₊power₊f(t) - m2_j1₊m₊power₊f(t)) + m4_j0₊sd₊d₊R*(-m3_j1₊m₊power₊f(t) + m4_j1₊m₊power₊f(t))) / m3_j1₊m₊I
+Differential(t)(m4_j0₊sd₊s₊q(t)) ~ -m3_j1₊m₊power₊f(t) + m4_j1₊m₊power₊f(t)
+Differential(t)(m4_j1₊m₊power₊f(t)) ~ ((-m4_j0₊sd₊s₊q(t)) / m4_j0₊sd₊s₊C - m4_j0₊sd₊d₊R*(-m3_j1₊m₊power₊f(t) + m4_j1₊m₊power₊f(t))) / m4_j1₊m₊I
