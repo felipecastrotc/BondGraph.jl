@@ -27,6 +27,7 @@ Branch: `feature/mtk-upgrade`. Destination: **BondGraph installs and passes test
 - [ ] `/to-spec` → `/to-tickets` → `/implement` per ticket (uses `tdd` and `code-review`).
 - [ ] `/diagnosing-bugs` for equation/sign mismatches against the literature (MSD N-DoF, DC motor).
 - [ ] Fold the remaining `TODO.md` items (mTF, rename-by-Dict) into tickets, then delete `TODO.md`.
+- [ ] TODO (deferred by maintainer): decide license and MTK vs ModelingToolkitBase dependency before registration/paper. AGPL is acceptable if needed; keep the current license until then. See `.scratch/mtk-upgrade/issues/07-dependency-license-stance.md`.
 - [ ] Release: `release/0.3.0` → `main`, tag `v0.3.0`.
 
 ## Step 4: documentation
