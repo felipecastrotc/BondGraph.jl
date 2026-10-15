@@ -1,10 +1,12 @@
 # # [DC Motor](@id dc-motor)
+#
+# ## Introduction
 # 
 # The DC motor is a commonly used actuator that provides rotary motion to a mechanical system. It converts electrical energy into rotational mechanical energy. Thus, modeling it with a bond graph requires an additional port to the zero and one junctions. The system can be represented as an equivalent circuit of the armature and the free-body diagram of the rotor illustrated below:
 # 
 # ![DC motor](https://ctms.engin.umich.edu/CTMS/Content/MotorSpeed/System/Modeling/figures/motor.png)
 # 
-# ## DC Motor model
+# ### DC Motor model
 # 
 # We assumed that the rotor and shaft are rigid to model the DC motor coupled with a shaft. We also considered the shaft friction proportional to its angular velocity, representing a viscous friction model.
 # 
@@ -28,18 +30,22 @@
 # 
 # See also [DC Motor Speed: System Modeling](https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&section=SystemModeling)
 # 
-# ## Bond Graph Model
+# ### Bond Graph Model
 # 
 # To model the DC motor depicted in the figure above, we can use the bond graph approach and represent the system with the following bond graph:
 # 
-# TODO: update the bond graph
-# ![Bond Graph Representation](../assets/bg_dcmotor.svg)
+# ```@raw html
+# <picture style="display: flex; justify-content: center; align-items: center;">
+#   <source srcset="../../assets/tikz/bg_dcmotor-dark.svg" media="(prefers-color-scheme: dark)">
+#   <img src="../../assets/tikz/bg_dcmotor.svg">
+# </picture>
+# ```
 # 
 # In this representation, the inertance elements (I) correspond to the moment of inertia of the rotor ($J$) in the mechanical domain and the armature inductance ($L$) in the electrical domain. The resistance elements (R) represent the viscous friction coefficient ($c$) in the mechanical domain and the armature electrical resistance ($R_a$). 
 # 
 # The gyrator (GY) port describes the electrical current and torque relationship, with the constant $k$ representing its value.
 # 
-# ## Bond-graph toolkit
+# ## Preliminary Steps
 # 
 # In this example we are going to first build and simulate the bond graph model for the DC motor. Then we are going to use the DC motor differential equations obtained based Newton's 2nd law and Kirchhoff's voltage law to compare the results.
 # 
@@ -52,7 +58,7 @@ using ModelingToolkit
 using Plots
 using Symbolics.Latexify
 
-# ## Building the model
+# ## System Element Definitions
 # 
 # Before defining a system, we need to define the single port elements of the system. Then, we define the electrical inductance (L), resitance (R) and the source of effort (V, voltage applied), elements as follows:
 @named L = Mass(m=0.5)        # (H) Electric inductance
@@ -75,7 +81,7 @@ g = 0.01    # DC motor torque constant
 eqs = []
 @named gy = mGY(je, jm, g = g, coneqs = eqs)
 
-### Build the system
+# ## Model Construction
 
 # We build the system by first creating a `ODESystem` with `mGY` generated equations and setting the independent variable as t.
 @named mdl = ODESystem(eqs, t)
@@ -83,8 +89,8 @@ eqs = []
 # Then, we need to add the subsystems to the model.
 mdl = compose(mdl, gy, je, jm)
 
-
 # ## Analysing the model
+# 
 # We can visualize the bond-graph connections by generating a graph plot of the model.
 generate_graph(mdl)
 
@@ -108,7 +114,7 @@ equations(sys)
 # We can generate LaTeX code from the equations
 latexify(equations(sys))
 
-# ## Simulate the system
+# ## System Simulations
 # 
 # ### Bond graph model
 # Define the simulation time
