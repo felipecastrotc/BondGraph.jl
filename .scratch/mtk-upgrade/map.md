@@ -22,6 +22,7 @@ A settled, written spec for BondGraph v0.3 on ModelingToolkit 11 / Julia ≥ 1.1
 <!-- one line per resolved ticket: [title](issues/NN-slug.md): gist -->
 
 - [How does BondGraphs.jl compare today?](issues/01-bondgraphs-jl-comparison.md): complementary, not a replacement (graph object → MTK, biochemistry, no GY/modulated two-ports); `BondGraph` is not registrable, `BondGraphToolkit` and similar pass.
+- [Can junctions be expressed with MTK's native connections?](issues/03-junctions-as-native-connections.md): yes, via a hybrid: 0-junction = native `connect` (effort Equality, flow `Flow`), 1-junction = component with ±1-signed ports, TF/GY = two-port components; no MTK internals; RC/DC motor/2-DoF match golden data on MTK 11.
 
 ## Not yet specified
 
