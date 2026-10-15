@@ -1,0 +1,2 @@
+Differential(t)(je₊L₊power₊f(t)) ~ (12.0 - 0.01jm₊J₊power₊f(t) - je₊R₊R*je₊L₊power₊f(t)) / je₊L₊I
+Differential(t)(jm₊J₊power₊f(t)) ~ (1.0 + 0.01je₊L₊power₊f(t) - jm₊c₊R*jm₊J₊power₊f(t)) / jm₊J₊I
