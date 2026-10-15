@@ -30,7 +30,6 @@ A settled, written spec for BondGraph v0.3 on ModelingToolkit 11 / Julia ≥ 1.1
 
 ## Not yet specified
 
-- **Coupling with non-bond-graph MTK components**, e.g. ModelingToolkitStandardLibrary electrical `Pin` / mechanical `Flange`: how a power port meets them, implied by the "couple with any MTK model" goal. Sharpens once the connection mechanism is chosen.
 - **Causality**: how integral/differential causality and causal conflicts surface when MTK does index reduction; ties to the MTK vs ModelingToolkitBase stance.
 - **Graph visualization**: rebuilding `generate_graph` on the new connection representation.
 - **Duffing's redundant state** (`s.q` and `s3.q` integrate the same velocity): keep, or model the nonlinear spring as one element. (The N-DoF merge anomaly is gone with the new mechanism.)
