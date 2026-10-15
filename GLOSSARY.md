@@ -19,7 +19,7 @@ The extensive power variable of a port (velocity, current, volume flow).
 _Avoid_: through variable
 
 **Bond**:
-A connection between two power ports, with a direction that fixes the positive sense of power transfer.
+A connection between two power ports, with a direction (the half-arrow) that fixes the positive sense of power transfer. An element's law is written in the variables of its bond as drawn.
 _Avoid_: link, edge, wire
 
 ### Elements
@@ -52,10 +52,10 @@ A user-defined element, often nonlinear, built with the same ergonomics as the b
 ### Junctions and two-ports
 
 **0-junction**:
-A node where all bonded ports share one effort and their flows sum to zero.
+A node where all bonds share one effort and their flows sum to zero, each flow counted positive when its bond points into the junction.
 
 **1-junction**:
-A node where all bonded ports share one flow and their efforts sum to zero.
+A node where all bonds share one flow and their efforts sum to zero, each effort counted positive when its bond points into the junction.
 
 **Transformer (TF)**:
 A two-port element that scales effort and flow by reciprocal factors, conserving power.
