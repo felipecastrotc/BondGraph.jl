@@ -16,6 +16,7 @@ SymbolicUtils = "d1185830-fcd6-423d-90d6-eec64667417b"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [compat]
+DelimitedFiles = "1"
 DocStringExtensions = "0.9"
 DomainSets = "0.6"
 GraphRecipes = "0.5"
@@ -29,8 +30,9 @@ Symbolics = "5"
 julia = "1.9"
 
 [extras]
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "DifferentialEquations"]
+test = ["Test", "DifferentialEquations", "DelimitedFiles"]

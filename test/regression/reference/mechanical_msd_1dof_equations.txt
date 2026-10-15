@@ -1,0 +1,2 @@
+Differential(t)(m₊power₊f(t)) ~ (f₊F(t) + (-s₊q(t)) / s₊C - d₊R*m₊power₊f(t)) / m₊I
+Differential(t)(s₊q(t)) ~ m₊power₊f(t)
