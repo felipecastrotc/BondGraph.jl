@@ -21,6 +21,8 @@ A settled, written spec for BondGraph v0.3 on ModelingToolkit 11 / Julia ≥ 1.1
 
 <!-- one line per resolved ticket: [title](issues/NN-slug.md): gist -->
 
+- [How does BondGraphs.jl compare today?](issues/01-bondgraphs-jl-comparison.md): complementary, not a replacement (graph object → MTK, biochemistry, no GY/modulated two-ports); `BondGraph` is not registrable, `BondGraphToolkit` and similar pass.
+
 ## Not yet specified
 
 - **Coupling with non-bond-graph MTK components**, e.g. ModelingToolkitStandardLibrary electrical `Pin` / mechanical `Flange`: how a power port meets them, implied by the "couple with any MTK model" goal. Sharpens once the connection mechanism is chosen.
