@@ -15,6 +15,7 @@ A settled, written spec for BondGraph v0.3 on ModelingToolkit 11 / Julia ≥ 1.1
 - **Invariant (from the maintainer):** keep the MTK-native ergonomics, i.e. tight integration and interchangeability with MTK models and functions, and easy custom ports, nonlinear R/C, and mGY/mTF. Everything else may break (no known users besides the maintainer; v0.2 → v0.3).
 - **Physics must not change:** the six examples must reproduce `test/regression/reference/*.csv` (state names may be remapped in `test/regression/helpers.jl`).
 - **Long-term goals that constrain decisions:** register the package in the General registry and publish a software paper (thesis contribution). The name must be registrable and the license paper-compatible.
+- **License deferred:** the dependency/license ticket is deferred by the maintainer; provisionally depend on full ModelingToolkit and keep the current license. Don't block other tickets on it.
 - **Codex:** may take AFK work, but the maintainer approves every Codex launch.
 
 ## Decisions so far
