@@ -22,13 +22,13 @@ Branch: `feature/mtk-upgrade`. Destination: **BondGraph installs and passes test
   - [ ] Which MTK version to target, and the minimum Julia version
   - [ ] Turn `generate_graph` (Plots/GraphRecipes) into a package extension so the core stays light
   - [x] Junction sign convention: v0.2 convention kept, confirmed against Karnopp/Borutzky (ticket 06)
-  - [ ] Package name: `BondGraph` vs `BondGraphToolkit` (`BondGraphs.jl` already exists in the General registry)
+  - [x] Package name: `BondGraphToolkit` (ticket 08)
 - [ ] `/grill-with-docs` on the key decisions: produces `GLOSSARY.md` (effort, flow, port, junction, bond, ...) and ADRs in `docs/adr/`.
 - [ ] `/to-spec` → `/to-tickets` → `/implement` per ticket (uses `tdd` and `code-review`).
 - [ ] `/diagnosing-bugs` for equation/sign mismatches against the literature (MSD N-DoF, DC motor).
 - [ ] Fold the remaining `TODO.md` items (mTF, rename-by-Dict) into tickets, then delete `TODO.md`.
 - [ ] TODO (deferred by maintainer): decide license and MTK vs ModelingToolkitBase dependency before registration/paper. AGPL is acceptable if needed; keep the current license until then. See `.scratch/mtk-upgrade/issues/07-dependency-license-stance.md`.
-- [ ] Release: `release/0.3.0` → `main`, tag `v0.3.0`.
+- [ ] Release: `release/0.3.0` → `main`, tag `v0.3.0`; rename the GitHub repo to `BondGraphToolkit.jl` (ask first; ticket 08).
 
 ## Step 4: documentation
 

@@ -29,6 +29,7 @@ A settled, written spec for BondGraph v0.3 on ModelingToolkit 11 / Julia ≥ 1.1
 - [Choose the connection mechanism](issues/05-connection-mechanism.md): settled by the ticket 04 verdict (ADR 0001).
 - [How do power ports couple with ModelingToolkitStandardLibrary components?](issues/11-coupling-with-mtk-stdlib.md): no direct `connect`, but small per-domain adapter elements match reference models in electrical, translational, rotational, hydraulic, and `RealInput`-modulated cases; API choices go to the public-API ticket.
 - [Fix the sign convention and the meaning of bond direction](issues/06-sign-convention.md): v0.2's convention stays, and the textbooks agree (half-arrow signs only in junction sums; one-port laws in bond variables; TF/GY port 1 in, port 2 out). 0- and 1-junctions become one signed component, and ADR 0001 is amended. The prototype passes all golden cases with v0.2 signs.
+- [Choose the package name](issues/08-package-name.md): `BondGraphToolkit` (passes the registry checks, matches the existing docs). Module, `Project.toml`, file, docs and tests are renamed in v0.3 and the UUID is kept. The GitHub repo is renamed at the v0.3.0 release, after asking.
 
 ## Not yet specified
 
