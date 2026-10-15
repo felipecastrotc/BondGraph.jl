@@ -15,7 +15,7 @@ Steps 1 (commit pending work) and 2 (cleanup: deps, `[compat]`, CI, dead files) 
 
 Branch: `feature/mtk-upgrade`. Destination: **BondGraph installs and passes tests on current MTK, Julia 1.10+, with fresh dependency resolution (CI green).**
 
-- [ ] `/research`: what changed in MTK/Symbolics/SymbolicUtils from 8.71 to current for every internal `src/` imports (`src/mtk.jl`, `src/utils/*.jl`, `src/types.jl`). Output: a cited markdown note in the repo.
+- [x] `/research` (done: `.scratch/mtk-upgrade/research-mtk-internals.md`): what changed in MTK/Symbolics/SymbolicUtils from 8.71 to current for every internal `src/` imports (`src/mtk.jl`, `src/utils/*.jl`, `src/types.jl`). Output: a cited markdown note in the repo.
 - [ ] `/wayfinder`: chart the upgrade as a map in `.scratch/mtk-upgrade/map.md` with decision tickets. Expected questions:
   - [ ] Keep overriding MTK internals, or rebuild connection expansion on MTK's public API (the big one)
   - [ ] Which MTK version to target, and the minimum Julia version
