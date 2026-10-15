@@ -34,12 +34,14 @@ Mostly after step 3: the examples must run on the new API.
 
 Can start now:
 - [ ] Fix the README naming (depends on the package-name decision)
-- [ ] Rewrite `docs/src/contributing.md` (currently an unedited COSMO.jl copy) from `AGENTS.md`
+- [x] Rewrite `docs/src/contributing.md` from `AGENTS.md` (Codex)
+- [x] Docs/API coverage audit: `.scratch/codex/docs-audit/report.md` (Codex). Use it as the checklist for the items below.
 
 After step 3:
 - [ ] `/to-spec` for the docs scope, then `/to-tickets` → `/implement`:
   - [ ] User Guide (empty in `docs/make.jl`): concepts, elements, connections, simulation
-  - [ ] API reference: docstrings for every export, `lib/public.md` and `lib/internals.md` complete
+  - [ ] API reference: docstrings for every export, `lib/public.md` and `lib/internals.md` complete; resolve exports with no local definition (`renamevars`, `addsubsys`, `latexify`), document `@oneport`
+  - [ ] Fix `docs/make.jl` issues listed in the audit (`/tree/master/` link, cwd-relative paths, unguarded `rm`)
   - [ ] Examples: all run on the new API; finish `mechanical_msd_ndof.jl`; decide on `tmp_dev_acoustic_carol.jl`
   - [ ] Changelog page (commented out in `docs/make.jl`)
   - [ ] Citing page with the thesis/paper reference
