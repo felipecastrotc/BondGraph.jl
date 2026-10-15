@@ -1,0 +1,4 @@
+Differential(t)(m1_j1₊m₊power₊f(t)) ~ ((-m1_j1₊s₊q(t)) / m1_j1₊s₊C + (-m2_sd₊s₊q(t)) / m2_sd₊s₊C - m1_j1₊d₊R*m1_j1₊m₊power₊f(t) - m2_sd₊d₊R*(-m2_j1₊m₊power₊f(t) + m1_j1₊m₊power₊f(t))) / m1_j1₊m₊I
+Differential(t)(m1_j1₊s₊q(t)) ~ m1_j1₊m₊power₊f(t)
+Differential(t)(m2_j1₊m₊power₊f(t)) ~ (m2_j1₊f₊F(t) + m2_sd₊s₊q(t) / m2_sd₊s₊C + m2_sd₊d₊R*(-m2_j1₊m₊power₊f(t) + m1_j1₊m₊power₊f(t))) / m2_j1₊m₊I
+Differential(t)(m2_sd₊s₊q(t)) ~ -m2_j1₊m₊power₊f(t) + m1_j1₊m₊power₊f(t)
