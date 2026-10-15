@@ -1,7 +1,7 @@
 # Fix the sign convention and the meaning of bond direction
 
 Type: grilling
-Status: claimed
+Status: resolved
 Blocked by: 03
 
 ## Inputs
@@ -26,4 +26,24 @@ Principle (maintainer): the tool follows bond-graph conventions and never assume
 - Q7 MTK standard-library adapters follow the same convention as any element: documented conventional direction, signed like any bond.
 - Q8 N-DoF example uses the textbook orientation `0 → sd`; its regression check maps the coupling springs' `q` sign against the v0.2 reference data.
 
-Before closing: check these against the literature notes (`docs/literature/`, Karnopp ch. 1–3, Borutzky ch. 1–4) and rerun the prototype's 9 golden cases under this convention.
+## Answer
+
+v0.3 keeps v0.2's convention. The books agree with it ([docs/literature/README.md](../../../docs/literature/README.md)):
+- half-arrow = positive power direction;
+- junctions: shared variable unsigned, sum signed (+ into, − out) at both junction types (Karnopp Eqs. 3.16–3.21, pp. 58–61; Breedveld Eqs. 1.8–1.11);
+- one-port laws in bond variables, conventionally drawn into R/C/I and out of sources (Karnopp pp. 39–49);
+- TF/GY through-oriented, with the laws Karnopp Eqs. 3.9, 3.11.
+
+What a reversed one-port arrow means is not stated by either book. The law keeps its form in the bond's variables: a design choice, following the maintainer's principle.
+
+Prototype rerun (branch `prototype/connection-mechanism`, 2026-10-15): with one signed junction component for both 0 and 1 and element laws in bond variables, all 9 golden cases pass with v0.2's own signs (max |Δ| ≤ 2.3e-10). Also:
+- the reversed-R RC gives `q = e^{+t}`;
+- the textbook N-DoF (`0 → sd`, initial `q = −1`) matches the v0.2 data with the coupling springs' `q` negated;
+- mGY power balance is 0.
+
+ADR 0001 is amended.
+
+Follow-ups for implementation:
+- the MTK standard-library adapters (ticket 11) were verified under the withdrawn convention A, so re-verify their signs under this one;
+- fix the DC motor and 2-DoF TikZ drawings (docs step);
+- update `test/regression/helpers.jl` with the N-DoF `q` sign map.
