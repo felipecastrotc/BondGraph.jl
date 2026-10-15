@@ -25,13 +25,15 @@ A settled, written spec for BondGraph v0.3 on ModelingToolkit 11 / Julia ≥ 1.1
 - [How does BondGraphs.jl compare today?](issues/01-bondgraphs-jl-comparison.md): complementary, not a replacement (graph object → MTK, biochemistry, no GY/modulated two-ports); `BondGraph` is not registrable, `BondGraphToolkit` and similar pass.
 - [Can junctions be expressed with MTK's native connections?](issues/03-junctions-as-native-connections.md): yes, via a hybrid: 0-junction = native `connect` (effort Equality, flow `Flow`), 1-junction = component with ±1-signed ports, TF/GY = two-port components; no MTK internals; RC/DC motor/2-DoF match golden data on MTK 11.
 - [Which MTK 11 dependencies are AGPL, and what does that mean for us?](issues/02-licensing-facts.md): full MTK ≥ 11 hard-depends on two AGPL-3.0 packages; ModelingToolkitBase is MIT but lacks index reduction/tearing (higher-index bond graphs fail); Catalyst's pattern (depend on MTKBase, users opt into full MTK) is the precedent; JOSS is fine either way.
+- [Prototype the bond connection mechanism on MTK 11](issues/04-prototype-connection-mechanism.md): hybrid accepted ([ADR 0001](../../docs/adr/0001-junctions-on-native-mtk-connections.md)); all six examples reproduce golden data on MTK 11; free ports + explicit `connect`, momentum state for inertias, GY/TF components replace `mGY(coneqs)`.
+- [Choose the connection mechanism](issues/05-connection-mechanism.md): settled by the ticket 04 verdict (ADR 0001).
 
 ## Not yet specified
 
 - **Coupling with non-bond-graph MTK components**, e.g. ModelingToolkitStandardLibrary electrical `Pin` / mechanical `Flange`: how a power port meets them, implied by the "couple with any MTK model" goal. Sharpens once the connection mechanism is chosen.
 - **Causality**: how integral/differential causality and causal conflicts surface when MTK does index reduction; ties to the MTK vs ModelingToolkitBase stance.
 - **Graph visualization**: rebuilding `generate_graph` on the new connection representation.
-- **Regression oddities**: N-DoF 0-junctions merging non-adjacent elements (cancelling terms) and Duffing's redundant state; whether the new mechanism should fix or preserve them.
+- **Duffing's redundant state** (`s.q` and `s3.q` integrate the same velocity): keep, or model the nonlinear spring as one element. (The N-DoF merge anomaly is gone with the new mechanism.)
 - **`Integral` / DomainSets** (`It` in `src/bg.jl`): keep, replace, or drop.
 
 ## Out of scope
