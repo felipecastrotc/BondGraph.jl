@@ -23,6 +23,7 @@ A settled, written spec for BondGraph v0.3 on ModelingToolkit 11 / Julia ≥ 1.1
 
 - [How does BondGraphs.jl compare today?](issues/01-bondgraphs-jl-comparison.md): complementary, not a replacement (graph object → MTK, biochemistry, no GY/modulated two-ports); `BondGraph` is not registrable, `BondGraphToolkit` and similar pass.
 - [Can junctions be expressed with MTK's native connections?](issues/03-junctions-as-native-connections.md): yes, via a hybrid: 0-junction = native `connect` (effort Equality, flow `Flow`), 1-junction = component with ±1-signed ports, TF/GY = two-port components; no MTK internals; RC/DC motor/2-DoF match golden data on MTK 11.
+- [Which MTK 11 dependencies are AGPL, and what does that mean for us?](issues/02-licensing-facts.md): full MTK ≥ 11 hard-depends on two AGPL-3.0 packages; ModelingToolkitBase is MIT but lacks index reduction/tearing (higher-index bond graphs fail); Catalyst's pattern (depend on MTKBase, users opt into full MTK) is the precedent; JOSS is fine either way.
 
 ## Not yet specified
 
