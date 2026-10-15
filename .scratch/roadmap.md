@@ -17,7 +17,7 @@ Branch: `feature/mtk-upgrade`. Destination: **BondGraph installs and passes test
 
 - [x] `/research` (done: `.scratch/mtk-upgrade/research-mtk-internals.md`): what changed in MTK/Symbolics/SymbolicUtils from 8.71 to current for every internal `src/` imports (`src/mtk.jl`, `src/utils/*.jl`, `src/types.jl`). Output: a cited markdown note in the repo.
 - [x] Regression safety net: golden-data tests for every example (`test/regression/`, report `.scratch/golden-tests/report.md`). Watch: N-DoF cancelling terms (0-junction merges non-adjacent elements) and Duffing's redundant state.
-- [ ] `/wayfinder`: chart the upgrade as a map in `.scratch/mtk-upgrade/map.md` with decision tickets. Expected questions:
+- [x] `/wayfinder`: map charted in `.scratch/mtk-upgrade/map.md` (10 decision tickets in `issues/`; the map is the source of truth from here). Original expected questions:
   - [ ] Keep overriding MTK internals, or rebuild connection expansion on MTK's public API (the big one)
   - [ ] Which MTK version to target, and the minimum Julia version
   - [ ] Turn `generate_graph` (Plots/GraphRecipes) into a package extension so the core stays light
