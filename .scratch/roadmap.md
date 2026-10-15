@@ -21,7 +21,7 @@ Branch: `feature/mtk-upgrade`. Destination: **BondGraph installs and passes test
   - [ ] Keep overriding MTK internals, or rebuild connection expansion on MTK's public API (the big one)
   - [ ] Which MTK version to target, and the minimum Julia version
   - [ ] Turn `generate_graph` (Plots/GraphRecipes) into a package extension so the core stays light
-  - [ ] Junction sign convention (see `TODO.md`: DC motor matches literature only with the sign disabled)
+  - [x] Junction sign convention: v0.2 convention kept, confirmed against Karnopp/Borutzky (ticket 06)
   - [ ] Package name: `BondGraph` vs `BondGraphToolkit` (`BondGraphs.jl` already exists in the General registry)
 - [ ] `/grill-with-docs` on the key decisions: produces `GLOSSARY.md` (effort, flow, port, junction, bond, ...) and ADRs in `docs/adr/`.
 - [ ] `/to-spec` → `/to-tickets` → `/implement` per ticket (uses `tdd` and `code-review`).
