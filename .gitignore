@@ -28,3 +28,5 @@ _matlab/
 .vscode
 
 tmp_dev_*
+# Local patch experiments (historical, see git history)
+patches/
