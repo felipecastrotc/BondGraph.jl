@@ -81,6 +81,7 @@ function insert_quick_example(quick_example)
     write(joinpath(@__DIR__, "src", "getting_started_auto.md"), cont)
 end
 
+
 # Function to generate the example navigation bar
 function get_nav(filename; suffix="./examples/")
     f = open(suffix * filename, "r")
@@ -96,6 +97,7 @@ example_path = joinpath(@__DIR__, "../examples/")
 build_path = joinpath(@__DIR__, "src", "examples/")
 files = readdir(example_path)
 filter!(x -> endswith(x, ".jl"), files)
+filter!((x) -> !occursin("tmp_", x),  files)
 
 for file in files
     Literate.markdown(
@@ -119,6 +121,7 @@ rm("./docs/src/examples/electrical_rc.md")
 # Generate documentation using Documenter
 makedocs(
     modules=[BondGraph],
+    # format=Documenter.LaTeX(platform="none"),
     format=Documenter.HTML(prettyurls=true, sidebar_sitename=false, assets=["assets/favicon.ico"]),
     sitename="BondGraph.jl",
     # doctest=true,
