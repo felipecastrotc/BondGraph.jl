@@ -1,0 +1,101 @@
+# Karnopp, Margolis & Rosenberg — System Dynamics: Modeling, Simulation, and Control of Mechatronic Systems, 5th ed., John Wiley & Sons 2012: Ch. 1–2
+
+PDF↔book page offset: book p. N = PDF p. N+10 (PDF p. 13 = printed p. 3; PDF p. 4 = printed "v"). Pages cited below are printed book pages. Range read: pp. 4–36.
+
+## Topics covered
+- Models of systems: real systems cannot be modeled exactly; the aim is the simplest model that answers the question (§1.1, p. 4–5)
+- Bond graphs as a uniform notation across energy domains, exposing structure and analogies (§1.1, p. 5)
+- Systems, subsystems, components, elements; black-box components (§1.2, p. 7–8)
+- State-determined systems: state variables X, inputs U, outputs Y (§1.3–1.4, p. 9–10, Fig. 1.4)
+- Linear vs nonlinear models; no real system is truly linear (§1.5, p. 11–12)
+- Why bond graphs for automated simulation (precise, few symbols, machine-readable) (§1.6, p. 12–13)
+- Engineering multiports, ports, power variables (§2.1, p. 17–19, Fig. 2.1)
+- Effort/flow, power, momentum p, displacement q, energy (§2.1, p. 19–21, Table 2.1, Eqs. 2.1–2.5b)
+- Tetrahedron of state (§2.1, p. 21, Fig. 2.2)
+- Units and variable tables per domain (§2.1, p. 22–24, Tables 2.2–2.5)
+- Ports, bonds, half-arrow sign convention (§2.2, p. 24–27, Figs. 2.3–2.5)
+- Word bond graphs (§2.3, p. 27–29, Figs. 2.5–2.7)
+- Inputs, outputs, causal stroke, active bonds / signals (§2.4, p. 30–33, Figs. 2.8–2.9)
+
+## Definitions
+- State-determined system: a model given by ODEs in state variables plus algebraic relations for other variables; future behavior follows from the state at some time plus the future inputs. (§1.3, p. 9)
+- X = state variables, U = input variables (the environment's action on the system), Y = output variables (back effects or sensed quantities). (§1.4, p. 10, Fig. 1.4)
+- Linear systems = sets of linear first-order state equations; nonlinear (still state determined) = sets of nonlinear first-order state equations. (§1.5, p. 11)
+- Subsystem: modeled as a system itself, broken into interacting components. Component: modeled as a unit (black box) characterized only by how it interacts with others. Element: the most primitive component. (§1.2, p. 7)
+- Port: a place where subsystems can be interconnected and power can flow. Multiport: a subsystem with one or more ports (1-port, 2-port, ...). (§2.1, p. 19)
+- Power variables: the pair of variables forced equal when two multiports are connected, whose product is instantaneous power. (§2.1, p. 19)
+- Effort e(t) and flow f(t): generalized names for all power variables. (§2.1, p. 19)
+- Power `P(t) = e(t) f(t)`. (§2.1, p. 20, Eq. 2.1)
+- Momentum p(t): time integral of an effort. Displacement q(t): time integral of a flow. Together p and q are the "energy variables". (§2.1, p. 20–21, Eqs. 2.2–2.3)
+- Energy `E(t)`: time integral of power that has passed into or out of a port. (§2.1, p. 20, Eq. 2.4)
+- Tetrahedron of state: mnemonic with vertices e, f, p, q; edges e–p linked by `\dot p = e` and f–q linked by `\dot q = f` (the other edges are filled in later). (§2.1, p. 21, Fig. 2.2)
+- Bond: when two multiports are coupled so effort and flow are identical, they share a common bond; drawn as a single line joining the two ports. Isolated lines denote ports or "potential bonds". (§2.2, p. 26–27, Fig. 2.5)
+- Power bond: a line in a bond graph representing power exchange. Word bond graph: bond graph whose subsystems are named by words. (§2.3, p. 27)
+- Half-arrow: marks the direction of power flow when the product e·f is positive. (§2.2, p. 25, Fig. 2.3d)
+- Causal stroke: short perpendicular line at one end of a bond; shows the direction in which the effort signal is directed (the effort is an input to the element at the stroke end). The end with no stroke is the end toward which the flow signal points. (§2.4, p. 30, Figs. 2.8c, 2.9)
+- Active bond: a bond drawn with a full arrowhead; a pure signal (negligible power) in which one variable (usually effort) is determined by A and is an input to B, and the other variable has negligible effect on A. (§2.4, p. 29, p. 33, Fig. 2.7)
+
+## Sign conventions (power direction, half-arrows, signs at junctions/elements)
+- The half-arrow on a port line or bond points in the direction of power flow when the product of effort and flow is positive at that instant. (§2.2, p. 25, Fig. 2.3d)
+- Example, dc motor shaft: if ω is positive in the sketched direction and τ is the torque exerted by the motor on whatever it is connected to, then τω > 0 means power flows from the motor to the other multiport, so the half-arrow points away from the motor. (§2.2, p. 25–26, Fig. 2.3d)
+- Example, dc motor electrical ports: when e_f, i_f, e_a, i_a are positive, power flows into the motor from whatever is connected, so the field and armature half-arrows point toward the motor. (§2.2, p. 26, Fig. 2.3d)
+- On a bond between two multiports, the half-arrow means the effort and flow are defined such that when their product is positive, power flows from the tail multiport to the head multiport. Example: the half-arrow on the motor–pump bond means that τω > 0 is power flowing from motor to pump. (§2.2, p. 27, Fig. 2.5)
+- Both power variables share one definition per bond: a bond carries a single effort and a single flow, identical at both ends. The sign convention fixes the positive sense of both. (§2.2, p. 26–27, Fig. 2.5)
+- The book stresses that sign conventions are easy in circuits but not trivial in mechanics: action and reaction forces appear oppositely directed, so a diagram like Fig. 2.3a does not say whether τ is the torque on the shaft or from the motor; the half-arrow settles this. (§2.2, p. 26)
+- Half-arrow and causal stroke are independent. All four combinations (stroke at either end, half-arrow either direction) are allowed; the text lists A ⊢ B style combinations. (§2.4, p. 31, Fig. 2.9)
+- Effort/flow label placement: efforts above or to the left of the bond, flows below or to the right; for diagonal bonds use judgment. (§2.2, p. 25)
+- Active (full-arrow) bond: arrowhead shows the direction of the signal. `A -e-> B` means effort determined by A, input to B. The notation for a normal bond with the flow determined by B appears as `A -e/f-| B` with the flow suppressed as a signal. (§2.4, p. 33)
+- **Inference:** the book gives no rule about how reversing a half-arrow changes element laws in Ch. 2; the discussion is only that the half-arrow fixes which direction is positive power. Element-level sign effects (e.g. "power into the element") are not covered in pp. 4–36. (§2.2, p. 25–27)
+- Variable subscripts on figures such as Fig. 2.5 label the field port as e_1 | i_1 and the battery port as e_2 / i_2, each paired on one bond. (§2.2, p. 27, Fig. 2.5)
+
+## Constitutive equations
+- Power: `P(t) = e(t) f(t)`, effort e and flow f. (§2.1, p. 20, Eq. 2.1)
+- Momentum: `p(t) = p_0 + \int_{t_0}^{t} e(t) dt`; differential form `dp/dt = e`, `dp = e dt`. (§2.1, p. 20, Eqs. 2.2, 2.2a)
+- Displacement: `q(t) = q_0 + \int_{t_0}^{t} f(t) dt`; `dq/dt = f`, `dq = f dt`. (§2.1, p. 20, Eqs. 2.3, 2.2b)
+- Energy: `E(t) = \int^t P dt = \int^t e f dt`. (§2.1, p. 20, Eq. 2.4)
+- `E(t) = \int e dq = \int f dp`. (§2.1, p. 21, Eq. 2.5)
+- When e is a function of q, or f of p: `E(q) = \int^q e(q) dq`, `E(p) = \int^p f(p) dp`. (§2.1, p. 21, Eqs. 2.5a, 2.5b)
+- Power/energy variables per domain (generalized: e, f, p, q, P, E):
+  - Mechanical translation: F (N), V (m/s), P = momentum (N-s), X (m); P = F V; E = \int F dx, \int V dP. (§2.1, p. 22, Table 2.2)
+  - Mechanical rotation: τ (N-m), ω (rad/s), p_τ = angular momentum (N-m-s), θ (rad); P = τ ω; E = \int τ dθ, \int ω dp_τ. (§2.1, p. 23, Table 2.3)
+  - Hydraulic: pressure P (N/m^2), volume flow Q (m^3/s), pressure momentum p_p (N-s/m^2), volume V (m^3); power P(t) Q(t); E = \int P dV, \int Q dp_p. (§2.1, p. 23, Table 2.4)
+  - Electrical: voltage e (V), current i (A), flux linkage λ (V-s), charge q (C = A-s); power e i; E = \int e dq, \int i dλ. (§2.1, p. 24, Table 2.5)
+- 1-port resistor (previewed only in the page following the range): effort and flow related by a static function, `e = Φ_R(f)`, `f = Φ_R^{-1}(e)`; linear cases `e = R i` (electrical), `F = b V` (dashpot). Bond graph symbol `e/f -> R`, labels like `R:b`. This is outside pp. 4–36 but appears on p. 37–38 (Fig. 3.1) and is included only because it fixes the notation. (§3.1, p. 37–38, Fig. 3.1)
+- Slider-crank, power-conserving ideal device (problem): `τ ω = F v`, with `v = m(θ) ω` and hence `τ = m(θ) F`; stated to be a modulated transformer. (§2, Prob. 2-11, p. 34–35)
+
+## Causality rules
+- Input/output at a port: at each port both an effort and a flow exist; one can be controlled (input) but not both simultaneously. If effort is an input, flow is the output and vice versa. (§2.4, p. 30)
+- Only one fact is needed per bond to specify causality; the other follows. (§2.4, p. 30)
+- Causal stroke at the end of a bond marks the end where effort is an input (effort signal points toward the stroke); flow signal points toward the end without the stroke. (§2.4, p. 30, Fig. 2.9)
+- Fig. 2.9a: `A —e/f—| B` (stroke at B) means effort is output of A and input to B, flow is output of B and input to A. Fig. 2.9b: `A |— B` (stroke at A) is the reverse: effort is output of B and input to A, flow is output of A and input to B. (§2.4, p. 32, Fig. 2.9)
+- Example, dc motor test: dynamometer sets speed, so ω is an input to the motor and τ is an output; voltages applied, currents measured: e_a, e_f inputs, i_a, i_f outputs. (§2.4, p. 30–31, Fig. 2.8)
+- Active bond / signal: a full arrow means the other variable has negligible effect, so only a one-way signal remains. Active bonds behave like one-way block-diagram signals, while normal bonds give two signal flows (e and f). (§2.4, p. 33, Prob. 2-6, p. 34)
+- The book defers detailed causality rules for elements ("rules of causality among ideal multiports must be discovered and obeyed") to Ch. 3; none are stated in pp. 4–36. (§2.4, p. 33)
+- Without a stated decision, bond graphs assume forward and backward effects both exist; an active bond is an explicit modeling decision that the back effect is negligible. (§2.4, p. 33)
+
+## Assumptions
+- Ports transmit power; power conservation across a bond: the same e and f appear at both ends, so power leaving one port equals power entering the other. **Inference:** this follows from "identical effort and flow" on a bond; the book does not state "lossless" explicitly here. (§2.2, p. 26–27)
+- All variables are in SI units, with no conversion factors in the model; bond graph software assumes SI. (§2.1, p. 22)
+- Angles in radians. (§2.1, p. 23, Table 2.3 footnote)
+- Ideal instruments/signal connections extract negligible power; zero power is the idealization of an active bond. (§2.4, p. 32–33)
+- Modeling is selective: only the effects of interest are represented; model complexity is a choice. (§1.1, p. 4–5)
+- Linear models are a starting point only; real systems are nonlinear, and bond graph simulation handles both. (§1.5–1.6, p. 12–13)
+- Models are state determined; time runs from past to future and the state summarizes the past. (§1.3, p. 9)
+- Slider-crank: massless, frictionless, rigid, hence power conserving. (§2, Prob. 2-11, p. 34)
+
+## Worked examples
+- Separately excited dc motor as a 3-port: power variables τ, ω (shaft), e_f, i_f (field), e_a, i_a (armature). Fig. 2.3d adds half-arrows: shaft away from motor, field and armature toward the motor. Fig. 2.8c adds causal strokes for a test: ω input, τ output, voltages inputs, currents outputs. (§2.2, §2.4, p. 25–31, Figs. 2.3, 2.8)
+- Pump–dc motor–battery word bond graph: pump bond carries P, Q (pump side) and the shaft bond carries τ, ω; motor field port e_1 | i_1; battery bond e_2, i_2; the shaft half-arrow points motor to pump and the battery half-arrow points to the motor. No equations given. (§2.2, p. 26–27, Figs. 2.4–2.5)
+- Radar antenna pedestal drive word bond graph: armature supply (v_1, i_1) and field supply (v_2, i_2) into Motor, then Shaft (τ_3, ω_3 / τ_4, ω_4), Gears (τ_5, ω_5), Pedestal load. No equations. (§2.3, p. 27–28, Fig. 2.6)
+- Automotive drive train word bond graph: engine, clutch, gearbox, driveshaft, differential, two wheels, mass; throttle θ, clutch linkage μ, gear selector g drawn as active bonds (full arrows) from the driver; road elevation and air/rolling resistance attach to Mass. No equations. (§2.3, p. 28–29, Fig. 2.7)
+- Problem 2-11 slider-crank: from `x = R cos θ + l cos α` and `l sin α = R sin θ`, get `v = m(θ) ω` with `\dot x = -v`, `\dot θ = ω`, then `τ = m(θ) F` by power conservation. (§2, Prob. 2-11, p. 34–35)
+- Problem 2-10: lossless positive-displacement pump, `τ ω = P Q`; text gives τ = 5 N-m, P = 7.0 MPa. **Inference:** this yields Q = (τ/P) ω, which the book leaves as an exercise. (§2, Prob. 2-10, p. 34)
+- Problems 2-4, 2-12: causality assigned on the word bond graphs; Prob. 2-12 uses Supply pressure, Tube, Accumulator, Cylinder, Mass, Spring, Damper with efforts P_s, P_c, F_m, F_s, F_d and flows Q_s, Q_I, Q_a, v_m, v_s, v_d. (§2, p. 34, 36)
+
+## Flags
+- The scans are readable. The notation "A ⊢ B" etc. in the text (p. 31) lost its exact glyphs in the scan; rely on Fig. 2.9 for the stroke placement. (§2.4, p. 31–32)
+- On p. 33, the text for the flow-determined active bond is typeset as `A -e/f-| B`; the position of the stroke in that inline expression could not be confirmed from the scan. (§2.4, p. 33)
+- The pp. 4–36 range contains no 0/1 junction, TF/GY, I, C, R, Se, Sf definitions or causality rules for elements; those start in Ch. 3 (p. 37+). The R-element equations cited above come from p. 37–38, just outside the requested range. (§2.4, p. 33)
+- The book uses `P` both for power (sans-serif P(t)) and for pressure (Table 2.1/2.4) and `P` for translational momentum (Table 2.2); context disambiguates. (§2.1, p. 19–23)
+- Sign effect of half-arrow direction on element constitutive laws is not discussed in this range. (§2.2)
+- Fig. 2.7 and Fig. 2.6 internal sign directions of half-arrows are small in the scan and were not individually verified. (§2.3, p. 28–29)
