@@ -44,7 +44,8 @@ After step 3:
   - [ ] User Guide (empty in `docs/make.jl`): concepts, elements, connections, simulation
   - [ ] API reference: docstrings for every export, `lib/public.md` and `lib/internals.md` complete; resolve exports with no local definition (`renamevars`, `addsubsys`, `latexify`), document `@oneport`
   - [ ] Fix `docs/make.jl` issues listed in the audit (`/tree/master/` link, cwd-relative paths, unguarded `rm`)
-  - [ ] Examples: all run on the new API; finish `mechanical_msd_ndof.jl`; decide on `tmp_dev_acoustic_carol.jl`
+  - [ ] Examples: all run on the new API; finish `mechanical_msd_ndof.jl` (textbook `0 → sd`); decide on `tmp_dev_acoustic_carol.jl`
+  - [ ] Fix the DC motor and 2-DoF TikZ drawings to match the textbook (ticket 06)
   - [ ] Changelog page (commented out in `docs/make.jl`)
   - [ ] Citing page with the thesis/paper reference
 - [ ] Docs workflow green, deploy to `gh-pages`
