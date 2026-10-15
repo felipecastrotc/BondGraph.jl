@@ -27,6 +27,7 @@ A settled, written spec for BondGraph v0.3 on ModelingToolkit 11 / Julia ≥ 1.1
 - [Which MTK 11 dependencies are AGPL, and what does that mean for us?](issues/02-licensing-facts.md): full MTK ≥ 11 hard-depends on two AGPL-3.0 packages; ModelingToolkitBase is MIT but lacks index reduction/tearing (higher-index bond graphs fail); Catalyst's pattern (depend on MTKBase, users opt into full MTK) is the precedent; JOSS is fine either way.
 - [Prototype the bond connection mechanism on MTK 11](issues/04-prototype-connection-mechanism.md): hybrid accepted ([ADR 0001](../../docs/adr/0001-junctions-on-native-mtk-connections.md)); all six examples reproduce golden data on MTK 11; free ports + explicit `connect`, momentum state for inertias, GY/TF components replace `mGY(coneqs)`.
 - [Choose the connection mechanism](issues/05-connection-mechanism.md): settled by the ticket 04 verdict (ADR 0001).
+- [How do power ports couple with ModelingToolkitStandardLibrary components?](issues/11-coupling-with-mtk-stdlib.md): no direct `connect`, but small per-domain adapter elements match reference models in electrical, translational, rotational, hydraulic, and `RealInput`-modulated cases; API choices go to the public-API ticket.
 
 ## Not yet specified
 
