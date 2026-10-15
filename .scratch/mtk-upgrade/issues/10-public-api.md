@@ -2,7 +2,10 @@
 
 Type: grilling
 Status: open
-Blocked by: 05
+
+## Already decided (ticket 04)
+
+- Junction-to-junction bonds via named free ports + explicit `connect`; `Mass` has momentum state `p`; `GY`/`TF` components replace `mGY(...; coneqs)` and the tuple `@named` form.
 
 ## Question
 
