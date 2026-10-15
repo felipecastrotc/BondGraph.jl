@@ -53,3 +53,5 @@ Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `
 ### Domain docs
 
 Single-context: `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+Bond-graph theory (sign conventions, element laws, causality): consult `docs/literature/README.md` and the cited book pages before answering or changing conventions. Keep what a book states separate from inference and design choices.
