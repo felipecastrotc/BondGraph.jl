@@ -1,7 +1,7 @@
 # How do power ports couple with ModelingToolkitStandardLibrary components?
 
 Type: research
-Status: open
+Status: claimed
 
 ## Question
 
