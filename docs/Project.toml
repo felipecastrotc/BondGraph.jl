@@ -1,7 +1,6 @@
 [deps]
 BondGraphToolkit = "41e83443-7082-4de0-b466-8936bcd80675"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-Graphviz_jll = "3c863552-8265-54e4-a6dc-903eb78fde85"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 ModelingToolkitStandardLibrary = "16a59e39-deab-5bd0-87e4-056b12336739"
 OrdinaryDiffEqNonlinearSolve = "127b3ac7-2247-4354-8eb6-78cf4e7c58e8"

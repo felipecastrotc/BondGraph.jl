@@ -17,6 +17,8 @@ using Reexport
 using ModelingToolkit: t_nounits as t, D_nounits as D, getname
 using Symbolics: unwrap, get_variables, iscall, operation, arguments
 using Latexify: latexify
+using Graphviz_jll: Graphviz_jll
+import REPL
 using ModelingToolkitStandardLibrary.Blocks: RealInput, RealOutput
 using ModelingToolkitStandardLibrary.Electrical: Pin
 using ModelingToolkitStandardLibrary.Mechanical: Translational, TranslationalPosition, Rotational
@@ -28,7 +30,7 @@ export Mass, Spring, Damper
 export Junction0, Junction1
 export TF, GY
 export bg_equations, latexify
-export bondgraph, bondgraph_dot, bondgraph_svg, bondgraph_tikz
+export bondgraph, bgplot, savebg
 export ElectricalAdapter, TranslationalAdapter, TranslationalPositionAdapter,
     RotationalAdapter, HydraulicAdapter
 
