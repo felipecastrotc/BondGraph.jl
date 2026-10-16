@@ -87,16 +87,18 @@ The bond graph of `sys` (see [`bondgraph`](@ref)) as Graphviz DOT text: laid out
 to right, junctions drawn as `0`/`1`, elements and two-ports as `type:name`, bonds as
 half-arrows. Render it with any Graphviz tool, or with [`bondgraph_svg`](@ref).
 """
-function bondgraph_dot(sys)
-    g = bondgraph(sys)
+bondgraph_dot(sys) = dot_text(bondgraph(sys), n -> string('"', n.id, '"'))
+
+# DOT text of a bond graph `g`, naming each node `name(node)`.
+function dot_text(g, name)
     io = IOBuffer()
     println(io, "digraph bondgraph {\n  rankdir=LR;\n  splines=false;\n  node [shape=plaintext];")
-    foreach(n -> println(io, "  \"", n.id, "\" [label=\"", n.label, "\"];"), g.nodes)
+    foreach(n -> println(io, "  ", name(n), " [label=\"", n.label, "\"];"), g.nodes)
     # Bonds between junctions and two-ports are the main power path: keep them straight.
-    kind = Dict(n.id => n.kind for n in g.nodes)
+    node = Dict(n.id => n for n in g.nodes)
     for (a, b) in g.bonds
-        weight = kind[a] != :element && kind[b] != :element ? ", weight=10" : ""
-        println(io, "  \"", a, "\" -> \"", b, "\" [arrowhead=lvee", weight, "];")
+        weight = node[a].kind != :element && node[b].kind != :element ? ", weight=10" : ""
+        println(io, "  ", name(node[a]), " -> ", name(node[b]), " [arrowhead=lvee", weight, "];")
     end
     print(io, "}")
     String(take!(io))
@@ -109,3 +111,13 @@ The bond graph of `sys` rendered by Graphviz, displayed as SVG in notebooks and 
 docs. Needs `using Graphviz_jll`, which loads the package extension.
 """
 function bondgraph_svg end
+
+"""
+    bondgraph_tikz(sys)
+
+The bond graph of `sys` as a standalone LaTeX/TikZ document, placed with Graphviz's
+layout and drawn in the style of this package's documentation figures (half-arrow
+bonds, `0`/`1` junctions, `type:name` labels). Compile it with `pdflatex`, or copy its
+`tikzpicture` (and the `bgarrow` declaration) into a paper. Needs `using Graphviz_jll`.
+"""
+function bondgraph_tikz end
