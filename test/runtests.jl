@@ -18,6 +18,9 @@ const PENDING = Dict(
     @testset "Two-ports" begin
         include("test_two_ports.jl")
     end
+    @testset "Equations" begin
+        include("test_equations.jl")
+    end
     @testset "Regression" begin
         include("regression/helpers.jl")
         for f in filter(startswith("test_"), readdir(joinpath(@__DIR__, "regression")))
