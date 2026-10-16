@@ -14,7 +14,7 @@ Julia library for modeling and simulating dynamic systems with bond graphs, buil
 ## Commands
 
 ```sh
-julia --project -e 'using Pkg; Pkg.test()'      # tests (CI: Julia 1.10, no Manifest)
+julia --project -e 'using Pkg; Pkg.test()'      # tests (CI: Julia 1.10 and 1, no Manifest)
 julia --project=docs docs/make.jl               # build docs (also tries to deploy; harmless locally)
 ```
 

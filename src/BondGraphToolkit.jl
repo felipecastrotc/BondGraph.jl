@@ -39,14 +39,14 @@ end
 
 Define a one-port element. The body can use `power.e` and `power.f`, the effort and
 flow of the element's bond as drawn, and must end with the vector of laws. The macro
-adds the `power` port and wraps the laws in a `System`; MTK finds the unknowns and
-parameters itself.
+adds the `power` port and wraps the laws in a `System`, as an MTK `@component`; MTK
+finds the unknowns and parameters itself.
 """
 macro oneport(fdef)
     body = fdef.args[2]
     body.args[end] = :($System(vcat($(body.args[end])), $t; name, systems = [power]))
     pushfirst!(body.args, :(power = $PowerPort(name = :power)))
-    esc(fdef)
+    esc(Expr(:macrocall, GlobalRef(ModelingToolkit, Symbol("@component")), __source__, fdef))
 end
 
 include("elements.jl")
