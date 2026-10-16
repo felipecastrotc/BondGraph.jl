@@ -5,7 +5,7 @@ Julia library for modeling and simulating dynamic systems with bond graphs, buil
 ## Layout
 
 - `src/BondGraphToolkit.jl`: module entry, exports, `PowerPort`, `@oneport`
-- `src/elements.jl`: one-port elements (`Se`, `Sf`, `Resistance`, `Compliance`, `Inertia`)
+- `src/elements.jl`: one-port elements (`Se`, `Sf`, `Resistance`, `Compliance`, `Inertia`) and the mechanical shorthands `Mass`, `Spring`, `Damper`
 - `src/junctions.jl`: the signed 0-/1-junction component (`Junction0`, `Junction1`)
 - `src/two_ports.jl`: `TF`, `GY` (built with `@twoport`, defined in the module file)
 - `src/equations.jl`: `bg_equations` (readable, renameable equations; `latexify` is re-exported)
