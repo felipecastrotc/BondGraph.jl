@@ -1,15 +1,13 @@
-# BondGraph.jl
+# BondGraphToolkit.jl
 
-Julia library for modeling and simulating dynamic systems with bond graphs, built on ModelingToolkit.jl (MTK). Module name `BondGraph`.
+Julia library for modeling and simulating dynamic systems with bond graphs, built on ModelingToolkit.jl (MTK 11). Module name `BondGraphToolkit` (v0.3 on branch `feature/mtk-upgrade`; v0.2 was `BondGraph` on MTK 8.71). Public MTK API only, no overrides of MTK internals (ADR 0001).
 
 ## Layout
 
-- `src/BondGraph.jl`: module entry, exports, include order
-- `src/bg.jl`: bond graph elements (`Se`, `Sf`, `Junction0/1`, `mGY`, `mTF`, `Mass`, `Spring`, `Damper`, ...)
-- `src/mtk.jl`: overrides of MTK internals; the first thing to break on MTK upgrades
-- `src/utils/`: connection, graph, system, macro (`@oneport`) helpers
-- `src/mbg.jl`: 2D/multibond experiments, not included in the module
-- `test/runtests.jl` + `test/unit-tests/`: unit tests
+- `src/BondGraphToolkit.jl`: module entry, exports, `PowerPort`, `@oneport`
+- `src/elements.jl`: one-port elements (`Se`, `Sf`, `Resistance`, `Compliance`, `Inertia`)
+- `src/junctions.jl`: the signed 0-/1-junction component (`Junction0`, `Junction1`)
+- `test/runtests.jl` + `test/test_*.jl`: behaviour tests through the public API; `test/regression/`: golden data from v0.2 (never regenerate)
 - `examples/*.jl`: Literate.jl sources, rendered into the docs
 - `docs/`: Documenter.jl site, deployed to `gh-pages`; has its own `docs/Project.toml`
 

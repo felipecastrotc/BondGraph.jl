@@ -1,11 +1,7 @@
-# Model from examples/electrical_rc.jl
-function build_electrical_rc()
-    @named C = Spring(k = 1 / 1.0)
-    @named R = Damper(c = 1.0)
-    @named model = Junction0(R, C)
-    @named sys = simplifysys(model)
-    prob = ODEProblem(sys, [R.power.f => 0.0, C.q => 1.0], (0, 10))
-    return sys, ["electrical_rc" => prob]
+# Model from examples/electrical_rc.jl: R and C on one 0-junction, bonds drawn into them.
+let
+    @named C = Compliance(C = 1.0, q = 1.0)
+    @named R = Resistance(R = 1.0)
+    @named model = Junction0([-1, R], [-1, C])
+    check_case("electrical_rc", model, ["C₊q(t)" => model.C.q])
 end
-
-check_example("electrical_rc", build_electrical_rc)
