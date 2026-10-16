@@ -14,10 +14,10 @@ _member(a) = (1, a)
 
 function junction_core(kind, signs, σs; name)
     ps = [PowerPort(name = Symbol(:p, k)) for k in eachindex(signs)]
-    x = [σ * p.f for (σ, p) in zip(σs, ps)]
+    bond_f = [σ * p.f for (σ, p) in zip(σs, ps)]
     eqs = kind == 0 ?
-        [[p.e ~ ps[1].e for p in ps[2:end]]; 0 ~ sum(signs .* x)] :
-        [[xk ~ x[1] for xk in x[2:end]]; 0 ~ sum(s * p.e for (s, p) in zip(signs, ps))]
+        [[p.e ~ ps[1].e for p in ps[2:end]]; 0 ~ sum(signs .* bond_f)] :
+        [[f ~ bond_f[1] for f in bond_f[2:end]]; 0 ~ sum(s * p.e for (s, p) in zip(signs, ps))]
     System(eqs, t; name, systems = ps)
 end
 
@@ -26,8 +26,8 @@ function junction(kind, args; name)
     σs = [x isa Symbol ? s : -1 for (s, x) in zip(signs, xs)]
     core = junction_core(kind, signs, σs; name = :core)
     ends = [x isa Symbol ? PowerPort(name = x) : x for x in xs]
-    cons = [connect(x isa Symbol ? e : e.power, getproperty(core, Symbol(:p, k)))
-            for (k, (x, e)) in enumerate(zip(xs, ends))]
+    cons = [connect(x isa Symbol ? sys : sys.power, getproperty(core, Symbol(:p, k)))
+            for (k, (x, sys)) in enumerate(zip(xs, ends))]
     System(cons, t; name, systems = [core; ends])
 end
 

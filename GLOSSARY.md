@@ -1,4 +1,4 @@
-# BondGraph.jl
+# BondGraphToolkit.jl
 
 A bond-graph dialect of ModelingToolkit: bond-graph models are ordinary MTK systems, so they compose, couple, and simulate with the same tools as any other MTK model.
 

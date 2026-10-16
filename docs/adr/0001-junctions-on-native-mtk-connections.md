@@ -9,7 +9,7 @@ BondGraph v0.2 (MTK 8.71) turned bonds into equations with its own algorithm: it
 
 ## Decision
 
-- **0- and 1-junctions = one signed component** with one `Power` port per bond. The sign is the bond's half-arrow: +1 into the junction, −1 out of it. The equations are the textbook ones in bond variables (Karnopp Eqs. 3.16–3.21): the shared variable is unsigned and the sum is signed.
+- **0- and 1-junctions = one signed component** with one `PowerPort` per bond. The sign is the bond's half-arrow: +1 into the junction, −1 out of it. The equations are the textbook ones in bond variables (Karnopp Eqs. 3.16–3.21): the shared variable is unsigned and the sum is signed.
 - **Element laws are written in the variables of the element's bond, as drawn** (v0.2's convention, unchanged). A junction converts MTK's port flow (positive into the component) to the bond flow, so a bond drawn out of an element keeps the element's law as written.
 - **Plain `connect` of free junction ports is a 0-junction** whose bond directions come from the signs at the other end of each bond.
 - **TF / GY (and modulated forms) = ordinary two-port components**, wired with `connect`; modulation is just an expression for the ratio.
