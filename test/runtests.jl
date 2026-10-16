@@ -15,6 +15,9 @@ using Test
     @testset "Two-ports" begin
         include("test_two_ports.jl")
     end
+    @testset "Signals" begin
+        include("test_signals.jl")
+    end
     @testset "Equations" begin
         include("test_equations.jl")
     end
