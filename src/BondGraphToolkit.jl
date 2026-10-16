@@ -20,6 +20,7 @@ using Latexify: latexify
 
 export PowerPort, @oneport, @twoport
 export Se, Sf, Resistance, Compliance, Inertia
+export Mass, Spring, Damper
 export Junction0, Junction1
 export TF, GY
 export bg_equations, latexify
