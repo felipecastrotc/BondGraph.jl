@@ -36,15 +36,22 @@ A one-port element that imposes an effort (Se) or a flow (Sf).
 
 **Inertia (I)**:
 A one-port element that stores energy in its flow's conjugate momentum; mechanically a mass, electrically an inductance.
-_Avoid_: mass (outside mechanical examples)
+_Avoid_: mass, except as the mechanical shorthand
 
 **Compliance (C)**:
 A one-port element that stores energy in its displacement; mechanically a spring, electrically a capacitance.
-_Avoid_: spring, capacitor (outside domain-specific examples)
+_Avoid_: spring, except as the mechanical shorthand; capacitor
 
 **Resistance (R)**:
 A one-port element that dissipates power; mechanically a damper, electrically a resistor.
-_Avoid_: damper (outside mechanical examples)
+_Avoid_: damper, except as the mechanical shorthand
+
+**Detector (De, Df)**:
+An element that measures the effort (De) or flow (Df) of a bond and outputs it as a signal, carrying no power.
+_Avoid_: sensor
+
+**Adapter**:
+An element whose bond connects a bond graph to a model written in another modeling convention (an MTK standard-library network), which acts as the element at the end of that bond.
 
 **Custom element**:
 A user-defined element, often nonlinear, built with the same ergonomics as the built-in ones.
@@ -64,4 +71,10 @@ A two-port element that scales effort and flow by reciprocal factors, conserving
 A two-port element that relates the effort of each port to the flow of the other, conserving power.
 
 **Modulated two-port (mTF, mGY)**:
-A transformer or gyrator whose ratio is an expression of system variables rather than a constant.
+A transformer or gyrator whose ratio is an expression of system variables or a signal rather than a constant.
+
+### Signals
+
+**Activated bond (signal)**:
+A connection that carries information but no power, such as a source's driving signal, a modulus, or a detector's output.
+_Avoid_: bond (for signals)

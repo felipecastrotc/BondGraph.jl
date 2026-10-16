@@ -18,12 +18,13 @@ Branch: `feature/mtk-upgrade`. Destination: **BondGraph installs and passes test
 - [x] `/research` (done: `.scratch/mtk-upgrade/research-mtk-internals.md`): what changed in MTK/Symbolics/SymbolicUtils from 8.71 to current for every internal `src/` imports (`src/mtk.jl`, `src/utils/*.jl`, `src/types.jl`). Output: a cited markdown note in the repo.
 - [x] Regression safety net: golden-data tests for every example (`test/regression/`, report `.scratch/golden-tests/report.md`). Watch: N-DoF cancelling terms (0-junction merges non-adjacent elements) and Duffing's redundant state.
 - [x] `/wayfinder`: map charted in `.scratch/mtk-upgrade/map.md` (10 decision tickets in `issues/`; the map is the source of truth from here). Original expected questions:
-  - [ ] Keep overriding MTK internals, or rebuild connection expansion on MTK's public API (the big one)
+  - [x] Rebuild connection expansion on MTK's public API, no overrides (ADR 0001, tickets 03–05)
   - [x] Which MTK version to target, and the minimum Julia version: MTK `11.45` caret, Julia 1.10, CI 1.10 + 1 (ticket 09)
-  - [ ] Turn `generate_graph` (Plots/GraphRecipes) into a package extension so the core stays light
+  - [x] Graph plotting: rebuilt on Graphviz with TikZ export; public API settled (ticket 10)
   - [x] Junction sign convention: v0.2 convention kept, confirmed against Karnopp/Borutzky (ticket 06)
   - [x] Package name: `BondGraphToolkit` (ticket 08)
 - [ ] `/grill-with-docs` on the key decisions: produces `GLOSSARY.md` (effort, flow, port, junction, bond, ...) and ADRs in `docs/adr/`.
+- [ ] TODO (future): SCAP causality as an optional diagnostic (ticket 10).
 - [ ] `/to-spec` → `/to-tickets` → `/implement` per ticket (uses `tdd` and `code-review`).
 - [ ] `/diagnosing-bugs` for equation/sign mismatches against the literature (MSD N-DoF, DC motor).
 - [ ] Fold the remaining `TODO.md` items (mTF, rename-by-Dict) into tickets, then delete `TODO.md`.

@@ -30,14 +30,17 @@ A settled, written spec for BondGraph v0.3 on ModelingToolkit 11 / Julia ≥ 1.1
 - [How do power ports couple with ModelingToolkitStandardLibrary components?](issues/11-coupling-with-mtk-stdlib.md): no direct `connect`, but small per-domain adapter elements match reference models in electrical, translational, rotational, hydraulic, and `RealInput`-modulated cases; API choices go to the public-API ticket.
 - [Fix the sign convention and the meaning of bond direction](issues/06-sign-convention.md): v0.2's convention stays, and the textbooks agree (half-arrow signs only in junction sums; one-port laws in bond variables; TF/GY port 1 in, port 2 out). 0- and 1-junctions become one signed component, and ADR 0001 is amended. The prototype passes all golden cases with v0.2 signs.
 - [Choose the package name](issues/08-package-name.md): `BondGraphToolkit` (passes the registry checks, matches the existing docs). Module, `Project.toml`, file, docs and tests are renamed in v0.3 and the UUID is kept. The GitHub repo is renamed at the v0.3.0 release, after asking.
+- [Decide the public API and its breaking changes](issues/10-public-api.md): role names `Resistance`/`Compliance`/`Inertia` (book parameters R, C, I; states q, p) plus `Mass`/`Spring`/`Damper` shorthands; `PowerPort`; `TF(m)`/`GY(r)` with expression or `RealInput` modulus; `De`/`Df`; `[-1, x]` junction syntax kept; `@oneport` + `@twoport`; five MTKSL adapters; `bg_equations` + `latexify`; Graphviz plot + TikZ export; causality left to MTK.
 - [Confirm the target versions and compat bounds](issues/09-target-versions.md): MTK 11, `ModelingToolkit = "11.45"` (caret), Julia ≥ 1.10. Direct deps only for what the code imports. CI on Julia 1.10 and 1.
 
 ## Not yet specified
 
-- **Causality**: how integral/differential causality and causal conflicts surface when MTK does index reduction; ties to the MTK vs ModelingToolkitBase stance.
-- **Graph visualization**: rebuilding `generate_graph` on the new connection representation.
-- **Duffing's redundant state** (`s.q` and `s3.q` integrate the same velocity): keep, or model the nonlinear spring as one element. (The N-DoF merge anomaly is gone with the new mechanism.)
-- **`Integral` / DomainSets** (`It` in `src/bg.jl`): keep, replace, or drop.
+Nothing left: causality (left to MTK), graph visualization (Graphviz + TikZ), Duffing (kept as drawn) and `Integral`/DomainSets (dropped) were settled in ticket 10.
+
+## Future (after v0.3)
+
+- SCAP causality assignment as an optional diagnostic (reports derivative causality, conflicts and algebraic loops by element; strokes on the plot), never replacing MTK's equations by default.
+- Multiport fields (`@multiport`), thermal/magnetic adapters.
 
 ## Out of scope
 
