@@ -3,23 +3,58 @@
 
 """
     Se(E; name)
+    Se(; name)
 
 Effort source, `e = E`. `E` is a number or any expression of `t` and system variables
-(an expression of another subsystem's variables needs `@named`). Conventionally its
-bond points away from the source.
+(an expression of another subsystem's variables needs `@named`). Without `E`, the
+effort comes from the signal connector `input::RealInput` (a modulated source, MSe).
+Conventionally its bond points away from the source.
 """
-@oneport function Se(E; name)
+@oneport function Se(E = nothing; name)
+    if E === nothing
+        @named input = RealInput()
+        E = input.u
+    end
     [power.e ~ E]
 end
 
 """
     Sf(F; name)
+    Sf(; name)
 
-Flow source, `f = F`. `F` is a number or any expression, as for [`Se`](@ref).
-Conventionally its bond points away from the source.
+Flow source, `f = F`. `F` is a number or any expression, as for [`Se`](@ref). Without
+`F`, the flow comes from `input::RealInput` (MSf). Conventionally its bond points away
+from the source.
 """
-@oneport function Sf(F; name)
+@oneport function Sf(F = nothing; name)
+    if F === nothing
+        @named input = RealInput()
+        F = input.u
+    end
     [power.f ~ F]
+end
+
+"""
+    De(; name)
+
+Effort detector: outputs the effort of its bond as `output::RealOutput` and carries no
+power (`f = 0`), so it doesn't change the model. It sits on a 0-junction, where every
+bond shares the effort it reads (Borutzky 2011, Ch. 3 p. 116).
+"""
+@oneport function De(; name)
+    @named output = RealOutput()
+    [power.f ~ 0, output.u ~ power.e]
+end
+
+"""
+    Df(; name)
+
+Flow detector: outputs the flow of its bond as `output::RealOutput` and carries no
+power (`e = 0`). It sits on a 1-junction, where every bond shares the flow it reads.
+"""
+@oneport function Df(; name)
+    @named output = RealOutput()
+    [power.e ~ 0, output.u ~ power.f]
 end
 
 """
