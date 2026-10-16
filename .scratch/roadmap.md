@@ -25,7 +25,7 @@ Branch: `feature/mtk-upgrade`. Destination: **BondGraph installs and passes test
   - [x] Package name: `BondGraphToolkit` (ticket 08)
 - [ ] `/grill-with-docs` on the key decisions: produces `GLOSSARY.md` (effort, flow, port, junction, bond, ...) and ADRs in `docs/adr/`.
 - [ ] TODO (future): SCAP causality as an optional diagnostic (ticket 10).
-- [ ] `/to-spec` → `/to-tickets` → `/implement` per ticket (uses `tdd` and `code-review`).
+- [ ] `/to-spec` (done: `.scratch/mtk-upgrade/spec.md`) → `/to-tickets` → `/implement` per ticket (uses `tdd` and `code-review`).
 - [ ] `/diagnosing-bugs` for equation/sign mismatches against the literature (MSD N-DoF, DC motor).
 - [ ] Fold the remaining `TODO.md` items (mTF, rename-by-Dict) into tickets, then delete `TODO.md`.
 - [ ] TODO (deferred by maintainer): decide license and MTK vs ModelingToolkitBase dependency before registration/paper. AGPL is acceptable if needed; keep the current license until then. See `.scratch/mtk-upgrade/issues/07-dependency-license-stance.md`.
