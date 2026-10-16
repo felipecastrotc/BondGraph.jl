@@ -80,7 +80,6 @@ HydraulicAdapter
 ```@docs
 bg_equations
 bondgraph
-bondgraph_dot
-bondgraph_svg
-bondgraph_tikz
+bgplot
+savebg
 ```

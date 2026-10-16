@@ -14,9 +14,21 @@ end
 subpath(path, name) = isempty(path) ? string(name) : string(path, "₊", name)
 
 """
+    BondGraph
+
+The bond graph of a model, returned by [`bondgraph`](@ref): fields `nodes` and `bonds`.
+Displayed as the list of its bonds; draw it with [`bgplot`](@ref).
+"""
+struct BondGraph
+    nodes::Vector{NamedTuple{(:id, :kind, :label), Tuple{String, Symbol, String}}}
+    bonds::Vector{Pair{String, String}}
+end
+
+"""
     bondgraph(sys)
 
-The bond graph of the model `sys` as data: `(; nodes, bonds)`.
+The bond graph of the model `sys` as data, a [`BondGraph`](@ref) with fields `nodes`
+and `bonds`, displayed as the list of its bonds (`Se:V ⇀ 1:je`).
 
 - `nodes`: one `(; id, kind, label)` per junction (`kind = :junction`, label `"0"` or
   `"1"`), element (`:element`) and two-port (`:twoport`), labelled `type:name` as in
@@ -78,47 +90,175 @@ function bondgraph(sys)
             append!(bonds, [role == :into ? j0 => node : node => j0 for (node, role) in ends])
         end
     end
-    (; nodes, bonds)
+    BondGraph(nodes, bonds)
 end
 
-"""
-    bondgraph_dot(sys)
+# A node as written in the text display: `type:name`, junctions `1:name`; the 0-junction
+# of a plain `connect` has no name.
+function text_label(n)
+    n.kind != :junction && return n.label
+    startswith(n.id, "0_") ? n.label : string(n.label, ":", last(split(n.id, "₊")))
+end
 
-The bond graph of `sys` (see [`bondgraph`](@ref)) as Graphviz DOT text: laid out left
-to right, junctions drawn as `0`/`1`, elements and two-ports as `type:name`, bonds as
-half-arrows. Render it with any Graphviz tool, or with [`bondgraph_svg`](@ref).
-"""
-bondgraph_dot(sys) = dot_text(bondgraph(sys), n -> string('"', n.id, '"'))
+function Base.show(io::IO, ::MIME"text/plain", g::BondGraph)
+    name = Dict(n.id => text_label(n) for n in g.nodes)
+    print(io, "BondGraph with ", length(g.nodes), " nodes and ", length(g.bonds), " bonds:")
+    foreach(((a, b),) -> print(io, "\n  ", name[a], " ⇀ ", name[b]), g.bonds)
+end
 
 # DOT text of a bond graph `g`, naming each node `name(node)`.
 function dot_text(g, name)
     io = IOBuffer()
-    println(io, "digraph bondgraph {\n  rankdir=LR;\n  splines=false;\n  node [shape=plaintext];")
+    println(io, "digraph bondgraph {\n  rankdir=LR;\n  splines=false;\n  nodesep=0.6;\n  ranksep=0.6;\n  node [shape=plaintext];")
     foreach(n -> println(io, "  ", name(n), " [label=\"", n.label, "\"];"), g.nodes)
-    # Bonds between junctions and two-ports are the main power path: keep them straight.
+    # Textbook layout: junctions and two-ports form a straight left-to-right power path, and
+    # each element sits beside its node: in a free horizontal slot, then above, then below.
     node = Dict(n.id => n for n in g.nodes)
+    leaf(id) = node[id].kind == :element
+    taken = Dict(n.id => Symbol[] for n in g.nodes)
     for (a, b) in g.bonds
-        weight = node[a].kind != :element && node[b].kind != :element ? ", weight=10" : ""
-        println(io, "  ", name(node[a]), " -> ", name(node[b]), " [arrowhead=lvee", weight, "];")
+        leaf(a) || leaf(b) || (push!(taken[a], :right); push!(taken[b], :left))
+    end
+    edge(u, v, bond, attrs = "") = println(io, "  ", name(node[u]), " -> ", name(node[v]),
+        bond == (u => v) ? " [arrowhead=lvee" : " [dir=back, arrowtail=lvee", attrs, "];")
+    for (a, b) in g.bonds
+        leaf(a) || leaf(b) ? nothing : (edge(a, b, a => b, ", weight=10"); continue)
+        el, j = leaf(a) ? (a, b) : (b, a)
+        k = findfirst(∉(taken[j]), [:left, :right, :above, :below])
+        slot = k === nothing ? :none : [:left, :right, :above, :below][k]
+        slot === :none || push!(taken[j], slot)
+        # dot puts an edge's head after its tail: to the right, or below within a rank.
+        u, v = slot in (:left, :above) ? (el, j) : slot === :none ? (a, b) : (j, el)
+        edge(u, v, a => b)
+        slot in (:above, :below) && println(io, "  {rank=same; ", name(node[u]), "; ", name(node[v]), "}")
     end
     print(io, "}")
     String(take!(io))
 end
 
-"""
-    bondgraph_svg(sys)
+# Graphviz's rendering of DOT text in `format` (svg, png, pdf, plain), as bytes.
+graphviz(dot, format) = read(pipeline(`$(Graphviz_jll.dot()) -T$format`; stdin = IOBuffer(dot)))
 
-The bond graph of `sys` rendered by Graphviz, displayed as SVG in notebooks and in the
-docs. Needs `using Graphviz_jll`, which loads the package extension.
+dot_source(g) = dot_text(g, n -> string('"', n.id, '"'))
+
+# The half-arrow of the docs' figures (docs/src/misc/tikz/base_tikzset.tex).
+const TIKZ_PREAMBLE = raw"""
+\documentclass[tikz]{standalone}
+\usetikzlibrary{arrows.meta}
+\pgfdeclarearrow{
+  name = bgarrow,
+  parameters = { \the\pgfarrowlength },
+  setup code = {
+    \pgfarrowssettipend{0\pgfarrowlength}
+    \pgfarrowssetlineend{0\pgfarrowlength}
+    \pgfarrowssetvisualbackend{.5\pgfarrowlength}
+    \pgfarrowssavethe\pgfarrowlength
+  },
+  drawing code = {
+    \pgfpathmoveto{\pgfpoint{0\pgfarrowlength}{0pt}}
+    \pgfpathlineto{\pgfpoint{-10pt}{-0.45\pgfarrowlength}}
+    \pgfusepathqstroke
+  },
+  defaults = { length = 5mm }
+}
 """
-function bondgraph_svg end
+
+# `type:name` → `type: $name$`, the name in math mode as in the docs' figures (Greek too).
+function tikz_label(label)
+    occursin(':', label) || return label
+    type, name = split(label, ':'; limit = 2)
+    string(type, ": ", latexify(Symbol(name)))
+end
+
+# A standalone TikZ document, placed with Graphviz's layout.
+function tikz_source(g)
+    names = Dict(n.id => "n$k" for (k, n) in enumerate(g.nodes))
+    # `dot -Tplain` lines: `node <name> <x> <y> ...`, positions in inches.
+    plain = String(graphviz(dot_text(g, n -> names[n.id]), "plain"))
+    pos = Dict(f[2] => (f[3], f[4]) for f in split.(split(plain, '\n')) if !isempty(f) && f[1] == "node")
+    io = IOBuffer()
+    print(io, TIKZ_PREAMBLE, "\\begin{document}\n\\begin{tikzpicture}[x=1in, y=1in, line width=0.25mm]\n")
+    for n in g.nodes
+        x, y = pos[names[n.id]]
+        println(io, "  \\node[inner sep=4pt] (", names[n.id], ") at (", x, ", ", y, ") {", tikz_label(n.label), "};")
+    end
+    foreach(((a, b),) -> println(io, "  \\draw[-bgarrow] (", names[a], ") -- (", names[b], ");"), g.bonds)
+    print(io, "\\end{tikzpicture}\n\\end{document}\n")
+    String(take!(io))
+end
+
+# A bond graph in `format`, as a string or bytes.
+function source(g, format)
+    format === :dot ? dot_source(g) : format === :tikz ? tikz_source(g) : graphviz(dot_source(g), format)
+end
 
 """
-    bondgraph_tikz(sys)
+    BondGraphPlot
 
-The bond graph of `sys` as a standalone LaTeX/TikZ document, placed with Graphviz's
-layout and drawn in the style of this package's documentation figures (half-arrow
-bonds, `0`/`1` junctions, `type:name` labels). Compile it with `pdflatex`, or copy its
-`tikzpicture` (and the `bgarrow` declaration) into a paper. Needs `using Graphviz_jll`.
+What [`bgplot`](@ref) returns: a bond graph and the format to show it in. Save it with
+[`savebg`](@ref); `print` writes its source.
 """
-function bondgraph_tikz end
+struct BondGraphPlot
+    graph::BondGraph
+    format::Symbol
+end
+
+graph(g::BondGraph) = g
+graph(p::BondGraphPlot) = p.graph
+graph(sys) = bondgraph(sys)
+
+"""
+    bgplot(x; format = :svg)
+
+Draw the bond graph of `x`, a model or a [`BondGraph`](@ref), the way `plot` draws a
+solution. The drawing follows the textbook layout: the power path through junctions and
+two-ports runs left to right, and each element sits beside its node, with half-arrow
+bonds, `0`/`1` junctions and `type:name` labels.
+
+- `format = :svg`: the drawing. It appears in the VS Code plot pane, Jupyter, Pluto and the
+  docs; in a terminal REPL it opens in the default viewer.
+- `format = :tikz`: a standalone LaTeX/TikZ document in the style of the docs' figures,
+  shown as text. Compile it with `pdflatex`, or copy its `tikzpicture` (and the `bgarrow`
+  declaration) into a paper.
+- `format = :dot`: the Graphviz DOT source, shown as text.
+
+Save any of them with [`savebg`](@ref).
+"""
+function bgplot(x; format = :svg)
+    format in (:svg, :tikz, :dot) ||
+        throw(ArgumentError("bgplot: format must be :svg, :tikz or :dot, not :$format"))
+    BondGraphPlot(graph(x), format)
+end
+
+Base.print(io::IO, p::BondGraphPlot) = write(io, source(p.graph, p.format))
+Base.showable(::MIME"image/svg+xml", p::BondGraphPlot) = p.format === :svg
+Base.show(io::IO, ::MIME"image/svg+xml", p::BondGraphPlot) = print(io, p)
+function Base.show(io::IO, ::MIME"text/plain", p::BondGraphPlot)
+    p.format === :svg ? print(io, "BondGraphPlot (SVG): savebg(\"file.svg\", p) to save it") : print(io, p)
+end
+
+# A terminal can't show SVG: open it in the default viewer, as Plots opens a GR window.
+function Base.display(d::REPL.REPLDisplay, p::BondGraphPlot)
+    p.format === :svg || return display(d, MIME("text/plain"), p)
+    path = savebg(tempname() * ".svg", p)
+    cmd = Sys.isapple() ? `open $path` : Sys.iswindows() ? `cmd /c start "" $path` : `xdg-open $path`
+    run(cmd; wait = false)
+    nothing
+end
+
+const EXTENSIONS = Dict(".svg" => :svg, ".png" => :png, ".pdf" => :pdf, ".tex" => :tikz, ".dot" => :dot)
+
+"""
+    savebg(path, x)
+
+Save the bond graph of `x` (a model, a [`BondGraph`](@ref) or a [`bgplot`](@ref)) to
+`path`, in the format of its extension: `.svg`, `.png`, `.pdf` (rendered by Graphviz),
+`.tex` (TikZ, see [`bgplot`](@ref)) or `.dot`. Returns `path`.
+"""
+function savebg(path, x)
+    ext = lowercase(splitext(path)[2])
+    haskey(EXTENSIONS, ext) ||
+        throw(ArgumentError("savebg: unknown extension \"$ext\"; use .svg, .png, .pdf, .tex or .dot"))
+    write(path, source(graph(x), EXTENSIONS[ext]))
+    path
+end
