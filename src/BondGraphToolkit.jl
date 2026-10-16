@@ -18,6 +18,9 @@ using ModelingToolkit: t_nounits as t, D_nounits as D, getname
 using Symbolics: unwrap, get_variables, iscall, operation, arguments
 using Latexify: latexify
 using ModelingToolkitStandardLibrary.Blocks: RealInput, RealOutput
+using ModelingToolkitStandardLibrary.Electrical: Pin
+using ModelingToolkitStandardLibrary.Mechanical: Translational, TranslationalPosition, Rotational
+using ModelingToolkitStandardLibrary.Hydraulic: IsothermalCompressible
 
 export PowerPort, @oneport, @twoport
 export Se, Sf, Resistance, Compliance, Inertia, De, Df
@@ -25,6 +28,8 @@ export Mass, Spring, Damper
 export Junction0, Junction1
 export TF, GY
 export bg_equations, latexify
+export ElectricalAdapter, TranslationalAdapter, TranslationalPositionAdapter,
+    RotationalAdapter, HydraulicAdapter
 
 """
     PowerPort(; name)
@@ -89,5 +94,6 @@ include("elements.jl")
 include("junctions.jl")
 include("two_ports.jl")
 include("equations.jl")
+include("adapters.jl")
 
 end # module
