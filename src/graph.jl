@@ -24,7 +24,8 @@ The bond graph of the model `sys` as data: `(; nodes, bonds)`.
 - `bonds`: one `from => to` pair of node ids per bond, following its half-arrow.
 
 A `connect` of more than two power ports, or of two that both expect the bond to point
-into them, is a 0-junction and gets its own node.
+into them (e.g. two elements: a plain `connect` to an element is a bond pointing into
+it), is a 0-junction and gets its own node.
 """
 function bondgraph(sys)
     nodes = NamedTuple{(:id, :kind, :label), Tuple{String, Symbol, String}}[]
@@ -72,9 +73,9 @@ function bondgraph(sys)
         if length(ends) == 2 && Set(roles) == Set([:into, :outof])
             push!(bonds, first(ends[roles .== :outof][1]) => first(ends[roles .== :into][1]))
         else
-            zero = "0_$(length(nodes) + 1)"
-            push!(nodes, (; id = zero, kind = :junction, label = "0"))
-            append!(bonds, [role == :into ? zero => node : node => zero for (node, role) in ends])
+            j0 = "0_$(length(nodes) + 1)"
+            push!(nodes, (; id = j0, kind = :junction, label = "0"))
+            append!(bonds, [role == :into ? j0 => node : node => j0 for (node, role) in ends])
         end
     end
     (; nodes, bonds)
