@@ -18,6 +18,9 @@ using Test
     @testset "Signals" begin
         include("test_signals.jl")
     end
+    @testset "Adapters" begin
+        include("test_adapters.jl")
+    end
     @testset "Equations" begin
         include("test_equations.jl")
     end
