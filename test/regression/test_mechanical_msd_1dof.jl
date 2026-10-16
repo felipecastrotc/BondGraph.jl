@@ -1,20 +1,14 @@
-# Model from examples/mechanical_msd_1dof.jl (unforced and forced cases)
-function build_mechanical_msd_1dof()
-    @named m = Mass(m = 1.0)
-    @named s = Spring(k = 1.0)
-    @named d = Damper(c = 1.0)
-    @parameters F(t)
-    @named f = Se(F)
-    @named mdl = Junction1(m, d, s, [-1, f])
-    @named sys = simplifysys(mdl)
-    unforced = substitute(sys, Dict(f.F => 0.0))
-    forced = substitute(sys, Dict(f.F => sin(t)))
-    return sys, [
-        "mechanical_msd_1dof_unforced" =>
-            ODEProblem(unforced, [m.power.f => 0.0, s.q => 1.0], (0, 10)),
-        "mechanical_msd_1dof_forced" =>
-            ODEProblem(forced, [m.power.f => 0.0, s.q => 0.0], (0, 10)),
-    ]
-end
+# The source bond enters the 1-junction; its I, C and R bonds leave it.
+using BondGraphToolkit.ModelingToolkit: t_nounits as t
 
-check_example("mechanical_msd_1dof", build_mechanical_msd_1dof)
+for (case, force, displacement) in
+    (("mechanical_msd_1dof_unforced", 0.0, 1.0),
+     ("mechanical_msd_1dof_forced", sin(t), 0.0))
+    @named m = Inertia(I = 1.0)
+    @named s = Compliance(C = 1.0, q = displacement)
+    @named d = Resistance(R = 1.0)
+    @named f = Se(force)
+    @named model = Junction1(f, [-1, m], [-1, d], [-1, s])
+    check_case(case, model, ["m₊power₊f(t)" => model.m.power.f,
+                             "s₊q(t)" => model.s.q])
+end

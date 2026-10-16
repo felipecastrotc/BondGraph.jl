@@ -18,6 +18,7 @@ using ModelingToolkit: t_nounits as t, D_nounits as D
 
 export PowerPort, @oneport
 export Se, Sf, Resistance, Compliance, Inertia
+export Mass, Spring, Damper
 export Junction0, Junction1
 
 """
