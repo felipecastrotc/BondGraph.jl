@@ -1,24 +1,22 @@
-# Model from examples/mechanical_msd_ndof.jl with the example's own N = 4 DoF.
-function build_mechanical_msd_ndof(n = 4)
-    @named m = Mass(m = 1.0)
-    @named s = Spring(k = 1.0)
-    @named d = Damper(c = 1.0)
-    @named m1 = Junction1([-1, m], [-1, d], [-1, s])
-    @named sd = Junction1([-1, s], [-1, d])
-    M, cons = [], []
-    for i = 2:n
-        j0 = Junction0(sd; name = Symbol("m" * string(i) * "_j0"))
-        j1 = Junction1([-1, m]; name = Symbol("m" * string(i) * "_j1"))
-        push!(M, [j0, j1])
-        push!(cons, connect(j0.power, j1.power))
+# Four masses; each coupling spring-damper bond points from the 0-junction to sd.
+let n = 4
+    @named m = Inertia(I = 1.0)
+    @named s = Compliance(C = 1.0)
+    @named d = Resistance(R = 1.0)
+    @named m1 = Junction1([-1, m], [-1, d], [-1, s], [-1, :out])
+    masses = [Junction1(:in, [-1, m], (i < n ? [[-1, :out]] : [])...;
+                        name = Symbol(:m, i)) for i in 2:n]
+    sds = [Junction1([-1, Compliance(C = 1.0, q = i == 2 ? -1.0 : 0.0, name = :s)],
+                     [-1, d], :j0; name = Symbol(:sd, i)) for i in 2:n]
+    prev = [m1; masses[1:end-1]]
+    cons = [connect(prev[k].out, masses[k].in, sds[k].j0) for k in 1:n-1]
+    @named model = System(cons, t; systems = [m1; masses; sds])
+    cols = ["m1₊m₊power₊f(t)" => model.m1.m.power.f,
+            "m1₊s₊q(t)" => model.m1.s.q]
+    for i in 2:n
+        push!(cols, "m$(i)_j1₊m₊power₊f(t)" => getproperty(model, Symbol(:m, i)).m.power.f)
+        push!(cols, "m$(i)_j0₊sd₊s₊q(t)" => getproperty(model, Symbol(:sd, i)).s.q)
     end
-    push!(cons, [connect(M[i][2].power, M[i+1][1].power) for i = 1:(length(M)-1)]...)
-    push!(cons, connect(m1.power, M[1][1].power))
-    @named mdl = ODESystem(cons, t)
-    mdl = compose(mdl, m1, vcat(M...)...)
-    @named sys = simplifysys(mdl)
-    prob = ODEProblem(sys, [M[1][2].m.power.f => 0.0, M[1][1].sd.s.q => 1.0], (0, 10))
-    return sys, ["mechanical_msd_ndof" => prob]
+    check_case("mechanical_msd_ndof", model, cols;
+               flip = ["m$(i)_j0₊sd₊s₊q(t)" for i in 2:n])
 end
-
-check_example("mechanical_msd_ndof", build_mechanical_msd_ndof)
