@@ -1,9 +1,8 @@
 # [Public Documentation](@id public-documentation)
 
+Documentation for `BondGraphToolkit.jl`'s public interface. `using BondGraphToolkit` also re-exports ModelingToolkit, and `latexify` from Latexify.
 
-Documentation for `BondGraph.jl`'s public interface.
-
-See the [Internals](@ref internal-documentation) section of the manual covering the internal functions.
+See the [Internals](@ref internal-documentation) section for the internal functions.
 
 ## Contents
 
@@ -21,29 +20,67 @@ Pages = ["public.md"]
 ## Public Interface
 
 ```@docs
-BondGraph
+BondGraphToolkit
 ```
 
-### Bond graph elements
+### Power port
+
+```@docs
+PowerPort
+```
+
+### One-port elements
 
 ```@docs
 Se
 Sf
-Junction1
-Junction0
-mGY
-mTF
+Resistance
+Compliance
+Inertia
 Mass
 Spring
 Damper
-Power
+De
+Df
 ```
 
-### Utilities function
+### Junctions
 
 ```@docs
-generate_graph
-simplifysys
-isindependent
-BondGraph.GenericDamper
+Junction0
+Junction1
+```
+
+### Two-ports
+
+```@docs
+TF
+GY
+```
+
+### Custom elements
+
+```@docs
+@oneport
+@twoport
+```
+
+### MTK Standard Library adapters
+
+```@docs
+ElectricalAdapter
+TranslationalAdapter
+TranslationalPositionAdapter
+RotationalAdapter
+HydraulicAdapter
+```
+
+### Equations and drawing
+
+```@docs
+bg_equations
+bondgraph
+bondgraph_dot
+bondgraph_svg
+bondgraph_tikz
 ```
