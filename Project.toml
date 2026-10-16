@@ -4,14 +4,18 @@ authors = ["Felipe de Castro <felipecastrotc@gmail.com>"]
 version = "0.2.1"
 
 [deps]
+Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [compat]
 DelimitedFiles = "1"
+Latexify = "0.16"
 ModelingToolkit = "11.45"
 OrdinaryDiffEqTsit5 = "2"
 Reexport = "1"
+Symbolics = "7"
 julia = "1.10"
 
 [extras]

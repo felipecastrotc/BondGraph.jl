@@ -14,12 +14,15 @@ module BondGraphToolkit
 
 using Reexport
 @reexport using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D
+using ModelingToolkit: t_nounits as t, D_nounits as D, getname
+using Symbolics: unwrap, get_variables, iscall, operation, arguments
+using Latexify: latexify
 
 export PowerPort, @oneport, @twoport
 export Se, Sf, Resistance, Compliance, Inertia
 export Junction0, Junction1
 export TF, GY
+export bg_equations, latexify
 
 """
     PowerPort(; name)
@@ -73,5 +76,6 @@ end
 include("elements.jl")
 include("junctions.jl")
 include("two_ports.jl")
+include("equations.jl")
 
 end # module
