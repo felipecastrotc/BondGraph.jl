@@ -12,6 +12,8 @@ _member(a::AbstractVector) = length(a) == 2 && a[1] in (1, -1) ? (Int(a[1]), a[2
     throw(ArgumentError("junction member must be `x` or `[-1, x]` (or `[1, x]`), got $a"))
 _member(a) = (1, a)
 
+struct JunctionMembers end   # system metadata key
+
 function junction_core(kind, signs, σs; name)
     ps = [PowerPort(name = Symbol(:p, k)) for k in eachindex(signs)]
     bond_f = [σ * p.f for (σ, p) in zip(σs, ps)]
@@ -28,7 +30,9 @@ function junction(kind, args; name)
     ends = [x isa Symbol ? PowerPort(name = x) : x for x in xs]
     cons = [connect(x isa Symbol ? sys : sys.power, getproperty(core, Symbol(:p, k)))
             for (k, (x, sys)) in enumerate(zip(xs, ends))]
-    System(cons, t; name, systems = [core; ends])
+    # Recorded for `bondgraph`: each member's sign, name, and whether it is a free port.
+    members = [(s, nameof(e), x isa Symbol) for (s, x, e) in zip(signs, xs, ends)]
+    System(cons, t; name, systems = [core; ends], metadata = Dict(JunctionMembers => (kind, members)))
 end
 
 """

@@ -24,6 +24,9 @@ using Test
     @testset "Equations" begin
         include("test_equations.jl")
     end
+    @testset "Graph" begin
+        include("test_graph.jl")
+    end
     @testset "Regression" begin
         include("regression/helpers.jl")
         for f in filter(startswith("test_"), readdir(joinpath(@__DIR__, "regression")))

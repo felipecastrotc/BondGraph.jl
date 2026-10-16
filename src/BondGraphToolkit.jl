@@ -28,6 +28,7 @@ export Mass, Spring, Damper
 export Junction0, Junction1
 export TF, GY
 export bg_equations, latexify
+export bondgraph, bondgraph_dot, bondgraph_svg
 export ElectricalAdapter, TranslationalAdapter, TranslationalPositionAdapter,
     RotationalAdapter, HydraulicAdapter
 
@@ -95,5 +96,6 @@ include("junctions.jl")
 include("two_ports.jl")
 include("equations.jl")
 include("adapters.jl")
+include("graph.jl")
 
 end # module
