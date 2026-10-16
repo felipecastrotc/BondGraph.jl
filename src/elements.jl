@@ -57,3 +57,28 @@ Conventionally its bond points into it.
     @variables p(t) = p
     [D(p) ~ power.e, power.f ~ p / I]
 end
+
+"""
+    Mass(; name, m = 1.0, u = 0.0)
+
+Mechanical shorthand for [`Inertia`](@ref) with mass `m` and initial velocity `u`:
+`I = m`, `p = m*u`. Its bond conventionally points into it (Karnopp §3.1).
+"""
+Mass(; name, m = 1.0, u = 0.0) = Inertia(; name, I = m, p = m * u)
+
+"""
+    Spring(; name, k = 10, x = 0.0)
+
+Mechanical shorthand for [`Compliance`](@ref) with stiffness `k` and initial
+displacement `x`: `C = 1/k`, `q = x`. Its bond conventionally points into it
+(Karnopp §3.1).
+"""
+Spring(; name, k = 10, x = 0.0) = Compliance(; name, C = 1 / k, q = x)
+
+"""
+    Damper(; name, c = 10)
+
+Mechanical shorthand for [`Resistance`](@ref) with damping coefficient `c`:
+`R = c`. Its bond conventionally points into it (Karnopp §3.1).
+"""
+Damper(; name, c = 10) = Resistance(; name, R = c)
