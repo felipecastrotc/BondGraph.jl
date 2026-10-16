@@ -1,3 +1,6 @@
+_isderivative(x) = iscall(x) && operation(x) isa Differential
+_underived(x) = _isderivative(x) ? only(arguments(x)) : x
+
 """
     bg_equations(sys; rename = Dict())
 
@@ -14,9 +17,6 @@ variable in a solution, add an alias equation such as `x ~ model.C.q` to the mod
 latexify(bg_equations(model; rename = Dict(model.C.q => x, D(model.C.q) => ẋ)))
 ```
 """
-_isderivative(x) = iscall(x) && operation(x) isa Differential
-_underived(x) = _isderivative(x) ? only(arguments(x)) : x
-
 function bg_equations(sys; rename = Dict())
     compiled = ModelingToolkit.iscomplete(sys)
     eqs = full_equations(compiled ? sys : mtkcompile(sys))
