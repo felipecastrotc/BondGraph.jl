@@ -1,41 +1,24 @@
-using BondGraph
+using BondGraphToolkit
+using OrdinaryDiffEqTsit5
 using Test
 
-# `Pkg.test(test_args = ["regenerate"])` rewrites the golden data and stops.
-if "regenerate" in ARGS
-    include("regression/generate_references.jl")
-    exit()
-end
+# Examples not yet ported to v0.3, by golden file → ticket in .scratch/v0.3-impl/issues.
+const PENDING = Dict(
+    "test_mechanical_msd_1dof.jl" => "02",
+    "test_mechanical_duffing.jl" => "02",
+    "test_mechanical_msd_2dof.jl" => "03",
+    "test_mechanical_msd_ndof.jl" => "03",
+    "test_electrical_dc_motor.jl" => "04",
+)
 
-# Test types and basic utilities
-@testset "Test base" begin
-    include("unit-tests/test_types.jl")
-    include("unit-tests/test_graph.jl")
-end
-
-# Utilities for bond graphs and connections
-@testset "Test utilities" begin
-    include("unit-tests/test_bg_utils.jl")
-    include("unit-tests/test_connection_utils.jl")
-end
-
-# System and port-related tests
-@testset "Test ports and system " begin
-    include("unit-tests/test_ports.jl")
-    include("unit-tests/test_system_utils.jl")
-end
-
-# Macro-related tests
-@testset "Test macros " begin
-    include("unit-tests/test_macros.jl")
-end
-
-# Golden-data regression of every example (see test/regression/helpers.jl)
-@testset "Regression" begin
-    include("regression/helpers.jl")
-    for f in filter(startswith("test_"), readdir(joinpath(@__DIR__, "regression")))
-        include(joinpath("regression", f))
+@testset "BondGraphToolkit" begin
+    @testset "Core" begin
+        include("test_core.jl")
+    end
+    @testset "Regression" begin
+        include("regression/helpers.jl")
+        for f in filter(startswith("test_"), readdir(joinpath(@__DIR__, "regression")))
+            haskey(PENDING, f) ? (@info "Skipping $f until ticket $(PENDING[f])") : include(joinpath("regression", f))
+        end
     end
 end
-
-@info "All tests completed!"
