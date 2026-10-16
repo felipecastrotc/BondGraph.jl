@@ -6,14 +6,15 @@ using Test
 const PENDING = Dict(
     "test_mechanical_msd_1dof.jl" => "02",
     "test_mechanical_duffing.jl" => "02",
-    "test_mechanical_msd_2dof.jl" => "03",
-    "test_mechanical_msd_ndof.jl" => "03",
     "test_electrical_dc_motor.jl" => "04",
 )
 
 @testset "BondGraphToolkit" begin
     @testset "Core" begin
         include("test_core.jl")
+    end
+    @testset "Multi-junction" begin
+        include("test_multi_junction.jl")
     end
     @testset "Regression" begin
         include("regression/helpers.jl")
