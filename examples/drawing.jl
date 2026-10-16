@@ -34,6 +34,10 @@ g.bonds
 
 # ## Drawing it
 #
+# `bondgraph_dot` gives the DOT text, for any Graphviz tool:
+print(bondgraph_dot(motor))
+
+#
 # Bonds are drawn as half-arrows, left to right, with the power path through junctions and two-ports kept straight:
 bondgraph_svg(motor)
 
