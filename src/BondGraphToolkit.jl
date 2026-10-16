@@ -28,7 +28,7 @@ export Mass, Spring, Damper
 export Junction0, Junction1
 export TF, GY
 export bg_equations, latexify
-export bondgraph, bondgraph_dot, bondgraph_svg
+export bondgraph, bondgraph_dot, bondgraph_svg, bondgraph_tikz
 export ElectricalAdapter, TranslationalAdapter, TranslationalPositionAdapter,
     RotationalAdapter, HydraulicAdapter
 

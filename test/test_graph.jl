@@ -42,3 +42,11 @@ end
     svg = sprint(show, MIME("image/svg+xml"), bondgraph_svg(tf_model()))
     @test occursin("<svg", svg) && occursin("TF:tf", svg)
 end
+
+@testset "bondgraph_tikz" begin
+    tex = bondgraph_tikz(tf_model())
+    @test occursin("\\begin{tikzpicture}", tex)
+    @test count("\\node", tex) == 5              # one per junction, element, two-port
+    @test count("\\draw[-bgarrow]", tex) == 4    # one half-arrow per bond
+    @test occursin("{TF: \$tf\$}", tex) && occursin("{1}", tex)
+end
