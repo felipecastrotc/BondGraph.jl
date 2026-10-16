@@ -8,6 +8,7 @@ Julia library for modeling and simulating dynamic systems with bond graphs, buil
 - `src/elements.jl`: one-port elements (`Se`, `Sf`, `Resistance`, `Compliance`, `Inertia`)
 - `src/junctions.jl`: the signed 0-/1-junction component (`Junction0`, `Junction1`)
 - `src/two_ports.jl`: `TF`, `GY` (built with `@twoport`, defined in the module file)
+- `src/equations.jl`: `bg_equations` (readable, renameable equations; `latexify` is re-exported)
 - `test/runtests.jl` + `test/test_*.jl`: behaviour tests through the public API; `test/regression/`: golden data from v0.2 (never regenerate)
 - `examples/*.jl`: Literate.jl sources, rendered into the docs
 - `docs/`: Documenter.jl site, deployed to `gh-pages`; has its own `docs/Project.toml`
