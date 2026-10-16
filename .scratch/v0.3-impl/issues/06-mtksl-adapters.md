@@ -6,10 +6,14 @@ Spec: [../../mtk-upgrade/spec.md](../../mtk-upgrade/spec.md). Branch: `feature/m
 
 **Blocked by:** 04.
 
-**Status:** ready-for-agent
+**Status:** done (feature/mtk-upgrade)
 
-- [ ] ModelingToolkitStandardLibrary is a regular dependency with a `[compat]` bound, unless 05 already added it.
-- [ ] The five adapters use the MTKSL port names (`p`/`n`, `flange`, `port`). The position-based ones take `s = nothing` / `phi = nothing`.
-- [ ] The adapter signs are re-verified under the v0.2 convention (research 11 used the withdrawn convention A), and the docstrings state the sign rule and gotchas (the hydraulic fluid is connected in its own statement).
-- [ ] Each adapter matches a pure-MTKSL reference model: RC, DC motor (through `RotationalAdapter` and through `ElectricalAdapter`), translational velocity and position, and hydraulic.
-- [ ] A docs example per domain, or one page covering all five.
+- [x] ModelingToolkitStandardLibrary is a regular dependency with a `[compat]` bound, unless 05 already added it.
+- [x] The five adapters use the MTKSL port names (`p`/`n`, `flange`, `port`). The position-based ones take `s = nothing` / `phi = nothing`.
+- [x] The adapter signs are re-verified under the v0.2 convention (research 11 used the withdrawn convention A), and the docstrings state the sign rule and gotchas (the hydraulic fluid is connected in its own statement).
+- [x] Each adapter matches a pure-MTKSL reference model: RC, DC motor (through `RotationalAdapter` and through `ElectricalAdapter`), translational velocity and position, and hydraulic.
+- [x] A docs example per domain, or one page covering all five.
+
+## Comments
+
+- 2026-10-15: done. Research 11's adapter equations hold under the v0.2 convention with the adapter's bond always drawn into it (`[-1, adapter]`): MTKSL loads (electrical R+C, rotational inertia+damper behind the DC motor, translational masses) match their references exactly; MTKSL sources (voltage, pressure) give the reference with the opposite sign, i.e. negative power along the bond, as the convention says. Position adapters take `s`/`phi` like MTKSL components (a local variable with a `nothing` default). Docs example: `examples/adapters.jl`.
