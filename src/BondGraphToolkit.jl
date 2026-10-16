@@ -17,9 +17,10 @@ using Reexport
 using ModelingToolkit: t_nounits as t, D_nounits as D, getname
 using Symbolics: unwrap, get_variables, iscall, operation, arguments
 using Latexify: latexify
+using ModelingToolkitStandardLibrary.Blocks: RealInput, RealOutput
 
 export PowerPort, @oneport, @twoport
-export Se, Sf, Resistance, Compliance, Inertia
+export Se, Sf, Resistance, Compliance, Inertia, De, Df
 export Mass, Spring, Damper
 export Junction0, Junction1
 export TF, GY
@@ -39,19 +40,31 @@ counts `f` positive into the component that owns the port.
     System(Equation[], t, vars, []; name)
 end
 
+# Shared by @oneport and @twoport: make `fdef` an MTK component whose body ends with the
+# vector of laws (long-form `function`). Its subsystems are `ports`, plus the signal
+# connectors `input` (RealInput) and `output` (RealOutput) when the body defines them.
+function element(fdef, ports, preamble, source)
+    body = fdef.args[2]
+    signals = [:(@isdefined($s) ? [$s] : []) for s in (:input, :output) if mentions(body, s)]
+    body.args[end] = :($System(vcat($(body.args[end])), $t; name,
+                               systems = [$(ports...); $(signals...)]))
+    prepend!(body.args, preamble)
+    esc(Expr(:macrocall, GlobalRef(ModelingToolkit, Symbol("@component")), source, fdef))
+end
+mentions(ex::Expr, s) = any(a -> mentions(a, s), ex.args)
+mentions(ex, s) = ex === s
+
 """
     @oneport function Name(args...; name, kwargs...) ... [laws] end
 
 Define a one-port element. The body can use `power.e` and `power.f`, the effort and
 flow of the element's bond as drawn, and must end with the vector of laws. The macro
 adds the `power` port and wraps the laws in a `System`, as an MTK `@component`; MTK
-finds the unknowns and parameters itself.
+finds the unknowns and parameters itself. A signal connector the body defines as
+`input` (`RealInput`) or `output` (`RealOutput`) becomes part of the element.
 """
 macro oneport(fdef)
-    body = fdef.args[2]
-    body.args[end] = :($System(vcat($(body.args[end])), $t; name, systems = [power]))
-    pushfirst!(body.args, :(power = $PowerPort(name = :power)))
-    esc(Expr(:macrocall, GlobalRef(ModelingToolkit, Symbol("@component")), __source__, fdef))
+    element(fdef, [:power], [:(power = $PowerPort(name = :power))], __source__)
 end
 
 """
@@ -61,17 +74,15 @@ Define a two-port element: port `p1` is the bond into it, port `p2` the bond out
 The body can use the bond variables `e1, f1` (port 1) and `e2, f2` (port 2), each flow
 positive along its bond's half-arrow, and must end with the vector of laws, written as
 in the books (e.g. Karnopp Eq. 3.9). The macro adds the ports and wraps the laws in a
-`System`, as an MTK `@component`.
+`System`, as an MTK `@component`. Signal connectors as for [`@oneport`](@ref).
 
 MTK counts every port's flow positive into the component, so `f2 = -p2.f`; write the
 laws in `e1, f1, e2, f2` and this sign is handled for you.
 """
 macro twoport(fdef)
-    body = fdef.args[2]   # long-form `function`; its last statement is the vector of laws
-    body.args[end] = :($System(vcat($(body.args[end])), $t; name, systems = [p1, p2]))
-    prepend!(body.args, [:(p1 = $PowerPort(name = :p1)), :(p2 = $PowerPort(name = :p2)),
-                         :(e1 = p1.e), :(f1 = p1.f), :(e2 = p2.e), :(f2 = -p2.f)])
-    esc(Expr(:macrocall, GlobalRef(ModelingToolkit, Symbol("@component")), __source__, fdef))
+    element(fdef, [:p1, :p2],
+            [:(p1 = $PowerPort(name = :p1)), :(p2 = $PowerPort(name = :p2)),
+             :(e1 = p1.e), :(f1 = p1.f), :(e2 = p2.e), :(f2 = -p2.f)], __source__)
 end
 
 include("elements.jl")
