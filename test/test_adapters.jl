@@ -77,6 +77,40 @@ end
     @test s(TT; idxs = m.motor.je.L.power.f) ≈ r(TT; idxs = ref.je.L.power.f) atol = 1e-8
 end
 
+@testset "ElectricalAdapter: MTKSL armature circuit driving a bond-graph motor" begin
+    # Voltage, resistor and inductor in MTKSL feed GY ⇀ 1ₘ. GY's port 1 and the adapter
+    # both expect the bond to point into them: a 0-junction where the MTKSL side supplies.
+    @named k = Blocks.Constant(k = 12.0)
+    @named src = El.Voltage()
+    @named gnd = El.Ground()
+    @named res = El.Resistor(R = 1.0)
+    @named ind = El.Inductor(L = 0.5, i = 0.0)
+    @named ea = ElectricalAdapter()
+    @named gy = GY(r = 0.01)
+    @named J = Inertia(I = 0.01)
+    @named c = Resistance(R = 0.1)
+    @named τ = Se(1.0)
+    @named jm = Junction1(τ, [-1, c], [-1, J], :gy)
+    @named m = System([connect(k.output, src.V), connect(src.p, res.p), connect(res.n, ind.p),
+                       connect(ind.n, ea.p), connect(ea.n, src.n, gnd.g),
+                       connect(ea.power, gy.p1), connect(gy.p2, jm.gy)], t;
+                      systems = [k, src, gnd, res, ind, ea, gy, jm])
+    # Reference: the all-bond-graph DC motor of the examples.
+    @named L = Inertia(I = 0.5)
+    @named R = Resistance(R = 1.0)
+    @named V = Se(12.0)
+    @named je = Junction1(V, [-1, R], [-1, L], [-1, :gy])
+    @named J = Inertia(I = 0.01)
+    @named c = Resistance(R = 0.1)
+    @named τ = Se(1.0)
+    @named jm = Junction1(τ, [-1, c], [-1, J], :gy)
+    @named gy = GY(r = 0.01)
+    @named ref = System([connect(je.gy, gy.p1), connect(gy.p2, jm.gy)], t; systems = [je, gy, jm])
+    s, r = solve_dae(m), solve_dae(ref)
+    @test s(TT; idxs = m.jm.J.power.f) ≈ r(TT; idxs = ref.jm.J.power.f) atol = 1e-8
+    @test s(TT; idxs = m.ind.i) ≈ r(TT; idxs = ref.je.L.power.f) atol = 1e-8
+end
+
 @testset "Translational adapters: a force accelerates an MTKSL mass" begin
     # Se(1) ⇀ 1 ⇀ adapter ⇀ MTKSL mass of 2 kg: v = t/2.
     @named se = Se(1.0)
