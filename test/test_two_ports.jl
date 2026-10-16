@@ -39,6 +39,15 @@ end
     @test maximum(abs, power_in(sol, m.gy) - power_out(sol, m.gy)) < 1e-8
 end
 
+@testset "Modulated GY conserves power" begin
+    @named gy = GY(r = 2 + t)
+    @named C = Compliance(C = 1.0)
+    m = driven(gy, C; E = 2.0)
+    sol = solve_tp(m)
+    @test sol(TT; idxs = m.C.q) ≈ 2 .* log.(1 .+ TT ./ 2) atol = 1e-8   # q̇ = E/(2+t)
+    @test maximum(abs, power_in(sol, m.gy) - power_out(sol, m.gy)) < 1e-8
+end
+
 @testset "Modulated TF: the modulus is an expression" begin
     @named tf = TF(m = 1 + t)
     @named I = Inertia(I = 1.0)
@@ -55,6 +64,9 @@ end
     end
     @named tf = MyTF(m = 2.0)
     @named I = Inertia(I = 1.0)
-    m = driven(tf, I; E = 3.0)
-    @test solve_tp(m)(TT; idxs = m.I.p) ≈ 1.5 .* TT atol = 1e-8
+    custom = driven(tf, I; E = 3.0)
+    @named tf = TF(m = 2.0)
+    @named I = Inertia(I = 1.0)
+    builtin = driven(tf, I; E = 3.0)
+    @test solve_tp(custom)(TT; idxs = custom.I.p) ≈ solve_tp(builtin)(TT; idxs = builtin.I.p) atol = 1e-10
 end

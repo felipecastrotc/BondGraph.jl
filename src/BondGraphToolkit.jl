@@ -63,7 +63,7 @@ MTK counts every port's flow positive into the component, so `f2 = -p2.f`; write
 laws in `e1, f1, e2, f2` and this sign is handled for you.
 """
 macro twoport(fdef)
-    body = fdef.args[2]
+    body = fdef.args[2]   # long-form `function`; its last statement is the vector of laws
     body.args[end] = :($System(vcat($(body.args[end])), $t; name, systems = [p1, p2]))
     prepend!(body.args, [:(p1 = $PowerPort(name = :p1)), :(p2 = $PowerPort(name = :p2)),
                          :(e1 = p1.e), :(f1 = p1.f), :(e2 = p2.e), :(f2 = -p2.f)])

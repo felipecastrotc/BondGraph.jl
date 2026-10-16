@@ -11,7 +11,7 @@ the bond into it, `p2` the bond out. `m` can be an expression (modulated transfo
 MTF); build it with `@named` when the expression uses other subsystems' variables.
 """
 @twoport function TF(; name, m)
-    if !(m isa Num)   # a constant modulus is a parameter
+    if m isa Real && !(m isa Num)   # a constant modulus is a parameter
         @parameters m = m
     end
     [e1 ~ m * e2, f2 ~ m * f1]
@@ -25,7 +25,7 @@ bond into it, `p2` the bond out. `r` can be an expression (modulated gyrator, MG
 build it with `@named` when the expression uses other subsystems' variables.
 """
 @twoport function GY(; name, r)
-    if !(r isa Num)
+    if r isa Real && !(r isa Num)
         @parameters r = r
     end
     [e1 ~ r * f2, e2 ~ r * f1]
