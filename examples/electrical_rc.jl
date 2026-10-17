@@ -4,9 +4,9 @@
 #
 # ![RC Circuit](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Discharging_capacitor.svg/400px-Discharging_capacitor.svg.png)
 #
-# From Kirchhoff's law, the linear differential equation representing the charge on the capacitor over time is given by:
+# The capacitor discharges through the resistor. Both share the voltage $V = q/C$, and Kirchhoff's current law says the current leaving the capacitor, $-\dot{q}$, is the current through the resistor, $V/R$. So the charge $q$ on the capacitor obeys
 #
-# $C \frac{dV}{dt} + \frac{V}{R} = 0$
+# $R \frac{dq}{dt} + \frac{q}{C} = 0, \qquad q(t) = q_0\, e^{-t/RC}.$
 #
 # ### Bond Graph Representation
 #
@@ -39,9 +39,14 @@ sys = mtkcompile(model)
 
 ## Define and solve the ODE problem over 10 s
 prob = ODEProblem(sys, [], (0.0, 10.0))
-sol = solve(prob, Tsit5())
-## Plot the charge on the capacitor
-plot(sol, idxs = [model.C.q], xlabel = "Time", ylabel = "Charge")
+sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
+## Plot the charge on the capacitor against the hand-derived q(t) = q₀ exp(-t/RC), with q₀ = R = C = 1
+plot(sol, idxs = [model.C.q], label = "Bond graph", xlabel = "Time", ylabel = "Charge")
+plot!(τ -> exp(-τ), 0, 10, label = "Hand-derived", linestyle = :dash)
+
+# The largest difference between the two on a common time grid:
+tgrid = 0:0.01:10
+maximum(abs, sol(tgrid; idxs = model.C.q).u - exp.(-tgrid))
 
 # To inspect the system, the following functions can be employed:
 #
