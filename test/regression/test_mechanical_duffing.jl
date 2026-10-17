@@ -1,5 +1,4 @@
 # Linear and cubic compliances share the 1-junction.
-using BondGraphToolkit.ModelingToolkit: t_nounits as t, D_nounits as D
 
 @oneport function CubicCompliance(; name, C = 0.2, q = 0.0)
     @parameters C = C

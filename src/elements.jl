@@ -39,7 +39,9 @@ end
 
 Effort detector: outputs the effort of its bond as `output::RealOutput` and carries no
 power (`f = 0`), so it doesn't change the model. It sits on a 0-junction, where every
-bond shares the effort it reads (Borutzky 2011, Ch. 3 p. 116).
+bond shares the effort it reads (Borutzky 2011, Ch. 3 p. 116). Write its bond like a
+passive element's, from the junction into the detector (`[-1, de]`); it carries no power,
+so the direction doesn't change the model.
 """
 @oneport function De(; name)
     @named output = RealOutput()
@@ -51,6 +53,8 @@ end
 
 Flow detector: outputs the flow of its bond as `output::RealOutput` and carries no
 power (`e = 0`). It sits on a 1-junction, where every bond shares the flow it reads.
+Write its bond like a passive element's, from the junction into the detector
+(`[-1, df]`); it carries no power, so the direction doesn't change the model.
 """
 @oneport function Df(; name)
     @named output = RealOutput()

@@ -1,19 +1,6 @@
 # Two-ports through the public API (Karnopp Eqs. 3.8-3.11): port 1 is the bond into the
 # two-port, port 2 the bond out of it. A source reaches port 1 through a 1-junction
 # (Se ⇀ 1 ⇀ TF), and port 2 bonds straight into a storage element (TF ⇀ I).
-using BondGraphToolkit.ModelingToolkit: t_nounits as t
-
-solve_tp(model, T = 1.0) =
-    solve(ODEProblem(mtkcompile(model), [], (0.0, T)), Tsit5(); abstol = 1e-10, reltol = 1e-10)
-const TT = range(0.0, 1.0, length = 11)
-
-# Se(E) ⇀ 1 ⇀ two-port ⇀ load, as one model.
-function driven(twoport, load; E)
-    @named se = Se(E)
-    @named src = Junction1(se, [-1, :out])
-    System([connect(src.out, twoport.p1), connect(twoport.p2, load.power)], t;
-           name = :m, systems = [src, twoport, load])
-end
 
 # Power into port 1 and out of port 2, in the bonds' own variables (f₂ = -p2.f).
 power_in(sol, tp) = sol(TT; idxs = tp.p1.e) .* sol(TT; idxs = tp.p1.f)

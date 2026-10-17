@@ -1,6 +1,6 @@
 # [Public Documentation](@id public-documentation)
 
-Documentation for `BondGraphToolkit.jl`'s public interface. `using BondGraphToolkit` also re-exports ModelingToolkit, and `latexify` from Latexify.
+Documentation for `BondGraphToolkit.jl`'s public interface. `using BondGraphToolkit` also re-exports ModelingToolkit, and `latexify` from [Latexify](https://korsbo.github.io/Latexify.jl/stable/).
 
 See the [Internals](@ref internal-documentation) section for the internal functions.
 

@@ -1,5 +1,4 @@
 # The bond graph of a model as data and text, drawn with bgplot, and saved with savebg.
-using BondGraphToolkit.ModelingToolkit: t_nounits as t
 
 # Se ⇀ 1 ⇀ R, and the junction's free port `out` ⇀ TF ⇀ I.
 function tf_model()

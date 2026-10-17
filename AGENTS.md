@@ -28,7 +28,7 @@ julia --project=docs docs/make.jl               # build docs (also tries to depl
 - Examples: first line is `# # [Title](@id anchor)`; the title becomes the docs nav entry. The example titled `Quick Example` is spliced into `docs/src/getting_started.md` at `@quick-example`. Files prefixed `tmp_` are skipped.
 - Figures: TikZ sources in `docs/src/misc/tikz/*.tex` → PDF → SVG (+ `-dark.svg`) via `docs/src/misc/getsvg.sh`; published copies go in `docs/src/assets/tikz/`.
 - `tmp_dev_*` files are personal scratch, gitignored. Never commit them.
-- Dependencies: runtime deps in `Project.toml` `[deps]` with a `[compat]` bound each; test-only deps go in `[extras]`/`[targets]`; example/plotting deps go in `docs/Project.toml`. `Manifest.toml` is gitignored.
+- Dependencies: runtime deps in `Project.toml` `[deps]` with a `[compat]` bound each, except standard libraries bundled with Julia (`REPL`, …), which `julia` bounds; test-only deps go in `[extras]`/`[targets]`; example/plotting deps go in `docs/Project.toml`. `Manifest.toml` is gitignored.
 
 ## Git workflow
 

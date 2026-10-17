@@ -129,7 +129,7 @@ The physics of v0.2's examples doesn't change.
 ### Package
 
 - Rename to `BondGraphToolkit` everywhere in code, docs and tests, keeping UUID `41e83443-…` and no alias (ticket 08). The GitHub repo rename happens at the release, after asking.
-- Compat: `ModelingToolkit = "11.45"`, `julia = "1.10"`. Direct dependencies only for what the code imports, each with a `[compat]` bound:
+- Compat: `ModelingToolkit = "11.45"`, `julia = "1.10"`. Direct dependencies only for what the code imports, each with a `[compat]` bound except standard libraries bundled with Julia, which `julia` bounds (2026-10-17, review of ticket 11):
   - ModelingToolkitStandardLibrary is a regular dependency (MIT, about 0.2 s load). It's needed for `RealInput`/`RealOutput` and the adapters.
   - Latexify is a direct dependency, because `latexify` is re-exported. MTK already loads it.
 - Graph rendering uses Graphviz_jll as a regular dependency (v0.3-impl ticket 11; was a package extension).

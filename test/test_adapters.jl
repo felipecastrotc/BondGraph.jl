@@ -1,7 +1,6 @@
 # Adapters to MTK standard-library networks, each checked against a reference model.
 # An adapter's bond is drawn into it (`[-1, adapter]` at a junction): the MTKSL network
-# is the element at the end of that bond. Uses `solve_dae` and `TT` from earlier files.
-using BondGraphToolkit.ModelingToolkit: t_nounits as t
+# is the element at the end of that bond.
 import ModelingToolkitStandardLibrary.Electrical as El
 import ModelingToolkitStandardLibrary.Mechanical.Rotational as Rot
 import ModelingToolkitStandardLibrary.Mechanical.Translational as Tr
@@ -112,21 +111,34 @@ end
 end
 
 @testset "Translational adapters: a force accelerates an MTKSL mass" begin
-    # Se(1) ⇀ 1 ⇀ adapter ⇀ MTKSL mass of 2 kg: v = t/2.
+    # Se(1) ⇀ 1 ⇀ adapter ⇀ MTKSL mass of 2 kg: v = t/2, as with an MTKSL force source.
+    @named k = Blocks.Constant(k = 1.0)
+    @named force = Tr.Force()
+    @named mass = Tr.Mass(m = 2.0)
+    @named ref = System([connect(k.output, force.f), connect(force.flange, mass.flange)], t;
+                        systems = [k, force, mass])
     @named se = Se(1.0)
     @named ta = TranslationalAdapter()
     @named j = Junction1(se, [-1, ta])
-    @named mass = Tr.Mass(m = 2.0)
     @named m = System([connect(j.ta.flange, mass.flange)], t; systems = [j, mass])
-    sys = mtkcompile(m)
-    sol = solve(ODEProblem(sys, [sys.mass.v => 0.0, sys.mass.s => 0.0], (0.0, 1.0)), Rodas5P(); abstol = 1e-10, reltol = 1e-10)
-    @test sol(TT; idxs = m.mass.v) ≈ TT ./ 2 atol = 1e-8
+    # Tr.Mass has no initial values; in `ref` mass.v is observed, so start from the force's.
+    trsolve(x, v) = (sys = mtkcompile(x);
+                     solve(ODEProblem(sys, [v(sys) => 0.0, sys.mass.s => 0.0], (0.0, 1.0)), Rodas5P();
+                           abstol = 1e-10, reltol = 1e-10))
+    s, r = trsolve(m, x -> x.mass.v), trsolve(ref, x -> x.force.flange.v)
+    @test s(TT; idxs = m.mass.v) ≈ TT ./ 2 atol = 1e-8
+    @test s(TT; idxs = m.mass.v) ≈ r(TT; idxs = ref.mass.v) atol = 1e-8
+    @named force = TP.Force()
+    @named mass = TP.Mass(m = 2.0, s = 0.0, v = 0.0)
+    @named ref = System([connect(k.output, force.f), connect(force.flange, mass.flange)], t;
+                        systems = [k, force, mass])
     @named se = Se(1.0)
     @named tpa = TranslationalPositionAdapter()
     @named j = Junction1(se, [-1, tpa])
-    @named mass = TP.Mass(m = 2.0, s = 0.0, v = 0.0)
     @named m = System([connect(j.tpa.flange, mass.flange)], t; systems = [j, mass])
-    @test solve_dae(m)(TT; idxs = m.mass.v) ≈ TT ./ 2 atol = 1e-8
+    s, r = solve_dae(m), solve_dae(ref)
+    @test s(TT; idxs = m.mass.v) ≈ TT ./ 2 atol = 1e-8
+    @test s(TT; idxs = m.mass.s) ≈ r(TT; idxs = ref.mass.s) atol = 1e-8
 end
 
 @testset "HydraulicAdapter: MTKSL pressure source" begin
