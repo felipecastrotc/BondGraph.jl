@@ -113,6 +113,24 @@ filter!(x -> x[1] != "Quick Example", examples_nav)
 quick_md = joinpath(build_path, "electrical_rc.md")
 isfile(quick_md) && rm(quick_md)
 
+# Group the examples in the sidebar, in this order; a file not listed goes to "Other"
+example_sections = [
+    "Systems" => ["mechanical_msd_1dof", "mechanical_msd_2dof", "mechanical_msd_ndof",
+                  "mechanical_duffing", "electrical_dc_motor"],
+    "Features" => ["two_ports", "signals", "adapters", "elements_oneport",
+                   "equations_latex", "drawing"],
+    "Applications" => ["control_dc_motor_pi", "robotics_motor_pendulum", "electrical_rlc",
+                       "biomedical_windkessel", "hydraulic_coupled_tanks",
+                       "chemical_reaction_network"],
+]
+stem(entry) = splitext(basename(entry[2]))[1]
+listed = reduce(vcat, last.(example_sections))
+examples_nav = [
+    [title => [e for name in names for e in examples_nav if stem(e) == name]
+     for (title, names) in example_sections];
+    filter(!isempty ∘ last, ["Other" => filter(e -> stem(e) ∉ listed, examples_nav)])
+]
+
 # Generate documentation using Documenter
 makedocs(
     modules=[BondGraphToolkit],
