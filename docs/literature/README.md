@@ -65,7 +65,7 @@ Callers were found with the codebase knowledge graph: every junction equation co
 | Modulated TF/GY | modulus from a signal | modulus is any symbolic expression | **Agrees** (the expression plays the role of the activated bond) |
 | Causality | stroke rules, integral preferred | none; MTK's structural simplification picks the states and reduces the index | **No implementation** (design: left to MTK) |
 | Fields (multiport C/I/R) | Breedveld, Karnopp (later chapters) | only one-ports via `@oneport` | **No implementation** |
-| Detectors De/Df | Djeziri Ch. 3 | none (ticket 11 proposes `EffortSensor`/`FlowSensor`) | **No implementation** |
+| Detectors De/Df | Djeziri Ch. 3 | `De`: `f = 0`, outputs `e` on `output::RealOutput`; `Df`: `e = 0`, outputs `f`, `src/elements.jl` | **Agrees** |
 | Power/activity diagnostics | Louca Ch. 2 | none | **No implementation** |
 | Sensitivity | Borutzky Ch. 4 | none | **No implementation** (MTK/SciML sensitivity covers it later) |
 | DC motor drawing | a source's arrow points away from the source (Karnopp p. 49) | the code bonds the torque source τ into the shaft junction (as the books do), but the TikZ draws `jm → τ` | **Differs** (drawing only): fix the TikZ (ticket 06, Q6) |
@@ -81,4 +81,4 @@ Each step names the check that would catch it breaking.
 5. **No causality code.** Check: one model with dependent states (two inertias on one 1-junction, which puts one of them in derivative causality, Karnopp §3.4 pp. 63–65) compiles to a single state with MTK.
 6. **Examples and drawings follow the books:** DC motor per Karnopp Fig. 2.3d, N-DoF with `0 → sd` (ticket 06, Q6/Q8). Check: the regression helpers map the N-DoF `q` sign.
 
-Out of scope for v0.3, but recorded: activity diagnostics, De/Df detectors, sensitivity via incremental bond graphs, multiport fields.
+Out of scope for v0.3, but recorded: activity diagnostics, sensitivity via incremental bond graphs, multiport fields.

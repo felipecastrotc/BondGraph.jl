@@ -8,6 +8,11 @@
 # The mapping is research 11's (`.scratch/mtk-upgrade/research/11-coupling-with-mtk-stdlib.md`):
 # effort = across-variable in the impedance-analogy domains (electrical, hydraulic);
 # flow = rate of the across-variable in the mobility-analogy ones (mechanical).
+#
+# The adapters are plain `@component`s, not `@oneport`s: `@oneport` only adds the
+# `input`/`output` signal connectors, and an adapter also needs an MTKSL connector (pin,
+# flange, port). They are hand-written elements, as in "Writing an element without the
+# macros" (`examples/elements_oneport.jl`).
 
 """
     ElectricalAdapter(; name)

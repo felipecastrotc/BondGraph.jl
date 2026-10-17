@@ -1,5 +1,4 @@
 # The source bond enters the 1-junction; its I, C and R bonds leave it.
-using BondGraphToolkit.ModelingToolkit: t_nounits as t
 
 for (case, force, displacement) in
     (("mechanical_msd_1dof_unforced", 0.0, 1.0),

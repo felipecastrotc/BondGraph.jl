@@ -1,15 +1,5 @@
 # Signals (activated bonds): sources and moduli driven by MTK standard-library blocks,
-# and detectors measuring a bond without carrying power. Reuses `driven`, `solve_tp`
-# and `TT` from test_two_ports.jl.
-using BondGraphToolkit.ModelingToolkit: t_nounits as t
-import ModelingToolkitStandardLibrary.Blocks as Blocks
-using OrdinaryDiffEqRosenbrock, OrdinaryDiffEqNonlinearSolve
-
-# A modulus read from a signal is an unknown, which MTK won't divide by, so the model
-# keeps an algebraic equation: a DAE that needs a mass-matrix solver, and a nonlinear
-# solve for its initial values when the loop is nonlinear.
-solve_dae(model) =
-    solve(ODEProblem(mtkcompile(model), [], (0.0, 1.0)), Rodas5P(); abstol = 1e-10, reltol = 1e-10)
+# and detectors measuring a bond without carrying power.
 
 # `model` plus a block whose output drives `input`, as one system.
 with_block(model, block, input) =
