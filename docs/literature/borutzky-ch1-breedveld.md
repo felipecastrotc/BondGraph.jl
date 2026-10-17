@@ -132,3 +132,13 @@ PDF↔book page offset: book p. N = PDF p. N+18 (PDF p. 20 shows printed "2"; ch
 - Table 1.3 uses "X0/X1" formulas with an inconsistent index range in the scan (n-1 sum); read as "sum over i != j". (p. 18)
 - Scan is of normal quality. Eq. (1.9) text says "minus sign for away, plus for toward" but the sentence order in the extract is split across pp. 15-16; Table 1.3 on p. 18 agrees (+1 inward, -1 outward).
 - I did not check where pseudo-bond/RS thermal ports are used in the library; only the book content is reported.
+
+## Pendulum example: details read for `examples/robotics_motor_pendulum.jl` (2026-10-17)
+Read from the rendered figures (PDF pp. 37-38, 44, 52-53) and text, book pp. 19-21, 25-26, 33-35.
+- Fig. 1.6 (p. 19): φ is drawn from the horizontal space axis x_s towards y_s; g points down (−y_s). With (1.13)-(1.14), x = l cos φ and y = l sin φ, so the mass hangs at φ = −π/2. **Inference:** from the figure plus (1.13)-(1.14); the text does not state the rest angle, but p. 35 speaks of "small angles around −π/2".
+- Fig. 1.7d (p. 20) half-arrows: Se:us → 1(i); 1(i) → R:Re, 1(i) → I:L; 1(i) → GY:Km → 1(ω); 1(ω) → I:J, 1(ω) → R:b; 1(ω) → MTF(−l sin φ) → I:m_x (no v_x junction after simplification); 1(ω) → MTF(l cos φ) → 1(v_y) → I:m_y; Se:−mg → 1(v_y). The angle is a signal: an integrator ∫ fed from 1(ω) outputs φ, which modulates both MTFs. So every bond follows the power from the source to the mass; gravity enters the v_y junction as the effort −mg.
+- Fig. 1.8 (p. 26): the graph of Fig. 1.7d with causal strokes numbered in assignment order (1-13 legible in the scan; half-arrows too small to re-check); I:m_x and I:m_y in differential causality ("do not get their preferred causality", §1.4.4, p. 25). Reason given in §1.5.9 (p. 33): the rigid constraint between rotor inertia and point mass.
+- p. 33: with constant TF ratios the dependent I's could be moved to the rotor junction and combined (Huygens-Steiner analogy); with modulated TFs a gyristor appears (Fig. 1.10).
+- p. 34: if the constraint were elastic, the gyristors would stay and represent fictitious (e.g. centrifugal) forces; with a rigid constraint their power is zero.
+- p. 35: "For small angles around −π/2 this C-element even becomes a linear C-element with parameter 1/mgl", giving Eq. (1.26); the result is "identical" to writing the damped second-order model in φ directly.
+- **Inference:** the reduced model of Fig. 1.11b in equations: L di/dt = u_s − R_e i − K_m ω; (J + m l²) ω̇ = K_m i − b ω − m g l cos φ; φ̇ = ω. The book gives the elements (I:L, R:Re, GY:Km, I:J+ml², R:b, C with T_C = mgl cos φ) but does not write these equations out.

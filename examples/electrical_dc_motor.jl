@@ -2,7 +2,7 @@
 #
 # ## Introduction
 # 
-# The DC motor is a commonly used actuator that provides rotary motion to a mechanical system. It converts electrical energy into rotational mechanical energy. Thus, modeling it with a bond graph requires an additional port to the zero and one junctions. The system can be represented as an equivalent circuit of the armature and the free-body diagram of the rotor illustrated below:
+# The DC motor is a commonly used actuator that provides rotary motion to a mechanical system. It converts electrical energy into rotational mechanical energy, so its bond graph has an electrical and a mechanical part, coupled by a gyrator. The system can be represented as an equivalent circuit of the armature and the free-body diagram of the rotor illustrated below:
 # 
 # ![DC motor](https://ctms.engin.umich.edu/CTMS/Content/MotorSpeed/System/Modeling/figures/motor.png)
 # 
@@ -18,11 +18,13 @@
 # 
 # $e = k_e \dot{\theta}$
 # 
-# The motor torque constant ($k_\tau$) and the back electromotive force ($k_e$) are equal, denoted as $k$.
+# In SI units the torque constant ($k_\tau$) and the back-EMF constant ($k_e$) are equal, denoted as $k$: the motor converts power without storing or dissipating it, so $\tau\,\dot{\theta} = e\,i$. Karnopp, Margolis & Rosenberg (2012, §3.2, pp. 53–54) model such a coupling as a gyrator with a single coupling constant.
+#
+# The shaft also carries an applied torque $\tau_a$, acting in the direction of positive rotation.
 # 
 # Finally, based on Newton's 2nd law and Kirchhoff's voltage law, we can derive the following governing equations for the system:
 # 
-# $J\ddot{\theta} + c\,\dot{\theta} = k\,i ,$
+# $J\ddot{\theta} + c\,\dot{\theta} = k\,i + \tau_a,$
 # 
 # $L\frac{di}{dt} + R\,i = V - k\,\dot{\theta},$
 # 
@@ -41,9 +43,9 @@
 # </picture>
 # ```
 # 
-# In this representation, the inertance elements (I) correspond to the moment of inertia of the rotor ($J$) in the mechanical domain and the armature inductance ($L$) in the electrical domain. The resistance elements (R) represent the viscous friction coefficient ($c$) in the mechanical domain and the armature electrical resistance ($R_a$). 
+# In this representation, the inertance elements (I) correspond to the moment of inertia of the rotor ($J$) in the mechanical domain and the armature inductance ($L$) in the electrical domain. The resistance elements (R) represent the viscous friction coefficient ($c$) in the mechanical domain and the armature resistance ($R$) in the electrical domain. The effort sources (Se) are the applied voltage ($V$) and the applied torque ($\tau_a$).
 # 
-# The gyrator (GY) describes the current–torque and speed–voltage relationships, with the motor constant $k$ as its modulus.
+# The gyrator (GY) describes the current–torque and speed–voltage relationships, with the motor constant $k$ as its modulus: $e_1 = k f_2$ and $e_2 = k f_1$ (Karnopp, Margolis & Rosenberg 2012, Eq. 3.11), that is, back EMF $e = k\dot{\theta}$ and motor torque $\tau = k i$.
 # 
 # ## Preliminary Steps
 # 
@@ -66,16 +68,16 @@ using Plots
 # The mechanical side has the shaft moment of inertia (J), its viscous friction (c) and an applied torque (τ):
 @named J = Inertia(I = 0.01)      # (kg⋅m^2) Shaft moment of inertia
 @named c = Resistance(R = 0.1)    # (N⋅m⋅s) Shaft viscous friction
-@named τ = Se(1.0)                # (N⋅m) Applied torque on the shaft
+@named τ = Se(1.0)                # (N⋅m) Applied torque on the shaft, τₐ
 
-# The motor constant is the gyrator modulus `r`: torque `τ = r i` and back EMF `e = r ω`.
+# The motor constant $k$ is the gyrator modulus `r`: torque `τ = r i` and back EMF `e = r ω`, in N⋅m/A = V⋅s/rad.
 r = 0.01
 
 # ## Model Construction
 #
-# Each side is a 1-junction: all its elements share one flow (current or angular velocity). The sources' bonds point into the junction and the passive elements' bonds point out of it, `[-1, x]`.
+# Each side is a 1-junction: all its elements share one flow (current or angular velocity), and its efforts (voltages or torques) sum to zero. The sources' bonds point into the junction, away from the source, and the passive elements' bonds point out of the junction into the element, `[-1, x]`, the usual orientations of Karnopp, Margolis & Rosenberg (2012, §3.1, pp. 39 and 49). So $V$ and $\tau_a$ enter each sum with a plus sign, and the R and I efforts with a minus sign.
 #
-# The two junctions are bonded through the gyrator, so each gets a free port named `gy`. The electrical bond leaves its junction towards the gyrator (`[-1, :gy]`) and the mechanical bond enters its junction from the gyrator (`:gy`), following the power from the voltage source to the shaft.
+# The two junctions are bonded through the gyrator, so each gets a free port named `gy`. The electrical bond leaves its junction towards the gyrator (`[-1, :gy]`) and the mechanical bond enters its junction from the gyrator (`:gy`), following the power from the voltage source to the shaft. This is how Karnopp, Margolis & Rosenberg (2012, Fig. 2.3d, pp. 25–26) orient a motor: the armature bond points toward the motor and the shaft bond away from it. The back EMF therefore enters the electrical sum with a minus sign and the motor torque enters the mechanical sum with a plus sign, as in the hand-derived equations.
 @named je = Junction1(V, [-1, R], [-1, L], [-1, :gy])   # Electrical part
 @named jm = Junction1(τ, [-1, c], [-1, J], :gy)         # Mechanical part
 
@@ -97,6 +99,18 @@ parameters(sys)
 # Print the system's equations in terms of the states
 full_equations(sys)
 
+# ### Generated equations against the hand derivation
+#
+# `bg_equations` returns the same equations with the names we choose. The states are the momenta of the two inertias: the flux linkage of the inductance, $\lambda = L\,i$, and the angular momentum of the shaft, $h = J\dot{\theta}$. Here we rename them, and the parameters, to the symbols of the introduction (inside a `let`, so the names `L`, `R`, `J` and `c` keep pointing at the elements):
+let
+    @variables λ(t) h(t)
+    @parameters L R J c k
+    bg_equations(mdl; rename = Dict(je.L.p => λ, jm.J.p => h, je.L.I => L, je.R.R => R,
+                                    jm.J.I => J, jm.c.R => c, gy.r => k))
+end
+
+# The constant sources appear as their values, $V = 12$ and $\tau_a = 1$. With $\lambda = L\,i$ and $h = J\dot{\theta}$, the equation for $\dot{\lambda}$ is $L\frac{di}{dt} = V - R\,i - k\,\dot{\theta}$ and the one for $\dot{h}$ is $J\ddot{\theta} = \tau_a + k\,i - c\,\dot{\theta}$: the two governing equations of the introduction.
+
 # ## System Simulations
 #
 # ### Bond graph model
@@ -106,13 +120,13 @@ tspan = (0.0, 10.0)
 # Generate an `ODEProblem` as for any ModelingToolkit model, passing the simulation interval.
 prob = ODEProblem(sys, [], tspan)
 
-# Use `solve` to simulate the system.
-sol = solve(prob, Tsit5())
+# Use `solve` to simulate the system. Tight tolerances let us compare it with the reference model at the end.
+sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
 plot(sol, idxs = [je.L.power.f, jm.J.power.f], xlabel = "Time", ylabel = "Amplitude")
 
 # ### DC motor model
 # 
-# First, we define the state variables of the DC motor system, which are the $i$, $\theta$, and $\cdot{\theta}$. They represent the armature current, shaft angle, and shaft angular velocity, respectively.
+# First, we define the state variables of the DC motor system, which are $i$, $\theta$, and $\dot{\theta}$. They represent the armature current, shaft angle, and shaft angular velocity, respectively.
 
 @variables i(t) = 0.0           # Armature current
 @variables θ(t) = 0.0           # Shaft angle
@@ -125,7 +139,7 @@ Uᵥ = 12.0                     # (V) - Voltage
 
 Jᵥ = 0.01                     # (kg*m²) - Moment of inertia of the rotor
 bᵥ = 0.1                      # (N*m*s) - Motor viscous friction constant
-Tᵥ = 1.0                      # (N*m) - Motor torque
+Tᵥ = 1.0                      # (N*m) - Applied torque on the shaft
 
 # Define the differential equations that represent the governing equations of the system. They include the equation for shaft angular acceleration, armature current, and the derivative of the shaft angle.
 
@@ -141,11 +155,11 @@ eqs_t = [
 # We compile the ODE with `mtkcompile`, as for the bond graph model.
 sys_t = mtkcompile(sys_t)
 
-# Define the ODEproblem to simulate with the time span defined for the bond graph simulation.
+# Define the `ODEProblem` to simulate with the time span defined for the bond graph simulation.
 prob_t = ODEProblem(sys_t, [], tspan)
 
-# Use the `solve` to simulate the system.
-sol_t = solve(prob_t, Tsit5(), reltol = 1e-8, abstol = 1e-8);
+# Use `solve` to simulate the system, with the same tolerances.
+sol_t = solve(prob_t, Tsit5(), reltol = 1e-10, abstol = 1e-10);
 
 # Plot the results
 plot(sol_t.t, sol_t[θ̇], label = "Angular Velocity")
@@ -163,4 +177,9 @@ plot!(sol_t.t, sol_t[i], label = "Model", xlabel = "Time (s)")
 plot(sol.t, sol[jm.J.power.f], label = "Bond-graph", ylabel = "Angular velocity (rad/s)")
 plot!(sol_t.t, sol_t[θ̇], label = "Model", xlabel = "Time (s)")
 
-# As we can see, the simulation, based on the bond graph model, replicated the expected dynamics.
+# On a common time grid, the largest difference between the two models, in current and in angular velocity:
+tgrid = range(tspan..., length = 1001)
+(maximum(abs, sol(tgrid; idxs = je.L.power.f).u - sol_t(tgrid; idxs = i).u),
+ maximum(abs, sol(tgrid; idxs = jm.J.power.f).u - sol_t(tgrid; idxs = θ̇).u))
+
+# The bond graph model reproduces the hand-derived dynamics to the solver's tolerance.
