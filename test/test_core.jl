@@ -1,10 +1,6 @@
 # Core elements and junctions through the public API, checked against closed-form
 # solutions and the junction laws (Karnopp Eqs. 3.16-3.21). All parameters are 1.
-using BondGraphToolkit.ModelingToolkit: t_nounits as t
 
-simulate(model, T = 1.0) =
-    solve(ODEProblem(mtkcompile(model), [], (0.0, T)), Tsit5(); abstol = 1e-10, reltol = 1e-10)
-const T1 = range(0.0, 1.0, length = 11)
 # e·f on an element's bond. (MTK 11 can't index a solution by a product of observed
 # variables, so the product is taken after sampling.)
 power(sol, x) = sol(T1; idxs = x.power.e) .* sol(T1; idxs = x.power.f)
@@ -61,4 +57,16 @@ end
     @named j0 = Junction0(:in, [-1, C])              # ... and enters j0
     @named m = System([connect(j1.out, j0.in)], t; systems = [j1, j0])
     @test simulate(m)(T1; idxs = m.j0.C.q) ≈ 1 .- exp.(-T1) atol = 1e-8
+end
+
+@testset "a custom @oneport matches the built-in Compliance" begin
+    @oneport function MyC(; name, C = 1.0, q = 0.0)
+        @parameters C = C
+        @variables q(t) = q
+        [power.e ~ q / C, D(q) ~ power.f]
+    end
+    rc(c) = (@named R = Resistance(R = 1.0); Junction0([-1, R], [-1, c]; name = :m))
+    custom = rc(MyC(C = 2.0, q = 1.0; name = :C))
+    builtin = rc(Compliance(C = 2.0, q = 1.0; name = :C))
+    @test simulate(custom)(T1; idxs = custom.C.q) ≈ simulate(builtin)(T1; idxs = builtin.C.q) atol = 1e-10
 end

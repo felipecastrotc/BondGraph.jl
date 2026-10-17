@@ -17,3 +17,4 @@ Spec: [../../mtk-upgrade/spec.md](../../mtk-upgrade/spec.md). Branch: `feature/m
 ## Comments
 
 - 2026-10-15: done. Research 11's adapter equations hold under the v0.2 convention with the adapter's bond always drawn into it (`[-1, adapter]`): MTKSL loads (electrical R+C, rotational inertia+damper behind the DC motor, translational masses) match their references exactly; MTKSL sources (voltage, pressure) give the reference with the opposite sign, i.e. negative power along the bond, as the convention says. Position adapters take `s`/`phi` like MTKSL components (a local variable with a `nothing` default). Docs example: `examples/adapters.jl`.
+- 2026-10-17 (review of v0.3): the adapters are plain `@component`s, not built with `@oneport` (spec story 34), because the macro only adds signal connectors; recorded in `src/adapters.jl`'s header. Kept as is.

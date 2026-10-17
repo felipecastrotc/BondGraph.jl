@@ -14,7 +14,8 @@ module BondGraphToolkit
 
 using Reexport
 @reexport using ModelingToolkit
-using ModelingToolkit: t_nounits as t, D_nounits as D, getname
+using ModelingToolkit: t_nounits as t, D_nounits as D
+using SymbolicIndexingInterface: getname
 using Symbolics: unwrap, get_variables, iscall, operation, arguments
 using Latexify: latexify
 using Graphviz_jll: Graphviz_jll
@@ -42,8 +43,8 @@ counts `f` positive into the component that owns the port.
 """
 @connector function PowerPort(; name)
     vars = @variables begin
-        e(t), [guess = 0.0]
-        f(t), [connect = Flow, guess = 0.0]
+        e(t)
+        f(t), [connect = Flow]
     end
     System(Equation[], t, vars, []; name)
 end

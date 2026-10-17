@@ -1,7 +1,6 @@
 # Model from examples/electrical_dc_motor.jl: V ⇀ 1ₑ ⇀ GY ⇀ 1ₘ, with R, L on the
 # electrical 1-junction and the load torque τ, damping c and rotor inertia J on the
 # mechanical one.
-using BondGraphToolkit.ModelingToolkit: t_nounits as t
 
 function dc_motor(; modulated = false)
     @named L = Inertia(I = 0.5)

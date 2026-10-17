@@ -1,5 +1,3 @@
-using BondGraphToolkit.ModelingToolkit: t_nounits as t
-
 @testset "Mechanical shorthands match role-named elements" begin
     function oscillator(make_elements)
         I, C, R = make_elements()
@@ -52,8 +50,23 @@ end
     @test maximum(abs, (energy[3:end] .- energy[1:end-2]) ./ (2dt) .- power[2:end-1]) < 1e-8
 end
 
+@testset "Two inertias driven by an effort share one flow (DAE)" begin
+    @named source = Se(3.0)
+    @named first_inertia = Inertia(I = 1.0)
+    @named second_inertia = Inertia(I = 2.0)
+    @named model = Junction1(source, [-1, first_inertia], [-1, second_inertia])
+    times = range(0.0, 1.0, length = 11)
+    # Closed form: (I1 + I2) df/dt = E with f(0) = 0, so f = t, p1 = I1 f, p2 = I2 f.
+    # One momentum follows the other (derivative causality), so both default initial
+    # values over-determine initialization; they agree (p1 = p2 = 0).
+    prob = ODEProblem(mtkcompile(model), [], (0.0, 1.0); warn_initialize_determined = false)
+    sol = solve(prob, Rodas5P(); abstol = 1e-10, reltol = 1e-10)
+    @test sol(times; idxs = model.first_inertia.p) ≈ times atol = 1e-8
+    @test sol(times; idxs = model.second_inertia.p) ≈ 2 .* times atol = 1e-8
+    @test sol(times; idxs = model.first_inertia.power.f) ≈ times atol = 1e-8
+end
+
 @testset "Two inertias share a 1-junction flow" begin
-    # shortcut: Tsit5 cannot solve the effort-driven DAE; use a DAE solver when one is available.
     @named source = Sf(t)
     @named first_inertia = Inertia(I = 1.0)
     @named second_inertia = Inertia(I = 2.0)

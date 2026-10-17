@@ -1,5 +1,4 @@
 # Readable equations: the model's equations in its states, with display names, and LaTeX.
-using BondGraphToolkit.ModelingToolkit: t_nounits as t, D_nounits as D
 
 function rc_model()
     @named R = Resistance(R = 1.0)

@@ -11,6 +11,9 @@ function element_type(sys)
     get(LETTERS, type, type)
 end
 
+# A bond-graph node: its subsystem path, `:junction`/`:element`/`:twoport`, and label.
+const Node = NamedTuple{(:id, :kind, :label), Tuple{String, Symbol, String}}
+
 subpath(path, name) = isempty(path) ? string(name) : string(path, "₊", name)
 
 """
@@ -20,7 +23,7 @@ The bond graph of a model, returned by [`bondgraph`](@ref): fields `nodes` and `
 Displayed as the list of its bonds; draw it with [`bgplot`](@ref).
 """
 struct BondGraph
-    nodes::Vector{NamedTuple{(:id, :kind, :label), Tuple{String, Symbol, String}}}
+    nodes::Vector{Node}
     bonds::Vector{Pair{String, String}}
 end
 
@@ -38,13 +41,16 @@ and `bonds`, displayed as the list of its bonds (`Se:V ⇀ 1:je`).
 A `connect` of more than two power ports, or of two that both expect the bond to point
 into them (e.g. two elements: a plain `connect` to an element is a bond pointing into
 it), is a 0-junction and gets its own node.
+
+A subsystem with a `power` port is drawn as one element, even when it is a composite
+model inside: that's how hand-written elements are recognised.
 """
 function bondgraph(sys)
-    nodes = NamedTuple{(:id, :kind, :label), Tuple{String, Symbol, String}}[]
+    nodes = Node[]
     bonds = Pair{String, String}[]
     ports = Dict{String, Tuple{String, Symbol}}()   # port path => (node id, :into | :outof)
     connections = Vector{String}[]
-    walk!(sys, path) = begin
+    function walk!(sys, path)
         id = isempty(path) ? string(nameof(sys)) : path
         subs = ModelingToolkit.get_systems(sys)
         names = nameof.(subs)
@@ -122,7 +128,10 @@ function dot_text(g, name)
     edge(u, v, bond, attrs = "") = println(io, "  ", name(node[u]), " -> ", name(node[v]),
         bond == (u => v) ? " [arrowhead=lvee" : " [dir=back, arrowtail=lvee", attrs, "];")
     for (a, b) in g.bonds
-        leaf(a) || leaf(b) ? nothing : (edge(a, b, a => b, ", weight=10"); continue)
+        if !(leaf(a) || leaf(b))
+            edge(a, b, a => b, ", weight=10")
+            continue
+        end
         el, j = leaf(a) ? (a, b) : (b, a)
         k = findfirst(∉(taken[j]), [:left, :right, :above, :below])
         slot = k === nothing ? :none : [:left, :right, :above, :below][k]
@@ -234,7 +243,11 @@ Base.print(io::IO, p::BondGraphPlot) = write(io, source(p.graph, p.format))
 Base.showable(::MIME"image/svg+xml", p::BondGraphPlot) = p.format === :svg
 Base.show(io::IO, ::MIME"image/svg+xml", p::BondGraphPlot) = print(io, p)
 function Base.show(io::IO, ::MIME"text/plain", p::BondGraphPlot)
-    p.format === :svg ? print(io, "BondGraphPlot (SVG): savebg(\"file.svg\", p) to save it") : print(io, p)
+    if p.format === :svg
+        print(io, "BondGraphPlot (SVG): savebg(\"file.svg\", p) to save it")
+    else
+        print(io, p)
+    end
 end
 
 # A terminal can't show SVG: open it in the default viewer, as Plots opens a GR window.
