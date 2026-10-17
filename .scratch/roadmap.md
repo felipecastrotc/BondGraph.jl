@@ -51,3 +51,15 @@ After step 3:
   - [ ] Citing page with the thesis/paper reference
 - [ ] Docs workflow green, deploy to `gh-pages`
 - [ ] Optional: register in the Julia General registry
+
+## Value gaps to reassess (2026-10-17)
+
+From the assessment of whether the library adds value (user: record them and reassess later). Today it is mostly MTK components with textbook bond-graph conventions, readable equations and drawings. Its distinct strengths: elements are native MTK systems, and the MTKSL adapters. What would justify the bond-graph method over plain acausal MTK/MTKSL modelling is not built yet:
+
+- [ ] Causality assignment (SCAP) as a diagnostic: `.scratch/v0.3-impl/issues/23-causality-diagnostic.md`
+- [ ] Power and energy diagnostics: `.scratch/v0.3-impl/issues/24-power-energy-diagnostics.md`
+- [ ] Multiport fields: `.scratch/v0.3-impl/issues/25-multiport-fields.md`
+- [ ] Signals and modulated elements in drawings: `.scratch/v0.3-impl/issues/20-draw-signals.md`
+- [ ] Derivative-causality pitfalls (silent frozen pendulum): `.scratch/v0.3-impl/issues/21-derivative-causality-pitfalls.md`
+
+Positioning for the paper: engineering and multiphysics, textbook-faithful bond graphs as native MTK components interoperating with MTKSL, complementary to BondGraphs.jl (systems biology, graph object compiled to MTK, registered but effectively MTK 9 only; `.scratch/mtk-upgrade/research/01-bondgraphs-jl-comparison.md`). Other tools: BondGraphTools (Python), 20-sim (commercial).
