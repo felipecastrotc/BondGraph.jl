@@ -13,6 +13,9 @@ Each note marks the reader's own interpretation with **Inference:**. In this ind
 | [borutzky-ch1-breedveld.md](borutzky-ch1-breedveld.md) | Breedveld, *Concept-Oriented Modeling of Dynamic Behavior*, in Borutzky (ed.), *Bond Graph Modelling of Engineering Systems*, Springer 2011, Ch. 1 | pp. 3–52 | N+18 |
 | [borutzky-ch2-reduction.md](borutzky-ch2-reduction.md) | Louca et al., *Energy-Based Bond Graph Model Reduction*, same book, Ch. 2 (short, low priority) | pp. 53–104 | N+18 |
 | [borutzky-ch3-4.md](borutzky-ch3-4.md) | Djeziri et al., *LFT Bond Graph … Fault Detection* (Ch. 3), and Borutzky, *Incremental Bond Graphs* (Ch. 4) | pp. 105–178 | N+18 |
+| [gawthrop-crampin-2014.md](gawthrop-crampin-2014.md) | Gawthrop & Crampin, *Energy-based analysis of biochemical cycles using bond graphs*, Proc. R. Soc. A 470: 20140459, 2014 (arXiv:1406.2447 v2, open access) | §1–§3.1, Eqs. 1–35 (arXiv numbering) | n/a |
+| [ctms-dc-motor-speed.md](ctms-dc-motor-speed.md) | Michigan CTMS, *DC Motor Speed: System Modeling* and *PID Controller Design* (read as Internet Archive snapshots, 2022-11-19 and 2023-06-10; text and MATLAB code, not the figures) | both pages | n/a |
+| [westerhof-2009-windkessel.md](westerhof-2009-windkessel.md) | Westerhof, Lankhaar & Westerhof, *The arterial Windkessel*, Med Biol Eng Comput 47:131–141, 2009 (Springer HTML full text) | §1–§8, Figs. 3, 5, Tables 1–2 | n/a |
 
 ## Topic index
 
@@ -65,7 +68,7 @@ Callers were found with the codebase knowledge graph: every junction equation co
 | Modulated TF/GY | modulus from a signal | modulus is any symbolic expression | **Agrees** (the expression plays the role of the activated bond) |
 | Causality | stroke rules, integral preferred | none; MTK's structural simplification picks the states and reduces the index | **No implementation** (design: left to MTK) |
 | Fields (multiport C/I/R) | Breedveld, Karnopp (later chapters) | only one-ports via `@oneport` | **No implementation** |
-| Detectors De/Df | Djeziri Ch. 3 | none (ticket 11 proposes `EffortSensor`/`FlowSensor`) | **No implementation** |
+| Detectors De/Df | Djeziri Ch. 3 | `De`: `f = 0`, outputs `e` on `output::RealOutput`; `Df`: `e = 0`, outputs `f`, `src/elements.jl` | **Agrees** |
 | Power/activity diagnostics | Louca Ch. 2 | none | **No implementation** |
 | Sensitivity | Borutzky Ch. 4 | none | **No implementation** (MTK/SciML sensitivity covers it later) |
 | DC motor drawing | a source's arrow points away from the source (Karnopp p. 49) | the code bonds the torque source τ into the shaft junction (as the books do), but the TikZ draws `jm → τ` | **Differs** (drawing only): fix the TikZ (ticket 06, Q6) |
@@ -81,4 +84,4 @@ Each step names the check that would catch it breaking.
 5. **No causality code.** Check: one model with dependent states (two inertias on one 1-junction, which puts one of them in derivative causality, Karnopp §3.4 pp. 63–65) compiles to a single state with MTK.
 6. **Examples and drawings follow the books:** DC motor per Karnopp Fig. 2.3d, N-DoF with `0 → sd` (ticket 06, Q6/Q8). Check: the regression helpers map the N-DoF `q` sign.
 
-Out of scope for v0.3, but recorded: activity diagnostics, De/Df detectors, sensitivity via incremental bond graphs, multiport fields.
+Out of scope for v0.3, but recorded: activity diagnostics, sensitivity via incremental bond graphs, multiport fields.

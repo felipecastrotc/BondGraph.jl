@@ -1,22 +1,24 @@
-# BondGraph.jl
+# BondGraphToolkit.jl
 
-Julia library for modeling and simulating dynamic systems with bond graphs, built on ModelingToolkit.jl (MTK). Module name `BondGraph`.
+Julia library for modeling and simulating dynamic systems with bond graphs, built on ModelingToolkit.jl (MTK 11). Module name `BondGraphToolkit` (v0.3 on branch `feature/mtk-upgrade`; v0.2 was `BondGraph` on MTK 8.71). Public MTK API only, no overrides of MTK internals (ADR 0001).
 
 ## Layout
 
-- `src/BondGraph.jl`: module entry, exports, include order
-- `src/bg.jl`: bond graph elements (`Se`, `Sf`, `Junction0/1`, `mGY`, `mTF`, `Mass`, `Spring`, `Damper`, ...)
-- `src/mtk.jl`: overrides of MTK internals; the first thing to break on MTK upgrades
-- `src/utils/`: connection, graph, system, macro (`@oneport`) helpers
-- `src/mbg.jl`: 2D/multibond experiments, not included in the module
-- `test/runtests.jl` + `test/unit-tests/`: unit tests
+- `src/BondGraphToolkit.jl`: module entry, exports, `PowerPort`, `@oneport`
+- `src/elements.jl`: one-port elements (`Se`, `Sf`, `Resistance`, `Compliance`, `Inertia`) and the mechanical shorthands `Mass`, `Spring`, `Damper`
+- `src/junctions.jl`: the signed 0-/1-junction component (`Junction0`, `Junction1`)
+- `src/two_ports.jl`: `TF`, `GY` (built with `@twoport`, defined in the module file)
+- `src/adapters.jl`: the five MTK standard-library adapters
+- `src/graph.jl`: `bondgraph` (the model's bond graph as data, shown as text), `bgplot` (SVG/TikZ/DOT drawing, laid out with Graphviz_jll), `savebg` (export by file extension)
+- `src/equations.jl`: `bg_equations` (readable, renameable equations; `latexify` is re-exported)
+- `test/runtests.jl` + `test/test_*.jl`: behaviour tests through the public API; `test/regression/`: golden data from v0.2 (never regenerate)
 - `examples/*.jl`: Literate.jl sources, rendered into the docs
 - `docs/`: Documenter.jl site, deployed to `gh-pages`; has its own `docs/Project.toml`
 
 ## Commands
 
 ```sh
-julia --project -e 'using Pkg; Pkg.test()'      # tests (CI: Julia 1.10, no Manifest)
+julia --project -e 'using Pkg; Pkg.test()'      # tests (CI: Julia 1.10 and 1, no Manifest)
 julia --project=docs docs/make.jl               # build docs (also tries to deploy; harmless locally)
 ```
 
@@ -26,7 +28,7 @@ julia --project=docs docs/make.jl               # build docs (also tries to depl
 - Examples: first line is `# # [Title](@id anchor)`; the title becomes the docs nav entry. The example titled `Quick Example` is spliced into `docs/src/getting_started.md` at `@quick-example`. Files prefixed `tmp_` are skipped.
 - Figures: TikZ sources in `docs/src/misc/tikz/*.tex` → PDF → SVG (+ `-dark.svg`) via `docs/src/misc/getsvg.sh`; published copies go in `docs/src/assets/tikz/`.
 - `tmp_dev_*` files are personal scratch, gitignored. Never commit them.
-- Dependencies: runtime deps in `Project.toml` `[deps]` with a `[compat]` bound each; test-only deps go in `[extras]`/`[targets]`; example/plotting deps go in `docs/Project.toml`. `Manifest.toml` is gitignored.
+- Dependencies: runtime deps in `Project.toml` `[deps]` with a `[compat]` bound each, except standard libraries bundled with Julia (`REPL`, …), which `julia` bounds; test-only deps go in `[extras]`/`[targets]`; example/plotting deps go in `docs/Project.toml`. `Manifest.toml` is gitignored.
 
 ## Git workflow
 

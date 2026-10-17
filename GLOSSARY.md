@@ -1,4 +1,4 @@
-# BondGraph.jl
+# BondGraphToolkit.jl
 
 A bond-graph dialect of ModelingToolkit: bond-graph models are ordinary MTK systems, so they compose, couple, and simulate with the same tools as any other MTK model.
 
@@ -40,7 +40,7 @@ _Avoid_: mass, except as the mechanical shorthand
 
 **Compliance (C)**:
 A one-port element that stores energy in its displacement; mechanically a spring, electrically a capacitance.
-_Avoid_: spring, except as the mechanical shorthand; capacitor
+_Avoid_: spring, except as the mechanical shorthand; capacitor, as the element's name (fine for the physical part)
 
 **Resistance (R)**:
 A one-port element that dissipates power; mechanically a damper, electrically a resistor.

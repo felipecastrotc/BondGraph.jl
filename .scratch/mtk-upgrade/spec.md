@@ -101,7 +101,8 @@ The physics of v0.2's examples doesn't change.
 40. As a modeller, I want a function that extracts the bond graph from a model (elements, junctions, two-ports, and bonds with their half-arrows), so that I can inspect or process the structure.
 41. As a modeller, I want to render the bond graph with Graphviz, with half-arrow heads, `0`/`1` junction nodes and `type:parameter` labels laid out left to right, so that the picture looks like a textbook bond graph.
 42. As an author, I want to export the drawing as TikZ in the style of the docs' figures, so that I can put it in a thesis or paper.
-43. As a modeller who doesn't draw graphs, I want the rendering dependency to be optional (a package extension), so that the core stays light.
+43. ~~As a modeller who doesn't draw graphs, I want the rendering dependency to be optional (a package extension), so that the core stays light.~~ Reversed by v0.3-impl ticket 11: Graphviz_jll is a regular dependency (batteries included).
+44a. As a modeller, I want `bondgraph(model)` to show the bond graph as text, `bgplot(model)` to draw it like `plot(sol)`, and `savebg(path, model)` to export it by file extension, so that the drawing API reads like Plots (v0.3-impl ticket 11).
 
 ### Simulation and diagnostics
 
@@ -128,10 +129,10 @@ The physics of v0.2's examples doesn't change.
 ### Package
 
 - Rename to `BondGraphToolkit` everywhere in code, docs and tests, keeping UUID `41e83443-…` and no alias (ticket 08). The GitHub repo rename happens at the release, after asking.
-- Compat: `ModelingToolkit = "11.45"`, `julia = "1.10"`. Direct dependencies only for what the code imports, each with a `[compat]` bound:
+- Compat: `ModelingToolkit = "11.45"`, `julia = "1.10"`. Direct dependencies only for what the code imports, each with a `[compat]` bound except standard libraries bundled with Julia, which `julia` bounds (2026-10-17, review of ticket 11):
   - ModelingToolkitStandardLibrary is a regular dependency (MIT, about 0.2 s load). It's needed for `RealInput`/`RealOutput` and the adapters.
   - Latexify is a direct dependency, because `latexify` is re-exported. MTK already loads it.
-- Graph rendering is a package extension on a Graphviz package (the exact package is chosen in implementation). Writing DOT text needs no dependency, but layout and TikZ positions need Graphviz.
+- Graph rendering uses Graphviz_jll as a regular dependency (v0.3-impl ticket 11; was a package extension).
 - Licence: unchanged until ticket 07 is decided.
 - CI: Julia `1.10` and `1`, no Manifest, no downgrade or nightly jobs.
 
@@ -212,8 +213,9 @@ The table below comes from research 11:
 - An exported extractor returns the bond graph as plain data:
   - nodes: each element with its type and parameter label, each junction with its kind, each two-port;
   - bonds: each with its from/to nodes per its half-arrow.
-- The DOT writer draws bonds with half-arrow heads, junctions as `0`/`1`, labels as `type:parameter`, and lays out left to right. The Graphviz extension renders it (SVG in docs and notebooks).
+- The DOT writer draws bonds with half-arrow heads, junctions as `0`/`1`, labels as `type:name`, and lays out left to right in the textbook layout: the power path straight, each element beside its node.
 - The TikZ writer uses Graphviz's node positions and emits a `.tex` file in the docs' figure style.
+- Public API (v0.3-impl ticket 11): `bondgraph(sys)` is data shown as text; `bgplot(x; format = :svg | :tikz | :dot)` is the drawing or its source; `savebg(path, x)` exports `.svg .png .pdf .tex .dot`. No `plot`/`print` methods on MTK's `System` (type piracy).
 - No causal strokes in v0.3.
 
 ### Removed

@@ -1,115 +1,149 @@
 # # [Harmonic Oscillator](@id msd-1dof)
-# 
+#
 # ## Introduction
-# 
-# The harmonic oscillator exemplifies dynamic systems with oscillatory behaviors. When considering the mechanical domain, this system manifests as a mass-spring-damper system, as illustrated below:
-# 
+#
+# The harmonic oscillator is a classic example of a dynamic system with oscillatory behaviour. In the mechanical domain it is a mass on a spring and a damper, driven by an external force, as in the free-body diagram below:
+#
 # ```@raw html
 # <picture style="display: flex; justify-content: center; align-items: center;">
 #   <source srcset="../../assets/tikz/fbd_1dof-dark.svg" media="(prefers-color-scheme: dark)">
 #   <img src="../../assets/tikz/fbd_1dof.svg">
 # </picture>
 # ```
-# 
-# The governing differential equation for this oscillator is:
-# 
-# $ m\,\frac{d^2 x}{dt^2} + c\,\frac{dx}{dt} + k\,x = F(t), $
-# 
-# Where:
-# - $ x $ denotes the position,
-# - $ m $ is the mass,
-# - $ c $ represents the damping coefficient,
-# - $ k $ is the spring stiffness, and
-# - $ F(t) $ is the external force applied.
-# 
-# By utilizing the bond graph approach, this system can be modeled by connecting inertance (I), compliance (C), and resistance (R) elements to a one-junction:
-
+#
+# ### Mass-spring-damper model
+#
+# We assume a rigid mass $m$ moving along one axis, a linear spring of stiffness $k$ and a viscous damper with coefficient $c$, both massless. The position $x$ is measured from the static equilibrium, positive in the direction of the force $F(t)$, so gravity is balanced by the spring's preload and drops out.
+#
+# On the mass act the external force $F(t)$, the spring force $-k\,x$ and the damper force $-c\,\dot{x}$. Newton's 2nd law, $m\,\ddot{x} = F(t) - c\,\dot{x} - k\,x$, gives the governing equation:
+#
+# ```math
+# m\,\ddot{x} + c\,\dot{x} + k\,x = F(t).
+# ```
+#
+# See also [Harmonic oscillator](https://en.wikipedia.org/wiki/Harmonic_oscillator#Damped_harmonic_oscillator).
+#
+# ### Bond Graph Model
+#
+# The mass, spring and damper all move with the same velocity $\dot{x}$, so their bonds meet at a 1-junction, together with the force source:
+#
 # ```@raw html
 # <picture style="display: flex; justify-content: center; align-items: center;">
 #   <source srcset="../../assets/tikz/bg_1dof-dark.svg" media="(prefers-color-scheme: dark)">
 #   <img src="../../assets/tikz/bg_1dof.svg">
 # </picture>
 # ```
-
-# In this representation, the inertance element (I) corresponds to the mass (m) in the mechanical system, the compliance element (C) corresponds to the spring constant (k), and the resistance element (R) represents the damping coefficient (c).
-
+#
+# Karnopp, Margolis & Rosenberg (2012) model a mass as an inertia `I:m` with momentum $p = m\,\dot{x}$ and $\dot{p} = F$, a spring as a compliance `C:1/k` with displacement $q = x$ and effort $k\,q$, and a dashpot as a resistance `R:c` (§3.1, pp. 38–47). A mechanical 1-junction is a force balance at a common velocity (§3.3, pp. 58, 61). The effort source `Se:F(t)` is the external force.
+#
 # ## Preliminary Steps
+#
+# In this example we first build and simulate the bond graph model of the oscillator, unforced and forced. Then we simulate the equation derived above as a plain ModelingToolkit model and compare the results.
+#
+# We import the bond-graph toolkit to model the system and `OrdinaryDiffEqTsit5` to solve the resulting ODE. We also import ModelingToolkit's independent variable `t` and derivative `D`, for the forcing term and the reference model.
 
-# Firstly, we need to import the bond-graph toolkit module to model the system and the `DifferentialEquations.jl` to solve the resultant ODE. Also, we import the independent variable `t` from the bond-graph toolkit to define a custom forcing term.
-
-using BondGraph
-using BondGraph: t, D
-using DifferentialEquations
-using ModelingToolkit
+using BondGraphToolkit
+using BondGraphToolkit.ModelingToolkit: t_nounits as t, D_nounits as D
+using OrdinaryDiffEqTsit5
 using Plots
-using Symbolics.Latexify
 
 # ## System Element Definitions
-# 
-# Before defining a system, we need to define the single port elements of the system. Then, we define the mass, spring, and damper elements as follows:
-@named m = Mass(m = 1.0);      # (kg)
-@named s = Spring(k = 1.0);    # (N/m)
-@named d = Damper(c = 1.0);    # (N⋅m⋅s)
+#
+# `Mass`, `Spring` and `Damper` are the mechanical shorthands for `Inertia` (`I = m`), `Compliance` (`C = 1/k`) and `Resistance` (`R = c`):
+@named mass = Mass(m = 1.0)         # (kg) Mass
+@named spring = Spring(k = 1.0)     # (N/m) Spring stiffness
+@named damper = Damper(c = 1.0)     # (N⋅s/m) Viscous damping coefficient
 
-# The forcing term can be set as an expression or even a Julia function. In this example, we will first initialize a generic forcing term that will be defined before solving the ODE.
-@parameters F(t)
-@named f = Se(F)
+# The unforced case has a zero force, $F(t) = 0$:
+@named force = Se(0.0)              # (N) External force
 
 # ## Model Construction
-# 
-# Then, we build the system by passing the one-port elements to the 1-junction function as arguments.
-@named mdl = Junction1(m, d, s, [-1, f]);
+#
+# A single 1-junction holds the whole model. Following Karnopp's usual orientation (§3.1, pp. 39, 42, 49), the source's bond points into the junction (`force`, positive) and the bonds of the passive elements point out of it, towards the elements (`[-1, x]`). The junction then states that all four bonds share the velocity and that $F - \dot{p} - c\,\dot{x} - k\,q = 0$.
+@named model = Junction1(force, [-1, mass], [-1, damper], [-1, spring])
 
 # ## Analysing the model
-# We can visualize the bond-graph connections by generating a graph plot of the model.
-generate_graph(mdl)
+#
+# `mtkcompile` reduces the model to its states: the mass's momentum and the spring's displacement.
+sys = mtkcompile(model)
 
-# We can obtain the bond-graph equations using the code below.
-equations(expand_connections(mdl))
+# Print system states
+unknowns(sys)
 
-# The model's equations above were not simplified and represent the bond-graphs equations directly derived from the connections. Then, we simplify the DAE above and obtain the ODE. The simplified set of equations is required for using `solve` from `DifferentialEquations.jl`.
-@named sys = simplifysys(mdl)
-
-# Print the system's states.
-states(sys)
-
-# Print the system's parameters.
+# Print system parameters
 parameters(sys)
 
-# Print the system's simplified equations.
-equations(sys)
+# Print the system's equations in terms of the states
+full_equations(sys)
 
-# By comparison, we can see that the equations above are the same as the canonical form of the harmonic oscillator presented at the beginning.
+# `bg_equations` gives the same equations in terms of the states. Renaming the variables and parameters to the symbols of the hand derivation makes them easier to read:
+@variables x(t) p(t)
+@parameters m c k
+eqs = bg_equations(model; rename = Dict(model.spring.q => x, model.mass.p => p,
+                                        model.mass.I => m, model.damper.R => c,
+                                        model.spring.C => 1 / k))
+latexify(eqs)
 
-# We can generate LaTeX code from the equations.
-latexify(equations(sys))
-
+# The first equation says the spring's displacement changes with the mass's velocity, $\dot{x} = p/m$. The second is the 1-junction's force balance, $\dot{p} = F - c\,p/m - k\,x$, here with $F = 0$. Substituting $p = m\,\dot{x}$ gives $m\,\ddot{x} + c\,\dot{x} + k\,x = F(t)$, the equation derived by hand.
+#
 # ## System Simulations
-# 
-# ### Unforced case
-# Now, we will only the unforced case. Therefore, $F(t) = 0$. Thus, we update the force function on the system.
-sys_unforced = substitute(sys, Dict(f.F => 0.0))
+#
+# ### Bond graph model
+#
+# Define the simulation time
+tspan = (0.0, 10.0)
 
-# Define the simulation time.
-tspan = (0, 10)
+# The unforced oscillator starts from rest with a unit spring displacement, $x(0) = 1$. The initial values are passed to the `ODEProblem` as for any ModelingToolkit model.
+prob = ODEProblem(sys, [sys.spring.q => 1.0], tspan)
 
-# When defining the ODEProblem as in the ModelingToolkit, we can define the initial value of the states.
-prob = ODEProblem(sys_unforced, [m.power.f => 0.0, s.q => 1.0], tspan)
+# Use `solve` to simulate the system.
+sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
+plot(sol, idxs = [model.spring.q, model.mass.power.f], labels = ["x" "ẋ"],
+     xlabel = "Time (s)", ylabel = "Displacement (m) / velocity (m/s)")
 
-# Use the `solve` to simulate the system.
-sol = solve(prob)
-plot(sol, xlabel = "Time", ylabel = "Amplitude")
+# For the forced case, the force source becomes $F(t) = \sin(t)$, built from the same elements. The oscillator starts at rest at $x(0) = 0$, the spring's default.
+@named force_sin = Se(sin(t))       # (N) External force
+@named forced = Junction1(force_sin, [-1, mass], [-1, damper], [-1, spring])
+forced_sol = solve(ODEProblem(mtkcompile(forced), [], tspan), Tsit5(),
+                   reltol = 1e-10, abstol = 1e-10)
+plot(forced_sol, idxs = [forced.spring.q, forced.mass.power.f], labels = ["x" "ẋ"],
+     xlabel = "Time (s)", ylabel = "Displacement (m) / velocity (m/s)")
 
-# ### Forced case
-# Now, we will consider the forced case, where $F(t) = sin(t)$. Thus, we update the force function on the system.
-sys_forced = substitute(sys, Dict(f.F => sin(t)))
+# ### Mass-spring-damper model
+#
+# The reference model is the equation derived by hand, written as two first-order equations in the position $x$ and the velocity $v = \dot{x}$:
+@variables v(t)
+mᵥ = 1.0                      # (kg) Mass
+kᵥ = 1.0                      # (N/m) Spring stiffness
+cᵥ = 1.0                      # (N⋅s/m) Damping coefficient
 
-# Define the simulation time.
-tspan = (0, 10)
+oscillator_eqs(F) = [D(x) ~ v, mᵥ * D(v) ~ F - cᵥ * v - kᵥ * x]
 
-# When defining the ODEProblem, as in the ModelingToolkit, we can define the initial value of the states.
-prob = ODEProblem(sys_forced, [m.power.f => 0.0, s.q => 0.0], tspan)
+# One `System` per case: the unforced one starts at $x(0) = 1$, the forced one at rest at the origin.
+@named ref = System(oscillator_eqs(0.0), t)
+ref_sol = solve(ODEProblem(mtkcompile(ref), [x => 1.0, v => 0.0], tspan), Tsit5(),
+                reltol = 1e-10, abstol = 1e-10)
 
-# Use the `solve` to simulate the system.
-sol = solve(prob)
-plot(sol, xlabel = "Time", ylabel = "Amplitude")
+@named ref_forced = System(oscillator_eqs(sin(t)), t)
+ref_forced_sol = solve(ODEProblem(mtkcompile(ref_forced), [x => 0.0, v => 0.0], tspan),
+                       Tsit5(), reltol = 1e-10, abstol = 1e-10);
+
+# ### Compare models
+#
+# We compare the bond graph's spring displacement with the position $x$ of the reference model.
+#
+# Unforced case
+plot(sol, idxs = model.spring.q, label = "Bond graph", ylabel = "Displacement (m)")
+plot!(ref_sol, idxs = x, label = "Model", xlabel = "Time (s)", linestyle = :dash)
+
+# Forced case
+plot(forced_sol, idxs = forced.spring.q, label = "Bond graph", ylabel = "Displacement (m)")
+plot!(ref_forced_sol, idxs = x, label = "Model", xlabel = "Time (s)", linestyle = :dash)
+
+# The largest difference between the two models on a common time grid, over the displacement and the velocity, for both cases:
+tgrid = range(tspan..., length = 1001)
+maxdiff(bg, m, ref) = maximum(maximum(abs.(bg(tgrid; idxs = a) .- ref(tgrid; idxs = b)))
+                              for (a, b) in [m.spring.q => x, m.mass.power.f => v])
+maxdiff(sol, model, ref_sol), maxdiff(forced_sol, forced, ref_forced_sol)
+
+# The bond graph model reproduces the hand-derived dynamics of the harmonic oscillator.
