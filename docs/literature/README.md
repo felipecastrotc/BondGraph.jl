@@ -13,6 +13,9 @@ Each note marks the reader's own interpretation with **Inference:**. In this ind
 | [borutzky-ch1-breedveld.md](borutzky-ch1-breedveld.md) | Breedveld, *Concept-Oriented Modeling of Dynamic Behavior*, in Borutzky (ed.), *Bond Graph Modelling of Engineering Systems*, Springer 2011, Ch. 1 | pp. 3–52 | N+18 |
 | [borutzky-ch2-reduction.md](borutzky-ch2-reduction.md) | Louca et al., *Energy-Based Bond Graph Model Reduction*, same book, Ch. 2 (short, low priority) | pp. 53–104 | N+18 |
 | [borutzky-ch3-4.md](borutzky-ch3-4.md) | Djeziri et al., *LFT Bond Graph … Fault Detection* (Ch. 3), and Borutzky, *Incremental Bond Graphs* (Ch. 4) | pp. 105–178 | N+18 |
+| [gawthrop-crampin-2014.md](gawthrop-crampin-2014.md) | Gawthrop & Crampin, *Energy-based analysis of biochemical cycles using bond graphs*, Proc. R. Soc. A 470: 20140459, 2014 (arXiv:1406.2447 v2, open access) | §1–§3.1, Eqs. 1–35 (arXiv numbering) | n/a |
+| [ctms-dc-motor-speed.md](ctms-dc-motor-speed.md) | Michigan CTMS, *DC Motor Speed: System Modeling* and *PID Controller Design* (read as Internet Archive snapshots, 2022-11-19 and 2023-06-10; text and MATLAB code, not the figures) | both pages | n/a |
+| [westerhof-2009-windkessel.md](westerhof-2009-windkessel.md) | Westerhof, Lankhaar & Westerhof, *The arterial Windkessel*, Med Biol Eng Comput 47:131–141, 2009 (Springer HTML full text) | §1–§8, Figs. 3, 5, Tables 1–2 | n/a |
 
 ## Topic index
 

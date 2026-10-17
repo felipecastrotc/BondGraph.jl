@@ -5,6 +5,8 @@
 # - `Se()`, `Sf()` without a value read their effort or flow from `input` (MSe, MSf);
 # - `TF()`, `GY()` without a modulus read it from `input` (MTF, MGY);
 # - `De()` and `Df()` put the effort or flow of their bond on `output`.
+#
+# Each model below is checked against its closed-form solution.
 
 using BondGraphToolkit
 using BondGraphToolkit.ModelingToolkit: t_nounits as t
@@ -21,18 +23,29 @@ using Plots
 @named rc = Junction1(V, [-1, R], [-1, C])
 @named sine = Blocks.Sine(frequency = 0.5)
 @named circuit = System([connect(sine.output, rc.V.input)], t; systems = [rc, sine])
-sol = solve(ODEProblem(mtkcompile(circuit), [], (0.0, 10.0)), Tsit5())
-plot(sol, idxs = [rc.C.q], xlabel = "Time", ylabel = "Charge")
+sol = solve(ODEProblem(mtkcompile(circuit), [], (0.0, 10.0)), Tsit5(), reltol = 1e-10, abstol = 1e-10)
+
+# By hand: the 1-junction shares the current $\dot{q}$, and its efforts sum to zero with `+` for the source's bond and `-` for the R and C bonds, $V(t) - R\,\dot{q} - q/C = 0$. With $R = C = 1$, $V = \sin\omega t$ and $\omega = 2\pi \cdot 0.5 = \pi$, the charge from $q(0) = 0$ is
+#
+# $q(t) = \dfrac{\sin\omega t - \omega\cos\omega t + \omega\,e^{-t}}{1 + \omega^2}.$
+ω = π
+q_rc(τ) = (sin(ω * τ) - ω * cos(ω * τ) + ω * exp(-τ)) / (1 + ω^2)
+plot(sol, idxs = [rc.C.q], label = "Bond graph", xlabel = "Time", ylabel = "Charge")
+plot!(q_rc, 0, 10, label = "Closed form", linestyle = :dash)
+
+# The largest difference on a common time grid:
+tgrid = 0:0.01:10
+maximum(abs, sol(tgrid; idxs = rc.C.q).u - q_rc.(tgrid))
 
 # ## Detectors
 #
-# A flow detector sits on a 1-junction and an effort detector on a 0-junction, where every bond shares the variable they read. Their bond carries no power, so they don't change the model. Here `Df` reads the circuit's current:
+# A flow detector sits on a 1-junction and an effort detector on a 0-junction, where every bond shares the variable they read. Their bond carries no power, so they don't change the model. Here `Df` reads the circuit's current, which is $E/R = 2/4 = 0.5$ at all times:
 @named V = Se(2.0)
 @named R = Resistance(R = 4.0)
 @named ammeter = Df()
 @named circuit = Junction1(V, [-1, R], [-1, ammeter])
 sol = solve(ODEProblem(mtkcompile(circuit), [], (0.0, 1.0)), Tsit5())
-sol[circuit.ammeter.output.u][end]   # E/R = 0.5
+sol[circuit.ammeter.output.u][end]
 
 # ## Closing a loop
 #
@@ -52,5 +65,14 @@ sol[circuit.ammeter.output.u][end]   # E/R = 0.5
                      systems = [src, gy, out, gain, offset, add])
 
 # A modulus read from a signal is an unknown of the model, which MTK won't divide by, so the compiled model keeps an algebraic equation. Solve it with a DAE-capable solver such as `Rodas5P`; `OrdinaryDiffEqNonlinearSolve` provides the nonlinear solve for its initial values.
-sol = solve(ODEProblem(mtkcompile(loop), [], (0.0, 10.0)), Rodas5P())
-plot(sol, idxs = [out.C.q], xlabel = "Time", ylabel = "Displacement")
+sol = solve(ODEProblem(mtkcompile(loop), [], (0.0, 10.0)), Rodas5P(), reltol = 1e-10, abstol = 1e-10)
+
+# By hand: the source's 1-junction passes the effort $e_1 = 2$ to the gyrator's port 1. The gyrator law $e_1 = r f_2$ (Karnopp, Margolis & Rosenberg 2012, Eq. 3.11) sets the flow out of port 2, $f_2 = 2/r$, and the 0-junction passes it to the compliance (the detector takes no flow), so $\dot{q} = 2/r$. The detector reads $e = q/C = q$, so $r = 2 + q/2$ and
+#
+# $\dot{q} = \dfrac{4}{4 + q}, \qquad q(0) = 0 \quad\Rightarrow\quad q(t) = \sqrt{16 + 8t} - 4.$
+q_loop(τ) = sqrt(16 + 8τ) - 4
+plot(sol, idxs = [out.C.q], label = "Bond graph", xlabel = "Time", ylabel = "Displacement")
+plot!(q_loop, 0, 10, label = "Closed form", linestyle = :dash)
+
+# The largest difference on a common time grid:
+maximum(abs, sol(tgrid; idxs = out.C.q).u - q_loop.(tgrid))

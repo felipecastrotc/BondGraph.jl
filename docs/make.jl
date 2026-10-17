@@ -117,7 +117,7 @@ isfile(quick_md) && rm(quick_md)
 makedocs(
     modules=[BondGraphToolkit],
     # format=Documenter.LaTeX(platform="none"),
-    format=Documenter.HTML(prettyurls=true, sidebar_sitename=false, assets=["assets/favicon.ico"], edit_link="main"),
+    format=Documenter.HTML(prettyurls=get(ENV, "CI", nothing) == "true", sidebar_sitename=false, assets=["assets/favicon.ico"], edit_link="main"),
     sitename="BondGraphToolkit.jl",
     # doctest=true,
     clean=true,

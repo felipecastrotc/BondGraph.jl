@@ -1,0 +1,14 @@
+# 21: Derivative-causality models: initial values and MTK's state choice
+
+**What to build:** Two pitfalls found by the ticket-15 example (pendulum driven by a DC motor), where two inertias are in derivative causality and MTK reduces the index:
+
+1. The inertias in derivative causality need `Inertia(p = nothing)`, or initialisation is over-determined and warns. It works, but nothing documents it.
+2. MTK picks `p_x` as a state and recovers ω from `p_x = −m l sin φ · ω`, which is singular at `sin φ = 0`. Started at φ = 0, Rodas5P reports success while the pendulum stays frozen: a silent wrong answer. The example avoids it by staying in −π < φ < 0 and says so.
+
+Decide: document both (where?), and/or let the modeller steer MTK's state choice (e.g. MTK's `state_priority` metadata) in the example or in the elements.
+
+**Blocked by:** None.
+
+**Status:** needs-triage
+
+## Comments
