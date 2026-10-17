@@ -22,7 +22,7 @@ Spec: [../../mtk-upgrade/spec.md](../../mtk-upgrade/spec.md) (drawing section, a
 
 - [x] `bondgraph(sys)` displays as a text list of bonds; `g.nodes`, `g.bonds` unchanged.
 - [x] `bgplot` gives SVG (image display), TikZ and DOT (text display); unknown formats error.
-- [ ] In a terminal REPL, displaying an SVG `bgplot` opens the default viewer. (Not yet checked by hand; no automated test, it opens a window.)
+- [x] In a terminal REPL, displaying an SVG `bgplot` opens the default viewer. (Checked by hand by the user, 2026-10-17; no automated test, it opens a window.)
 - [x] `savebg` writes each format by extension and errors on an unknown one.
 - [x] Graphviz_jll is a dependency with a compat bound; the extension is gone; no `using Graphviz_jll` in docs, examples or tests.
 - [x] Textbook layout, checked on the DC motor: `Se` left of its junction on the power path, `R` above it.
