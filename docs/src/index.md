@@ -16,11 +16,11 @@ The key features of the package include:
 
 ## Use Cases
 
-- Control systems design and analysis.
-- Robotics and mechatronics applications.
-- Electrical and electronic circuit simulation.
-- Biomedical systems modeling.
-- Chemical process simulation.
+- Control systems design and analysis: [DC motor speed control](@ref control-dc-motor-pi).
+- Robotics and mechatronics applications: [a pendulum driven by a DC motor](@ref motor-pendulum).
+- Electrical and electronic circuit simulation: [a series RLC circuit](@ref rlc-circuit).
+- Biomedical systems modeling: [the arterial Windkessel](@ref biomedical-windkessel).
+- Chemical process simulation: [coupled tanks](@ref hydraulic-coupled-tanks) and [a chemical reaction network](@ref chemical-reaction-network).
 
 ## Installation
 
