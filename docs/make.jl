@@ -1,15 +1,12 @@
 
-import Pkg;
+import Pkg
 
-# Set up project dependencies
-# Pkg.status("BondGraph")
-# Pkg.activate("docs")
-# Pkg.add(path=".")
-Pkg.develop(path=".")
+# Use this checkout of the package
+Pkg.develop(path = joinpath(@__DIR__, ".."))
 Pkg.instantiate()
 
 # Import required packages
-using Documenter, DocStringExtensions, Literate, BondGraph
+using Documenter, Literate, BondGraphToolkit
 
 # Function to check if display is available
 function has_display()
@@ -23,10 +20,9 @@ end
 ENV["JULIA_DEBUG"] = "Documenter"
 
 # Clean docs/build directory
-if isdir("./docs/build")
-    rm("./docs/build", recursive=true)
-end
-mkdir("./docs/build")
+build_dir = joinpath(@__DIR__, "build")
+isdir(build_dir) && rm(build_dir, recursive = true)
+mkdir(build_dir)
 
 
 # Utility function to fix math in Markdown content
@@ -37,7 +33,7 @@ fix_math_md(content) = replace(content, r"\$\$(.*?)\$\$"s => s"```math\1```")
 function postprocess(cont)
     # Text to insert
     text = """
-     *The source files for all examples can be found in [/examples](https://github.com/felipecastrotc/BondGraph.jl/tree/master/examples/).*\n
+     *The source files for all examples can be found in [/examples](https://github.com/felipecastrotc/BondGraph.jl/tree/main/examples/).*\n
     """
 
     # Regular expression pattern to match the first heading
@@ -61,6 +57,8 @@ function insert_quick_example(quick_example)
     quickex = read(joinpath(@__DIR__, "src", quick_example[1][2]), String)
 
     quickex = replace(quickex, "This page was generated using" => "This section was generated using")
+    # Image paths are written relative to docs/src/examples/; this page lives in docs/src/
+    quickex = replace(quickex, "](../assets/" => "](assets/")
 
     # Regular expression pattern to match the first heading
     pattern = r"(?m)^#.*?\n\n"
@@ -84,9 +82,7 @@ end
 
 # Function to generate the example navigation bar
 function get_nav(filename; suffix="./examples/")
-    f = open(suffix * filename, "r")
-    name = split(split(readline(f), "[")[2], "]")[1]
-    close(f)
+    name = split(split(readline(joinpath(example_path, filename)), "[")[2], "]")[1]
     path = suffix * replace(filename, ".jl" => ".md")
     return String(name) => path
 end
@@ -116,20 +112,40 @@ examples_nav = get_nav.(files; suffix="./examples/")
 quick_example = filter(x -> x[1] == "Quick Example", examples_nav)
 insert_quick_example(quick_example)
 filter!(x -> x[1] != "Quick Example", examples_nav)
-rm("./docs/src/examples/electrical_rc.md")
+quick_md = joinpath(build_path, "electrical_rc.md")
+isfile(quick_md) && rm(quick_md)
+
+# Group the examples in the sidebar, in this order; a file not listed goes to "Other"
+example_sections = [
+    "Systems" => ["mechanical_msd_1dof", "mechanical_msd_2dof", "mechanical_msd_ndof",
+                  "mechanical_duffing", "electrical_dc_motor"],
+    "Features" => ["two_ports", "signals", "adapters", "elements_oneport", "composition",
+                   "equations_latex", "drawing"],
+    "Applications" => ["control_dc_motor_pi", "robotics_motor_pendulum", "electrical_rlc",
+                       "biomedical_windkessel", "hydraulic_coupled_tanks",
+                       "chemical_reaction_network"],
+]
+stem(entry) = splitext(basename(entry[2]))[1]
+listed = reduce(vcat, last.(example_sections))
+examples_nav = [
+    [title => [e for name in names for e in examples_nav if stem(e) == name]
+     for (title, names) in example_sections];
+    filter(!isempty ∘ last, ["Other" => filter(e -> stem(e) ∉ listed, examples_nav)])
+]
 
 # Generate documentation using Documenter
 makedocs(
-    modules=[BondGraph],
+    modules=[BondGraphToolkit],
     # format=Documenter.LaTeX(platform="none"),
-    format=Documenter.HTML(prettyurls=true, sidebar_sitename=false, assets=["assets/favicon.ico"]),
-    sitename="BondGraph.jl",
+    format=Documenter.HTML(prettyurls=get(ENV, "CI", nothing) == "true", sidebar_sitename=false, assets=["assets/favicon.ico"], edit_link="main"),
+    sitename="BondGraphToolkit.jl",
     # doctest=true,
     clean=true,
     pages=[
         "Home" => "index.md",
         "Getting started" => "getting_started_auto.md",
         "User Guide" => [
+            "Concepts and conventions" => "man/user_guide.md",
         ],
         "Examples" => examples_nav,
         "Library" => [
@@ -149,7 +165,8 @@ makedocs(
 )
 
 # Cleaning
-rm(joinpath(@__DIR__, "src", "getting_started_auto.md"))
+getting_started_auto = joinpath(@__DIR__, "src", "getting_started_auto.md")
+isfile(getting_started_auto) && rm(getting_started_auto)
 
 # Deploy documentation to GitHub Pages
-deploydocs(repo="github.com/felipecastrotc/BondGraph.jl.git")
+deploydocs(repo="github.com/felipecastrotc/BondGraph.jl.git", devbranch="main")

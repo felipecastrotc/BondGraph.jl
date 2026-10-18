@@ -1,4 +1,4 @@
-# BondGraph.jl
+# BondGraphToolkit.jl
 
 A bond-graph dialect of ModelingToolkit: bond-graph models are ordinary MTK systems, so they compose, couple, and simulate with the same tools as any other MTK model.
 
@@ -19,8 +19,16 @@ The extensive power variable of a port (velocity, current, volume flow).
 _Avoid_: through variable
 
 **Bond**:
-A connection between two power ports, with a direction (the half-arrow) that fixes the positive sense of power transfer. An element's law is written in the variables of its bond as drawn.
+A connection between two power ports, with a direction (the half-arrow) that fixes the positive sense of power transfer. It runs from an outgoing port to an incoming port. An element's law is written in the variables of its bond as drawn.
 _Avoid_: link, edge, wire
+
+**Incoming port**:
+A power port through which its bond points into the port's owner (an element's `power`, a two-port's port 1).
+_Avoid_: receiver, head, input (inputs are signals)
+
+**Outgoing port**:
+A power port through which its bond points out of the port's owner (an element's `pout`, a two-port's port 2).
+_Avoid_: sender, tail, output (outputs are signals)
 
 ### Elements
 
@@ -29,7 +37,7 @@ A system with one or more power ports whose constitutive law relates their effor
 _Avoid_: component, block
 
 **One-port element**:
-An element with a single power port: a source, an inertia, a compliance, or a resistance.
+An element with a single bond: a source, an inertia, a compliance, or a resistance. The bond attaches through either its incoming or its outgoing port, never both.
 
 **Source**:
 A one-port element that imposes an effort (Se) or a flow (Sf).
@@ -40,7 +48,7 @@ _Avoid_: mass, except as the mechanical shorthand
 
 **Compliance (C)**:
 A one-port element that stores energy in its displacement; mechanically a spring, electrically a capacitance.
-_Avoid_: spring, except as the mechanical shorthand; capacitor
+_Avoid_: spring, except as the mechanical shorthand; capacitor, as the element's name (fine for the physical part)
 
 **Resistance (R)**:
 A one-port element that dissipates power; mechanically a damper, electrically a resistor.
