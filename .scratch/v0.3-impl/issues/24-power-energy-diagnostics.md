@@ -4,8 +4,11 @@
 
 **Blocked by:** None.
 
-**Status:** needs-triage
+**Status:** needs-info
 
 Registered 2026-10-17 from the assessment "does the library add value?" (user asked to record the gaps and reassess later). Reassess before starting: does it still make sense, given MTK's own features and BondGraphs.jl's roadmap (`.scratch/mtk-upgrade/research/01-bondgraphs-jl-comparison.md`)?
 
 ## Comments
+
+- 2026-10-18 (triage, user agreed): after v0.3. Reassess against MTK's features and BondGraphs.jl's roadmap before specifying.
+  Cheapest of the three value gaps: first in line for 0.4.

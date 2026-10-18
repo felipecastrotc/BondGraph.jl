@@ -9,6 +9,8 @@ Decide: document both (where?), and/or let the modeller steer MTK's state choice
 
 **Blocked by:** None.
 
-**Status:** needs-triage
+**Status:** ready-for-agent
 
 ## Comments
+
+- 2026-10-18 (triage, user agreed): **v0.3**, docs only: document `Inertia(p = nothing)` (and `Compliance(q = nothing)`) for elements in derivative causality, and the silent frozen pendulum at sin φ = 0 (docstrings + user guide). Try MTK's `state_priority` in the pendulum example; if it steers the state choice to φ, ω, use it there and say so. No src/ behaviour change.
