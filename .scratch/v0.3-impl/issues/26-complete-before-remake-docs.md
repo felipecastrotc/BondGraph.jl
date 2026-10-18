@@ -4,14 +4,15 @@
 
 **Blocked by:** None.
 
-**Status:** needs-triage
+**Status:** done (feature/mtk-upgrade, uncommitted), user review pending
 
 Source: `.scratch/api-usability/` finding P05-F02 / U01 (trial 05, `runs/05/attempt_01.jl:37`, `attempt_01.log`); rechecked on the oriented-ports API 2026-10-18 with the same result. P01-F01 (`prob.ps[sym]` for reading a parameter value) fits in the same example.
 
 ## Acceptance criteria
 
-- [ ] An example (or a section of an existing one) builds a reusable subsystem with a port and two instances, and remakes one instance's parameter.
-- [ ] It states that overrides use the compiled system's (or a `complete`d model's) symbols, and shows `prob.ps[sym]`.
-- [ ] Its result is checked against a closed form.
+- [x] An example (or a section of an existing one) builds a reusable subsystem with a port and two instances, and remakes one instance's parameter.
+- [x] It states that overrides use the compiled system's (or a `complete`d model's) symbols, and shows `prob.ps[sym]`.
+- [x] Its result is checked against a closed form.
 
 ## Comments
+- 2026-10-18 (agent): new example `examples/composition.jl` ("Reusable Subsystems", Features): a one-junction RC load (`Junction1(:power => :in, …)`), two copies, results by name, `remake` of one copy with `sys.A.r.R` (and why not `loads.A.r.R`), `prob.ps`, closed-form checks (all ~1e-12); a two-junction subsystem as an MTK component owning a `PowerPort`. Found: such a component draws as one node, and drawing it on its own also gives one node (`RCLadder:ladder`), so its inside can't be drawn; that belongs with U02 (drawing hierarchy), not fixed here.

@@ -119,7 +119,7 @@ isfile(quick_md) && rm(quick_md)
 example_sections = [
     "Systems" => ["mechanical_msd_1dof", "mechanical_msd_2dof", "mechanical_msd_ndof",
                   "mechanical_duffing", "electrical_dc_motor"],
-    "Features" => ["two_ports", "signals", "adapters", "elements_oneport",
+    "Features" => ["two_ports", "signals", "adapters", "elements_oneport", "composition",
                    "equations_latex", "drawing"],
     "Applications" => ["control_dc_motor_pi", "robotics_motor_pendulum", "electrical_rlc",
                        "biomedical_windkessel", "hydraulic_coupled_tanks",
