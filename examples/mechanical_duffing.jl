@@ -107,10 +107,10 @@ parameters(sys)
 # Print the system's equations in terms of the states
 full_equations(sys)
 
-# `bg_equations` gives the same equations in terms of the states. We rename the momentum $p$, the springs' displacements $x$ and $x_{\text{nl}}$, and the parameters to the symbols of the hand derivation:
+# `bgequations` gives the same equations in terms of the states. We rename the momentum $p$, the springs' displacements $x$ and $x_{\text{nl}}$, and the parameters to the symbols of the hand derivation:
 @variables x(t) x_nl(t) p(t)
 @parameters m_duff c_duff k_lin k_nl
-eqs = bg_equations(model; rename = Dict(
+eqs = bgequations(model; rename = Dict(
     model.mass.p => p, model.spring.q => x, model.spring_nl.q => x_nl,
     model.mass.I => m_duff, model.damper.R => c_duff,
     model.spring.C => 1 / k_lin, model.spring_nl.C => 1 / k_nl))

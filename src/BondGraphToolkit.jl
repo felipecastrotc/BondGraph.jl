@@ -30,8 +30,8 @@ export Se, Sf, Resistance, Compliance, Inertia, De, Df
 export Mass, Spring, Damper
 export Junction0, Junction1
 export TF, GY
-export bg_equations, latexify
-export bondgraph, bgplot, savebg
+export bgequations, latexify
+export BondGraph, bgplot, bgsave
 export ElectricalAdapter, TranslationalAdapter, TranslationalPositionAdapter,
     RotationalAdapter, HydraulicAdapter
 

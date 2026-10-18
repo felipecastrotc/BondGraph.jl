@@ -142,11 +142,11 @@ full_equations(sys)
 
 # ### Generated equations against the hand derivation
 #
-# `bg_equations` returns the same equations with the names we choose. We rename the stored volumes to $V_1$, $V_2$ and the parameters to symbols of the introduction (inside a `let`, so the Julia values `A1`, `cd`, … keep their numbers):
+# `bgequations` returns the same equations with the names we choose. We rename the stored volumes to $V_1$, $V_2$ and the parameters to symbols of the introduction (inside a `let`, so the Julia values `A1`, `cd`, … keep their numbers):
 let
     @variables V1(t) V2(t)
     @parameters C1 C2 cd a1 a2 ρ
-    bg_equations(tanks; rename = Dict(j1.tank1.q => V1, j2.tank2.q => V2,
+    bgequations(tanks; rename = Dict(j1.tank1.q => V1, j2.tank2.q => V2,
                                       j1.tank1.C => C1, j2.tank2.C => C2,
                                       jv1.valve1.cd => cd, jv2.valve2.cd => cd,
                                       jv1.valve1.a => a1, jv2.valve2.a => a2,

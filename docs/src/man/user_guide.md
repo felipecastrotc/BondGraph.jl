@@ -47,7 +47,7 @@ A bare element `x` is a bond from the junction into `x` (through `x.power`), and
 
 [`TF`](@ref) and [`GY`](@ref) have port `p1` (bond in) and `p2` (bond out): `TF`: `e₁ = m e₂`, `f₂ = m f₁`; `GY`: `e₁ = r f₂`, `e₂ = r f₁` (Karnopp Eqs. 3.9, 3.11). A modulus that is an expression, or that comes from a signal, makes them modulated (MTF, MGY).
 
-A source bonds to port 1 through its outgoing port, `connect(se.pout, tf.p1)`, and port 2 to an element through the element's incoming port, `connect(tf.p2, mass.power)`. Connecting two incoming ports, such as `connect(se.power, tf.p1)`, is not a bond but a 0-junction with both bonds pointing out of it, which flips the sign of the source's flow; `bondgraph` draws it that way. An element bonded through both of its ports is an error in `bondgraph`: a one-port has one bond.
+A source bonds to port 1 through its outgoing port, `connect(se.pout, tf.p1)`, and port 2 to an element through the element's incoming port, `connect(tf.p2, mass.power)`. Connecting two incoming ports, such as `connect(se.power, tf.p1)`, is not a bond but a 0-junction with both bonds pointing out of it, which flips the sign of the source's flow; `bgplot` draws it that way. An element bonded through both of its ports is an error in `BondGraph(model)` and `bgplot`: a one-port has one bond.
 
 ## Simulation and causality
 

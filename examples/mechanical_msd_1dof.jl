@@ -86,10 +86,10 @@ parameters(sys)
 # Print the system's equations in terms of the states
 full_equations(sys)
 
-# `bg_equations` gives the same equations in terms of the states. Renaming the variables and parameters to the symbols of the hand derivation makes them easier to read:
+# `bgequations` gives the same equations in terms of the states. Renaming the variables and parameters to the symbols of the hand derivation makes them easier to read:
 @variables x(t) p(t)
 @parameters m c k
-eqs = bg_equations(model; rename = Dict(model.spring.q => x, model.mass.p => p,
+eqs = bgequations(model; rename = Dict(model.spring.q => x, model.mass.p => p,
                                         model.mass.I => m, model.damper.R => c,
                                         model.spring.C => 1 / k))
 latexify(eqs)

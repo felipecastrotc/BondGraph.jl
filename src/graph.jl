@@ -17,21 +17,11 @@ const Node = NamedTuple{(:id, :kind, :label), Tuple{String, Symbol, String}}
 subpath(path, name) = isempty(path) ? string(name) : string(path, "₊", name)
 
 """
-    BondGraph
+    BondGraph(x)
 
-The bond graph of a model, returned by [`bondgraph`](@ref): fields `nodes` and `bonds`.
-Displayed as the list of its bonds; draw it with [`bgplot`](@ref).
-"""
-struct BondGraph
-    nodes::Vector{Node}
-    bonds::Vector{Pair{String, String}}
-end
-
-"""
-    bondgraph(sys)
-
-The bond graph of the model `sys` as data, a [`BondGraph`](@ref) with fields `nodes`
-and `bonds`, displayed as the list of its bonds (`Se:V ⇀ 1:je`).
+The bond graph of `x` as data: of a model, of a [`bgplot`](@ref) drawing, or `x` itself
+when it is a `BondGraph`. Its fields are `nodes` and `bonds`; it is displayed as the list
+of its bonds (`Se:V ⇀ 1:je`) and drawn with [`bgplot`](@ref).
 
 - `nodes`: one `(; id, kind, label)` per junction (`kind = :junction`, label `"0"` or
   `"1"`), element (`:element`) and two-port (`:twoport`), labelled `type:name` as in
@@ -47,7 +37,12 @@ A subsystem with a `power` port is drawn as one element, even when it is a compo
 model inside: that's how hand-written elements are recognised. An element bonded through
 both `power` and `pout` is an error: a one-port has one bond.
 """
-function bondgraph(sys)
+struct BondGraph
+    nodes::Vector{Node}
+    bonds::Vector{Pair{String, String}}
+end
+
+function BondGraph(sys)
     nodes = Node[]
     bonds = Pair{String, String}[]
     ports = Dict{String, Tuple{String, Symbol}}()   # port path => (node id, :into | :outof)
@@ -134,7 +129,7 @@ end
 # DOT text of a bond graph `g`, naming each node `name(node)`.
 function dot_text(g, name)
     io = IOBuffer()
-    println(io, "digraph bondgraph {\n  rankdir=LR;\n  splines=false;\n  nodesep=0.6;\n  ranksep=0.6;\n  node [shape=plaintext];")
+    println(io, "digraph BondGraph {\n  rankdir=LR;\n  splines=false;\n  nodesep=0.6;\n  ranksep=0.6;\n  node [shape=plaintext];")
     foreach(n -> println(io, "  ", name(n), " [label=\"", n.label, "\"];"), g.nodes)
     # Textbook layout: junctions and two-ports form a straight left-to-right power path, and
     # each element sits beside its node: in a free horizontal slot, then above, then below.
@@ -216,7 +211,7 @@ function tikz_source(g)
 end
 
 # A bond graph in `format`, as a string or bytes.
-function source(g, format)
+function render(g, format)
     format === :dot ? dot_source(g) : format === :tikz ? tikz_source(g) : graphviz(dot_source(g), format)
 end
 
@@ -224,16 +219,15 @@ end
     BondGraphPlot
 
 What [`bgplot`](@ref) returns: a bond graph and the format to show it in. Save it with
-[`savebg`](@ref); `print` writes its source.
+[`bgsave`](@ref); `print` writes its source.
 """
 struct BondGraphPlot
     graph::BondGraph
     format::Symbol
 end
 
-graph(g::BondGraph) = g
-graph(p::BondGraphPlot) = p.graph
-graph(sys) = bondgraph(sys)
+BondGraph(g::BondGraph) = g
+BondGraph(p::BondGraphPlot) = p.graph
 
 """
     bgplot(x; format = :svg)
@@ -250,20 +244,20 @@ bonds, `0`/`1` junctions and `type:name` labels.
   declaration) into a paper.
 - `format = :dot`: the Graphviz DOT source, shown as text.
 
-Save any of them with [`savebg`](@ref).
+Save any of them with [`bgsave`](@ref).
 """
 function bgplot(x; format = :svg)
     format in (:svg, :tikz, :dot) ||
         throw(ArgumentError("bgplot: format must be :svg, :tikz or :dot, not :$format"))
-    BondGraphPlot(graph(x), format)
+    BondGraphPlot(BondGraph(x), format)
 end
 
-Base.print(io::IO, p::BondGraphPlot) = write(io, source(p.graph, p.format))
+Base.print(io::IO, p::BondGraphPlot) = write(io, render(p.graph, p.format))
 Base.showable(::MIME"image/svg+xml", p::BondGraphPlot) = p.format === :svg
 Base.show(io::IO, ::MIME"image/svg+xml", p::BondGraphPlot) = print(io, p)
 function Base.show(io::IO, ::MIME"text/plain", p::BondGraphPlot)
     if p.format === :svg
-        print(io, "BondGraphPlot (SVG): savebg(\"file.svg\", p) to save it")
+        print(io, "BondGraphPlot (SVG): bgsave(\"file.svg\", p) to save it")
     else
         print(io, p)
     end
@@ -272,7 +266,7 @@ end
 # A terminal can't show SVG: open it in the default viewer, as Plots opens a GR window.
 function Base.display(d::REPL.REPLDisplay, p::BondGraphPlot)
     p.format === :svg || return display(d, MIME("text/plain"), p)
-    path = savebg(tempname() * ".svg", p)
+    path = bgsave(tempname() * ".svg", p)
     cmd = Sys.isapple() ? `open $path` : Sys.iswindows() ? `cmd /c start "" $path` : `xdg-open $path`
     run(cmd; wait = false)
     nothing
@@ -281,16 +275,16 @@ end
 const EXTENSIONS = Dict(".svg" => :svg, ".png" => :png, ".pdf" => :pdf, ".tex" => :tikz, ".dot" => :dot)
 
 """
-    savebg(path, x)
+    bgsave(path, x)
 
 Save the bond graph of `x` (a model, a [`BondGraph`](@ref) or a [`bgplot`](@ref)) to
 `path`, in the format of its extension: `.svg`, `.png`, `.pdf` (rendered by Graphviz),
 `.tex` (TikZ, see [`bgplot`](@ref)) or `.dot`. Returns `path`.
 """
-function savebg(path, x)
+function bgsave(path, x)
     ext = lowercase(splitext(path)[2])
     haskey(EXTENSIONS, ext) ||
-        throw(ArgumentError("savebg: unknown extension \"$ext\"; use .svg, .png, .pdf, .tex or .dot"))
-    write(path, source(graph(x), EXTENSIONS[ext]))
+        throw(ArgumentError("bgsave: unknown extension \"$ext\"; use .svg, .png, .pdf, .tex or .dot"))
+    write(path, render(BondGraph(x), EXTENSIONS[ext]))
     path
 end

@@ -1,4 +1,4 @@
-# The bond graph of a model as data and text, drawn with bgplot, and saved with savebg.
+# The bond graph of a model as data and text, drawn with bgplot, and saved with bgsave.
 
 # Se ⇀ 1 ⇀ R, and the junction's free port `out` ⇀ TF ⇀ I.
 function tf_model()
@@ -10,14 +10,14 @@ function tf_model()
     @named model = System([connect(j.out, tf.p1), connect(tf.p2, I.power)], t; systems = [j, tf, I])
 end
 
-@testset "bondgraph: elements, junctions, two-ports and half-arrows" begin
-    g = bondgraph(tf_model())
+@testset "BondGraph: elements, junctions, two-ports and half-arrows" begin
+    g = BondGraph(tf_model())
     @test Dict(n.id => n.label for n in g.nodes) ==
           Dict("j" => "1", "j₊se" => "Se:se", "j₊R" => "R:R", "tf" => "TF:tf", "I" => "I:I")
     @test Set(g.bonds) == Set(["j₊se" => "j", "j" => "j₊R", "j" => "tf", "tf" => "I"])
 end
 
-@testset "bondgraph: a connect of several free ports is a 0-junction" begin
+@testset "BondGraph: a connect of several free ports is a 0-junction" begin
     @named a = Se(1.0)
     @named b = Resistance()
     @named c = Compliance()
@@ -25,33 +25,33 @@ end
     @named j2 = Junction1(:in => :in, b)    # ... and enters j2 and j3
     @named j3 = Junction1(:in => :in, c)
     @named model = System([connect(j1.out, j2.in, j3.in)], t; systems = [j1, j2, j3])
-    g = bondgraph(model)
+    g = BondGraph(model)
     zero = only(n.id for n in g.nodes if n.label == "0")
     @test Set(g.bonds) == Set(["j1₊a" => "j1", "j1" => zero, zero => "j2", zero => "j3",
                                "j2" => "j2₊b", "j3" => "j3₊c"])
 end
 
-@testset "bondgraph: a source's pout bonds straight to a two-port" begin
+@testset "BondGraph: a source's pout bonds straight to a two-port" begin
     @named se = Se(1.0)
     @named tf = TF(m = 2.0)
     @named I = Inertia()
     @named model = System([connect(se.pout, tf.p1), connect(tf.p2, I.power)], t; systems = [se, tf, I])
-    @test Set(bondgraph(model).bonds) == Set(["se" => "tf", "tf" => "I"])
+    @test Set(BondGraph(model).bonds) == Set(["se" => "tf", "tf" => "I"])
 end
 
-@testset "bondgraph rejects an element bonded through both ports" begin
+@testset "BondGraph rejects an element bonded through both ports" begin
     @named se = Se(1.0)
     @named C = Compliance()
     @named j = Junction1(se => :pout, :out)
     @named sf = Sf(1.0)
     @named model = System([connect(j.out, C.power), connect(sf.pout, C.pout)], t; systems = [j, C, sf])
-    err = try bondgraph(model); nothing catch e; e end
+    err = try BondGraph(model); nothing catch e; e end
     @test err isa ArgumentError
     @test occursin("`C`", err.msg) && occursin("j₊out", err.msg) && occursin("sf₊pout", err.msg)
 end
 
-@testset "bondgraph shows as text" begin
-    text = repr("text/plain", bondgraph(tf_model()))
+@testset "BondGraph shows as text" begin
+    text = repr("text/plain", BondGraph(tf_model()))
     @test occursin("Se:se ⇀ 1:j", text) && occursin("1:j ⇀ TF:tf", text) && occursin("TF:tf ⇀ I:I", text)
 end
 
@@ -60,7 +60,7 @@ end
     @test showable("image/svg+xml", p)
     svg = repr("image/svg+xml", p)
     @test occursin("<svg", svg) && occursin("TF:tf", svg)
-    @test bgplot(bondgraph(tf_model())) isa typeof(p)   # a BondGraph works too
+    @test bgplot(BondGraph(tf_model())) isa typeof(p)   # a BondGraph works too
 
     dot = sprint(print, bgplot(tf_model(); format = :dot))
     @test occursin("rankdir=LR", dot)
@@ -86,16 +86,16 @@ end
     @test_throws ArgumentError bgplot(tf_model(); format = :jpg)
 end
 
-@testset "savebg: format from the file extension" begin
+@testset "bgsave: format from the file extension" begin
     mktempdir() do dir
         magic = Dict(".svg" => "<?xml", ".png" => "\x89PNG", ".pdf" => "%PDF",
                      ".tex" => "\\documentclass", ".dot" => "digraph")
         for (ext, head) in magic
-            path = savebg(joinpath(dir, "m" * ext), tf_model())
+            path = bgsave(joinpath(dir, "m" * ext), tf_model())
             @test startswith(read(path, String), head)
         end
-        @test isfile(savebg(joinpath(dir, "g.svg"), bondgraph(tf_model())))
-        @test isfile(savebg(joinpath(dir, "p.tex"), bgplot(tf_model())))
-        @test_throws ArgumentError savebg(joinpath(dir, "m.jpg"), tf_model())
+        @test isfile(bgsave(joinpath(dir, "g.svg"), BondGraph(tf_model())))
+        @test isfile(bgsave(joinpath(dir, "p.tex"), bgplot(tf_model())))
+        @test_throws ArgumentError bgsave(joinpath(dir, "m.jpg"), tf_model())
     end
 end

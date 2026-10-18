@@ -128,11 +128,11 @@ full_equations(sys)
 
 # ### Generated equations against the hand derivation
 #
-# `bg_equations` returns the same equations with the names we choose. We rename the amounts and parameters to the symbols of the introduction (inside a `let`, so the names `A`, `B` and `C` keep pointing at the elements); every element's $RT$ becomes the one $RT$:
+# `bgequations` returns the same equations with the names we choose. We rename the amounts and parameters to the symbols of the introduction (inside a `let`, so the names `A`, `B` and `C` keep pointing at the elements); every element's $RT$ becomes the one $RT$:
 let
     @variables x_a(t) x_b(t) x_c(t)
     @parameters K_a K_b K_c κ_1 κ_2 RT
-    bg_equations(network; rename = Dict(
+    bgequations(network; rename = Dict(
         ja.A.x => x_a, jb.B.x => x_b, jc.C.x => x_c,
         ja.A.K => K_a, jb.B.K => K_b, jc.C.K => K_c, r1.κ => κ_1, r2.κ => κ_2,
         ja.A.RT => RT, jb.B.RT => RT, jc.C.RT => RT, r1.RT => RT, r2.RT => RT))

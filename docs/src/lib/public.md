@@ -78,8 +78,8 @@ HydraulicAdapter
 ### Equations and drawing
 
 ```@docs
-bg_equations
-bondgraph
+bgequations
+BondGraph
 bgplot
-savebg
+bgsave
 ```

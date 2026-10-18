@@ -110,11 +110,11 @@ parameters(sys)
 
 # ### Generated equations against the hand derivation
 #
-# `bg_equations` names the states and parameters as we choose. The inertias' states are their momenta, the flux linkage $\lambda = L\,i$ and the angular momentum $h = J\omega$; the controller's state is its integrator's output, $x = z/T$. We rename them, and the parameters, to the symbols of the introduction, inside a `let` so that `L`, `R`, `J` and `b` keep naming the elements:
+# `bgequations` names the states and parameters as we choose. The inertias' states are their momenta, the flux linkage $\lambda = L\,i$ and the angular momentum $h = J\omega$; the controller's state is its integrator's output, $x = z/T$. We rename them, and the parameters, to the symbols of the introduction, inside a `let` so that `L`, `R`, `J` and `b` keep naming the elements:
 let
     @variables λ(t) h(t) x(t)
     @parameters L R J b K Kp T ωᵣ
-    bg_equations(loop; rename = Dict(je.L.p => λ, jm.J.p => h, pi.addPI.input2.u => x,
+    bgequations(loop; rename = Dict(je.L.p => λ, jm.J.p => h, pi.addPI.input2.u => x,
                                      je.L.I => L, je.R.R => R, jm.J.I => J, jm.b.R => b,
                                      gy.r => K, pi.k => Kp, pi.T => T, ref.k => ωᵣ,
                                      pi.addPI.k1 => 1, pi.addPI.k2 => 1))

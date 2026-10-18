@@ -42,7 +42,7 @@ function junction(kind, args; name)
     ends = [port === :free ? PowerPort(name = x) : x for (_, x, port) in members]
     cons = [connect(port === :free ? sys : getproperty(sys, port), getproperty(core, Symbol(:p, k)))
             for (k, ((_, _, port), sys)) in enumerate(zip(members, ends))]
-    # Recorded for `bondgraph`: each member's sign, name, and whether it is a free port.
+    # Recorded for `BondGraph`: each member's sign, name, and whether it is a free port.
     meta = [(s, nameof(e), port === :free) for ((s, _, port), e) in zip(members, ends)]
     System(cons, t; name, systems = [core; ends], metadata = Dict(JunctionMembers => (kind, meta)))
 end

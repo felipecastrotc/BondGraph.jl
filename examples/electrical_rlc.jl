@@ -105,11 +105,11 @@ full_equations(sys)
 
 # ### Generated equations against the hand derivation
 #
-# `bg_equations` gives the same equations with the names we choose. We rename the states to the flux linkage $\lambda = L\,i$ and the charge $q$, and the parameters to the symbols of the introduction (inside a `let`, so the names `R`, `L` and `C` keep pointing at the elements):
+# `bgequations` gives the same equations with the names we choose. We rename the states to the flux linkage $\lambda = L\,i$ and the charge $q$, and the parameters to the symbols of the introduction (inside a `let`, so the names `R`, `L` and `C` keep pointing at the elements):
 let
     @variables λ(t) q(t)
     @parameters R L C
-    latexify(bg_equations(model; rename = Dict(model.L.p => λ, model.C.q => q,
+    latexify(bgequations(model; rename = Dict(model.L.p => λ, model.C.q => q,
                                                model.L.I => L, model.R.R => R,
                                                model.C.C => C)))
 end

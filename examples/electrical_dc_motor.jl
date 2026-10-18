@@ -106,11 +106,11 @@ full_equations(sys)
 
 # ### Generated equations against the hand derivation
 #
-# `bg_equations` returns the same equations with the names we choose. The states are the momenta of the two inertias: the flux linkage of the inductance, $\lambda = L\,i$, and the angular momentum of the shaft, $h = J\dot{\theta}$. Here we rename them, and the parameters, to the symbols of the introduction (inside a `let`, so the names `L`, `R`, `J` and `c` keep pointing at the elements):
+# `bgequations` returns the same equations with the names we choose. The states are the momenta of the two inertias: the flux linkage of the inductance, $\lambda = L\,i$, and the angular momentum of the shaft, $h = J\dot{\theta}$. Here we rename them, and the parameters, to the symbols of the introduction (inside a `let`, so the names `L`, `R`, `J` and `c` keep pointing at the elements):
 let
     @variables λ(t) h(t)
     @parameters L R J c k
-    bg_equations(mdl; rename = Dict(je.L.p => λ, jm.J.p => h, je.L.I => L, je.R.R => R,
+    bgequations(mdl; rename = Dict(je.L.p => λ, jm.J.p => h, je.L.I => L, je.R.R => R,
                                     jm.J.I => J, jm.c.R => c, gy.r => k))
 end
 
