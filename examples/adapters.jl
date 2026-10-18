@@ -4,13 +4,13 @@
 #
 # | Adapter | MTKSL connector(s) | Effort | Flow |
 # |---|---|---|---|
-# | `ElectricalAdapter` | `p`, `n` (`Pin`) | voltage `p.v - n.v` | current into the network at `p` |
-# | `TranslationalAdapter` | `flange` (`MechanicalPort`) | force on the network | `flange.v` |
-# | `TranslationalPositionAdapter` | `flange` (`TranslationalPosition.Flange`) | force on the network | `ds/dt` |
-# | `RotationalAdapter` | `flange` (`Rotational.Flange`) | torque on the network | `dφ/dt` |
-# | `HydraulicAdapter` | `port` (`HydraulicPort`) | pressure | volume flow into the network |
+# | `ElectricalAdapter` | `p`, `n` (`Pin`) | voltage `p.v - n.v` | current into the network at `p` (`power`), out of it (`pout`) |
+# | `TranslationalAdapter` | `flange` (`MechanicalPort`) | force on the network | `flange.v` (`power`), `-flange.v` (`pout`) |
+# | `TranslationalPositionAdapter` | `flange` (`TranslationalPosition.Flange`) | force on the network | `ds/dt` (`power`), `-ds/dt` (`pout`) |
+# | `RotationalAdapter` | `flange` (`Rotational.Flange`) | torque on the network | `dφ/dt` (`power`), `-dφ/dt` (`pout`) |
+# | `HydraulicAdapter` | `port` (`HydraulicPort`) | pressure | volume flow into the network (`power`), out of it (`pout`) |
 #
-# Like any element, an adapter's law is written in the variables of its bond, and its bond conventionally points into the adapter: a bare member `adapter` at a junction, or a `connect` to `adapter.power`. When the MTKSL side supplies power instead of absorbing it, the power along the bond is negative.
+# Like any element, an adapter has two ports. Bond it through `power` (a bare member `adapter` at a junction) when the MTKSL network absorbs power, and through `pout` (`adapter => :pout`, or `connect(adapter.pout, …)`) when it supplies it, like a source. Unlike a resistor drawn backwards, an adapter is a coupling, not a law: either port conserves power, and the choice only sets which way the bond's flow is counted. The effort stays the one across (or on) the network.
 
 using BondGraphToolkit
 using BondGraphToolkit.ModelingToolkit: t_nounits as t
@@ -117,24 +117,24 @@ maximum(abs, sol(tgrid; idxs = mass.v).u - tgrid / 2)
 
 # ## Hydraulic: an MTKSL pressure source filling a bond-graph tank
 #
-# Here the MTKSL side supplies power: a pressure source drives a flow through a bond-graph resistance into a compliance (a tank). With the adapter's bond drawn into it, the bond's flow is negative while the source delivers, so the tank's volume `q` goes negative: the volume that left the source.
+# Here the MTKSL side supplies power: a pressure source drives a flow through a bond-graph resistance into a compliance (a tank). The adapter is bonded like a source, through `pout`, so the bond's flow is the volume flow out of the MTKSL network, into the tank.
 @named k = Blocks.Constant(k = 2.0e5)
 @named src = Hy.Pressure()
 @named fluid = Hy.HydraulicFluid()
 @named ha = HydraulicAdapter()
 @named R = Resistance(R = 1.0e9)
 @named C = Compliance(C = 2.0e-9)
-@named j = Junction1(ha, R, C)
+@named j = Junction1(ha => :pout, R, C)
 @named tank = System([connect(k.output, src.p), connect(fluid, src.port), connect(src.port, j.ha.port)], t;
                      systems = [k, src, fluid, j])
 sol = solve(ODEProblem(mtkcompile(tank), [], (0.0, 10.0)), Rodas5P(); abstol = 1e-18, reltol = 1e-10)
 
-# By hand: all three bonds point out of the 1-junction, so its efforts sum to $0 = -p_0 - R\,\dot{q} - q/C$, and from an empty tank
+# By hand: the adapter's bond points into the 1-junction and the other two out of it, so its efforts sum to $0 = p_0 - R\,\dot{q} - q/C$, and from an empty tank
 #
-# $q(t) = -C\,p_0\,\left(1 - e^{-t/RC}\right),$
+# $q(t) = C\,p_0\,\left(1 - e^{-t/RC}\right),$
 #
-# which approaches $-C\,p_0 = -4 \times 10^{-4}$ m³ with the time constant $RC = 2$ s.
-q_tank(τ) = -2.0e-9 * 2.0e5 * (1 - exp(-τ / (1.0e9 * 2.0e-9)))
+# which approaches $C\,p_0 = 4 \times 10^{-4}$ m³ with the time constant $RC = 2$ s. Bonded through `power` instead (`Junction1(ha, R, C)`), the same model gives $-q(t)$: the bond's flow is then counted into the network, and is negative while the source delivers.
+q_tank(τ) = 2.0e-9 * 2.0e5 * (1 - exp(-τ / (1.0e9 * 2.0e-9)))
 plot(sol, idxs = [j.C.q], label = "Bond graph + MTKSL", xlabel = "Time", ylabel = "Volume (m³)")
 plot!(q_tank, 0, 10, label = "Closed form", linestyle = :dash)
 

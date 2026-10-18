@@ -1,6 +1,6 @@
 # Adapters to MTK standard-library networks, each checked against a reference model.
-# An adapter's bond is drawn into it (member `adapter` at a junction): the MTKSL network
-# is the element at the end of that bond.
+# An adapter's bond is drawn into it (member `adapter` at a junction) when the MTKSL
+# network receives power, and out of it (`adapter => :pout`) when the network supplies it.
 import ModelingToolkitStandardLibrary.Electrical as El
 import ModelingToolkitStandardLibrary.Mechanical.Rotational as Rot
 import ModelingToolkitStandardLibrary.Mechanical.Translational as Tr
@@ -77,8 +77,8 @@ end
 end
 
 @testset "ElectricalAdapter: MTKSL armature circuit driving a bond-graph motor" begin
-    # Voltage, resistor and inductor in MTKSL feed GY ⇀ 1ₘ. GY's port 1 and the adapter
-    # both expect the bond to point into them: a 0-junction where the MTKSL side supplies.
+    # Voltage, resistor and inductor in MTKSL feed GY ⇀ 1ₘ, so the adapter bonds out
+    # through `pout`.
     @named k = Blocks.Constant(k = 12.0)
     @named src = El.Voltage()
     @named gnd = El.Ground()
@@ -90,10 +90,10 @@ end
     @named c = Resistance(R = 0.1)
     @named τ = Se(1.0)
     @named jm = Junction1(τ => :pout, c, J, :gy => :in)
-    @named m = System([connect(k.output, src.V), connect(src.p, res.p), connect(res.n, ind.p),
-                       connect(ind.n, ea.p), connect(ea.n, src.n, gnd.g),
-                       connect(ea.power, gy.p1), connect(gy.p2, jm.gy)], t;
-                      systems = [k, src, gnd, res, ind, ea, gy, jm])
+    armature(bond) = System([connect(k.output, src.V), connect(src.p, res.p), connect(res.n, ind.p),
+                             connect(ind.n, ea.p), connect(ea.n, src.n, gnd.g),
+                             bond, connect(gy.p2, jm.gy)], t;
+                            name = :m, systems = [k, src, gnd, res, ind, ea, gy, jm])
     # Reference: the all-bond-graph DC motor of the examples.
     @named L = Inertia(I = 0.5)
     @named R = Resistance(R = 1.0)
@@ -105,9 +105,69 @@ end
     @named jm = Junction1(τ => :pout, c, J, :gy => :in)
     @named gy = GY(r = 0.01)
     @named ref = System([connect(je.gy, gy.p1), connect(gy.p2, jm.gy)], t; systems = [je, gy, jm])
+    r = solve_dae(ref)
+    # Adapter ⇀ GY directly, or the adapter's incoming port against GY's (a 0-junction
+    # with both bonds pointing out of it): the same physics.
+    for bond in [connect(ea.pout, gy.p1), connect(ea.power, gy.p1)]
+        m = armature(bond)
+        s = solve_dae(m)
+        @test s(TT; idxs = m.jm.J.f) ≈ r(TT; idxs = ref.jm.J.f) atol = 1e-8
+        @test s(TT; idxs = m.ind.i) ≈ r(TT; idxs = ref.je.L.f) atol = 1e-8
+    end
+end
+
+@testset "Adapters through pout: the MTKSL side supplies power" begin
+    # The bond leaves the adapter, so the MTKSL source behaves like a bond-graph source:
+    # Junction1(adapter => :pout, R, C) is the reference Se ⇀ 1 ⇀ R, C, with positive power.
+    @named k = Blocks.Constant(k = 3.0)
+    @named src = El.Voltage()
+    @named gnd = El.Ground()
+    @named ea = ElectricalAdapter()
+    @named R = Resistance(R = 2.0)
+    @named C = Compliance(C = 0.5)
+    @named j = Junction1(ea => :pout, R, C)
+    @named m = System([connect(k.output, src.V), connect(src.p, j.ea.p), connect(src.n, j.ea.n, gnd.g)], t;
+                      systems = [k, src, gnd, j])
+    ref = series_rc(E = 3.0, R = 2.0, C = 0.5)
     s, r = solve_dae(m), solve_dae(ref)
-    @test s(TT; idxs = m.jm.J.f) ≈ r(TT; idxs = ref.jm.J.f) atol = 1e-8
-    @test s(TT; idxs = m.ind.i) ≈ r(TT; idxs = ref.je.L.f) atol = 1e-8
+    @test s(TT; idxs = m.j.C.q) ≈ r(TT; idxs = ref.C.q) atol = 1e-8
+    @test s(TT; idxs = m.j.ea.f) ≈ -s(TT; idxs = m.src.p.i) atol = 1e-8   # current out of the network
+    @test all(>=(-1e-12), s(TT; idxs = m.j.ea.e) .* s(TT; idxs = m.j.ea.f))
+
+    p0, Rh, Ch = 2.0e5, 1.0e9, 2.0e-9
+    @named k = Blocks.Constant(k = p0)
+    @named src = Hy.Pressure()
+    @named fluid = Hy.HydraulicFluid()
+    @named ha = HydraulicAdapter()
+    @named R = Resistance(R = Rh)
+    @named C = Compliance(C = Ch)
+    @named j = Junction1(ha => :pout, R, C)
+    @named m = System([connect(k.output, src.p), connect(fluid, src.port), connect(src.port, j.ha.port)], t;
+                      systems = [k, src, fluid, j])
+    ref = series_rc(E = p0, R = Rh, C = Ch)
+    T = range(0.0, 10.0, length = 11)
+    hsolve(x) = solve(ODEProblem(mtkcompile(x), [], (0.0, 10.0)), Rodas5P(); abstol = 1e-18, reltol = 1e-10)
+    @test hsolve(m)(T; idxs = m.j.C.q) ≈ hsolve(ref)(T; idxs = ref.C.q) rtol = 1e-6
+
+    # An MTKSL force (torque) of 1 on a bond-graph inertia of 2: the flange moves forward,
+    # v = t/2 (s, φ = t²/4). The bond's flow is counted out of the network, f = -v, so the
+    # inertia's velocity is the flange's mirrored: the effort stays the force on the network.
+    @named k = Blocks.Constant(k = 1.0)
+    for (Adapter, Source, input) in [(TranslationalAdapter, Tr.Force, :f),
+                                     (TranslationalPositionAdapter, TP.Force, :f),
+                                     (RotationalAdapter, Rot.Torque, :tau)]
+        @named a = Adapter()
+        @named source = Source()
+        @named I = Inertia(I = 2.0)
+        @named m = System([connect(k.output, getproperty(source, input)), connect(source.flange, a.flange),
+                           connect(a.pout, I.power)], t; systems = [k, source, a, I])
+        sys = mtkcompile(m)
+        u0 = Adapter === TranslationalAdapter ? [] : [Adapter === RotationalAdapter ? sys.a.phi => 0.0 : sys.a.s => 0.0]
+        s = solve(ODEProblem(sys, u0, (0.0, 1.0)), Rodas5P(); abstol = 1e-10, reltol = 1e-10)
+        x = Adapter === TranslationalAdapter ? m.a.flange.v : Adapter === RotationalAdapter ? m.a.phi : m.a.s
+        @test s(TT; idxs = x) ≈ (Adapter === TranslationalAdapter ? TT ./ 2 : TT .^ 2 ./ 4) atol = 1e-8
+        @test s(TT; idxs = m.I.f) ≈ -TT ./ 2 atol = 1e-8
+    end
 end
 
 @testset "Translational adapters: a force accelerates an MTKSL mass" begin
