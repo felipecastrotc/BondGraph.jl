@@ -1,6 +1,6 @@
 # Documentation and API coverage audit
 
-Scope: explicit `export` statements in `src/BondGraph.jl`, local source docstrings, and the checked-in documentation. `@reexport using ModelingToolkit` may expose additional upstream symbols; those are outside this explicit-export inventory. “Yes” means a local docstring is attached to the definition, not that the example or API was executed. No docstring here is merely an empty placeholder. The docs build was not run, as requested.
+Scope: explicit `export` statements in `src/BondGraphToolkit.jl`, local source docstrings, and the checked-in documentation. `@reexport using ModelingToolkit` may expose additional upstream symbols; those are outside this explicit-export inventory. “Yes” means a local docstring is attached to the definition, not that the example or API was executed. No docstring here is merely an empty placeholder. The docs build was not run, as requested.
 
 ## Explicit exports
 

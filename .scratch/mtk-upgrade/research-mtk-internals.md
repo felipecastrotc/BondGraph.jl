@@ -1,6 +1,6 @@
-# Research: MTK / Symbolics / SymbolicUtils internals used by BondGraph.jl, 8.71 → current
+# Research: MTK / Symbolics / SymbolicUtils internals used by BondGraphToolkit.jl, 8.71 → current
 
-Date: 2026-10-14. Scope: `src/BondGraph.jl`, `src/mtk.jl`, `src/types.jl`, `src/bg.jl`, `src/utils/*.jl` (not `src/mbg.jl`).
+Date: 2026-10-14. Scope: `src/BondGraphToolkit.jl`, `src/mtk.jl`, `src/types.jl`, `src/bg.jl`, `src/utils/*.jl` (not `src/mbg.jl`).
 Method: old sources read from the 8.71.2 tarball on disk (identical to tag `v8.71.2`); current sources read from shallow clones of tags `ModelingToolkit.jl v11.45.4`, `Symbolics.jl v7.45.0`, `SymbolicUtils.jl v4.51.0`, plus `gh api` for intermediate tags and release notes. Nothing was executed in Julia. Claims that would need a run to confirm are marked **UNVERIFIED**.
 
 ## Executive summary

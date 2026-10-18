@@ -29,7 +29,7 @@ To start using the Bond Graph Toolkit, you need to have Julia installed on your 
 Once Julia is installed, you can add the Bond Graph Toolkit to your project by running the following command in the Julia REPL or the Julia package manager:
 
 ```julia
-pkg> add https://github.com/felipecastrotc/BondGraph.jl
+pkg> add https://github.com/felipecastrotc/BondGraphToolkit.jl
 ```
 
 For more detailed installation instructions, see [Installation](@ref install-guide).

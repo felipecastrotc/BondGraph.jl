@@ -6,12 +6,12 @@
 </h1>
 
 <p align="center">
-  <a href="https://www.felipecastrotc.com/BondGraph.jl/stable/"><img src="https://img.shields.io/badge/docs-stable-blue.svg" alt="Documentation (stable)"></a>
-  <a href="https://www.felipecastrotc.com/BondGraph.jl/dev/"><img src="https://img.shields.io/badge/docs-dev-blue.svg" alt="Documentation (dev)"></a>
-  <a href="https://github.com/felipecastrotc/BondGraph.jl/actions/workflows/CI.yml?query=branch%3Amain"><img src="https://github.com/felipecastrotc/BondGraph.jl/actions/workflows/CI.yml/badge.svg?branch=main" alt="CI"></a>
-  <a href="https://github.com/felipecastrotc/BondGraph.jl/releases/latest"><img src="https://img.shields.io/github/v/release/felipecastrotc/BondGraph.jl" alt="Latest release"></a>
+  <a href="https://www.felipecastrotc.com/BondGraphToolkit.jl/stable/"><img src="https://img.shields.io/badge/docs-stable-blue.svg" alt="Documentation (stable)"></a>
+  <a href="https://www.felipecastrotc.com/BondGraphToolkit.jl/dev/"><img src="https://img.shields.io/badge/docs-dev-blue.svg" alt="Documentation (dev)"></a>
+  <a href="https://github.com/felipecastrotc/BondGraphToolkit.jl/actions/workflows/CI.yml?query=branch%3Amain"><img src="https://github.com/felipecastrotc/BondGraphToolkit.jl/actions/workflows/CI.yml/badge.svg?branch=main" alt="CI"></a>
+  <a href="https://github.com/felipecastrotc/BondGraphToolkit.jl/releases/latest"><img src="https://img.shields.io/github/v/release/felipecastrotc/BondGraphToolkit.jl" alt="Latest release"></a>
   <img src="https://img.shields.io/badge/julia-%E2%89%A5%201.10-9558b2.svg" alt="Julia ≥ 1.10">
-  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License: Apache 2.0"></a>
+  <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 </p>
 
 *Bond graphs in Julia, as ordinary ModelingToolkit systems.*
@@ -23,7 +23,7 @@ BondGraphToolkit.jl models dynamic systems with the bond-graph method, across me
 The package is not yet in the General registry; add it from this repository:
 
 ```julia
-pkg> add https://github.com/felipecastrotc/BondGraph.jl
+pkg> add https://github.com/felipecastrotc/BondGraphToolkit.jl
 pkg> add OrdinaryDiffEqTsit5   # an ODE solver for the examples
 ```
 
@@ -60,11 +60,15 @@ bgplot(model)                             # its bond graph, drawn
 
 ## Documentation
 
-The [documentation](https://www.felipecastrotc.com/BondGraph.jl/stable/) covers the conventions, the API, and worked examples from mechanical systems to a DC-motor pendulum, an arterial Windkessel and a chemical reaction network, each checked against hand-derived equations. The changes in each version are in [NEWS.md](NEWS.md).
+The [documentation](https://www.felipecastrotc.com/BondGraphToolkit.jl/stable/) covers the conventions, the API, and worked examples from mechanical systems to a DC-motor pendulum, an arterial Windkessel and a chemical reaction network, each checked against hand-derived equations. The changes in each version are in [NEWS.md](NEWS.md).
 
 ## Citing
 
 If you use BondGraphToolkit.jl in your work, please cite it. GitHub's *Cite this repository* button gives the reference from [CITATION.cff](CITATION.cff).
+
+## Development
+
+Versions up to 0.2 were written by the author without AI tools. The 0.3 refactor (the move to ModelingToolkit 11 and the redesign of ports and junctions) was developed with AI coding assistants. The author has reviewed all of it, and is doing a further full pass over the codebase to rewrite parts in his own style. The tests check the models against hand-derived equations and the v0.2 results.
 
 ## Contributing
 
@@ -72,4 +76,4 @@ Bug reports, questions and pull requests are welcome; see [CONTRIBUTING.md](CONT
 
 ## License
 
-Apache License 2.0; see [LICENSE.md](LICENSE.md).
+MIT; see [LICENSE.md](LICENSE.md). Versions up to 0.3.0 were released under the Apache License 2.0.

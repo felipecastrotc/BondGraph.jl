@@ -1,7 +1,7 @@
 # Louca et al., "Energy-Based Bond Graph Model Reduction", in Borutzky (ed.), Bond Graph Modelling of Engineering Systems: Theory, Applications and Software Support, Springer 2011: Ch. 2
 PDF↔book page offset: book p. N = PDF p. N+18 (verified: book p. 53 = PDF p. 71, book p. 72 = PDF p. 90). Chapter occupies book pp. 53-103 (p. 104 blank).
 
-Relevance: low. This chapter is about model reduction, which BondGraph.jl does not plan. Only items that may serve as diagnostics or reference examples are kept.
+Relevance: low. This chapter is about model reduction, which BondGraphToolkit.jl does not plan. Only items that may serve as diagnostics or reference examples are kept.
 
 ## Topics covered (one line each, with § and book page)
 - Introduction and notion of a "proper" model for an application (§2.1, pp. 53-54).

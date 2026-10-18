@@ -33,7 +33,7 @@ fix_math_md(content) = replace(content, r"\$\$(.*?)\$\$"s => s"```math\1```")
 function postprocess(cont)
     # Text to insert
     text = """
-     *The source files for all examples can be found in [/examples](https://github.com/felipecastrotc/BondGraph.jl/tree/main/examples/).*\n
+     *The source files for all examples can be found in [/examples](https://github.com/felipecastrotc/BondGraphToolkit.jl/tree/main/examples/).*\n
     """
 
     # Regular expression pattern to match the first heading
@@ -169,4 +169,4 @@ getting_started_auto = joinpath(@__DIR__, "src", "getting_started_auto.md")
 isfile(getting_started_auto) && rm(getting_started_auto)
 
 # Deploy documentation to GitHub Pages
-deploydocs(repo="github.com/felipecastrotc/BondGraph.jl.git", devbranch="main")
+deploydocs(repo="github.com/felipecastrotc/BondGraphToolkit.jl.git", devbranch="main")
