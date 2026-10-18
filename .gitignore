@@ -28,3 +28,8 @@ _matlab/
 .vscode
 
 tmp_dev_*
+# Local patch experiments (historical, see git history)
+patches/
+
+# Claude Code personal settings
+.claude/settings.local.json
