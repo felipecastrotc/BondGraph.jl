@@ -9,8 +9,8 @@ Julia library for modeling and simulating dynamic systems with bond graphs, buil
 - `src/junctions.jl`: the signed 0-/1-junction component (`Junction0`, `Junction1`)
 - `src/two_ports.jl`: `TF`, `GY` (built with `@twoport`, defined in the module file)
 - `src/adapters.jl`: the five MTK standard-library adapters
-- `src/graph.jl`: `bondgraph` (the model's bond graph as data, shown as text), `bgplot` (SVG/TikZ/DOT drawing, laid out with Graphviz_jll), `savebg` (export by file extension)
-- `src/equations.jl`: `bg_equations` (readable, renameable equations; `latexify` is re-exported)
+- `src/graph.jl`: `BondGraph` (the model's bond graph as data, shown as text), `bgplot` (SVG/TikZ/DOT drawing, laid out with Graphviz_jll), `bgsave` (export by file extension)
+- `src/equations.jl`: `bgequations` (readable, renameable equations; `latexify` is re-exported)
 - `test/runtests.jl` + `test/test_*.jl`: behaviour tests through the public API; `test/regression/`: golden data from v0.2 (never regenerate)
 - `examples/*.jl`: Literate.jl sources, rendered into the docs
 - `docs/`: Documenter.jl site, deployed to `gh-pages`; has its own `docs/Project.toml`
@@ -24,7 +24,7 @@ julia --project=docs docs/make.jl               # build docs (also tries to depl
 
 ## Conventions
 
-- Style: Julia Base style guide, 4-space indent, `snake_case` functions, `!` on mutating functions.
+- Style: Julia Base style guide, 4-space indent, lowercase functions with words squashed where readable (`bgplot`, `haskey`; underscores only when that's hard to read), `CamelCase` types and constructors, `!` on mutating functions.
 - Examples: first line is `# # [Title](@id anchor)`; the title becomes the docs nav entry. The example titled `Quick Example` is spliced into `docs/src/getting_started.md` at `@quick-example`. Files prefixed `tmp_` are skipped.
 - Figures: TikZ sources in `docs/src/misc/tikz/*.tex` → PDF → SVG (+ `-dark.svg`) via `docs/src/misc/getsvg.sh`; published copies go in `docs/src/assets/tikz/`.
 - `tmp_dev_*` files are personal scratch, gitignored. Never commit them.

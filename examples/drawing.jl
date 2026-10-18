@@ -2,9 +2,9 @@
 #
 # A model built with BondGraphToolkit knows its own bond graph: junctions record their bonds and signs, and elements and two-ports are recognised by their ports. Three functions work with it, the way `solve`, `plot` and `savefig` work with a simulation:
 #
-# - `bondgraph`: the bond graph as data, shown as the list of its bonds;
+# - `BondGraph`: the bond graph as data, shown as the list of its bonds;
 # - `bgplot`: the drawing, or its TikZ or Graphviz DOT source;
-# - `savebg`: saves it to a file, in the format of the file's extension.
+# - `bgsave`: saves it to a file, in the format of the file's extension.
 
 using BondGraphToolkit
 using BondGraphToolkit.ModelingToolkit: t_nounits as t
@@ -23,8 +23,8 @@ using BondGraphToolkit.ModelingToolkit: t_nounits as t
 
 # ## The bond graph as data
 #
-# `bondgraph` lists the bonds, each along its half-arrow, with nodes labelled `type:name` as in Karnopp, Margolis & Rosenberg's figures:
-g = bondgraph(motor)
+# `BondGraph` lists the bonds, each along its half-arrow, with nodes labelled `type:name` as in Karnopp, Margolis & Rosenberg's figures:
+g = BondGraph(motor)
 
 # Its `nodes` and `bonds` are plain data, for your own checks or drawings:
 g.bonds
@@ -43,9 +43,9 @@ bgplot(motor; format = :tikz)
 
 # ## Saving
 #
-# `savebg` takes the format from the file extension: `.svg`, `.png`, `.pdf`, `.tex` (TikZ) or `.dot`.
+# `bgsave` takes the format from the file extension: `.svg`, `.png`, `.pdf`, `.tex` (TikZ) or `.dot`.
 #
 # ```julia
-# savebg("motor.pdf", motor)
-# savebg("motor.tex", motor)
+# bgsave("motor.pdf", motor)
+# bgsave("motor.tex", motor)
 # ```

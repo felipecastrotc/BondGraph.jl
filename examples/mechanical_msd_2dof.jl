@@ -108,10 +108,10 @@ parameters(sys)
 # Print the system's equations in terms of the states
 full_equations(sys)
 
-# `bg_equations` gives the same equations in terms of the states. We rename the momenta $p_1$ and $p_2$, the ground spring's displacement $x_1$, the coupling's elongation $q_c$, and the parameters to the symbols of the hand derivation:
+# `bgequations` gives the same equations in terms of the states. We rename the momenta $p_1$ and $p_2$, the ground spring's displacement $x_1$, the coupling's elongation $q_c$, and the parameters to the symbols of the hand derivation:
 @variables p₁(t) p₂(t) x₁(t) q_c(t)
 @parameters m₁ c₁ k₁ m₂ c₂ k₂
-eqs = bg_equations(model; rename = Dict(
+eqs = bgequations(model; rename = Dict(
     model.j1.mass1.p => p₁, model.j2.mass2.p => p₂,
     model.j1.spring1.q => x₁, model.jc.spring2.q => q_c,
     model.j1.mass1.I => m₁, model.j1.damper1.R => c₁, model.j1.spring1.C => 1 / k₁,

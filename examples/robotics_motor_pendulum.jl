@@ -131,12 +131,12 @@ full_equations(sys)
 
 # ### Generated equations against the hand derivation
 #
-# `bg_equations` gives the same equations with names of our choice. ModelingToolkit kept the angle $\varphi$ (the integrator's output), the rotor's angular momentum $h = J\omega$, the flux linkage $\lambda = L\,i$, the rod's force on the $\dot{y}$ junction $F_y$ (the effort of the $y$ transformer's port 2) and $\dot{\omega}$, a *dummy derivative* added by the index reduction. We rename them, and the parameters, to the symbols of the introduction; the integrator's gain is 1 (inside a `let`, so the names `L`, `J`, `b`, `m` keep pointing at the elements and values):
+# `bgequations` gives the same equations with names of our choice. ModelingToolkit kept the angle $\varphi$ (the integrator's output), the rotor's angular momentum $h = J\omega$, the flux linkage $\lambda = L\,i$, the rod's force on the $\dot{y}$ junction $F_y$ (the effort of the $y$ transformer's port 2) and $\dot{\omega}$, a *dummy derivative* added by the index reduction. We rename them, and the parameters, to the symbols of the introduction; the integrator's gain is 1 (inside a `let`, so the names `L`, `J`, `b`, `m` keep pointing at the elements and values):
 let
     @variables φ(t) h(t) λ(t) F_y(t) ω̇(t)
     @parameters R_e L K_m J b m
     ω_t = only(filter(v -> endswith(string(v), "fˍt(t)"), unknowns(sys)))   # the dummy derivative
-    bg_equations(model; rename = Dict(
+    bgequations(model; rename = Dict(
         model.φ.output.u => φ, model.jω.J.p => h,
         model.ji.L.p => λ, model.jy.core.p1.e => F_y, ω_t => ω̇,
         model.φ.k => 1, model.ji.Re.R => R_e, model.ji.L.I => L, model.Km.r => K_m,

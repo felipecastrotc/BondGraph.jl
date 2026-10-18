@@ -68,5 +68,5 @@ end
 sol = solve(ODEProblem(mtkcompile(driven), [], (0.0, 5.0)), Tsit5(), reltol = 1e-10, abstol = 1e-10)
 maximum(abs, sol(tgrid; idxs = driven.ladder.j0.c.q).u - q_rc.(tgrid; R = 2.0, C = 0.5, V = 1.0))
 
-# The drawing shows such a component as one node, named after it: `bondgraph` doesn't draw the junctions and elements inside a component it doesn't know. A one-junction subsystem, like `RCLoad` above, is drawn in full, because it is a junction.
+# The drawing shows such a component as one node, named after it: `bgplot` doesn't draw the junctions and elements inside a component it doesn't know. A one-junction subsystem, like `RCLoad` above, is drawn in full, because it is a junction.
 bgplot(driven)

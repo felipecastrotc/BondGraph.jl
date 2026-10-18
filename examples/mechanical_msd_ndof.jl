@@ -110,7 +110,7 @@ full_equations(sys)
 
 # ### Generated equations against the hand derivation
 #
-# `bg_equations` returns the same equations with the names we choose. Here, for $N = 4$, we rename the momenta to $p_i$, the displacements to $q_i$ and the parameters to $m_i$, $C_i = 1/k_i$ and $c_i$ (inside a `let`, so these helper names stay local):
+# `bgequations` returns the same equations with the names we choose. Here, for $N = 4$, we rename the momenta to $p_i$, the displacements to $q_i$ and the parameters to $m_i$, $C_i = 1/k_i$ and $c_i$ (inside a `let`, so these helper names stay local):
 let
     @variables p₁(t) p₂(t) p₃(t) p₄(t) q₁(t) q₂(t) q₃(t) q₄(t)
     @parameters m₁ m₂ m₃ m₄ C₁ C₂ C₃ C₄ c₁ c₂ c₃ c₄
@@ -120,7 +120,7 @@ let
     rename = Dict([[J[i].m.p => p[i] for i in 1:n]; [J[i].m.I => M[i] for i in 1:n];
                    [S[i].s.q => q[i] for i in 1:n]; [S[i].s.C => C[i] for i in 1:n];
                    [S[i].d.R => c[i] for i in 1:n]])
-    bg_equations(model; rename)
+    bgequations(model; rename)
 end
 
 # MTK writes the equations without collecting terms, so some appear twice with opposite signs, and $\dot{x}_i = p_i/m_i$ shows up as a quotient. With $p_i = m_i\,\dot{x}_i$, $q_1 = x_1$, $q_i = x_{i-1} - x_i$ and $q_i/C_i = k_i\,q_i$:

@@ -104,26 +104,26 @@ steering which momentum MTK keeps as a state.
 end
 
 """
-    Mass(; name, m = 1.0, u = 0.0)
+    Mass(; name, m = 1.0, v = 0.0)
 
-Mechanical shorthand for [`Inertia`](@ref) with mass `m` and initial velocity `u`:
-`I = m`, `p = m*u`. Its bond conventionally points into it (Karnopp §3.1).
+Mechanical shorthand for [`Inertia`](@ref) with mass `m` and initial velocity `v`:
+`I = m`, `p = m*v`. Its bond conventionally points into it (Karnopp §3.1).
 """
-Mass(; name, m = 1.0, u = 0.0) = Inertia(; name, I = m, p = m * u)
+Mass(; name, m = 1.0, v = 0.0) = Inertia(; name, I = m, p = m * v)
 
 """
-    Spring(; name, k = 10, x = 0.0)
+    Spring(; name, k = 1.0, x = 0.0)
 
 Mechanical shorthand for [`Compliance`](@ref) with stiffness `k` and initial
 displacement `x`: `C = 1/k`, `q = x`. Its bond conventionally points into it
 (Karnopp §3.1).
 """
-Spring(; name, k = 10, x = 0.0) = Compliance(; name, C = 1 / k, q = x)
+Spring(; name, k = 1.0, x = 0.0) = Compliance(; name, C = 1 / k, q = x)
 
 """
-    Damper(; name, c = 10)
+    Damper(; name, c = 1.0)
 
 Mechanical shorthand for [`Resistance`](@ref) with damping coefficient `c`:
 `R = c`. Its bond conventionally points into it (Karnopp §3.1).
 """
-Damper(; name, c = 10) = Resistance(; name, R = c)
+Damper(; name, c = 1.0) = Resistance(; name, R = c)

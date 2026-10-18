@@ -15,7 +15,7 @@ using OrdinaryDiffEqTsit5
 
 # Mechanical shorthands use mass and initial velocity, stiffness and initial
 # displacement, and damping coefficient respectively.
-@named mass = Mass(m = 2.0, u = 0.5)
+@named mass = Mass(m = 2.0, v = 0.5)
 @named spring = Spring(k = 2.0, x = 0.2)
 @named damper = Damper(c = 3.0)
 

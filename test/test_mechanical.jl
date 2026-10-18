@@ -11,7 +11,7 @@
          Resistance(R = 0.5, name = :R))
     end
     shorthand = oscillator() do
-        (Mass(m = 2.0, u = 0.5, name = :I),
+        (Mass(m = 2.0, v = 0.5, name = :I),
          Spring(k = 4.0, x = 0.3, name = :C),
          Damper(c = 0.5, name = :R))
     end
@@ -23,8 +23,8 @@
 
     default_role = oscillator() do
         (Inertia(I = 1.0, p = 0.0, name = :I),
-         Compliance(C = 0.1, q = 0.0, name = :C),
-         Resistance(R = 10, name = :R))
+         Compliance(C = 1.0, q = 0.0, name = :C),
+         Resistance(R = 1.0, name = :R))
     end
     default_short = oscillator() do
         (Mass(name = :I), Spring(name = :C), Damper(name = :R))

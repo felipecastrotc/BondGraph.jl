@@ -108,14 +108,14 @@ full_equations(sys)
 
 # ### Generated equations against the hand derivation
 #
-# `bg_equations` returns the same equations with the names we choose. We rename the stored volume to $V$ and the parameters to the symbols of the introduction (inside a `let`, so the name `C` keeps pointing at the element):
+# `bgequations` returns the same equations with the names we choose. We rename the stored volume to $V$ and the parameters to the symbols of the introduction (inside a `let`, so the name `C` keeps pointing at the element):
 let
     @variables V(t)
     @parameters C R
-    bg_equations(windkessel; rename = Dict(j0.C.q => V, j0.C.C => C, j0.Rp.R => R))
+    bgequations(windkessel; rename = Dict(j0.C.q => V, j0.C.C => C, j0.Rp.R => R))
 end
 
-# The inflow appears as its expression in $t$. With $V = C\,P_c$, the equation reads $C\,\dot{P}_c = Q(t) - P_c/R$, the hand-derived equation. $Z_c$ doesn't appear, and renaming it would be an error: it carries the source's flow, which is known, so it only sets the source's effort, the entrance pressure $P = P_c + Z_c\,Q$, an observed variable that `bg_equations` (state equations only) doesn't list. We check it in the simulation below.
+# The inflow appears as its expression in $t$. With $V = C\,P_c$, the equation reads $C\,\dot{P}_c = Q(t) - P_c/R$, the hand-derived equation. $Z_c$ doesn't appear, and renaming it would be an error: it carries the source's flow, which is known, so it only sets the source's effort, the entrance pressure $P = P_c + Z_c\,Q$, an observed variable that `bgequations` (state equations only) doesn't list. We check it in the simulation below.
 #
 # ## System Simulations
 #

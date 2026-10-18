@@ -2,7 +2,7 @@ _isderivative(x) = iscall(x) && operation(x) isa Differential
 _underived(x) = _isderivative(x) ? only(arguments(x)) : x
 
 """
-    bg_equations(sys; rename = Dict())
+    bgequations(sys; rename = Dict())
 
 The equations of the model `sys` in terms of its states, as `full_equations` of the
 compiled model (`sys` is compiled with `mtkcompile` unless it already is). `rename` maps
@@ -14,10 +14,10 @@ variable in a solution, add an alias equation such as `x ~ model.C.q` to the mod
 
 ```julia
 @variables x(t) ẋ(t)
-latexify(bg_equations(model; rename = Dict(model.C.q => x, D(model.C.q) => ẋ)))
+latexify(bgequations(model; rename = Dict(model.C.q => x, D(model.C.q) => ẋ)))
 ```
 """
-function bg_equations(sys; rename = Dict())
+function bgequations(sys; rename = Dict())
     compiled = ModelingToolkit.iscomplete(sys)
     eqs = full_equations(compiled ? sys : mtkcompile(sys))
     # A key from the uncompiled model is namespaced by its name: `model₊C₊q` is `C₊q`.
