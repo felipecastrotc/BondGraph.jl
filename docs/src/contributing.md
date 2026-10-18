@@ -8,7 +8,7 @@ Create a `feature/<kebab-name>` branch from `develop`. The `develop` branch is f
 
 Write commit summaries in the imperative, capitalized, at most 72 characters, with no trailing period (for example, `Fix sign convention in Junction1`). Put any explanatory body after a blank line.
 
-Follow the [Julia Base style guide](https://docs.julialang.org/en/v1/manual/style-guide/): indent with four spaces, use `snake_case` for functions, and end mutating function names with `!`.
+Follow the [Julia Base style guide](https://docs.julialang.org/en/v1/manual/style-guide/): indent with four spaces, write function names in lowercase with words squashed where readable (`bgplot`, `haskey`), use `CamelCase` for types and constructors, and end mutating function names with `!`.
 
 Run the tests from the repository root:
 
