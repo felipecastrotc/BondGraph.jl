@@ -45,6 +45,12 @@ We recommend checking out the Getting Started to quickly get started with Bond G
 - [Library - Public](@ref public-documentation): Detailed documentation of all public functions provided by the Bond Graph Toolkit.
 - [Library - Internals](@ref internal-documentation): Detailed documentation of all internal functions and types used by the Bond Graph Toolkit.
 
+## Acknowledgements
+
+BondGraphToolkit.jl grew out of the author's doctoral research at the [School of Mechanical Engineering (FEM)](https://www.fem.unicamp.br/) of the [University of Campinas (UNICAMP)](https://www.unicamp.br/), supervised by [Prof. Alberto Luiz Serpa](https://bv.fapesp.br/en/pesquisador/4509/), and carried out at [CEPETRO](https://www.cepetro.unicamp.br/), UNICAMP's Center for Energy and Petroleum Studies. The doctorate was supported by the São Paulo Research Foundation (FAPESP), [process 2019/14597-5](https://bv.fapesp.br/en/bolsas/187752/modelling-the-dynamical-behavior-in-electrical-submersible-pump-esp-for-liquid-liquid-flow/).
+
+Opinions, hypotheses and conclusions or recommendations expressed in this material are the responsibility of the author and do not necessarily reflect the views of FAPESP.
+
 ## Library
 
 ```@contents
