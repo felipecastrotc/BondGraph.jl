@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Chemical Reaction Network · BondGraphToolkit.jl</title><meta name="title" content="Chemical Reaction Network · BondGraphToolkit.jl"/><meta property="og:title" content="Chemical Reaction Network · BondGraphToolkit.jl"/><meta property="twitter:title" content="Chemical Reaction Network · BondGraphToolkit.jl"/><meta name="description" content="Documentation for BondGraphToolkit.jl."/><meta property="og:description" content="Documentation for BondGraphToolkit.jl."/><meta property="twitter:description" content="Documentation for BondGraphToolkit.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img class="docs-light-only" src="../../assets/logo.svg" alt="BondGraphToolkit.jl logo"/><img class="docs-dark-only" src="../../assets/logo-dark.svg" alt="BondGraphToolkit.jl logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../getting_started_auto/">Getting started</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../../man/user_guide/">Concepts and conventions</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Systems</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../mechanical_msd_1dof/">Harmonic Oscillator</a></li><li><a class="tocitem" href="../mechanical_msd_2dof/">Mass-Spring-Damper system 2-DoF</a></li><li><a class="tocitem" href="../mechanical_msd_ndof/">MSD system with N-DoF</a></li><li><a class="tocitem" href="../mechanical_duffing/">Duffing Equation</a></li><li><a class="tocitem" href="../electrical_dc_motor/">DC Motor</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Features</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../two_ports/">Transformers and Gyrators</a></li><li><a class="tocitem" href="../signals/">Signals and Detectors</a></li><li><a class="tocitem" href="../adapters/">Coupling with the MTK Standard Library</a></li><li><a class="tocitem" href="../elements_oneport/">One-Port Elements</a></li><li><a class="tocitem" href="../composition/">Reusable Subsystems</a></li><li><a class="tocitem" href="../equations_latex/">Equations and LaTeX</a></li><li><a class="tocitem" href="../drawing/">Drawing Bond Graphs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox" checked/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Applications</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../control_dc_motor_pi/">DC Motor Speed Control</a></li><li><a class="tocitem" href="../robotics_motor_pendulum/">Pendulum Driven by a DC Motor</a></li><li><a class="tocitem" href="../electrical_rlc/">Series RLC Circuit</a></li><li><a class="tocitem" href="../biomedical_windkessel/">Arterial Windkessel</a></li><li><a class="tocitem" href="../hydraulic_coupled_tanks/">Coupled Tanks</a></li><li class="is-active"><a class="tocitem" href>Chemical Reaction Network</a><ul class="internal"><li><a class="tocitem" href="#Introduction"><span>Introduction</span></a></li><li><a class="tocitem" href="#Preliminary-Steps"><span>Preliminary Steps</span></a></li><li><a class="tocitem" href="#System-Element-Definitions"><span>System Element Definitions</span></a></li><li><a class="tocitem" href="#Model-Construction"><span>Model Construction</span></a></li><li><a class="tocitem" href="#Analysing-the-model"><span>Analysing the model</span></a></li><li><a class="tocitem" href="#System-Simulations"><span>System Simulations</span></a></li></ul></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/public/">Public</a></li><li><a class="tocitem" href="../../lib/internals/">Internals</a></li></ul></li><li><a class="tocitem" href="../../citing/">Citing BondGraphToolkit</a></li><li><a class="tocitem" href="../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../license/">License</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Applications</a></li><li class="is-active"><a href>Chemical Reaction Network</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Chemical Reaction Network</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl/blob/main/examples/chemical_reaction_network.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="chemical-reaction-network"><a class="docs-heading-anchor" href="#chemical-reaction-network">Chemical Reaction Network</a><a id="chemical-reaction-network-1"></a><a class="docs-heading-anchor-permalink" href="#chemical-reaction-network" title="Permalink"></a></h1><p><em>The source files for all examples can be found in <a href="https://github.com/felipecastrotc/BondGraph.jl/tree/main/examples/">/examples</a>.</em></p><h2 id="Introduction"><a class="docs-heading-anchor" href="#Introduction">Introduction</a><a id="Introduction-1"></a><a class="docs-heading-anchor-permalink" href="#Introduction" title="Permalink"></a></h2><p>A chemical reaction network converts species into one another. Its thermodynamics fixes where it can go: every reaction runs down a difference of chemical potential, and at equilibrium all those differences vanish. Gawthrop &amp; Crampin (2014) model such networks as bond graphs, with chemical potential as the effort and molar flow as the flow, so that the models obey the laws of thermodynamics by construction. This example builds their two-reaction chain (Gawthrop &amp; Crampin 2014, Fig. 1c):</p><p class="math-container">\[\mathrm{A} \rightleftharpoons \mathrm{B} \rightleftharpoons \mathrm{C}.\]</p><h3 id="Reaction-network-model"><a class="docs-heading-anchor" href="#Reaction-network-model">Reaction network model</a><a id="Reaction-network-model-1"></a><a class="docs-heading-anchor-permalink" href="#Reaction-network-model" title="Permalink"></a></h3><p>We assume a dilute, isothermal and isobaric mixture in a fixed volume, so that each species has the chemical potential (Gawthrop &amp; Crampin 2014, Eqs. 2–3)</p><p class="math-container">\[\mu_i = \mu_i^0 + RT \ln\frac{x_i}{V} = RT \ln(K_i\,x_i), \qquad K_i = \frac{1}{V}\,e^{\mu_i^0/RT},\]</p><p>where <span>$x_i$</span> is the amount of species <span>$i$</span> (mol), <span>$\mu_i^0$</span> its standard chemical potential, <span>$R$</span> the gas constant and <span>$T$</span> the temperature. The thermodynamic constant <span>$K_i$</span> (1/mol) gathers the standard potential and the volume.</p><p>Each reaction&#39;s molar flow follows the Marcelin–de Donder formula (Eqs. 4 and 6): with <span>$A^f$</span> the affinity of the forward reaction and <span>$A^r$</span> that of the reverse one,</p><p class="math-container">\[v = \kappa\left(e^{A^f/RT} - e^{A^r/RT}\right),\]</p><p>with a rate constant <span>$\kappa$</span> (mol/s). For a reaction <span>$\mathrm{A} \rightleftharpoons \mathrm{B}$</span> the affinities are the species&#39; potentials, <span>$A^f = \mu_a$</span> and <span>$A^r = \mu_b$</span>, and substituting the potentials gives first-order mass action, <span>$v = \kappa(K_a x_a - K_b x_b) = k^+ x_a - k^- x_b$</span> with <span>$k^+ = \kappa K_a$</span> and <span>$k^- = \kappa K_b$</span> (Eqs. 7–9).</p><p>Here the two reactions have rates <span>$v_1 = \kappa_1(K_a x_a - K_b x_b)$</span> and <span>$v_2 = \kappa_2(K_b x_b - K_c x_c)$</span>. Reaction 1 consumes A and produces B, reaction 2 consumes B and produces C, so the mass balances are (Eq. 30)</p><p class="math-container">\[\dot{x}_a = -v_1, \qquad \dot{x}_b = v_1 - v_2, \qquad \dot{x}_c = v_2.\]</p><p>Their sum is zero, so the total amount <span>$x_a + x_b + x_c$</span> is conserved. At equilibrium both flows vanish, <span>$K_a x_a = K_b x_b = K_c x_c$</span>, so the equilibrium constants of the two reactions are</p><p class="math-container">\[K_1 = \frac{x_b}{x_a} = \frac{K_a}{K_b} = \frac{k_1^+}{k_1^-}, \qquad K_2 = \frac{x_c}{x_b} = \frac{K_b}{K_c} = \frac{k_2^+}{k_2^-},\]</p><p>and each species ends with a share of the total proportional to <span>$1/K_i$</span>.</p><p>See also P. J. Gawthrop and E. J. Crampin, <a href="https://doi.org/10.1098/rspa.2014.0459">Energy-based analysis of biochemical cycles using bond graphs</a>, <em>Proc. R. Soc. A</em> 470: 20140459, 2014 (open access; <a href="https://arxiv.org/abs/1406.2447">arXiv:1406.2447</a>, whose section and equation numbers this example cites), Fig. 1 for the bond graphs of this and other small networks.</p><h3 id="Bond-Graph-Model"><a class="docs-heading-anchor" href="#Bond-Graph-Model">Bond Graph Model</a><a id="Bond-Graph-Model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-Graph-Model" title="Permalink"></a></h3><p>Each species is a C element, a store of matter whose effort is its chemical potential: it charges as a capacitor does when molar flow comes in. Each reaction is an Re element, a two-port that relates its flow to the affinities on its two bonds and dissipates power, <span>$(A^f - A^r)\,v \ge 0$</span>. A 0-junction (common potential) at each species lets several reactions share it. The bond graph is drawn from the model below with <code>bgplot</code>, once it is built.</p><table><tr><th style="text-align: right">Element</th><th style="text-align: right">Stands for</th><th style="text-align: right">Parameters</th></tr><tr><td style="text-align: right"><code>Ce:A</code>, <code>Ce:B</code>, <code>Ce:C</code></td><td style="text-align: right">the pools of A, B, C</td><td style="text-align: right"><span>$K_a$</span>, <span>$K_b$</span>, <span>$K_c$</span>, <span>$RT$</span></td></tr><tr><td style="text-align: right"><code>Re:r1</code>, <code>Re:r2</code></td><td style="text-align: right">the reactions A ⇌ B and B ⇌ C</td><td style="text-align: right"><span>$\kappa_1$</span>, <span>$\kappa_2$</span>, <span>$RT$</span></td></tr></table><h2 id="Preliminary-Steps"><a class="docs-heading-anchor" href="#Preliminary-Steps">Preliminary Steps</a><a id="Preliminary-Steps-1"></a><a class="docs-heading-anchor-permalink" href="#Preliminary-Steps" title="Permalink"></a></h2><p>In this example we first define the two chemical elements, which the library doesn&#39;t have, then build and simulate the bond graph model and check its equilibrium against the equilibrium constants. Finally, we simulate the mass-action equations derived above as a plain ModelingToolkit model and compare the results.</p><p>We import the bond-graph toolkit to model the system and <code>OrdinaryDiffEqTsit5</code> to solve the resulting ODE. We also import ModelingToolkit&#39;s independent variable <code>t</code> and derivative <code>D</code>, for the custom elements and the reference model.</p><pre><code class="language-julia hljs">using BondGraphToolkit
+using BondGraphToolkit.ModelingToolkit: t_nounits as t, D_nounits as D
+using OrdinaryDiffEqTsit5
+using Plots</code></pre><h2 id="System-Element-Definitions"><a class="docs-heading-anchor" href="#System-Element-Definitions">System Element Definitions</a><a id="System-Element-Definitions-1"></a><a class="docs-heading-anchor-permalink" href="#System-Element-Definitions" title="Permalink"></a></h2><h3 id="Chemical-species"><a class="docs-heading-anchor" href="#Chemical-species">Chemical species</a><a id="Chemical-species-1"></a><a class="docs-heading-anchor-permalink" href="#Chemical-species" title="Permalink"></a></h3><p>A species is a nonlinear compliance (Karnopp, Margolis &amp; Rosenberg 2012, §3.1, pp. 40–42: a C relates its effort to its displacement <span>$q = \int f\,dt$</span>). Here the displacement is the amount <span>$x$</span> and the effort the chemical potential <span>$\mu = RT\ln(K x)$</span>. <code>@oneport</code> adds the power port <code>power</code>, and the law is written in its bond variables, as for the built-in elements. We call the constructor <code>Ce</code> to keep it apart from the library&#39;s linear <code>Compliance</code>; Gawthrop &amp; Crampin (2014) label it <code>C</code>.</p><pre><code class="language-julia hljs">@oneport function Ce(; name, K = 1.0, RT = 2577.0, x = 1.0)
+    @parameters K = K           # (1/mol) Thermodynamic constant, K = exp(μ⁰/RT)/V
+    @parameters RT = RT         # (J/mol) Gas constant times temperature
+    @variables x(t) = x         # (mol) Amount of the species, with its initial value
+    [D(x) ~ f, e ~ RT * log(K * x)]
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Ce (generic function with 1 method)</code></pre><h3 id="Reactions"><a class="docs-heading-anchor" href="#Reactions">Reactions</a><a id="Reactions-1"></a><a class="docs-heading-anchor-permalink" href="#Reactions" title="Permalink"></a></h3><p>A reaction is a two-port: port 1 is the bond into it, carrying the forward affinity <span>$A^f$</span>, and port 2 the bond out of it, carrying the reverse affinity <span>$A^r$</span>. Both bonds carry the reaction flow <span>$v$</span>, which the Marcelin–de Donder formula sets. <code>@twoport</code> gives the bond variables <code>e1, f1, e2, f2</code>, each flow positive along its half-arrow:</p><pre><code class="language-julia hljs">@twoport function Re(; name, κ = 1.0, RT = 2577.0)
+    @parameters κ = κ           # (mol/s) Reaction rate constant
+    @parameters RT = RT         # (J/mol) Gas constant times temperature
+    [f1 ~ κ * (exp(e1 / RT) - exp(e2 / RT)), f2 ~ f1]
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Re (generic function with 1 method)</code></pre><h3 id="Elements"><a class="docs-heading-anchor" href="#Elements">Elements</a><a id="Elements-1"></a><a class="docs-heading-anchor-permalink" href="#Elements" title="Permalink"></a></h3><p>Body temperature, <span>$T = 310$</span> K, gives <span>$RT$</span>:</p><pre><code class="language-julia hljs">RT = 8.314 * 310.0              # (J/mol) R = 8.314 J/(mol⋅K)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2577.34</code></pre><p>The species, each with its thermodynamic constant and initial amount. A chemical potential is <span>$-\infty$</span> at a zero amount, so every species starts with some:</p><pre><code class="language-julia hljs">@named A = Ce(K = 1.0, RT = RT, x = 0.8)     # (1/mol, J/mol, mol)
+@named B = Ce(K = 2.0, RT = RT, x = 0.1)
+@named C = Ce(K = 0.5, RT = RT, x = 0.1)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}x\left( t \right)}{\mathrm{d}t} &amp;= f\left( t \right) \\
+e\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+\mathtt{pout.e}\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+f\left( t \right) &amp;=  - \mathtt{pout.f}\left( t \right) + \mathtt{power.f}\left( t \right) \\
+e\left( t \right) &amp;= \mathtt{RT} ~ \log\left( K ~ x\left( t \right) \right)
+\end{align}
+ \]</p><p>The two reactions:</p><pre><code class="language-julia hljs">@named r1 = Re(κ = 1.0, RT = RT)             # (mol/s) A ⇌ B
+@named r2 = Re(κ = 0.5, RT = RT)             # (mol/s) B ⇌ C</code></pre><p class="math-container">\[ \begin{align}
+\mathtt{p1.f}\left( t \right) &amp;= \left( e^{\frac{\mathtt{p1.e}\left( t \right)}{\mathtt{RT}}} - e^{\frac{\mathtt{p2.e}\left( t \right)}{\mathtt{RT}}} \right) ~ \kappa \\
+ - \mathtt{p2.f}\left( t \right) &amp;= \mathtt{p1.f}\left( t \right)
+\end{align}
+ \]</p><h2 id="Model-Construction"><a class="docs-heading-anchor" href="#Model-Construction">Model Construction</a><a id="Model-Construction-1"></a><a class="docs-heading-anchor-permalink" href="#Model-Construction" title="Permalink"></a></h2><p>Each species sits on a 0-junction, which gives it free ports for the reactions. Following Gawthrop &amp; Crampin (2014, Fig. 1c and Eq. 10), every bond to a species points out of its junction into the species (a bare member <code>x</code>), so the species&#39; flow is its rate of change, <span>$\dot{x}_i$</span>; this is also Karnopp&#39;s usual orientation for a C (§3.1, p. 42). Each reaction&#39;s bonds follow the forward reaction: from A&#39;s junction into <code>r1</code> (free port <code>:r1</code>, leaving), out of <code>r1</code> into B&#39;s junction (<code>:r1 =&gt; :in</code>, entering), and the same for <code>r2</code>. B&#39;s junction thus has one bond in and two out, and its flow balance is <span>$v_1 - \dot{x}_b - v_2 = 0$</span>, the mass balance of B.</p><pre><code class="language-julia hljs">@named ja = Junction0(A, :r1)
+@named jb = Junction0(:r1 =&gt; :in, B, :r2)
+@named jc = Junction0(:r2 =&gt; :in, C)</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( r2, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( C_{+}power, core_{+}p2 \right) \\
+\mathtt{core.p2.e}\left( t \right) &amp;= \mathtt{core.p1.e}\left( t \right) \\
+0 &amp;= \mathtt{core.p1.f}\left( t \right) + \mathtt{core.p2.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{C.x}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{C.f}\left( t \right) \\
+\mathtt{C.e}\left( t \right) &amp;= \mathtt{C.power.e}\left( t \right) \\
+\mathtt{C.pout.e}\left( t \right) &amp;= \mathtt{C.power.e}\left( t \right) \\
+\mathtt{C.f}\left( t \right) &amp;=  - \mathtt{C.pout.f}\left( t \right) + \mathtt{C.power.f}\left( t \right) \\
+\mathtt{C.e}\left( t \right) &amp;= \mathtt{C.RT} ~ \log\left( \mathtt{C.K} ~ \mathtt{C.x}\left( t \right) \right)
+\end{align}
+ \]</p><p>A reaction&#39;s port 1 is its bond in and port 2 its bond out, so each junction&#39;s port towards a reaction connects to <code>p1</code> and the one from it to <code>p2</code>:</p><pre><code class="language-julia hljs">@named network = System([connect(ja.r1, r1.p1), connect(r1.p2, jb.r1),
+                         connect(jb.r2, r2.p1), connect(r2.p2, jc.r2)], t;
+                        systems = [ja, jb, jc, r1, r2])</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( ja_{+}r1, r1_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( r1_{+}p2, jb_{+}r1 \right) \\
+0 &amp;= \mathrm{connect}\left( jb_{+}r2, r2_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( r2_{+}p2, jc_{+}r2 \right) \\
+0 &amp;= \mathrm{connect}\left( A_{+}power, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( r1, core_{+}p2 \right) \\
+\mathtt{ja.core.p2.e}\left( t \right) &amp;= \mathtt{ja.core.p1.e}\left( t \right) \\
+0 &amp;= \mathtt{ja.core.p1.f}\left( t \right) + \mathtt{ja.core.p2.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{ja.A.x}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{ja.A.f}\left( t \right) \\
+\mathtt{ja.A.e}\left( t \right) &amp;= \mathtt{ja.A.power.e}\left( t \right) \\
+\mathtt{ja.A.pout.e}\left( t \right) &amp;= \mathtt{ja.A.power.e}\left( t \right) \\
+\mathtt{ja.A.f}\left( t \right) &amp;=  - \mathtt{ja.A.pout.f}\left( t \right) + \mathtt{ja.A.power.f}\left( t \right) \\
+\mathtt{ja.A.e}\left( t \right) &amp;= \mathtt{ja.A.RT} ~ \log\left( \mathtt{ja.A.K} ~ \mathtt{ja.A.x}\left( t \right) \right) \\
+0 &amp;= \mathrm{connect}\left( r1, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( B_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( r2, core_{+}p3 \right) \\
+\mathtt{jb.core.p2.e}\left( t \right) &amp;= \mathtt{jb.core.p1.e}\left( t \right) \\
+\mathtt{jb.core.p3.e}\left( t \right) &amp;= \mathtt{jb.core.p1.e}\left( t \right) \\
+0 &amp;= \mathtt{jb.core.p1.f}\left( t \right) + \mathtt{jb.core.p2.f}\left( t \right) + \mathtt{jb.core.p3.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{jb.B.x}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{jb.B.f}\left( t \right) \\
+\mathtt{jb.B.e}\left( t \right) &amp;= \mathtt{jb.B.power.e}\left( t \right) \\
+\mathtt{jb.B.pout.e}\left( t \right) &amp;= \mathtt{jb.B.power.e}\left( t \right) \\
+\mathtt{jb.B.f}\left( t \right) &amp;=  - \mathtt{jb.B.pout.f}\left( t \right) + \mathtt{jb.B.power.f}\left( t \right) \\
+\mathtt{jb.B.e}\left( t \right) &amp;= \mathtt{jb.B.RT} ~ \log\left( \mathtt{jb.B.K} ~ \mathtt{jb.B.x}\left( t \right) \right) \\
+0 &amp;= \mathrm{connect}\left( r2, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( C_{+}power, core_{+}p2 \right) \\
+\mathtt{jc.core.p2.e}\left( t \right) &amp;= \mathtt{jc.core.p1.e}\left( t \right) \\
+0 &amp;= \mathtt{jc.core.p1.f}\left( t \right) + \mathtt{jc.core.p2.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{jc.C.x}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{jc.C.f}\left( t \right) \\
+\mathtt{jc.C.e}\left( t \right) &amp;= \mathtt{jc.C.power.e}\left( t \right) \\
+\mathtt{jc.C.pout.e}\left( t \right) &amp;= \mathtt{jc.C.power.e}\left( t \right) \\
+\mathtt{jc.C.f}\left( t \right) &amp;=  - \mathtt{jc.C.pout.f}\left( t \right) + \mathtt{jc.C.power.f}\left( t \right) \\
+\mathtt{jc.C.e}\left( t \right) &amp;= \mathtt{jc.C.RT} ~ \log\left( \mathtt{jc.C.K} ~ \mathtt{jc.C.x}\left( t \right) \right) \\
+\mathtt{r1.p1.f}\left( t \right) &amp;= \left( e^{\frac{\mathtt{r1.p1.e}\left( t \right)}{\mathtt{r1.RT}}} - e^{\frac{\mathtt{r1.p2.e}\left( t \right)}{\mathtt{r1.RT}}} \right) ~ \mathtt{r1.\kappa} \\
+ - \mathtt{r1.p2.f}\left( t \right) &amp;= \mathtt{r1.p1.f}\left( t \right) \\
+\mathtt{r2.p1.f}\left( t \right) &amp;= \left( e^{\frac{\mathtt{r2.p1.e}\left( t \right)}{\mathtt{r2.RT}}} - e^{\frac{\mathtt{r2.p2.e}\left( t \right)}{\mathtt{r2.RT}}} \right) ~ \mathtt{r2.\kappa} \\
+ - \mathtt{r2.p2.f}\left( t \right) &amp;= \mathtt{r2.p1.f}\left( t \right)
+\end{align}
+ \]</p><p>The library draws the bond graph from the model, as in Gawthrop &amp; Crampin&#39;s Fig. 1c:</p><pre><code class="language-julia hljs">bgplot(network)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 15.1.0 (20260618.0150)
+ -->
+<!-- Title: BondGraph Pages: 1 -->
+<svg width="646pt" height="123pt"
+ viewBox="0.00 0.00 646.00 123.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 119)">
+<title>BondGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-119 642,-119 642,4 -4,4"/>
+<!-- ja -->
+<g id="node1" class="node">
+<title>ja</title>
+<text xml:space="preserve" text-anchor="middle" x="124" y="-13.32" font-family="Times,serif" font-size="14.00">0</text>
+</g>
+<!-- r1 -->
+<g id="node7" class="node">
+<title>r1</title>
+<text xml:space="preserve" text-anchor="middle" x="221.5" y="-13.32" font-family="Times,serif" font-size="14.00">Re:r1</text>
+</g>
+<!-- ja&%2345;&gt;r1 -->
+<g id="edge4" class="edge">
+<title>ja&%2345;&gt;r1</title>
+<path fill="none" stroke="black" d="M150.84,-18C161.16,-18 173.23,-18 184.38,-18"/>
+<polygon fill="black" stroke="black" points="194.1,-18 184.1,-22.5 189.3,-18 184.1,-18 184.1,-18 194.1,-18"/>
+</g>
+<!-- ja₊A -->
+<g id="node2" class="node">
+<title>ja₊A</title>
+<text xml:space="preserve" text-anchor="middle" x="27" y="-13.32" font-family="Times,serif" font-size="14.00">Ce:A</text>
+</g>
+<!-- ja₊A&%2345;&gt;ja -->
+<g id="edge1" class="edge">
+<title>ja₊A&%2345;&gt;ja</title>
+<path fill="none" stroke="black" d="M64.13,-18C75.09,-18 86.92,-18 97.07,-18"/>
+<polygon fill="black" stroke="black" points="54.16,-18 64.16,-13.5 58.96,-18 64.16,-18 64.16,-18 54.16,-18"/>
+</g>
+<!-- jb -->
+<g id="node3" class="node">
+<title>jb</title>
+<text xml:space="preserve" text-anchor="middle" x="319" y="-13.32" font-family="Times,serif" font-size="14.00">0</text>
+</g>
+<!-- r2 -->
+<g id="node8" class="node">
+<title>r2</title>
+<text xml:space="preserve" text-anchor="middle" x="416.5" y="-13.32" font-family="Times,serif" font-size="14.00">Re:r2</text>
+</g>
+<!-- jb&%2345;&gt;r2 -->
+<g id="edge6" class="edge">
+<title>jb&%2345;&gt;r2</title>
+<path fill="none" stroke="black" d="M345.84,-18C356.16,-18 368.23,-18 379.38,-18"/>
+<polygon fill="black" stroke="black" points="389.1,-18 379.1,-22.5 384.3,-18 379.1,-18 379.1,-18 389.1,-18"/>
+</g>
+<!-- jb₊B -->
+<g id="node4" class="node">
+<title>jb₊B</title>
+<text xml:space="preserve" text-anchor="middle" x="319" y="-92.33" font-family="Times,serif" font-size="14.00">Ce:B</text>
+</g>
+<!-- jb₊B&%2345;&gt;jb -->
+<g id="edge2" class="edge">
+<title>jb₊B&%2345;&gt;jb</title>
+<path fill="none" stroke="black" d="M319,-69.16C319,-58.07 319,-46.98 319,-35.9"/>
+<polygon fill="black" stroke="black" points="319,-79.13 314.5,-69.13 319,-74.34 319,-69.13 319,-69.13 319,-79.13"/>
+</g>
+<!-- jc -->
+<g id="node5" class="node">
+<title>jc</title>
+<text xml:space="preserve" text-anchor="middle" x="514" y="-13.32" font-family="Times,serif" font-size="14.00">0</text>
+</g>
+<!-- jc₊C -->
+<g id="node6" class="node">
+<title>jc₊C</title>
+<text xml:space="preserve" text-anchor="middle" x="611" y="-13.32" font-family="Times,serif" font-size="14.00">Ce:C</text>
+</g>
+<!-- jc&%2345;&gt;jc₊C -->
+<g id="edge3" class="edge">
+<title>jc&%2345;&gt;jc₊C</title>
+<path fill="none" stroke="black" d="M540.96,-18C551.12,-18 562.94,-18 573.91,-18"/>
+<polygon fill="black" stroke="black" points="583.87,-18 573.87,-22.5 579.07,-18 573.87,-18 573.87,-18 583.87,-18"/>
+</g>
+<!-- r1&%2345;&gt;jb -->
+<g id="edge5" class="edge">
+<title>r1&%2345;&gt;jb</title>
+<path fill="none" stroke="black" d="M248.85,-18C259.06,-18 270.91,-18 281.89,-18"/>
+<polygon fill="black" stroke="black" points="291.86,-18 281.86,-22.5 287.07,-18 281.86,-18 281.86,-18 291.86,-18"/>
+</g>
+<!-- r2&%2345;&gt;jc -->
+<g id="edge7" class="edge">
+<title>r2&%2345;&gt;jc</title>
+<path fill="none" stroke="black" d="M443.85,-18C454.06,-18 465.91,-18 476.89,-18"/>
+<polygon fill="black" stroke="black" points="486.86,-18 476.86,-22.5 482.07,-18 476.86,-18 476.86,-18 486.86,-18"/>
+</g>
+</g>
+</svg>
+'/><h2 id="Analysing-the-model"><a class="docs-heading-anchor" href="#Analysing-the-model">Analysing the model</a><a id="Analysing-the-model-1"></a><a class="docs-heading-anchor-permalink" href="#Analysing-the-model" title="Permalink"></a></h2><p><code>mtkcompile</code> reduces the model to its states: the amounts of the three species.</p><pre><code class="language-julia hljs">sys = mtkcompile(network)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{jc.C.x}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{jc.C.power.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{jb.B.x}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{ja.A.f}\left( t \right) - \mathtt{jc.C.power.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{ja.A.x}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{ja.A.f}\left( t \right)
+\end{align}
+ \]</p><p>Print system states</p><pre><code class="language-julia hljs">unknowns(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ jc₊C₊x(t)
+ jb₊B₊x(t)
+ ja₊A₊x(t)</code></pre><p>Print system parameters</p><pre><code class="language-julia hljs">parameters(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">10-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ ja₊A₊RT
+ ja₊A₊K
+ jb₊B₊RT
+ jb₊B₊K
+ jc₊C₊RT
+ jc₊C₊K
+ r1₊RT
+ r1₊κ
+ r2₊RT
+ r2₊κ</code></pre><p>Print the system&#39;s equations in terms of the states</p><pre><code class="language-julia hljs">full_equations(sys)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{jc.C.x}\left( t \right)}{\mathrm{d}t} &amp;= \left( e^{\frac{\mathtt{jb.B.RT} ~ \log\left( \mathtt{jb.B.K} ~ \mathtt{jb.B.x}\left( t \right) \right)}{\mathtt{r2.RT}}} - e^{\frac{\mathtt{jc.C.RT} ~ \log\left( \mathtt{jc.C.K} ~ \mathtt{jc.C.x}\left( t \right) \right)}{\mathtt{r2.RT}}} \right) ~ \mathtt{r2.\kappa} \\
+\frac{\mathrm{d}\mathtt{jb.B.x}\left( t \right)}{\mathrm{d}t} &amp;= \left( e^{\frac{\mathtt{ja.A.RT} ~ \log\left( \mathtt{ja.A.K} ~ \mathtt{ja.A.x}\left( t \right) \right)}{\mathtt{r1.RT}}} - e^{\frac{\mathtt{jb.B.RT} ~ \log\left( \mathtt{jb.B.K} ~ \mathtt{jb.B.x}\left( t \right) \right)}{\mathtt{r1.RT}}} \right) ~ \mathtt{r1.\kappa} - \left( e^{\frac{\mathtt{jb.B.RT} ~ \log\left( \mathtt{jb.B.K} ~ \mathtt{jb.B.x}\left( t \right) \right)}{\mathtt{r2.RT}}} - e^{\frac{\mathtt{jc.C.RT} ~ \log\left( \mathtt{jc.C.K} ~ \mathtt{jc.C.x}\left( t \right) \right)}{\mathtt{r2.RT}}} \right) ~ \mathtt{r2.\kappa} \\
+\frac{\mathrm{d}\mathtt{ja.A.x}\left( t \right)}{\mathrm{d}t} &amp;=  - \left( e^{\frac{\mathtt{ja.A.RT} ~ \log\left( \mathtt{ja.A.K} ~ \mathtt{ja.A.x}\left( t \right) \right)}{\mathtt{r1.RT}}} - e^{\frac{\mathtt{jb.B.RT} ~ \log\left( \mathtt{jb.B.K} ~ \mathtt{jb.B.x}\left( t \right) \right)}{\mathtt{r1.RT}}} \right) ~ \mathtt{r1.\kappa}
+\end{align}
+ \]</p><h3 id="Generated-equations-against-the-hand-derivation"><a class="docs-heading-anchor" href="#Generated-equations-against-the-hand-derivation">Generated equations against the hand derivation</a><a id="Generated-equations-against-the-hand-derivation-1"></a><a class="docs-heading-anchor-permalink" href="#Generated-equations-against-the-hand-derivation" title="Permalink"></a></h3><p><code>bgequations</code> returns the same equations with the names we choose. We rename the amounts and parameters to the symbols of the introduction (inside a <code>let</code>, so the names <code>A</code>, <code>B</code> and <code>C</code> keep pointing at the elements); every element&#39;s <span>$RT$</span> becomes the one <span>$RT$</span>:</p><pre><code class="language-julia hljs">let
+    @variables x_a(t) x_b(t) x_c(t)
+    @parameters K_a K_b K_c κ_1 κ_2 RT
+    bgequations(network; rename = Dict(
+        ja.A.x =&gt; x_a, jb.B.x =&gt; x_b, jc.C.x =&gt; x_c,
+        ja.A.K =&gt; K_a, jb.B.K =&gt; K_b, jc.C.K =&gt; K_c, r1.κ =&gt; κ_1, r2.κ =&gt; κ_2,
+        ja.A.RT =&gt; RT, jb.B.RT =&gt; RT, jc.C.RT =&gt; RT, r1.RT =&gt; RT, r2.RT =&gt; RT))
+end</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{x\_c}\left( t \right)}{\mathrm{d}t} &amp;= \left( e^{\log\left( \mathtt{K\_b} ~ \mathtt{x\_b}\left( t \right) \right)} - e^{\log\left( \mathtt{K\_c} ~ \mathtt{x\_c}\left( t \right) \right)} \right) ~ \mathtt{\kappa\_2} \\
+\frac{\mathrm{d}\mathtt{x\_b}\left( t \right)}{\mathrm{d}t} &amp;= \left( e^{\log\left( \mathtt{K\_a} ~ \mathtt{x\_a}\left( t \right) \right)} - e^{\log\left( \mathtt{K\_b} ~ \mathtt{x\_b}\left( t \right) \right)} \right) ~ \mathtt{\kappa\_1} - \left( e^{\log\left( \mathtt{K\_b} ~ \mathtt{x\_b}\left( t \right) \right)} - e^{\log\left( \mathtt{K\_c} ~ \mathtt{x\_c}\left( t \right) \right)} \right) ~ \mathtt{\kappa\_2} \\
+\frac{\mathrm{d}\mathtt{x\_a}\left( t \right)}{\mathrm{d}t} &amp;=  - \left( e^{\log\left( \mathtt{K\_a} ~ \mathtt{x\_a}\left( t \right) \right)} - e^{\log\left( \mathtt{K\_b} ~ \mathtt{x\_b}\left( t \right) \right)} \right) ~ \mathtt{\kappa\_1}
+\end{align}
+ \]</p><p>With one <span>$RT$</span>, the potential&#39;s <span>$RT$</span> cancels the reaction&#39;s, and each exponential reads <span>$e^{\ln(K_i x_i)} = K_i x_i$</span>: the forward and reverse affinities of each reaction are the potentials of its reactant and product, set by the 0-junctions. The three equations are therefore <span>$\dot{x}_a = -\kappa_1(K_a x_a - K_b x_b)$</span>, <span>$\dot{x}_b = \kappa_1(K_a x_a - K_b x_b) - \kappa_2(K_b x_b - K_c x_c)$</span> and <span>$\dot{x}_c = \kappa_2(K_b x_b - K_c x_c)$</span>, the mass-action equations of the introduction.</p><h2 id="System-Simulations"><a class="docs-heading-anchor" href="#System-Simulations">System Simulations</a><a id="System-Simulations-1"></a><a class="docs-heading-anchor-permalink" href="#System-Simulations" title="Permalink"></a></h2><h3 id="Bond-graph-model"><a class="docs-heading-anchor" href="#Bond-graph-model">Bond graph model</a><a id="Bond-graph-model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-graph-model" title="Permalink"></a></h3><p>Define the simulation time, long enough to reach equilibrium</p><pre><code class="language-julia hljs">tspan = (0.0, 50.0)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(0.0, 50.0)</code></pre><p>Generate an <code>ODEProblem</code>, with the initial amounts given to the elements:</p><pre><code class="language-julia hljs">prob = ODEProblem(sys, [], tspan)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr38_2" style="color:#56b6c2">ODEProblem</span> with uType <span class="sgr38_2" style="color:#56b6c2">Vector{Float64}</span> and tType <span class="sgr38_2" style="color:#56b6c2">Float64</span>. In-place: <span class="sgr38_2" style="color:#56b6c2">true</span>
+Initialization status: <span class="sgr38_2" style="color:#56b6c2">FULLY_DETERMINED</span>
+Non-trivial mass matrix: <span class="sgr38_2" style="color:#56b6c2">false</span>
+timespan: (0.0, 50.0)
+u0: 3-element Vector{Float64}:
+ 0.1
+ 0.1
+ 0.8</code></pre><p>Use <code>solve</code> to simulate the system. Tight tolerances let us compare it with the reference model at the end.</p><pre><code class="language-julia hljs">sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
+plot(sol, idxs = [ja.A.x, jb.B.x, jc.C.x], labels = [&quot;x_a&quot; &quot;x_b&quot; &quot;x_c&quot;],
+     xlabel = &quot;Time (s)&quot;, ylabel = &quot;Amount (mol)&quot;)</code></pre><img src="0dd193aa.svg" alt="Example block output"/><h3 id="Equilibrium-against-the-equilibrium-constants"><a class="docs-heading-anchor" href="#Equilibrium-against-the-equilibrium-constants">Equilibrium against the equilibrium constants</a><a id="Equilibrium-against-the-equilibrium-constants-1"></a><a class="docs-heading-anchor-permalink" href="#Equilibrium-against-the-equilibrium-constants" title="Permalink"></a></h3><p>The total amount is 1 mol, so the equilibrium amounts are <span>$x_i = (1/K_i)/\sum_j (1/K_j)$</span>, with ratios <span>$K_1 = K_a/K_b$</span> and <span>$K_2 = K_b/K_c$</span>:</p><pre><code class="language-julia hljs">Ka, Kb, Kc = 1.0, 2.0, 0.5
+x_eq = [1 / Ka, 1 / Kb, 1 / Kc] / (1 / Ka + 1 / Kb + 1 / Kc)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{Float64}:
+ 0.2857142857142857
+ 0.14285714285714285
+ 0.5714285714285714</code></pre><p>The bond graph&#39;s final amounts, their ratios against <span>$K_1$</span> and <span>$K_2$</span>, and the largest distance from the predicted equilibrium:</p><pre><code class="language-julia hljs">x_end = sol[[ja.A.x, jb.B.x, jc.C.x]][end]
+(x_end[2] / x_end[1] - Ka / Kb, x_end[3] / x_end[2] - Kb / Kc, maximum(abs, x_end - x_eq))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(1.0132672478846416e-11, -8.742944146433729e-10, 5.021982829589433e-11)</code></pre><p>Every reaction dissipates, as the Re element should: the power into it, <span>$(A^f - A^r)\,v$</span>, is never negative along the trajectory (Gawthrop &amp; Crampin 2014, §2.1):</p><pre><code class="language-julia hljs">minimum(sol[(r1.p1.e - r1.p2.e) * r1.p1.f]), minimum(sol[(r2.p1.e - r2.p2.e) * r2.p1.f])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(3.024246394668829e-19, 1.759013992516977e-17)</code></pre><h3 id="Mass-action-model"><a class="docs-heading-anchor" href="#Mass-action-model">Mass-action model</a><a id="Mass-action-model-1"></a><a class="docs-heading-anchor-permalink" href="#Mass-action-model" title="Permalink"></a></h3><p>The reference model is the mass-action equations derived by hand, with the rate constants <span>$k^\pm$</span> of each reaction, <span>$k_1^+ = \kappa_1 K_a$</span>, <span>$k_1^- = \kappa_1 K_b$</span>, <span>$k_2^+ = \kappa_2 K_b$</span> and <span>$k_2^- = \kappa_2 K_c$</span> (Eq. 9):</p><pre><code class="language-julia hljs">@variables xa(t) = 0.8 xb(t) = 0.1 xc(t) = 0.1      # (mol) Amounts of A, B, C
+k1p, k1m = 1.0 * Ka, 1.0 * Kb                        # (1/s) Rate constants of A ⇌ B
+k2p, k2m = 0.5 * Kb, 0.5 * Kc                        # (1/s) Rate constants of B ⇌ C</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(1.0, 0.25)</code></pre><p>The two reaction rates and the mass balances:</p><pre><code class="language-julia hljs">v1 = k1p * xa - k1m * xb
+v2 = k2p * xb - k2m * xc
+@named ref = System([D(xa) ~ -v1, D(xb) ~ v1 - v2, D(xc) ~ v2], t)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{xa}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{xa}\left( t \right) + 2 ~ \mathtt{xb}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{xb}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{xa}\left( t \right) - 3 ~ \mathtt{xb}\left( t \right) + 0.25 ~ \mathtt{xc}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{xc}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{xb}\left( t \right) - 0.25 ~ \mathtt{xc}\left( t \right)
+\end{align}
+ \]</p><p>We compile and solve it as the bond graph model, with the same time span and tolerances.</p><pre><code class="language-julia hljs">ref_sol = solve(ODEProblem(mtkcompile(ref), [], tspan), Tsit5(), reltol = 1e-10, abstol = 1e-10);</code></pre><h3 id="Compare-models"><a class="docs-heading-anchor" href="#Compare-models">Compare models</a><a id="Compare-models-1"></a><a class="docs-heading-anchor-permalink" href="#Compare-models" title="Permalink"></a></h3><p>The bond graph (solid) against the mass-action model (dashed):</p><pre><code class="language-julia hljs">plot(sol, idxs = [ja.A.x, jb.B.x, jc.C.x], labels = [&quot;x_a, bond graph&quot; &quot;x_b, bond graph&quot; &quot;x_c, bond graph&quot;],
+     xlabel = &quot;Time (s)&quot;, ylabel = &quot;Amount (mol)&quot;)
+plot!(ref_sol, idxs = [xa, xb, xc], labels = [&quot;x_a, mass action&quot; &quot;x_b, mass action&quot; &quot;x_c, mass action&quot;],
+      linestyle = :dash)</code></pre><img src="190be80f.svg" alt="Example block output"/><p>On a common time grid, the largest difference between the two models, for each species:</p><pre><code class="language-julia hljs">tgrid = range(tspan..., length = 1001)
+[maximum(abs, sol(tgrid; idxs = bg).u - ref_sol(tgrid; idxs = ma).u)
+ for (bg, ma) in [(ja.A.x, xa), (jb.B.x, xb), (jc.C.x, xc)]]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{Float64}:
+ 1.2024331530469112e-10
+ 1.6776927069805936e-10
+ 4.752453985901184e-11</code></pre><p>The bond graph model reproduces mass-action kinetics to the solver&#39;s tolerance, and settles at the equilibrium the equilibrium constants predict.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../hydraulic_coupled_tanks/">« Coupled Tanks</a><a class="docs-footer-nextpage" href="../../lib/public/">Public »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Sunday 18 October 2026 18:13">Sunday 18 October 2026</span>. Using Julia version 1.10.12.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

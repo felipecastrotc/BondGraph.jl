@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Drawing Bond Graphs · BondGraphToolkit.jl</title><meta name="title" content="Drawing Bond Graphs · BondGraphToolkit.jl"/><meta property="og:title" content="Drawing Bond Graphs · BondGraphToolkit.jl"/><meta property="twitter:title" content="Drawing Bond Graphs · BondGraphToolkit.jl"/><meta name="description" content="Documentation for BondGraphToolkit.jl."/><meta property="og:description" content="Documentation for BondGraphToolkit.jl."/><meta property="twitter:description" content="Documentation for BondGraphToolkit.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img class="docs-light-only" src="../../assets/logo.svg" alt="BondGraphToolkit.jl logo"/><img class="docs-dark-only" src="../../assets/logo-dark.svg" alt="BondGraphToolkit.jl logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../getting_started_auto/">Getting started</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../../man/user_guide/">Concepts and conventions</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Systems</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../mechanical_msd_1dof/">Harmonic Oscillator</a></li><li><a class="tocitem" href="../mechanical_msd_2dof/">Mass-Spring-Damper system 2-DoF</a></li><li><a class="tocitem" href="../mechanical_msd_ndof/">MSD system with N-DoF</a></li><li><a class="tocitem" href="../mechanical_duffing/">Duffing Equation</a></li><li><a class="tocitem" href="../electrical_dc_motor/">DC Motor</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox" checked/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Features</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../two_ports/">Transformers and Gyrators</a></li><li><a class="tocitem" href="../signals/">Signals and Detectors</a></li><li><a class="tocitem" href="../adapters/">Coupling with the MTK Standard Library</a></li><li><a class="tocitem" href="../elements_oneport/">One-Port Elements</a></li><li><a class="tocitem" href="../composition/">Reusable Subsystems</a></li><li><a class="tocitem" href="../equations_latex/">Equations and LaTeX</a></li><li class="is-active"><a class="tocitem" href>Drawing Bond Graphs</a><ul class="internal"><li><a class="tocitem" href="#The-bond-graph-as-data"><span>The bond graph as data</span></a></li><li><a class="tocitem" href="#Drawing-it"><span>Drawing it</span></a></li><li><a class="tocitem" href="#TikZ-for-a-paper"><span>TikZ for a paper</span></a></li><li><a class="tocitem" href="#Saving"><span>Saving</span></a></li></ul></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox"/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Applications</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../control_dc_motor_pi/">DC Motor Speed Control</a></li><li><a class="tocitem" href="../robotics_motor_pendulum/">Pendulum Driven by a DC Motor</a></li><li><a class="tocitem" href="../electrical_rlc/">Series RLC Circuit</a></li><li><a class="tocitem" href="../biomedical_windkessel/">Arterial Windkessel</a></li><li><a class="tocitem" href="../hydraulic_coupled_tanks/">Coupled Tanks</a></li><li><a class="tocitem" href="../chemical_reaction_network/">Chemical Reaction Network</a></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/public/">Public</a></li><li><a class="tocitem" href="../../lib/internals/">Internals</a></li></ul></li><li><a class="tocitem" href="../../citing/">Citing BondGraphToolkit</a></li><li><a class="tocitem" href="../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../license/">License</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Features</a></li><li class="is-active"><a href>Drawing Bond Graphs</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Drawing Bond Graphs</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl/blob/main/examples/drawing.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="drawing"><a class="docs-heading-anchor" href="#drawing">Drawing Bond Graphs</a><a id="drawing-1"></a><a class="docs-heading-anchor-permalink" href="#drawing" title="Permalink"></a></h1><p><em>The source files for all examples can be found in <a href="https://github.com/felipecastrotc/BondGraph.jl/tree/main/examples/">/examples</a>.</em></p><p>A model built with BondGraphToolkit knows its own bond graph: junctions record their bonds and signs, and elements and two-ports are recognised by their ports. Three functions work with it, the way <code>solve</code>, <code>plot</code> and <code>savefig</code> work with a simulation:</p><ul><li><code>BondGraph</code>: the bond graph as data, shown as the list of its bonds;</li><li><code>bgplot</code>: the drawing, or its TikZ or Graphviz DOT source;</li><li><code>bgsave</code>: saves it to a file, in the format of the file&#39;s extension.</li></ul><pre><code class="language-julia hljs">using BondGraphToolkit
+using BondGraphToolkit.ModelingToolkit: t_nounits as t</code></pre><p>The <a href="../electrical_dc_motor/#dc-motor">DC motor</a>:</p><pre><code class="language-julia hljs">@named L = Inertia(I = 0.5)
+@named R = Resistance(R = 1.0)
+@named V = Se(12.0)
+@named J = Inertia(I = 0.01)
+@named c = Resistance(R = 0.1)
+@named τ = Se(1.0)
+@named je = Junction1(V =&gt; :pout, R, L, :gy)
+@named jm = Junction1(τ =&gt; :pout, c, J, :gy =&gt; :in)
+@named gy = GY(r = 0.01)
+@named motor = System([connect(je.gy, gy.p1), connect(gy.p2, jm.gy)], t; systems = [je, gy, jm])</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( je_{+}gy, gy_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( gy_{+}p2, jm_{+}gy \right) \\
+0 &amp;= \mathrm{connect}\left( V_{+}pout, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( R_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( L_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( gy, core_{+}p4 \right) \\
+ - \mathtt{je.core.p2.f}\left( t \right) &amp;= \mathtt{je.core.p1.f}\left( t \right) \\
+ - \mathtt{je.core.p3.f}\left( t \right) &amp;= \mathtt{je.core.p1.f}\left( t \right) \\
+ - \mathtt{je.core.p4.f}\left( t \right) &amp;= \mathtt{je.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{je.core.p1.e}\left( t \right) - \mathtt{je.core.p2.e}\left( t \right) - \mathtt{je.core.p3.e}\left( t \right) - \mathtt{je.core.p4.e}\left( t \right) \\
+\mathtt{je.V.e}\left( t \right) &amp;= \mathtt{je.V.power.e}\left( t \right) \\
+\mathtt{je.V.pout.e}\left( t \right) &amp;= \mathtt{je.V.power.e}\left( t \right) \\
+\mathtt{je.V.f}\left( t \right) &amp;=  - \mathtt{je.V.pout.f}\left( t \right) + \mathtt{je.V.power.f}\left( t \right) \\
+\mathtt{je.V.e}\left( t \right) &amp;= 12 \\
+\mathtt{je.R.e}\left( t \right) &amp;= \mathtt{je.R.power.e}\left( t \right) \\
+\mathtt{je.R.pout.e}\left( t \right) &amp;= \mathtt{je.R.power.e}\left( t \right) \\
+\mathtt{je.R.f}\left( t \right) &amp;=  - \mathtt{je.R.pout.f}\left( t \right) + \mathtt{je.R.power.f}\left( t \right) \\
+\mathtt{je.R.e}\left( t \right) &amp;= \mathtt{je.R.R} ~ \mathtt{je.R.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{je.L.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{je.L.e}\left( t \right) \\
+\mathtt{je.L.e}\left( t \right) &amp;= \mathtt{je.L.power.e}\left( t \right) \\
+\mathtt{je.L.pout.e}\left( t \right) &amp;= \mathtt{je.L.power.e}\left( t \right) \\
+\mathtt{je.L.f}\left( t \right) &amp;=  - \mathtt{je.L.pout.f}\left( t \right) + \mathtt{je.L.power.f}\left( t \right) \\
+\mathtt{je.L.f}\left( t \right) &amp;= \frac{\mathtt{je.L.p}\left( t \right)}{\mathtt{je.L.I}} \\
+\mathtt{gy.p1.e}\left( t \right) &amp;=  - \mathtt{gy.p2.f}\left( t \right) ~ \mathtt{gy.r} \\
+\mathtt{gy.p2.e}\left( t \right) &amp;= \mathtt{gy.p1.f}\left( t \right) ~ \mathtt{gy.r} \\
+0 &amp;= \mathrm{connect}\left( \tau_{+}pout, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( c_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( J_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( gy, core_{+}p4 \right) \\
+ - \mathtt{jm.core.p2.f}\left( t \right) &amp;= \mathtt{jm.core.p1.f}\left( t \right) \\
+ - \mathtt{jm.core.p3.f}\left( t \right) &amp;= \mathtt{jm.core.p1.f}\left( t \right) \\
+\mathtt{jm.core.p4.f}\left( t \right) &amp;= \mathtt{jm.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{jm.core.p1.e}\left( t \right) - \mathtt{jm.core.p2.e}\left( t \right) - \mathtt{jm.core.p3.e}\left( t \right) + \mathtt{jm.core.p4.e}\left( t \right) \\
+\mathtt{jm.\tau.e}\left( t \right) &amp;= \mathtt{jm.\tau.power.e}\left( t \right) \\
+\mathtt{jm.\tau.pout.e}\left( t \right) &amp;= \mathtt{jm.\tau.power.e}\left( t \right) \\
+\mathtt{jm.\tau.f}\left( t \right) &amp;=  - \mathtt{jm.\tau.pout.f}\left( t \right) + \mathtt{jm.\tau.power.f}\left( t \right) \\
+\mathtt{jm.\tau.e}\left( t \right) &amp;= 1 \\
+\mathtt{jm.c.e}\left( t \right) &amp;= \mathtt{jm.c.power.e}\left( t \right) \\
+\mathtt{jm.c.pout.e}\left( t \right) &amp;= \mathtt{jm.c.power.e}\left( t \right) \\
+\mathtt{jm.c.f}\left( t \right) &amp;=  - \mathtt{jm.c.pout.f}\left( t \right) + \mathtt{jm.c.power.f}\left( t \right) \\
+\mathtt{jm.c.e}\left( t \right) &amp;= \mathtt{jm.c.R} ~ \mathtt{jm.c.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{jm.J.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{jm.J.e}\left( t \right) \\
+\mathtt{jm.J.e}\left( t \right) &amp;= \mathtt{jm.J.power.e}\left( t \right) \\
+\mathtt{jm.J.pout.e}\left( t \right) &amp;= \mathtt{jm.J.power.e}\left( t \right) \\
+\mathtt{jm.J.f}\left( t \right) &amp;=  - \mathtt{jm.J.pout.f}\left( t \right) + \mathtt{jm.J.power.f}\left( t \right) \\
+\mathtt{jm.J.f}\left( t \right) &amp;= \frac{\mathtt{jm.J.p}\left( t \right)}{\mathtt{jm.J.I}}
+\end{align}
+ \]</p><h2 id="The-bond-graph-as-data"><a class="docs-heading-anchor" href="#The-bond-graph-as-data">The bond graph as data</a><a id="The-bond-graph-as-data-1"></a><a class="docs-heading-anchor-permalink" href="#The-bond-graph-as-data" title="Permalink"></a></h2><p><code>BondGraph</code> lists the bonds, each along its half-arrow, with nodes labelled <code>type:name</code> as in Karnopp, Margolis &amp; Rosenberg&#39;s figures:</p><pre><code class="language-julia hljs">g = BondGraph(motor)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">BondGraph with 9 nodes and 8 bonds:
+  Se:V ⇀ 1:je
+  1:je ⇀ R:R
+  1:je ⇀ I:L
+  Se:τ ⇀ 1:jm
+  1:jm ⇀ R:c
+  1:jm ⇀ I:J
+  1:je ⇀ GY:gy
+  GY:gy ⇀ 1:jm</code></pre><p>Its <code>nodes</code> and <code>bonds</code> are plain data, for your own checks or drawings:</p><pre><code class="language-julia hljs">g.bonds</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">8-element Vector{Pair{String, String}}:
+ &quot;je₊V&quot; =&gt; &quot;je&quot;
+   &quot;je&quot; =&gt; &quot;je₊R&quot;
+   &quot;je&quot; =&gt; &quot;je₊L&quot;
+ &quot;jm₊τ&quot; =&gt; &quot;jm&quot;
+   &quot;jm&quot; =&gt; &quot;jm₊c&quot;
+   &quot;jm&quot; =&gt; &quot;jm₊J&quot;
+   &quot;je&quot; =&gt; &quot;gy&quot;
+   &quot;gy&quot; =&gt; &quot;jm&quot;</code></pre><h2 id="Drawing-it"><a class="docs-heading-anchor" href="#Drawing-it">Drawing it</a><a id="Drawing-it-1"></a><a class="docs-heading-anchor-permalink" href="#Drawing-it" title="Permalink"></a></h2><p><code>bgplot</code> draws the bond graph in the textbook layout: the power path through junctions and two-ports runs left to right, and each element sits beside its junction. The drawing appears in the VS Code plot pane, in notebooks and in these docs; in a terminal REPL it opens in your default viewer.</p><pre><code class="language-julia hljs">bgplot(motor)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 15.1.0 (20260618.0150)
+ -->
+<!-- Title: BondGraph Pages: 1 -->
+<svg width="453pt" height="202pt"
+ viewBox="0.00 0.00 453.00 202.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 198)">
+<title>BondGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-198 448.5,-198 448.5,4 -4,4"/>
+<!-- je -->
+<g id="node1" class="node">
+<title>je</title>
+<text xml:space="preserve" text-anchor="middle" x="124" y="-92.33" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- je₊L -->
+<g id="node4" class="node">
+<title>je₊L</title>
+<text xml:space="preserve" text-anchor="middle" x="124" y="-13.32" font-family="Times,serif" font-size="14.00">I:L</text>
+</g>
+<!-- je&%2345;&gt;je₊L -->
+<g id="edge3" class="edge">
+<title>je&%2345;&gt;je₊L</title>
+<path fill="none" stroke="black" d="M124,-79.34C124,-68.25 124,-57.17 124,-46.08"/>
+<polygon fill="black" stroke="black" points="124,-36.1 128.5,-46.1 124,-40.9 124,-46.1 124,-46.1 124,-36.1"/>
+</g>
+<!-- gy -->
+<g id="node5" class="node">
+<title>gy</title>
+<text xml:space="preserve" text-anchor="middle" x="222.25" y="-92.33" font-family="Times,serif" font-size="14.00">GY:gy</text>
+</g>
+<!-- je&%2345;&gt;gy -->
+<g id="edge7" class="edge">
+<title>je&%2345;&gt;gy</title>
+<path fill="none" stroke="black" d="M150.79,-97C161.03,-97 172.99,-97 184.12,-97"/>
+<polygon fill="black" stroke="black" points="193.83,-97 183.83,-101.5 189.04,-97 183.83,-97 183.83,-97 193.83,-97"/>
+</g>
+<!-- je₊V -->
+<g id="node2" class="node">
+<title>je₊V</title>
+<text xml:space="preserve" text-anchor="middle" x="27" y="-92.33" font-family="Times,serif" font-size="14.00">Se:V</text>
+</g>
+<!-- je₊V&%2345;&gt;je -->
+<g id="edge1" class="edge">
+<title>je₊V&%2345;&gt;je</title>
+<path fill="none" stroke="black" d="M53.96,-97C64.12,-97 75.94,-97 86.91,-97"/>
+<polygon fill="black" stroke="black" points="96.87,-97 86.87,-101.5 92.07,-97 86.87,-97 86.87,-97 96.87,-97"/>
+</g>
+<!-- je₊R -->
+<g id="node3" class="node">
+<title>je₊R</title>
+<text xml:space="preserve" text-anchor="middle" x="124" y="-171.32" font-family="Times,serif" font-size="14.00">R:R</text>
+</g>
+<!-- je₊R&%2345;&gt;je -->
+<g id="edge2" class="edge">
+<title>je₊R&%2345;&gt;je</title>
+<path fill="none" stroke="black" d="M124,-148.16C124,-137.07 124,-125.98 124,-114.9"/>
+<polygon fill="black" stroke="black" points="124,-158.13 119.5,-148.13 124,-153.34 124,-148.13 124,-148.13 124,-158.13"/>
+</g>
+<!-- jm -->
+<g id="node6" class="node">
+<title>jm</title>
+<text xml:space="preserve" text-anchor="middle" x="320.5" y="-92.33" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- gy&%2345;&gt;jm -->
+<g id="edge8" class="edge">
+<title>gy&%2345;&gt;jm</title>
+<path fill="none" stroke="black" d="M250.32,-97C260.6,-97 272.48,-97 283.46,-97"/>
+<polygon fill="black" stroke="black" points="293.42,-97 283.42,-101.5 288.63,-97 283.42,-97 283.42,-97 293.42,-97"/>
+</g>
+<!-- jm₊τ -->
+<g id="node7" class="node">
+<title>jm₊τ</title>
+<text xml:space="preserve" text-anchor="middle" x="417.5" y="-92.33" font-family="Times,serif" font-size="14.00">Se:τ</text>
+</g>
+<!-- jm&%2345;&gt;jm₊τ -->
+<g id="edge4" class="edge">
+<title>jm&%2345;&gt;jm₊τ</title>
+<path fill="none" stroke="black" d="M357.63,-97C368.59,-97 380.42,-97 390.57,-97"/>
+<polygon fill="black" stroke="black" points="347.66,-97 357.66,-92.5 352.46,-97 357.66,-97 357.66,-97 347.66,-97"/>
+</g>
+<!-- jm₊J -->
+<g id="node9" class="node">
+<title>jm₊J</title>
+<text xml:space="preserve" text-anchor="middle" x="320.5" y="-13.32" font-family="Times,serif" font-size="14.00">I:J</text>
+</g>
+<!-- jm&%2345;&gt;jm₊J -->
+<g id="edge6" class="edge">
+<title>jm&%2345;&gt;jm₊J</title>
+<path fill="none" stroke="black" d="M320.5,-79.34C320.5,-68.25 320.5,-57.17 320.5,-46.08"/>
+<polygon fill="black" stroke="black" points="320.5,-36.1 325,-46.1 320.5,-40.9 320.5,-46.1 320.5,-46.1 320.5,-36.1"/>
+</g>
+<!-- jm₊c -->
+<g id="node8" class="node">
+<title>jm₊c</title>
+<text xml:space="preserve" text-anchor="middle" x="320.5" y="-171.32" font-family="Times,serif" font-size="14.00">R:c</text>
+</g>
+<!-- jm₊c&%2345;&gt;jm -->
+<g id="edge5" class="edge">
+<title>jm₊c&%2345;&gt;jm</title>
+<path fill="none" stroke="black" d="M320.5,-148.16C320.5,-137.07 320.5,-125.98 320.5,-114.9"/>
+<polygon fill="black" stroke="black" points="320.5,-158.13 316,-148.13 320.5,-153.34 320.5,-148.13 320.5,-148.13 320.5,-158.13"/>
+</g>
+</g>
+</svg>
+'/><p>A <code>connect</code> of more than two free ports is itself a 0-junction, and gets its own <code>0</code> node in the drawing.</p><h2 id="TikZ-for-a-paper"><a class="docs-heading-anchor" href="#TikZ-for-a-paper">TikZ for a paper</a><a id="TikZ-for-a-paper-1"></a><a class="docs-heading-anchor-permalink" href="#TikZ-for-a-paper" title="Permalink"></a></h2><p><code>format = :tikz</code> gives a standalone LaTeX/TikZ document in the style of these docs&#39; figures, placed with the same layout; it compiles with <code>pdflatex</code>. Copy its <code>tikzpicture</code>, with the <code>bgarrow</code> declaration, into your own document, and adjust positions or labels as you like. <code>format = :dot</code> gives the Graphviz DOT source.</p><pre><code class="language-julia hljs">bgplot(motor; format = :tikz)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">\documentclass[tikz]{standalone}
+\usetikzlibrary{arrows.meta}
+\pgfdeclarearrow{
+  name = bgarrow,
+  parameters = { \the\pgfarrowlength },
+  setup code = {
+    \pgfarrowssettipend{0\pgfarrowlength}
+    \pgfarrowssetlineend{0\pgfarrowlength}
+    \pgfarrowssetvisualbackend{.5\pgfarrowlength}
+    \pgfarrowssavethe\pgfarrowlength
+  },
+  drawing code = {
+    \pgfpathmoveto{\pgfpoint{0\pgfarrowlength}{0pt}}
+    \pgfpathlineto{\pgfpoint{-10pt}{-0.45\pgfarrowlength}}
+    \pgfusepathqstroke
+  },
+  defaults = { length = 5mm }
+}
+\begin{document}
+\begin{tikzpicture}[x=1in, y=1in, line width=0.25mm]
+  \node[inner sep=4pt] (n1) at (1.7222, 1.3472) {1};
+  \node[inner sep=4pt] (n2) at (0.375, 1.3472) {Se: $V$};
+  \node[inner sep=4pt] (n3) at (1.7222, 2.4444) {R: $R$};
+  \node[inner sep=4pt] (n4) at (1.7222, 0.25) {I: $L$};
+  \node[inner sep=4pt] (n5) at (3.0868, 1.3472) {GY: $gy$};
+  \node[inner sep=4pt] (n6) at (4.4514, 1.3472) {1};
+  \node[inner sep=4pt] (n7) at (5.7986, 1.3472) {Se: $\tau$};
+  \node[inner sep=4pt] (n8) at (4.4514, 2.4444) {R: $c$};
+  \node[inner sep=4pt] (n9) at (4.4514, 0.25) {I: $J$};
+  \draw[-bgarrow] (n2) -- (n1);
+  \draw[-bgarrow] (n1) -- (n3);
+  \draw[-bgarrow] (n1) -- (n4);
+  \draw[-bgarrow] (n7) -- (n6);
+  \draw[-bgarrow] (n6) -- (n8);
+  \draw[-bgarrow] (n6) -- (n9);
+  \draw[-bgarrow] (n1) -- (n5);
+  \draw[-bgarrow] (n5) -- (n6);
+\end{tikzpicture}
+\end{document}
+</code></pre><h2 id="Saving"><a class="docs-heading-anchor" href="#Saving">Saving</a><a id="Saving-1"></a><a class="docs-heading-anchor-permalink" href="#Saving" title="Permalink"></a></h2><p><code>bgsave</code> takes the format from the file extension: <code>.svg</code>, <code>.png</code>, <code>.pdf</code>, <code>.tex</code> (TikZ) or <code>.dot</code>.</p><pre><code class="language-julia hljs">bgsave(&quot;motor.pdf&quot;, motor)
+bgsave(&quot;motor.tex&quot;, motor)</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../equations_latex/">« Equations and LaTeX</a><a class="docs-footer-nextpage" href="../control_dc_motor_pi/">DC Motor Speed Control »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Sunday 18 October 2026 18:13">Sunday 18 October 2026</span>. Using Julia version 1.10.12.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

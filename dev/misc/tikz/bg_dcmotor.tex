@@ -1,0 +1,50 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+
+\input{base_tikzset.tex}
+
+\begin{document}
+
+\begin{tikzpicture}[line width=0.25mm, node distance=1.5cm]
+
+  % Voltage
+  \node[port] (Se-v) {Se: \(V(t)\)};
+
+  \node[right=of Se-v, port] (1junction-e) {1};
+  \drawbg{Se-v}{1junction-e};
+  
+  % Inertance
+  \node[below=of 1junction-e, port] (I-e) {I: \(L_e\)};
+  \drawbg{1junction-e}{I-e};
+  
+  % Resistance
+  \node[above=of 1junction-e, port] (R-e) {R: \(R_e\)};
+  \drawbg{1junction-e}{R-e};
+  
+  % MGY
+  \node[right=of 1junction-e, port] (mgy) {MGY};
+  \drawbg{1junction-e}{mgy};
+
+  % Mechanical
+  \node[right=of mgy, port] (1junction-m) {1};
+  \drawbg{mgy}{1junction-m};
+  
+  % Inertance
+  \node[below=of 1junction-m, port] (I-m) {I: \(J_\theta\)};
+  \drawbg{1junction-m}{I-m};
+  
+  % Resistance
+  \node[above=of 1junction-m, port] (R-m) {R: \(c\)};
+  \drawbg{1junction-m}{R-m};
+  
+  % Torque
+  \node[right=of 1junction-m, port] (Se-m) {Se: \(\tau(t)\)};
+  \drawbg{1junction-m}{Se-m};
+
+
+
+\end{tikzpicture}
+  
+
+\end{document}

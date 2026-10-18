@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Reusable Subsystems · BondGraphToolkit.jl</title><meta name="title" content="Reusable Subsystems · BondGraphToolkit.jl"/><meta property="og:title" content="Reusable Subsystems · BondGraphToolkit.jl"/><meta property="twitter:title" content="Reusable Subsystems · BondGraphToolkit.jl"/><meta name="description" content="Documentation for BondGraphToolkit.jl."/><meta property="og:description" content="Documentation for BondGraphToolkit.jl."/><meta property="twitter:description" content="Documentation for BondGraphToolkit.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img class="docs-light-only" src="../../assets/logo.svg" alt="BondGraphToolkit.jl logo"/><img class="docs-dark-only" src="../../assets/logo-dark.svg" alt="BondGraphToolkit.jl logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../getting_started_auto/">Getting started</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../../man/user_guide/">Concepts and conventions</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Systems</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../mechanical_msd_1dof/">Harmonic Oscillator</a></li><li><a class="tocitem" href="../mechanical_msd_2dof/">Mass-Spring-Damper system 2-DoF</a></li><li><a class="tocitem" href="../mechanical_msd_ndof/">MSD system with N-DoF</a></li><li><a class="tocitem" href="../mechanical_duffing/">Duffing Equation</a></li><li><a class="tocitem" href="../electrical_dc_motor/">DC Motor</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox" checked/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Features</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../two_ports/">Transformers and Gyrators</a></li><li><a class="tocitem" href="../signals/">Signals and Detectors</a></li><li><a class="tocitem" href="../adapters/">Coupling with the MTK Standard Library</a></li><li><a class="tocitem" href="../elements_oneport/">One-Port Elements</a></li><li class="is-active"><a class="tocitem" href>Reusable Subsystems</a><ul class="internal"><li><a class="tocitem" href="#A-one-junction-subsystem"><span>A one-junction subsystem</span></a></li><li><a class="tocitem" href="#Results-from-each-copy"><span>Results from each copy</span></a></li><li><a class="tocitem" href="#Changing-one-copy&#39;s-parameter"><span>Changing one copy&#39;s parameter</span></a></li><li><a class="tocitem" href="#A-subsystem-with-several-junctions"><span>A subsystem with several junctions</span></a></li></ul></li><li><a class="tocitem" href="../equations_latex/">Equations and LaTeX</a></li><li><a class="tocitem" href="../drawing/">Drawing Bond Graphs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox"/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Applications</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../control_dc_motor_pi/">DC Motor Speed Control</a></li><li><a class="tocitem" href="../robotics_motor_pendulum/">Pendulum Driven by a DC Motor</a></li><li><a class="tocitem" href="../electrical_rlc/">Series RLC Circuit</a></li><li><a class="tocitem" href="../biomedical_windkessel/">Arterial Windkessel</a></li><li><a class="tocitem" href="../hydraulic_coupled_tanks/">Coupled Tanks</a></li><li><a class="tocitem" href="../chemical_reaction_network/">Chemical Reaction Network</a></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/public/">Public</a></li><li><a class="tocitem" href="../../lib/internals/">Internals</a></li></ul></li><li><a class="tocitem" href="../../citing/">Citing BondGraphToolkit</a></li><li><a class="tocitem" href="../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../license/">License</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Features</a></li><li class="is-active"><a href>Reusable Subsystems</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Reusable Subsystems</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl/blob/main/examples/composition.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="composition"><a class="docs-heading-anchor" href="#composition">Reusable Subsystems</a><a id="composition-1"></a><a class="docs-heading-anchor-permalink" href="#composition" title="Permalink"></a></h1><p><em>The source files for all examples can be found in <a href="https://github.com/felipecastrotc/BondGraph.jl/tree/main/examples/">/examples</a>.</em></p><p>A subsystem written once and used several times is a Julia function that returns a model with a power port. This page builds a series RC load, uses it twice, reads results from each copy, and changes one copy&#39;s parameter without recompiling.</p><pre><code class="language-julia hljs">using BondGraphToolkit
+using BondGraphToolkit.ModelingToolkit: t_nounits as t
+using OrdinaryDiffEqTsit5
+using Plots</code></pre><h2 id="A-one-junction-subsystem"><a class="docs-heading-anchor" href="#A-one-junction-subsystem">A one-junction subsystem</a><a id="A-one-junction-subsystem-1"></a><a class="docs-heading-anchor-permalink" href="#A-one-junction-subsystem" title="Permalink"></a></h2><p>A junction is already a subsystem: it owns its elements, and a free port is its connection to the outside. The series RC load is a 1-junction whose free port <code>power</code> is a bond entering it (<code>:power =&gt; :in</code>), so the load is connected like an element, through <code>load.power</code>:</p><pre><code class="language-julia hljs">RCLoad(; name, R = 1.0, C = 1.0) =
+    Junction1(:power =&gt; :in, Resistance(; R, name = :r), Compliance(; C, name = :c); name)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">RCLoad (generic function with 1 method)</code></pre><p>Two copies, each driven by its own source. Every copy gets its own namespace, <code>A.r</code>, <code>B.r</code>, so their elements, states and parameters stay apart:</p><pre><code class="language-julia hljs">@named A = RCLoad(R = 2.0, C = 0.5)
+@named B = RCLoad(R = 3.0, C = 0.25)
+@named VA = Se(1.0)
+@named VB = Se(2.0)
+@named loads = System([connect(VA.pout, A.power), connect(VB.pout, B.power)], t;
+                      systems = [VA, VB, A, B])
+bgplot(loads)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 15.1.0 (20260618.0150)
+ -->
+<!-- Title: BondGraph Pages: 1 -->
+<svg width="261pt" height="281pt"
+ viewBox="0.00 0.00 261.00 281.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 277)">
+<title>BondGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-277 256.75,-277 256.75,4 -4,4"/>
+<!-- VA -->
+<g id="node1" class="node">
+<title>VA</title>
+<text xml:space="preserve" text-anchor="middle" x="126.38" y="-92.33" font-family="Times,serif" font-size="14.00">Se:VA</text>
+</g>
+<!-- A -->
+<g id="node3" class="node">
+<title>A</title>
+<text xml:space="preserve" text-anchor="middle" x="126.38" y="-13.32" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- VA&%2345;&gt;A -->
+<g id="edge5" class="edge">
+<title>VA&%2345;&gt;A</title>
+<path fill="none" stroke="black" d="M126.38,-79.34C126.38,-68.25 126.38,-57.17 126.38,-46.08"/>
+<polygon fill="black" stroke="black" points="126.38,-36.1 130.88,-46.1 126.38,-40.9 126.38,-46.1 126.38,-46.1 126.38,-36.1"/>
+</g>
+<!-- VB -->
+<g id="node2" class="node">
+<title>VB</title>
+<text xml:space="preserve" text-anchor="middle" x="126.38" y="-250.32" font-family="Times,serif" font-size="14.00">Se:VB</text>
+</g>
+<!-- B -->
+<g id="node6" class="node">
+<title>B</title>
+<text xml:space="preserve" text-anchor="middle" x="126.38" y="-171.32" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- VB&%2345;&gt;B -->
+<g id="edge6" class="edge">
+<title>VB&%2345;&gt;B</title>
+<path fill="none" stroke="black" d="M126.38,-237.34C126.38,-226.25 126.38,-215.17 126.38,-204.08"/>
+<polygon fill="black" stroke="black" points="126.38,-194.1 130.88,-204.1 126.38,-198.9 126.38,-204.1 126.38,-204.1 126.38,-194.1"/>
+</g>
+<!-- A₊c -->
+<g id="node5" class="node">
+<title>A₊c</title>
+<text xml:space="preserve" text-anchor="middle" x="225.75" y="-13.32" font-family="Times,serif" font-size="14.00">C:c</text>
+</g>
+<!-- A&%2345;&gt;A₊c -->
+<g id="edge2" class="edge">
+<title>A&%2345;&gt;A₊c</title>
+<path fill="none" stroke="black" d="M153.21,-18C164.11,-18 176.98,-18 188.77,-18"/>
+<polygon fill="black" stroke="black" points="198.59,-18 188.59,-22.5 193.79,-18 188.59,-18 188.59,-18 198.59,-18"/>
+</g>
+<!-- A₊r -->
+<g id="node4" class="node">
+<title>A₊r</title>
+<text xml:space="preserve" text-anchor="middle" x="27" y="-13.32" font-family="Times,serif" font-size="14.00">R:r</text>
+</g>
+<!-- A₊r&%2345;&gt;A -->
+<g id="edge1" class="edge">
+<title>A₊r&%2345;&gt;A</title>
+<path fill="none" stroke="black" d="M63.84,-18C75.63,-18 88.51,-18 99.42,-18"/>
+<polygon fill="black" stroke="black" points="54.04,-18 64.04,-13.5 58.84,-18 64.04,-18 64.04,-18 54.04,-18"/>
+</g>
+<!-- B₊c -->
+<g id="node8" class="node">
+<title>B₊c</title>
+<text xml:space="preserve" text-anchor="middle" x="225.75" y="-171.32" font-family="Times,serif" font-size="14.00">C:c</text>
+</g>
+<!-- B&%2345;&gt;B₊c -->
+<g id="edge4" class="edge">
+<title>B&%2345;&gt;B₊c</title>
+<path fill="none" stroke="black" d="M153.21,-176C164.11,-176 176.98,-176 188.77,-176"/>
+<polygon fill="black" stroke="black" points="198.59,-176 188.59,-180.5 193.79,-176 188.59,-176 188.59,-176 198.59,-176"/>
+</g>
+<!-- B₊r -->
+<g id="node7" class="node">
+<title>B₊r</title>
+<text xml:space="preserve" text-anchor="middle" x="27" y="-171.32" font-family="Times,serif" font-size="14.00">R:r</text>
+</g>
+<!-- B₊r&%2345;&gt;B -->
+<g id="edge3" class="edge">
+<title>B₊r&%2345;&gt;B</title>
+<path fill="none" stroke="black" d="M63.84,-176C75.63,-176 88.51,-176 99.42,-176"/>
+<polygon fill="black" stroke="black" points="54.04,-176 64.04,-171.5 58.84,-176 64.04,-176 64.04,-176 54.04,-176"/>
+</g>
+</g>
+</svg>
+'/><h2 id="Results-from-each-copy"><a class="docs-heading-anchor" href="#Results-from-each-copy">Results from each copy</a><a id="Results-from-each-copy-1"></a><a class="docs-heading-anchor-permalink" href="#Results-from-each-copy" title="Permalink"></a></h2><p>Results are read through the model&#39;s names, as for any element: <code>loads.A.c.q</code> is the charge of A&#39;s capacitor.</p><pre><code class="language-julia hljs">sys = mtkcompile(loads)
+prob = ODEProblem(sys, [], (0.0, 5.0))
+sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
+plot(sol, idxs = [loads.A.c.q, loads.B.c.q], labels = [&quot;q, A&quot; &quot;q, B&quot;], xlabel = &quot;Time (s)&quot;)</code></pre><img src="1943b76d.svg" alt="Example block output"/><p>By hand, a source <span>$V$</span> charging <span>$R$</span> and <span>$C$</span> in series from empty gives <span>$q(t) = C V (1 - e^{-t/RC})$</span>. The largest difference on a common time grid, for A and for B:</p><pre><code class="language-julia hljs">q_rc(τ; R, C, V) = C * V * (1 - exp(-τ / (R * C)))
+tgrid = 0:0.01:5
+(maximum(abs, sol(tgrid; idxs = loads.A.c.q).u - q_rc.(tgrid; R = 2.0, C = 0.5, V = 1.0)),
+ maximum(abs, sol(tgrid; idxs = loads.B.c.q).u - q_rc.(tgrid; R = 3.0, C = 0.25, V = 2.0)))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(4.806377518207228e-12, 7.097655796428626e-12)</code></pre><h2 id="Changing-one-copy&#39;s-parameter"><a class="docs-heading-anchor" href="#Changing-one-copy&#39;s-parameter">Changing one copy&#39;s parameter</a><a id="Changing-one-copy&#39;s-parameter-1"></a><a class="docs-heading-anchor-permalink" href="#Changing-one-copy&#39;s-parameter" title="Permalink"></a></h2><p><code>remake</code> gives the problem new parameter values without compiling again. Name the parameter through the <strong>compiled</strong> system, <code>sys.A.r.R</code>. The model before compiling, <code>loads</code>, still carries its own name in its paths (<code>loads₊A₊r₊R</code>), which solution indexing accepts but <code>remake</code> rejects with a warning that it &quot;is not a parameter&quot;. This is ModelingToolkit&#39;s behaviour: <code>complete(loads).A.r.R</code> works too.</p><pre><code class="language-julia hljs">prob_slow = remake(prob; p = [sys.A.r.R =&gt; 4.0])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr38_2" style="color:#56b6c2">ODEProblem</span> with uType <span class="sgr38_2" style="color:#56b6c2">Vector{Float64}</span> and tType <span class="sgr38_2" style="color:#56b6c2">Float64</span>. In-place: <span class="sgr38_2" style="color:#56b6c2">true</span>
+Initialization status: <span class="sgr38_2" style="color:#56b6c2">FULLY_DETERMINED</span>
+Non-trivial mass matrix: <span class="sgr38_2" style="color:#56b6c2">false</span>
+timespan: (0.0, 5.0)
+u0: 2-element Vector{Float64}:
+ 0.0
+ 0.0</code></pre><p><code>prob.ps</code> reads a parameter&#39;s value. Only A&#39;s resistance changed:</p><pre><code class="language-julia hljs">(prob.ps[sys.A.r.R], prob_slow.ps[sys.A.r.R], prob_slow.ps[sys.B.r.R])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(2.0, 4.0, 3.0)</code></pre><p>A charges more slowly now, and B is unchanged:</p><pre><code class="language-julia hljs">sol_slow = solve(prob_slow, Tsit5(), reltol = 1e-10, abstol = 1e-10)
+plot(sol, idxs = [loads.A.c.q], label = &quot;A, R = 2&quot;, xlabel = &quot;Time (s)&quot;, ylabel = &quot;Charge&quot;)
+plot!(sol_slow, idxs = [loads.A.c.q, loads.B.c.q], labels = [&quot;A, R = 4&quot; &quot;B&quot;], linestyle = :dash)</code></pre><img src="aa0abd7f.svg" alt="Example block output"/><p>Against the closed form with A&#39;s new resistance, and B against its first run:</p><pre><code class="language-julia hljs">(maximum(abs, sol_slow(tgrid; idxs = loads.A.c.q).u - q_rc.(tgrid; R = 4.0, C = 0.5, V = 1.0)),
+ maximum(abs, sol_slow(tgrid; idxs = loads.B.c.q).u - sol(tgrid; idxs = loads.B.c.q).u))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(2.593536496675597e-12, 1.071365218763276e-11)</code></pre><h2 id="A-subsystem-with-several-junctions"><a class="docs-heading-anchor" href="#A-subsystem-with-several-junctions">A subsystem with several junctions</a><a id="A-subsystem-with-several-junctions-1"></a><a class="docs-heading-anchor-permalink" href="#A-subsystem-with-several-junctions" title="Permalink"></a></h2><p>A subsystem with more than one junction is a plain ModelingToolkit component that owns a <code>PowerPort</code> and connects it inside, as here an R on a 1-junction followed by a C on a 0-junction. The port&#39;s direction comes from the inner port it is connected to: <code>j1.power</code> is a bond entering the 1-junction, so <code>ladder.power</code> is one too.</p><pre><code class="language-julia hljs">@component function RCLadder(; name, R = 1.0, C = 1.0)
+    @named power = PowerPort()
+    @named j1 = Junction1(:power =&gt; :in, Resistance(; R, name = :r), :out)
+    @named j0 = Junction0(:in =&gt; :in, Compliance(; C, name = :c))
+    System([connect(power, j1.power), connect(j1.out, j0.in)], t; name, systems = [power, j1, j0])
+end
+@named ladder = RCLadder(R = 2.0, C = 0.5)
+@named V = Se(1.0)
+@named driven = System([connect(V.pout, ladder.power)], t; systems = [V, ladder])
+sol = solve(ODEProblem(mtkcompile(driven), [], (0.0, 5.0)), Tsit5(), reltol = 1e-10, abstol = 1e-10)
+maximum(abs, sol(tgrid; idxs = driven.ladder.j0.c.q).u - q_rc.(tgrid; R = 2.0, C = 0.5, V = 1.0))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5.324907181858407e-12</code></pre><p>The drawing shows such a component as one node, named after it: <code>bgplot</code> doesn&#39;t draw the junctions and elements inside a component it doesn&#39;t know. A one-junction subsystem, like <code>RCLoad</code> above, is drawn in full, because it is a junction.</p><pre><code class="language-julia hljs">bgplot(driven)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 15.1.0 (20260618.0150)
+ -->
+<!-- Title: BondGraph Pages: 1 -->
+<svg width="243pt" height="44pt"
+ viewBox="0.00 0.00 243.00 44.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 40)">
+<title>BondGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-40 238.5,-40 238.5,4 -4,4"/>
+<!-- V -->
+<g id="node1" class="node">
+<title>V</title>
+<text xml:space="preserve" text-anchor="middle" x="27" y="-13.32" font-family="Times,serif" font-size="14.00">Se:V</text>
+</g>
+<!-- ladder -->
+<g id="node2" class="node">
+<title>ladder</title>
+<text xml:space="preserve" text-anchor="middle" x="165.75" y="-13.32" font-family="Times,serif" font-size="14.00">RCLadder:ladder</text>
+</g>
+<!-- V&%2345;&gt;ladder -->
+<g id="edge1" class="edge">
+<title>V&%2345;&gt;ladder</title>
+<path fill="none" stroke="black" d="M53.72,-18C63.39,-18 74.96,-18 86.92,-18"/>
+<polygon fill="black" stroke="black" points="96.82,-18 86.82,-22.5 92.03,-18 86.82,-18 86.82,-18 96.82,-18"/>
+</g>
+</g>
+</svg>
+'/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../elements_oneport/">« One-Port Elements</a><a class="docs-footer-nextpage" href="../equations_latex/">Equations and LaTeX »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Sunday 18 October 2026 18:13">Sunday 18 October 2026</span>. Using Julia version 1.10.12.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Arterial Windkessel · BondGraphToolkit.jl</title><meta name="title" content="Arterial Windkessel · BondGraphToolkit.jl"/><meta property="og:title" content="Arterial Windkessel · BondGraphToolkit.jl"/><meta property="twitter:title" content="Arterial Windkessel · BondGraphToolkit.jl"/><meta name="description" content="Documentation for BondGraphToolkit.jl."/><meta property="og:description" content="Documentation for BondGraphToolkit.jl."/><meta property="twitter:description" content="Documentation for BondGraphToolkit.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img class="docs-light-only" src="../../assets/logo.svg" alt="BondGraphToolkit.jl logo"/><img class="docs-dark-only" src="../../assets/logo-dark.svg" alt="BondGraphToolkit.jl logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../getting_started_auto/">Getting started</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../../man/user_guide/">Concepts and conventions</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Systems</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../mechanical_msd_1dof/">Harmonic Oscillator</a></li><li><a class="tocitem" href="../mechanical_msd_2dof/">Mass-Spring-Damper system 2-DoF</a></li><li><a class="tocitem" href="../mechanical_msd_ndof/">MSD system with N-DoF</a></li><li><a class="tocitem" href="../mechanical_duffing/">Duffing Equation</a></li><li><a class="tocitem" href="../electrical_dc_motor/">DC Motor</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Features</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../two_ports/">Transformers and Gyrators</a></li><li><a class="tocitem" href="../signals/">Signals and Detectors</a></li><li><a class="tocitem" href="../adapters/">Coupling with the MTK Standard Library</a></li><li><a class="tocitem" href="../elements_oneport/">One-Port Elements</a></li><li><a class="tocitem" href="../composition/">Reusable Subsystems</a></li><li><a class="tocitem" href="../equations_latex/">Equations and LaTeX</a></li><li><a class="tocitem" href="../drawing/">Drawing Bond Graphs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox" checked/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Applications</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../control_dc_motor_pi/">DC Motor Speed Control</a></li><li><a class="tocitem" href="../robotics_motor_pendulum/">Pendulum Driven by a DC Motor</a></li><li><a class="tocitem" href="../electrical_rlc/">Series RLC Circuit</a></li><li class="is-active"><a class="tocitem" href>Arterial Windkessel</a><ul class="internal"><li><a class="tocitem" href="#Introduction"><span>Introduction</span></a></li><li><a class="tocitem" href="#Preliminary-Steps"><span>Preliminary Steps</span></a></li><li><a class="tocitem" href="#System-Element-Definitions"><span>System Element Definitions</span></a></li><li><a class="tocitem" href="#Model-Construction"><span>Model Construction</span></a></li><li><a class="tocitem" href="#Analysing-the-model"><span>Analysing the model</span></a></li><li><a class="tocitem" href="#System-Simulations"><span>System Simulations</span></a></li></ul></li><li><a class="tocitem" href="../hydraulic_coupled_tanks/">Coupled Tanks</a></li><li><a class="tocitem" href="../chemical_reaction_network/">Chemical Reaction Network</a></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/public/">Public</a></li><li><a class="tocitem" href="../../lib/internals/">Internals</a></li></ul></li><li><a class="tocitem" href="../../citing/">Citing BondGraphToolkit</a></li><li><a class="tocitem" href="../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../license/">License</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Applications</a></li><li class="is-active"><a href>Arterial Windkessel</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Arterial Windkessel</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl/blob/main/examples/biomedical_windkessel.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="biomedical-windkessel"><a class="docs-heading-anchor" href="#biomedical-windkessel">Arterial Windkessel</a><a id="biomedical-windkessel-1"></a><a class="docs-heading-anchor-permalink" href="#biomedical-windkessel" title="Permalink"></a></h1><p><em>The source files for all examples can be found in <a href="https://github.com/felipecastrotc/BondGraph.jl/tree/main/examples/">/examples</a>.</em></p><h2 id="Introduction"><a class="docs-heading-anchor" href="#Introduction">Introduction</a><a id="Introduction-1"></a><a class="docs-heading-anchor-permalink" href="#Introduction" title="Permalink"></a></h2><p>The heart ejects blood into the aorta only during systole, yet blood flows through the tissues all the time. The large elastic arteries smooth the pulsatile ejection: they stretch and store blood while the heart ejects, and recoil and push it on while the aortic valve is closed. Weber compared this with the air chamber of a fire engine, the <em>Windkessel</em>, which turns the pump&#39;s strokes into a steady jet, and Frank turned the comparison into a quantitative model (Westerhof, Lankhaar &amp; Westerhof 2009, §1, Fig. 1). The Windkessel is a lumped model: it describes the whole arterial tree by the relation between pressure and flow at its entrance, the aortic root, with a few parameters that have a physiological meaning.</p><h3 id="Windkessel-model"><a class="docs-heading-anchor" href="#Windkessel-model">Windkessel model</a><a id="Windkessel-model-1"></a><a class="docs-heading-anchor-permalink" href="#Windkessel-model" title="Permalink"></a></h3><p>Frank&#39;s two-element Windkessel has two parameters (§1):</p><ul><li>the <strong>peripheral resistance</strong> <span>$R$</span> of the small arteries and arterioles, where most of the resistance to flow is. With venous pressure neglected, it is mean aortic pressure over cardiac output, <span>$R \approx P_{ao,mean}/\mathrm{CO}$</span>;</li><li>the <strong>total arterial compliance</strong> <span>$C = \Delta V/\Delta P$</span>, the volume the arteries store per unit of pressure, mostly in the large (conduit) arteries.</li></ul><p>It predicts that in diastole, with the valve closed and no inflow, aortic pressure decays exponentially, <span>$P(t) = P_{es}\,e^{-t/RC}$</span> from the end-systolic pressure <span>$P_{es}$</span> (§2, Fig. 3). It describes systole poorly, though, and its input impedance falls to zero at high frequencies, where the measured one levels off at the <strong>characteristic impedance</strong> <span>$Z_c$</span> of the proximal aorta. The three-element Windkessel adds <span>$Z_c$</span> in series at the entrance, before the parallel <span>$C$</span> and <span>$R$</span> (§2, Figs. 4–5). <span>$Z_c$</span> has the dimension of a resistance and is usually drawn as one, although it is not a resistance but a property of wave travel, <span>$Z_c = \mathrm{PWV}\,\rho/A$</span> (pulse wave velocity, blood density, aortic area); in the systemic circulation it is about 5–7% of <span>$R$</span> (§2, Fig. 5).</p><p>We model the three-element Windkessel as Westerhof et al. draw it (Fig. 5): the aortic inflow <span>$Q(t)$</span> passes through <span>$Z_c$</span> into the compliance <span>$C$</span>, which drains through the peripheral resistance <span>$R$</span> into the veins, whose pressure we take as zero. Let <span>$P$</span> be the aortic pressure at the entrance and <span>$P_c$</span> the pressure across the compliance, after <span>$Z_c$</span>. The pressure drop across <span>$Z_c$</span> is <span>$Z_c Q$</span>, and the inflow splits into the flow that fills the compliance, <span>$C\,\dot{P}_c$</span>, and the peripheral flow <span>$P_c/R$</span>. So</p><p class="math-container">\[C\,\frac{dP_c}{dt} = Q(t) - \frac{P_c}{R}, \qquad P = P_c + Z_c\,Q(t).\]</p><p>With <span>$Q = 0$</span> (diastole) <span>$P = P_c$</span> decays with the time constant <span>$RC$</span>, as for the two-element model. At steady state the mean pressure is <span>$(R + Z_c)$</span> times the mean flow (§2, Table 1).</p><p>The paper doesn&#39;t prescribe an inflow; in its examples the inflow is a measured aortic flow (§2, Fig. 6). We assume (our choice, not from the paper) the simplest standard pulsatile waveform: a half-sine during systole and no flow in diastole, with heart period <span>$T$</span>, systole length <span>$T_s$</span> and stroke volume <span>$SV$</span>,</p><p class="math-container">\[Q(t) = \begin{cases} Q_0 \sin(\pi\,\tau/T_s), &amp; \tau &lt; T_s, \\ 0, &amp; T_s \le \tau &lt; T, \end{cases} \qquad \tau = t \bmod T, \qquad Q_0 = \frac{\pi\,SV}{2\,T_s},\]</p><p>where <span>$Q_0$</span> makes the area under one half-sine equal to <span>$SV$</span>.</p><p>See also N. Westerhof, J.-W. Lankhaar and B. E. Westerhof, <a href="https://doi.org/10.1007/s11517-008-0359-2">The arterial Windkessel</a>, <em>Med Biol Eng Comput</em> 47:131–141, 2009 (open access), Fig. 5 for the hydraulic and electrical forms of the two-, three- and four-element Windkessels.</p><h3 id="Bond-Graph-Model"><a class="docs-heading-anchor" href="#Bond-Graph-Model">Bond Graph Model</a><a id="Bond-Graph-Model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-Graph-Model" title="Permalink"></a></h3><p>In the hydraulic domain pressure is the effort and volume flow the flow, so their product is power. The heart is a flow source, <span>$Z_c$</span> and <span>$R$</span> are resistances and the arterial compliance is a compliance, whose displacement is the stored volume <span>$V = \int Q\,dt$</span>. <span>$Z_c$</span> carries the whole inflow, so it shares a 1-junction (common flow) with the source; <span>$C$</span> and <span>$R$</span> share the pressure <span>$P_c$</span>, so they sit on a 0-junction (common effort). The bond graph is drawn from the model below with <code>bgplot</code>, once it is built.</p><table><tr><th style="text-align: right">Element</th><th style="text-align: right">Stands for</th><th style="text-align: right">Parameter</th></tr><tr><td style="text-align: right"><code>Sf:Q</code></td><td style="text-align: right">the aortic inflow from the heart</td><td style="text-align: right"><span>$Q(t)$</span></td></tr><tr><td style="text-align: right"><code>R:Zc</code></td><td style="text-align: right">the characteristic impedance of the proximal aorta</td><td style="text-align: right"><span>$Z_c$</span></td></tr><tr><td style="text-align: right"><code>C:C</code></td><td style="text-align: right">the total arterial compliance</td><td style="text-align: right"><span>$C$</span></td></tr><tr><td style="text-align: right"><code>R:Rp</code></td><td style="text-align: right">the peripheral resistance</td><td style="text-align: right"><span>$R$</span></td></tr></table><h2 id="Preliminary-Steps"><a class="docs-heading-anchor" href="#Preliminary-Steps">Preliminary Steps</a><a id="Preliminary-Steps-1"></a><a class="docs-heading-anchor-permalink" href="#Preliminary-Steps" title="Permalink"></a></h2><p>In this example we first build and simulate the bond graph model over several heart beats, and check that the pressure settles into a periodic range of plausible values. Then we simulate the hand-derived equation as a plain ModelingToolkit model and compare the results.</p><p>We import the bond-graph toolkit to model the system and <code>OrdinaryDiffEqTsit5</code> to solve the resulting ODE. We also import ModelingToolkit&#39;s independent variable <code>t</code> and derivative <code>D</code>, for the inflow and the reference model.</p><pre><code class="language-julia hljs">using BondGraphToolkit
+using BondGraphToolkit.ModelingToolkit: t_nounits as t, D_nounits as D
+using OrdinaryDiffEqTsit5
+using Plots</code></pre><h2 id="System-Element-Definitions"><a class="docs-heading-anchor" href="#System-Element-Definitions">System Element Definitions</a><a id="System-Element-Definitions-1"></a><a class="docs-heading-anchor-permalink" href="#System-Element-Definitions" title="Permalink"></a></h2><p>We work in the units of clinical hemodynamics: pressure in mmHg, volume in mL, time in s, so resistances are in mmHg⋅s/mL and the compliance in mL/mmHg. Westerhof et al. (2009) give no numerical parameter values, only that <span>$Z_c$</span> is about 5–7% of <span>$R$</span> (§2). The values below are our assumption, chosen to give an adult at rest a plausible mean pressure and cardiac output.</p><h3 id="Aortic-inflow"><a class="docs-heading-anchor" href="#Aortic-inflow">Aortic inflow</a><a id="Aortic-inflow-1"></a><a class="docs-heading-anchor-permalink" href="#Aortic-inflow" title="Permalink"></a></h3><p>A heart rate of 75 beats/min, a systole of 0.3 s and a stroke volume of 70 mL, that is a cardiac output of 5.25 L/min:</p><pre><code class="language-julia hljs">T = 0.8                         # (s) Heart period
+Ts = 0.3                        # (s) Duration of systole (ejection)
+SV = 70.0                       # (mL) Stroke volume
+Q0 = π * SV / (2Ts)             # (mL/s) Peak inflow</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">366.5191429188092</code></pre><p>The half-sine waveform, as a function of time. Called with the symbolic <code>t</code> it gives the flow source its law; we use the same function in the reference model.</p><pre><code class="language-julia hljs">inflow(t) = ifelse(mod(t, T) &lt; Ts, Q0 * sin(π * mod(t, T) / Ts), 0.0)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">inflow (generic function with 1 method)</code></pre><h3 id="Elements"><a class="docs-heading-anchor" href="#Elements">Elements</a><a id="Elements-1"></a><a class="docs-heading-anchor-permalink" href="#Elements" title="Permalink"></a></h3><p>The peripheral resistance gives a mean pressure of about <span>$R\,SV/T \approx 88$</span> mmHg; <span>$Z_c$</span> is 6% of it, in the middle of the paper&#39;s range; the compliance gives a diastolic decay time <span>$RC = 1.5$</span> s, about twice the heart period:</p><pre><code class="language-julia hljs">@named Q = Sf(inflow(t))                    # (mL/s) Aortic inflow
+@named Zc = Resistance(R = 0.06)            # (mmHg⋅s/mL) Characteristic impedance
+@named Rp = Resistance(R = 1.0)             # (mmHg⋅s/mL) Peripheral resistance
+@named C = Compliance(C = 1.5, q = 120.0)   # (mL/mmHg, mL) Total arterial compliance</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}q\left( t \right)}{\mathrm{d}t} &amp;= f\left( t \right) \\
+e\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+\mathtt{pout.e}\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+f\left( t \right) &amp;=  - \mathtt{pout.f}\left( t \right) + \mathtt{power.f}\left( t \right) \\
+e\left( t \right) &amp;= \frac{q\left( t \right)}{C}
+\end{align}
+ \]</p><p>The compliance&#39;s state is the volume it stores above its unstressed volume. Its initial value, 120 mL, starts the pressure <span>$P_c = V/C$</span> at 80 mmHg, a typical diastolic pressure.</p><h2 id="Model-Construction"><a class="docs-heading-anchor" href="#Model-Construction">Model Construction</a><a id="Model-Construction-1"></a><a class="docs-heading-anchor-permalink" href="#Model-Construction" title="Permalink"></a></h2><p>The inflow, <span>$Z_c$</span> and the bond to the rest of the tree share one flow, <span>$Q$</span>: a 1-junction. The source&#39;s bond points into the junction, away from the source (<code>Q =&gt; :pout</code>), and <span>$Z_c$</span>&#39;s bond points out of the junction into it (<code>Zc</code>), Karnopp, Margolis &amp; Rosenberg&#39;s usual orientations (2012, §3.1, pp. 39 and 49). The bond to the compliance and the periphery leaves the junction (<code>:wk</code>), following the blood downstream. The effort sum is therefore <span>$P - Z_c Q - P_c = 0$</span>: the source&#39;s effort, the pressure at the entrance, is <span>$P = Z_c Q + P_c$</span>.</p><pre><code class="language-julia hljs">@named j1 = Junction1(Q =&gt; :pout, Zc, :wk)</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( Q_{+}pout, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( Zc_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( wk, core_{+}p3 \right) \\
+ - \mathtt{core.p2.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p3.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{core.p1.e}\left( t \right) - \mathtt{core.p2.e}\left( t \right) - \mathtt{core.p3.e}\left( t \right) \\
+\mathtt{Q.e}\left( t \right) &amp;= \mathtt{Q.power.e}\left( t \right) \\
+\mathtt{Q.pout.e}\left( t \right) &amp;= \mathtt{Q.power.e}\left( t \right) \\
+\mathtt{Q.f}\left( t \right) &amp;=  - \mathtt{Q.pout.f}\left( t \right) + \mathtt{Q.power.f}\left( t \right) \\
+\mathtt{Q.f}\left( t \right) &amp;= ifelse\left( mod\left( t, 0.8 \right) &lt; 0.3, 366.52 ~ \sin\left( 3.3333 ~ \pi ~ mod\left( t, 0.8 \right) \right), 0 \right) \\
+\mathtt{Zc.e}\left( t \right) &amp;= \mathtt{Zc.power.e}\left( t \right) \\
+\mathtt{Zc.pout.e}\left( t \right) &amp;= \mathtt{Zc.power.e}\left( t \right) \\
+\mathtt{Zc.f}\left( t \right) &amp;=  - \mathtt{Zc.pout.f}\left( t \right) + \mathtt{Zc.power.f}\left( t \right) \\
+\mathtt{Zc.e}\left( t \right) &amp;= \mathtt{Zc.R} ~ \mathtt{Zc.f}\left( t \right)
+\end{align}
+ \]</p><p class="math-container">\[C\]</p><p>and <span>$R$</span> share the pressure <span>$P_c$</span>: a 0-junction. The bond from the 1-junction enters it (<code>:wk =&gt; :in</code>), and the bonds to <span>$C$</span> and <span>$R$</span> point out of it into the elements (<code>C</code>, <code>Rp</code>), again the usual orientations. The flow balance is <span>$Q - \dot{V} - P_c/R = 0$</span>, the volume balance of the arteries. The veins are the pressure reference, so <span>$R$</span>&#39;s bond ends there with no element.</p><pre><code class="language-julia hljs">@named j0 = Junction0(:wk =&gt; :in, C, Rp)</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( wk, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( C_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( Rp_{+}power, core_{+}p3 \right) \\
+\mathtt{core.p2.e}\left( t \right) &amp;= \mathtt{core.p1.e}\left( t \right) \\
+\mathtt{core.p3.e}\left( t \right) &amp;= \mathtt{core.p1.e}\left( t \right) \\
+0 &amp;= \mathtt{core.p1.f}\left( t \right) + \mathtt{core.p2.f}\left( t \right) + \mathtt{core.p3.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{C.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{C.f}\left( t \right) \\
+\mathtt{C.e}\left( t \right) &amp;= \mathtt{C.power.e}\left( t \right) \\
+\mathtt{C.pout.e}\left( t \right) &amp;= \mathtt{C.power.e}\left( t \right) \\
+\mathtt{C.f}\left( t \right) &amp;=  - \mathtt{C.pout.f}\left( t \right) + \mathtt{C.power.f}\left( t \right) \\
+\mathtt{C.e}\left( t \right) &amp;= \frac{\mathtt{C.q}\left( t \right)}{\mathtt{C.C}} \\
+\mathtt{Rp.e}\left( t \right) &amp;= \mathtt{Rp.power.e}\left( t \right) \\
+\mathtt{Rp.pout.e}\left( t \right) &amp;= \mathtt{Rp.power.e}\left( t \right) \\
+\mathtt{Rp.f}\left( t \right) &amp;=  - \mathtt{Rp.pout.f}\left( t \right) + \mathtt{Rp.power.f}\left( t \right) \\
+\mathtt{Rp.e}\left( t \right) &amp;= \mathtt{Rp.R} ~ \mathtt{Rp.f}\left( t \right)
+\end{align}
+ \]</p><p>The two free ports <code>wk</code> are the two ends of one bond, joined with <code>connect</code>:</p><pre><code class="language-julia hljs">@named windkessel = System([connect(j1.wk, j0.wk)], t; systems = [j1, j0])</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( j1_{+}wk, j0_{+}wk \right) \\
+0 &amp;= \mathrm{connect}\left( Q_{+}pout, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( Zc_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( wk, core_{+}p3 \right) \\
+ - \mathtt{j1.core.p2.f}\left( t \right) &amp;= \mathtt{j1.core.p1.f}\left( t \right) \\
+ - \mathtt{j1.core.p3.f}\left( t \right) &amp;= \mathtt{j1.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{j1.core.p1.e}\left( t \right) - \mathtt{j1.core.p2.e}\left( t \right) - \mathtt{j1.core.p3.e}\left( t \right) \\
+\mathtt{j1.Q.e}\left( t \right) &amp;= \mathtt{j1.Q.power.e}\left( t \right) \\
+\mathtt{j1.Q.pout.e}\left( t \right) &amp;= \mathtt{j1.Q.power.e}\left( t \right) \\
+\mathtt{j1.Q.f}\left( t \right) &amp;=  - \mathtt{j1.Q.pout.f}\left( t \right) + \mathtt{j1.Q.power.f}\left( t \right) \\
+\mathtt{j1.Q.f}\left( t \right) &amp;= ifelse\left( mod\left( t, 0.8 \right) &lt; 0.3, 366.52 ~ \sin\left( 3.3333 ~ \pi ~ mod\left( t, 0.8 \right) \right), 0 \right) \\
+\mathtt{j1.Zc.e}\left( t \right) &amp;= \mathtt{j1.Zc.power.e}\left( t \right) \\
+\mathtt{j1.Zc.pout.e}\left( t \right) &amp;= \mathtt{j1.Zc.power.e}\left( t \right) \\
+\mathtt{j1.Zc.f}\left( t \right) &amp;=  - \mathtt{j1.Zc.pout.f}\left( t \right) + \mathtt{j1.Zc.power.f}\left( t \right) \\
+\mathtt{j1.Zc.e}\left( t \right) &amp;= \mathtt{j1.Zc.R} ~ \mathtt{j1.Zc.f}\left( t \right) \\
+0 &amp;= \mathrm{connect}\left( wk, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( C_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( Rp_{+}power, core_{+}p3 \right) \\
+\mathtt{j0.core.p2.e}\left( t \right) &amp;= \mathtt{j0.core.p1.e}\left( t \right) \\
+\mathtt{j0.core.p3.e}\left( t \right) &amp;= \mathtt{j0.core.p1.e}\left( t \right) \\
+0 &amp;= \mathtt{j0.core.p1.f}\left( t \right) + \mathtt{j0.core.p2.f}\left( t \right) + \mathtt{j0.core.p3.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{j0.C.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{j0.C.f}\left( t \right) \\
+\mathtt{j0.C.e}\left( t \right) &amp;= \mathtt{j0.C.power.e}\left( t \right) \\
+\mathtt{j0.C.pout.e}\left( t \right) &amp;= \mathtt{j0.C.power.e}\left( t \right) \\
+\mathtt{j0.C.f}\left( t \right) &amp;=  - \mathtt{j0.C.pout.f}\left( t \right) + \mathtt{j0.C.power.f}\left( t \right) \\
+\mathtt{j0.C.e}\left( t \right) &amp;= \frac{\mathtt{j0.C.q}\left( t \right)}{\mathtt{j0.C.C}} \\
+\mathtt{j0.Rp.e}\left( t \right) &amp;= \mathtt{j0.Rp.power.e}\left( t \right) \\
+\mathtt{j0.Rp.pout.e}\left( t \right) &amp;= \mathtt{j0.Rp.power.e}\left( t \right) \\
+\mathtt{j0.Rp.f}\left( t \right) &amp;=  - \mathtt{j0.Rp.pout.f}\left( t \right) + \mathtt{j0.Rp.power.f}\left( t \right) \\
+\mathtt{j0.Rp.e}\left( t \right) &amp;= \mathtt{j0.Rp.R} ~ \mathtt{j0.Rp.f}\left( t \right)
+\end{align}
+ \]</p><p>The library draws the bond graph from the model, in the order of Westerhof et al.&#39;s Fig. 5: source, <span>$Z_c$</span>, then <span>$C$</span> and <span>$R$</span>:</p><pre><code class="language-julia hljs">bgplot(windkessel)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 15.1.0 (20260618.0150)
+ -->
+<!-- Title: BondGraph Pages: 1 -->
+<svg width="353pt" height="123pt"
+ viewBox="0.00 0.00 353.00 123.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 119)">
+<title>BondGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-119 349,-119 349,4 -4,4"/>
+<!-- j1 -->
+<g id="node1" class="node">
+<title>j1</title>
+<text xml:space="preserve" text-anchor="middle" x="124" y="-13.32" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- j0 -->
+<g id="node4" class="node">
+<title>j0</title>
+<text xml:space="preserve" text-anchor="middle" x="221" y="-13.32" font-family="Times,serif" font-size="14.00">0</text>
+</g>
+<!-- j1&%2345;&gt;j0 -->
+<g id="edge5" class="edge">
+<title>j1&%2345;&gt;j0</title>
+<path fill="none" stroke="black" d="M150.96,-18C161.12,-18 172.94,-18 183.91,-18"/>
+<polygon fill="black" stroke="black" points="193.87,-18 183.87,-22.5 189.07,-18 183.87,-18 183.87,-18 193.87,-18"/>
+</g>
+<!-- j1₊Q -->
+<g id="node2" class="node">
+<title>j1₊Q</title>
+<text xml:space="preserve" text-anchor="middle" x="27" y="-13.32" font-family="Times,serif" font-size="14.00">Sf:Q</text>
+</g>
+<!-- j1₊Q&%2345;&gt;j1 -->
+<g id="edge1" class="edge">
+<title>j1₊Q&%2345;&gt;j1</title>
+<path fill="none" stroke="black" d="M53.96,-18C64.12,-18 75.94,-18 86.91,-18"/>
+<polygon fill="black" stroke="black" points="96.87,-18 86.87,-22.5 92.07,-18 86.87,-18 86.87,-18 96.87,-18"/>
+</g>
+<!-- j1₊Zc -->
+<g id="node3" class="node">
+<title>j1₊Zc</title>
+<text xml:space="preserve" text-anchor="middle" x="124" y="-92.33" font-family="Times,serif" font-size="14.00">R:Zc</text>
+</g>
+<!-- j1₊Zc&%2345;&gt;j1 -->
+<g id="edge2" class="edge">
+<title>j1₊Zc&%2345;&gt;j1</title>
+<path fill="none" stroke="black" d="M124,-69.16C124,-58.07 124,-46.98 124,-35.9"/>
+<polygon fill="black" stroke="black" points="124,-79.13 119.5,-69.13 124,-74.34 124,-69.13 124,-69.13 124,-79.13"/>
+</g>
+<!-- j0₊C -->
+<g id="node5" class="node">
+<title>j0₊C</title>
+<text xml:space="preserve" text-anchor="middle" x="318" y="-13.32" font-family="Times,serif" font-size="14.00">C:C</text>
+</g>
+<!-- j0&%2345;&gt;j0₊C -->
+<g id="edge3" class="edge">
+<title>j0&%2345;&gt;j0₊C</title>
+<path fill="none" stroke="black" d="M247.96,-18C258.12,-18 269.94,-18 280.91,-18"/>
+<polygon fill="black" stroke="black" points="290.87,-18 280.87,-22.5 286.07,-18 280.87,-18 280.87,-18 290.87,-18"/>
+</g>
+<!-- j0₊Rp -->
+<g id="node6" class="node">
+<title>j0₊Rp</title>
+<text xml:space="preserve" text-anchor="middle" x="221" y="-92.33" font-family="Times,serif" font-size="14.00">R:Rp</text>
+</g>
+<!-- j0₊Rp&%2345;&gt;j0 -->
+<g id="edge4" class="edge">
+<title>j0₊Rp&%2345;&gt;j0</title>
+<path fill="none" stroke="black" d="M221,-69.16C221,-58.07 221,-46.98 221,-35.9"/>
+<polygon fill="black" stroke="black" points="221,-79.13 216.5,-69.13 221,-74.34 221,-69.13 221,-69.13 221,-79.13"/>
+</g>
+</g>
+</svg>
+'/><h2 id="Analysing-the-model"><a class="docs-heading-anchor" href="#Analysing-the-model">Analysing the model</a><a id="Analysing-the-model-1"></a><a class="docs-heading-anchor-permalink" href="#Analysing-the-model" title="Permalink"></a></h2><p><code>mtkcompile</code> reduces the model to its one state: the volume stored in the compliance.</p><pre><code class="language-julia hljs">sys = mtkcompile(windkessel)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{j0.C.q}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{j0.Rp.f}\left( t \right) + \mathtt{j1.Q.f}\left( t \right)
+\end{align}
+ \]</p><p>Print system states</p><pre><code class="language-julia hljs">unknowns(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ j0₊C₊q(t)</code></pre><p>Print system parameters</p><pre><code class="language-julia hljs">parameters(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ j1₊Zc₊R
+ j0₊C₊C
+ j0₊Rp₊R</code></pre><p>Print the system&#39;s equations in terms of the states</p><pre><code class="language-julia hljs">full_equations(sys)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{j0.C.q}\left( t \right)}{\mathrm{d}t} &amp;= ifelse\left( mod\left( t, 0.8 \right) &lt; 0.3, 366.52 ~ \sin\left( 3.3333 ~ \pi ~ mod\left( t, 0.8 \right) \right), 0 \right) + \frac{ - \mathtt{j0.C.q}\left( t \right)}{\mathtt{j0.C.C} ~ \mathtt{j0.Rp.R}}
+\end{align}
+ \]</p><h3 id="Generated-equations-against-the-hand-derivation"><a class="docs-heading-anchor" href="#Generated-equations-against-the-hand-derivation">Generated equations against the hand derivation</a><a id="Generated-equations-against-the-hand-derivation-1"></a><a class="docs-heading-anchor-permalink" href="#Generated-equations-against-the-hand-derivation" title="Permalink"></a></h3><p><code>bgequations</code> returns the same equations with the names we choose. We rename the stored volume to <span>$V$</span> and the parameters to the symbols of the introduction (inside a <code>let</code>, so the name <code>C</code> keeps pointing at the element):</p><pre><code class="language-julia hljs">let
+    @variables V(t)
+    @parameters C R
+    bgequations(windkessel; rename = Dict(j0.C.q =&gt; V, j0.C.C =&gt; C, j0.Rp.R =&gt; R))
+end</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}V\left( t \right)}{\mathrm{d}t} &amp;= ifelse\left( mod\left( t, 0.8 \right) &lt; 0.3, 366.52 ~ \sin\left( 3.3333 ~ \pi ~ mod\left( t, 0.8 \right) \right), 0 \right) + \frac{ - V\left( t \right)}{C ~ R}
+\end{align}
+ \]</p><p>The inflow appears as its expression in <span>$t$</span>. With <span>$V = C\,P_c$</span>, the equation reads <span>$C\,\dot{P}_c = Q(t) - P_c/R$</span>, the hand-derived equation. <span>$Z_c$</span> doesn&#39;t appear, and renaming it would be an error: it carries the source&#39;s flow, which is known, so it only sets the source&#39;s effort, the entrance pressure <span>$P = P_c + Z_c\,Q$</span>, an observed variable that <code>bgequations</code> (state equations only) doesn&#39;t list. We check it in the simulation below.</p><h2 id="System-Simulations"><a class="docs-heading-anchor" href="#System-Simulations">System Simulations</a><a id="System-Simulations-1"></a><a class="docs-heading-anchor-permalink" href="#System-Simulations" title="Permalink"></a></h2><h3 id="Bond-graph-model"><a class="docs-heading-anchor" href="#Bond-graph-model">Bond graph model</a><a id="Bond-graph-model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-graph-model" title="Permalink"></a></h3><p>Define the simulation time: ten heart beats.</p><pre><code class="language-julia hljs">tspan = (0.0, 10T)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(0.0, 8.0)</code></pre><p>Generate an <code>ODEProblem</code>, with the initial volume given to the compliance:</p><pre><code class="language-julia hljs">prob = ODEProblem(sys, [], tspan)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr38_2" style="color:#56b6c2">ODEProblem</span> with uType <span class="sgr38_2" style="color:#56b6c2">Vector{Float64}</span> and tType <span class="sgr38_2" style="color:#56b6c2">Float64</span>. In-place: <span class="sgr38_2" style="color:#56b6c2">true</span>
+Initialization status: <span class="sgr38_2" style="color:#56b6c2">FULLY_DETERMINED</span>
+Non-trivial mass matrix: <span class="sgr38_2" style="color:#56b6c2">false</span>
+timespan: (0.0, 8.0)
+u0: 1-element Vector{Float64}:
+ 120.0</code></pre><p>Use <code>solve</code> to simulate the system. Tight tolerances let us compare it with the reference model at the end. The inflow&#39;s slope jumps at the start and end of each systole; <code>tstops</code> puts a solver step on each of these instants.</p><pre><code class="language-julia hljs">kinks = sort([(0:9) * T; (0:9) * T .+ Ts])
+sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10, tstops = kinks)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">retcode: Success
+Interpolation: specialized 4th order &quot;free&quot; interpolation
+t: 510-element Vector{Float64}:
+ 0.0
+ 0.0019901506771301787
+ 0.005394165415389557
+ 0.009492893064091398
+ 0.014741030239407819
+ 0.021193327833589147
+ 0.0355716345328352
+ 0.04210830554506091
+ 0.051725549779142954
+ 0.05962103361402406
+ ⋮
+ 7.690074756897334
+ 7.729832394029656
+ 7.771253680226817
+ 7.8143200092526
+ 7.858612932873799
+ 7.903981138143846
+ 7.95019427067042
+ 7.99711186304317
+ 8.0
+u: 510-element Vector{Vector{Float64}}:
+ [120.0]
+ [119.84849082052146]
+ [119.62499984076982]
+ [119.41539893422417]
+ [119.24131905106599]
+ [119.17086036769378]
+ [119.569150247332]
+ [119.99484235744394]
+ [120.8850964341036]
+ [121.83909383629806]
+ ⋮
+ [135.18184400322815]
+ [131.64590407812744]
+ [128.06034299174578]
+ [124.43589658498837]
+ [120.81519701470201]
+ [117.21579181444253]
+ [113.65958168916146]
+ [110.15951597529894]
+ [109.94761619313704]</code></pre><p>The entrance (aortic) pressure is the source&#39;s effort, and the pressure after <span>$Z_c$</span> the compliance&#39;s:</p><pre><code class="language-julia hljs">plot(sol, idxs = [j1.Q.e, j0.C.e], labels = [&quot;P (aortic)&quot; &quot;P_c&quot;],
+     xlabel = &quot;Time (s)&quot;, ylabel = &quot;Pressure (mmHg)&quot;)</code></pre><img src="0213a009.svg" alt="Example block output"/><p>The inflow, the source&#39;s flow, against the peripheral outflow, <span>$R$</span>&#39;s flow. The compliance turns the pulsatile inflow into a nearly steady outflow:</p><pre><code class="language-julia hljs">plot(sol, idxs = [j1.Q.f, j0.Rp.f], labels = [&quot;Q (aortic inflow)&quot; &quot;P_c/R (peripheral)&quot;],
+     xlabel = &quot;Time (s)&quot;, ylabel = &quot;Flow (mL/s)&quot;)</code></pre><img src="c65b21a2.svg" alt="Example block output"/><h3 id="Periodic-pressure-range"><a class="docs-heading-anchor" href="#Periodic-pressure-range">Periodic pressure range</a><a id="Periodic-pressure-range-1"></a><a class="docs-heading-anchor-permalink" href="#Periodic-pressure-range" title="Permalink"></a></h3><p>After a few beats the pressure repeats from beat to beat. The diastolic (minimum) and systolic (maximum) aortic pressure of each beat, on a fine grid:</p><pre><code class="language-julia hljs">beats = [range(k * T, (k + 1) * T, length = 801) for k in 0:9]
+P_range = [extrema(sol(b; idxs = j1.Q.e).u) for b in beats]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">10-element Vector{Tuple{Float64, Float64}}:
+ (77.21643384934865, 122.40731394419143)
+ (75.58346529002979, 119.9841690778259)
+ (74.62549045785195, 118.56308582572677)
+ (74.06349814438092, 117.72970711767594)
+ (73.73380747842064, 117.24080864173797)
+ (73.54039569531518, 116.9539982036641)
+ (73.42693140394292, 116.78574194451278)
+ (73.36036800635361, 116.68703504662346)
+ (73.32131884079114, 116.62912901878062)
+ (73.29841079542469, 116.59515866727827)</code></pre><p>The last beat&#39;s diastolic and systolic pressures, about 73/117 mmHg, and their change from the beat before, a few hundredths of a mmHg: the start-up transient decays with the time constant <span>$RC = 1.5$</span> s, by a factor <span>$e^{-T/RC} \approx 0.6$</span> per beat, and after ten beats is almost gone:</p><pre><code class="language-julia hljs">P_range[end], P_range[end] .- P_range[end-1]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">((73.29841079542469, 116.59515866727827), (-0.022908045366449414, -0.033970351502347285))</code></pre><p>The mean aortic pressure over the last beat and the predicted <span>$(R + Z_c)\,SV/T$</span>:</p><pre><code class="language-julia hljs">let b = beats[end]
+    sum(sol(b[1:end-1]; idxs = j1.Q.e).u) / (length(b) - 1), (1.0 + 0.06) * SV / T
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(92.79291892411933, 92.75)</code></pre><h3 id="Windkessel-model-2"><a class="docs-heading-anchor" href="#Windkessel-model-2">Windkessel model</a><a class="docs-heading-anchor-permalink" href="#Windkessel-model-2" title="Permalink"></a></h3><p>The reference model is the hand-derived equation, in the pressure <span>$P_c$</span>, with the same parameter values and initial pressure:</p><pre><code class="language-julia hljs">Rᵥ, Zcᵥ, Cᵥ = 1.0, 0.06, 1.5     # (mmHg⋅s/mL, mmHg⋅s/mL, mL/mmHg)
+@variables Pc(t) = 80.0          # (mmHg) Pressure across the compliance
+@variables P(t)                  # (mmHg) Aortic pressure at the entrance
+@named ref = System([Cᵥ * D(Pc) ~ inflow(t) - Pc / Rᵥ, P ~ Pc + Zcᵥ * inflow(t)], t)</code></pre><p class="math-container">\[ \begin{align}
+1.5 ~ \frac{\mathrm{d}\mathtt{Pc}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{Pc}\left( t \right) + ifelse\left( mod\left( t, 0.8 \right) &lt; 0.3, 366.52 ~ \sin\left( 3.3333 ~ \pi ~ mod\left( t, 0.8 \right) \right), 0 \right) \\
+P\left( t \right) &amp;= \mathtt{Pc}\left( t \right) + 0.06 ~ ifelse\left( mod\left( t, 0.8 \right) &lt; 0.3, 366.52 ~ \sin\left( 3.3333 ~ \pi ~ mod\left( t, 0.8 \right) \right), 0 \right)
+\end{align}
+ \]</p><p>We compile and solve it as the bond graph model, with the same time span, tolerances and stops.</p><pre><code class="language-julia hljs">ref_sol = solve(ODEProblem(mtkcompile(ref), [], tspan), Tsit5(), reltol = 1e-10, abstol = 1e-10,
+                tstops = kinks);</code></pre><h3 id="Compare-models"><a class="docs-heading-anchor" href="#Compare-models">Compare models</a><a id="Compare-models-1"></a><a class="docs-heading-anchor-permalink" href="#Compare-models" title="Permalink"></a></h3><p>The aortic pressure of the bond graph (solid) against the Windkessel equation (dashed):</p><pre><code class="language-julia hljs">plot(sol, idxs = j1.Q.e, label = &quot;Bond graph&quot;, xlabel = &quot;Time (s)&quot;, ylabel = &quot;Aortic pressure (mmHg)&quot;)
+plot!(ref_sol, idxs = P, label = &quot;Windkessel equation&quot;, linestyle = :dash)</code></pre><img src="ad9c1bdc.svg" alt="Example block output"/><p>On a common time grid, the largest difference between the two models, in the aortic pressure <span>$P$</span> and the pressure after <span>$Z_c$</span>, <span>$P_c$</span>:</p><pre><code class="language-julia hljs">tgrid = range(tspan..., length = 1001)
+(maximum(abs, sol(tgrid; idxs = j1.Q.e).u - ref_sol(tgrid; idxs = P).u),
+ maximum(abs, sol(tgrid; idxs = j0.C.e).u - ref_sol(tgrid; idxs = Pc).u))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(7.459937023668317e-8, 7.459937023668317e-8)</code></pre><p>The difference is about <span>$10^{-9}$</span> of the pressure, the solver&#39;s tolerance. The bond graph model reproduces the three-element Windkessel, and its aortic pressure settles into a periodic beat with plausible systolic and diastolic values.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../electrical_rlc/">« Series RLC Circuit</a><a class="docs-footer-nextpage" href="../hydraulic_coupled_tanks/">Coupled Tanks »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Sunday 18 October 2026 18:13">Sunday 18 October 2026</span>. Using Julia version 1.10.12.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
