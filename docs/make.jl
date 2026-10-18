@@ -57,6 +57,8 @@ function insert_quick_example(quick_example)
     quickex = read(joinpath(@__DIR__, "src", quick_example[1][2]), String)
 
     quickex = replace(quickex, "This page was generated using" => "This section was generated using")
+    # Image paths are written relative to docs/src/examples/; this page lives in docs/src/
+    quickex = replace(quickex, "](../assets/" => "](assets/")
 
     # Regular expression pattern to match the first heading
     pattern = r"(?m)^#.*?\n\n"

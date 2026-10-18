@@ -5,10 +5,15 @@
 # A more challenging, yet still simple, dynamic system than the [harmonic oscillator](@ref msd-1dof) is the mass-spring-damper system with two degrees of freedom. A first mass sits on a spring and a damper to the ground; a second mass sits on a coupling spring and damper on top of the first, and an external force drives it, as in the free-body diagram below:
 #
 # ```@raw html
-# <picture style="display: flex; justify-content: center; align-items: center;">
-#   <source srcset="../../assets/tikz/fbd_2dof-dark.svg" media="(prefers-color-scheme: dark)">
-#   <img src="../../assets/tikz/fbd_2dof.svg">
-# </picture>
+# <div class="docs-light-only" style="text-align: center;">
+# ```
+# ![Free-body diagram](../assets/tikz/fbd_2dof.svg)
+# ```@raw html
+# </div><div class="docs-dark-only" style="text-align: center;">
+# ```
+# ![Free-body diagram](../assets/tikz/fbd_2dof-dark.svg)
+# ```@raw html
+# </div>
 # ```
 #
 # ### Two-mass model
@@ -29,10 +34,15 @@
 # Each mass has its own velocity, so each gets a 1-junction; the coupling spring and damper move with the relative velocity of the masses, so they share a third 1-junction. A 0-junction relates the three velocities:
 #
 # ```@raw html
-# <picture style="display: flex; justify-content: center; align-items: center;">
-#   <source srcset="../../assets/tikz/bg_2dof-dark.svg" media="(prefers-color-scheme: dark)">
-#   <img src="../../assets/tikz/bg_2dof.svg">
-# </picture>
+# <div class="docs-light-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_2dof.svg)
+# ```@raw html
+# </div><div class="docs-dark-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_2dof-dark.svg)
+# ```@raw html
+# </div>
 # ```
 #
 # As in the [harmonic oscillator](@ref msd-1dof), the inertias (I) stand for the masses $m_1$ and $m_2$, the compliances (C) for the springs, with $C = 1/k$, and the resistances (R) for the dampers (Karnopp, Margolis & Rosenberg 2012, §3.1, pp. 38–47). The effort source `Se:F(t)` is the external force on $m_2$. Karnopp describes the mechanical 1-junction as a force balance at a common velocity and the mechanical 0-junction as the geometric compatibility of velocities at a common force (§3.3, pp. 58, 61).
