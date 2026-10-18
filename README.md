@@ -66,6 +66,12 @@ The [documentation](https://www.felipecastrotc.com/BondGraphToolkit.jl/stable/) 
 
 If you use BondGraphToolkit.jl in your work, please cite it. GitHub's *Cite this repository* button gives the reference from [CITATION.cff](CITATION.cff).
 
+## Acknowledgements
+
+BondGraphToolkit.jl grew out of the author's doctoral research at the [School of Mechanical Engineering (FEM)](https://www.fem.unicamp.br/) of the [University of Campinas (UNICAMP)](https://www.unicamp.br/), supervised by [Prof. Alberto Luiz Serpa](https://bv.fapesp.br/en/pesquisador/4509/), and carried out at [CEPETRO](https://www.cepetro.unicamp.br/), UNICAMP's Center for Energy and Petroleum Studies. The doctorate was supported by the São Paulo Research Foundation (FAPESP), [process 2019/14597-5](https://bv.fapesp.br/en/bolsas/187752/modelling-the-dynamical-behavior-in-electrical-submersible-pump-esp-for-liquid-liquid-flow/).
+
+Opinions, hypotheses and conclusions or recommendations expressed in this material are the responsibility of the author and do not necessarily reflect the views of FAPESP.
+
 ## Development
 
 Versions up to 0.2 were written by the author without AI tools. The 0.3 refactor (the move to ModelingToolkit 11 and the redesign of ports and junctions) was developed with AI coding assistants. The author has reviewed all of it, and is doing a further full pass over the codebase to rewrite parts in his own style. The tests check the models against hand-derived equations and the v0.2 results.
