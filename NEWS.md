@@ -1,5 +1,13 @@
 # BondGraphToolkit.jl release notes
 
+## v0.3.1 (2026-10-18)
+
+The first version for Julia's General registry. No change to the API or the models.
+
+- **License: MIT.** Versions up to 0.3.0 were released under the Apache License 2.0.
+- **Repository renamed** to [BondGraphToolkit.jl](https://github.com/felipecastrotc/BondGraphToolkit.jl), as the registry requires. The documentation moved to https://www.felipecastrotc.com/BondGraphToolkit.jl/stable/.
+- A `[compat]` bound for the `REPL` standard library.
+
 ## v0.3.0 (2026-10-18)
 
 BondGraphToolkit 0.3.0 rebuilds the package on **ModelingToolkit 11** and **Julia ≥ 1.10**. It uses only MTK's public API, so it installs with a fresh dependency resolution: no pinned Manifest and no overridden MTK internals. A bond graph is an ordinary MTK system. You build it the way you draw it, then simulate it with `mtkcompile`, `ODEProblem` and `solve`.
