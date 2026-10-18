@@ -1,0 +1,38 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{nicefrac}
+\usepackage{amsmath}
+
+\input{base_tikzset.tex}
+
+\begin{document}
+
+\begin{tikzpicture}[line width=0.25mm, node distance=1.5cm]
+
+  % 1-junction at the center
+  \node[port] (junction1) {1};
+  
+  % I element to the left of junction1
+  \node[right=of junction1, port] (I) {I: \(m_{\text{duff}}\)};
+  \drawbg{junction1}{I};
+  
+  % C element above junction1
+  \node[above=of junction1, port] (C) {C:\(\nicefrac{1}{k_{\text{lin}}}\)};
+  \drawbg{junction1}{C};
+  
+  % R element below junction1
+  \node[below=of junction1, port] (R) {R:\(c_{\text{duff}}\)};
+  \drawbg{junction1}{R};
+  
+  % Non-linear spring
+  \node[above right=of junction1, xshift=0.5cm, yshift=0.5cm, port] (C3) {C:\(\nicefrac{1}{k_{\text{nl}}}\)};
+  \drawbg{junction1}{C3};
+  
+  % Second Se element to the lower right (diagonal) of junction1
+  \node[left=of junction1, port] (Se) {Se:\(F(t)\)};
+  \drawbg{Se}{junction1};
+  
+\end{tikzpicture}
+  
+
+\end{document}

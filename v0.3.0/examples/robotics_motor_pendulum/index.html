@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Pendulum Driven by a DC Motor · BondGraphToolkit.jl</title><meta name="title" content="Pendulum Driven by a DC Motor · BondGraphToolkit.jl"/><meta property="og:title" content="Pendulum Driven by a DC Motor · BondGraphToolkit.jl"/><meta property="twitter:title" content="Pendulum Driven by a DC Motor · BondGraphToolkit.jl"/><meta name="description" content="Documentation for BondGraphToolkit.jl."/><meta property="og:description" content="Documentation for BondGraphToolkit.jl."/><meta property="twitter:description" content="Documentation for BondGraphToolkit.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img class="docs-light-only" src="../../assets/logo.svg" alt="BondGraphToolkit.jl logo"/><img class="docs-dark-only" src="../../assets/logo-dark.svg" alt="BondGraphToolkit.jl logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../getting_started_auto/">Getting started</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../../man/user_guide/">Concepts and conventions</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Systems</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../mechanical_msd_1dof/">Harmonic Oscillator</a></li><li><a class="tocitem" href="../mechanical_msd_2dof/">Mass-Spring-Damper system 2-DoF</a></li><li><a class="tocitem" href="../mechanical_msd_ndof/">MSD system with N-DoF</a></li><li><a class="tocitem" href="../mechanical_duffing/">Duffing Equation</a></li><li><a class="tocitem" href="../electrical_dc_motor/">DC Motor</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Features</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../two_ports/">Transformers and Gyrators</a></li><li><a class="tocitem" href="../signals/">Signals and Detectors</a></li><li><a class="tocitem" href="../adapters/">Coupling with the MTK Standard Library</a></li><li><a class="tocitem" href="../elements_oneport/">One-Port Elements</a></li><li><a class="tocitem" href="../composition/">Reusable Subsystems</a></li><li><a class="tocitem" href="../equations_latex/">Equations and LaTeX</a></li><li><a class="tocitem" href="../drawing/">Drawing Bond Graphs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox" checked/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Applications</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../control_dc_motor_pi/">DC Motor Speed Control</a></li><li class="is-active"><a class="tocitem" href>Pendulum Driven by a DC Motor</a><ul class="internal"><li><a class="tocitem" href="#Introduction"><span>Introduction</span></a></li><li><a class="tocitem" href="#Preliminary-Steps"><span>Preliminary Steps</span></a></li><li><a class="tocitem" href="#System-Element-Definitions"><span>System Element Definitions</span></a></li><li><a class="tocitem" href="#Model-Construction"><span>Model Construction</span></a></li><li><a class="tocitem" href="#Analysing-the-model"><span>Analysing the model</span></a></li><li><a class="tocitem" href="#System-Simulations"><span>System Simulations</span></a></li></ul></li><li><a class="tocitem" href="../electrical_rlc/">Series RLC Circuit</a></li><li><a class="tocitem" href="../biomedical_windkessel/">Arterial Windkessel</a></li><li><a class="tocitem" href="../hydraulic_coupled_tanks/">Coupled Tanks</a></li><li><a class="tocitem" href="../chemical_reaction_network/">Chemical Reaction Network</a></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/public/">Public</a></li><li><a class="tocitem" href="../../lib/internals/">Internals</a></li></ul></li><li><a class="tocitem" href="../../citing/">Citing BondGraphToolkit</a></li><li><a class="tocitem" href="../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../license/">License</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Applications</a></li><li class="is-active"><a href>Pendulum Driven by a DC Motor</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Pendulum Driven by a DC Motor</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl/blob/main/examples/robotics_motor_pendulum.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="motor-pendulum"><a class="docs-heading-anchor" href="#motor-pendulum">Pendulum Driven by a DC Motor</a><a id="motor-pendulum-1"></a><a class="docs-heading-anchor-permalink" href="#motor-pendulum" title="Permalink"></a></h1><p><em>The source files for all examples can be found in <a href="https://github.com/felipecastrotc/BondGraph.jl/tree/main/examples/">/examples</a>.</em></p><h2 id="Introduction"><a class="docs-heading-anchor" href="#Introduction">Introduction</a><a id="Introduction-1"></a><a class="docs-heading-anchor-permalink" href="#Introduction" title="Permalink"></a></h2><p>A DC motor swinging a pendulum is the smallest model of a robot joint: an electrical drive, a rotor, and a link whose geometry changes as it moves. Breedveld uses it to show how a bond graph is built from an iconic diagram and what causality tells the modeller (Breedveld 2011, in Borutzky (ed.), <em>Bond Graph Modelling of Engineering Systems</em>, Springer, §1.3.5, §1.4.4 and §1.5.9, pp. 19–35). The iconic diagram is his Fig. 1.6 (p. 19): a voltage source <span>$u_s$</span> drives a current through the armature resistance <span>$R_e$</span> and inductance <span>$L$</span> into a motor with constant <span>$K_m$</span>; the rotor has inertia <span>$J$</span> and bearing friction <span>$b$</span>; a rigid massless rod of length <span>$l$</span> carries a point mass <span>$m$</span> in gravity <span>$g$</span>.</p><h3 id="Motor-and-pendulum-model"><a class="docs-heading-anchor" href="#Motor-and-pendulum-model">Motor and pendulum model</a><a id="Motor-and-pendulum-model-1"></a><a class="docs-heading-anchor-permalink" href="#Motor-and-pendulum-model" title="Permalink"></a></h3><p>As in the <a href="../electrical_dc_motor/#dc-motor">DC motor</a>, the magnetic field is constant, so the motor is an ideal transducer with torque <span>$K_m i$</span> and back EMF <span>$K_m \omega$</span>. The rod is rigid and massless, the mass a point, and the friction viscous. The angle <span>$\varphi$</span> is measured from the horizontal axis <span>$x$</span>, and gravity acts along <span>$-y$</span> (Fig. 1.6), so the mass sits at</p><p class="math-container">\[x = l\cos\varphi, \qquad y = l\sin\varphi\]</p><p>(Eqs. 1.13–1.14, p. 20) and hangs at rest at <span>$\varphi = -\pi/2$</span>.</p><p>Kirchhoff&#39;s voltage law around the armature loop gives</p><p class="math-container">\[L\,\dfrac{di}{dt} + R_e\,i = u_s - K_m\,\omega.\]</p><p>The rotor and the mass turn together about the pivot, with total inertia <span>$J + m l^2$</span>. Gravity <span>$-mg$</span> along <span>$y$</span> acts at the lever arm <span>$x = l\cos\varphi$</span>, a torque <span>$-m g l\cos\varphi$</span>. Newton&#39;s 2nd law for the rotation gives</p><p class="math-container">\[(J + m l^2)\,\dot{\omega} + b\,\omega + m g l\cos\varphi = K_m\,i, \qquad \dot{\varphi} = \omega.\]</p><p>Breedveld reaches the same model from the bond graph: the two inertias of the point mass add up to <span>$m l^2$</span> on the rotor (Eqs. 1.22–1.23, p. 34), and gravity becomes a nonlinear compliance with torque <span>$m g l\cos\varphi$</span> (Eq. 1.25, p. 34; Fig. 1.11b, p. 35). For small angles around <span>$-\pi/2$</span> this compliance is linear, with parameter <span>$1/(mgl)$</span>, and the undamped pendulum oscillates at</p><p class="math-container">\[f = \dfrac{\omega_0}{2\pi} = \dfrac{1}{2\pi}\sqrt{\dfrac{m g l}{J + m l^2}}\]</p><p>(Eq. 1.26, p. 35).</p><h3 id="Bond-Graph-Model"><a class="docs-heading-anchor" href="#Bond-Graph-Model">Bond Graph Model</a><a id="Bond-Graph-Model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-Graph-Model" title="Permalink"></a></h3><p>Breedveld&#39;s bond graph (Fig. 1.7d, p. 20) keeps the point mass in the plane instead of reducing it by hand. Here is the model built below, drawn by <code>bgplot</code>:</p><ul><li><code>Se:us</code> is the voltage source <span>$u_s$</span>; <code>R:Re</code> and <code>I:L</code> the armature resistance <span>$R_e$</span> and inductance <span>$L$</span>, on the 1-junction of the current <span>$i$</span>;</li><li><code>GY:Km</code> is the motor, a gyrator with modulus <span>$K_m$</span>: <span>$e_1 = K_m f_2$</span>, <span>$e_2 = K_m f_1$</span> (Breedveld Eqs. 1.6–1.7, p. 15; Karnopp, Margolis &amp; Rosenberg 2012, Eq. 3.11);</li><li><code>I:J</code> and <code>R:b</code> are the rotor inertia and the bearing friction, on the 1-junction of the angular velocity <span>$\omega$</span>;</li><li><code>TF:mtfx</code> and <code>TF:mtfy</code> are the rigid rod: two transformers modulated by the angle, with moduli <span>$-l\sin\varphi$</span> and <span>$l\cos\varphi$</span> (Eq. 1.19, p. 21). With the transformer law <span>$e_1 = n e_2$</span>, <span>$f_2 = n f_1$</span> (Eqs. 1.4–1.5, p. 15) they give the velocities of the mass, <span>$\dot{x} = (-l\sin\varphi)\,\omega$</span> and <span>$\dot{y} = (l\cos\varphi)\,\omega$</span> (Eqs. 1.15–1.16), and the torque of the rod&#39;s forces, <span>$T_\varphi = (-l\sin\varphi)\,F_x + (l\cos\varphi)\,F_y$</span> (Eq. 1.18);</li><li><code>I:mx</code> and <code>I:my</code> are the point mass in the two directions, and <code>Se:mg</code> the weight <span>$-mg$</span> on the 1-junction of <span>$\dot{y}$</span>.</li></ul><p>The angle that modulates the transformers is the integral of <span>$\omega$</span>, a signal: Breedveld draws it as an integrator fed from the <span>$\omega$</span> junction (Fig. 1.7d). Here a flow detector <code>Df:ω</code> reads <span>$\omega$</span> and an integrator block outputs <span>$\varphi$</span>. Signals are not drawn by <code>bgplot</code>.</p><h2 id="Preliminary-Steps"><a class="docs-heading-anchor" href="#Preliminary-Steps">Preliminary Steps</a><a id="Preliminary-Steps-1"></a><a class="docs-heading-anchor-permalink" href="#Preliminary-Steps" title="Permalink"></a></h2><p>In this example we build the bond graph of Fig. 1.7d and let ModelingToolkit reduce it, then compare it with the reduced pendulum derived above and check the small-angle frequency of Eq. 1.26.</p><p>We import the bond-graph toolkit, the integrator block from the MTK standard library, and the solvers: the compiled model keeps algebraic equations (see below), so it needs the DAE-capable <code>Rodas5P</code>, and <code>OrdinaryDiffEqNonlinearSolve</code> for its initial values. <code>Tsit5</code> solves the reference ODE.</p><pre><code class="language-julia hljs">using BondGraphToolkit
+using BondGraphToolkit.ModelingToolkit: t_nounits as t, D_nounits as D
+import ModelingToolkitStandardLibrary.Blocks as Blocks
+using OrdinaryDiffEqTsit5, OrdinaryDiffEqRosenbrock, OrdinaryDiffEqNonlinearSolve
+using Plots</code></pre><h2 id="System-Element-Definitions"><a class="docs-heading-anchor" href="#System-Element-Definitions">System Element Definitions</a><a id="System-Element-Definitions-1"></a><a class="docs-heading-anchor-permalink" href="#System-Element-Definitions" title="Permalink"></a></h2><p>The electrical side: the voltage source, the armature resistance and inductance.</p><pre><code class="language-julia hljs">@named us = Se(1.0)                 # (V) Source voltage uₛ
+@named Re = Resistance(R = 1.0)     # (Ω) Armature resistance Rₑ
+@named L = Inertia(I = 0.01)        # (H) Armature inductance L</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}p\left( t \right)}{\mathrm{d}t} &amp;= e\left( t \right) \\
+e\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+\mathtt{pout.e}\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+f\left( t \right) &amp;=  - \mathtt{pout.f}\left( t \right) + \mathtt{power.f}\left( t \right) \\
+f\left( t \right) &amp;= \frac{p\left( t \right)}{I}
+\end{align}
+ \]</p><p>The motor constant <span>$K_m$</span>, in N⋅m/A = V⋅s/rad, is the gyrator&#39;s modulus:</p><pre><code class="language-julia hljs">@named Km = GY(r = 0.5)</code></pre><p class="math-container">\[ \begin{align}
+\mathtt{p1.e}\left( t \right) &amp;=  - \mathtt{p2.f}\left( t \right) ~ r \\
+\mathtt{p2.e}\left( t \right) &amp;= \mathtt{p1.f}\left( t \right) ~ r
+\end{align}
+ \]</p><p>The rotor: its inertia and the bearing friction.</p><pre><code class="language-julia hljs">@named J = Inertia(I = 0.01)        # (kg⋅m²) Rotor inertia J
+@named b = Resistance(R = 0.05)     # (N⋅m⋅s/rad) Bearing friction b</code></pre><p class="math-container">\[ \begin{align}
+e\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+\mathtt{pout.e}\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+f\left( t \right) &amp;=  - \mathtt{pout.f}\left( t \right) + \mathtt{power.f}\left( t \right) \\
+e\left( t \right) &amp;= R ~ f\left( t \right)
+\end{align}
+ \]</p><p>The pendulum&#39;s mass, rod length and gravity:</p><pre><code class="language-julia hljs">m = 0.5                             # (kg) Point mass m
+l = 0.3                             # (m) Rod length l
+g = 9.81                            # (m/s²) Gravitational acceleration g</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">9.81</code></pre><p>The point mass is one inertia per direction. Its momenta are fixed by the rotor speed through the rigid rod, so they are not independent states: in bond-graph terms they are in derivative causality (below). Two things follow.</p><ul><li>They get no initial value, or the model&#39;s initialisation is over-determined. With the library&#39;s element that is <code>Inertia(I = m, p = nothing)</code>.</li><li>ModelingToolkit must not keep one of their momenta as a state. Left to itself, it keeps <span>$p_x$</span> and recovers <span>$\omega$</span> from <span>$p_x = -m l\sin\varphi\,\omega$</span>, which has no solution for <span>$\omega$</span> where <span>$\sin\varphi = 0$</span>, the rod horizontal: started there, the pendulum stays frozen while the solver reports success. A low <code>state_priority</code> on the momenta steers ModelingToolkit to the rotor&#39;s momentum instead.</li></ul><p><code>Inertia</code> has no option for that, so the point mass is a small custom element, the library&#39;s inertia law with that metadata on its momentum (see <a href="../elements_oneport/#elements-oneport">One-Port Elements</a>):</p><pre><code class="language-julia hljs">@oneport function PointInertia(; name, I)
+    @parameters I = I
+    @variables p(t) [state_priority = -10]   # no initial value
+    [D(p) ~ e, f ~ p / I]
+end
+@named mx = PointInertia(I = m)     # (kg) Point mass, x direction
+@named my = PointInertia(I = m)     # (kg) Point mass, y direction</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}p\left( t \right)}{\mathrm{d}t} &amp;= e\left( t \right) \\
+e\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+\mathtt{pout.e}\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+f\left( t \right) &amp;=  - \mathtt{pout.f}\left( t \right) + \mathtt{power.f}\left( t \right) \\
+f\left( t \right) &amp;= \frac{p\left( t \right)}{I}
+\end{align}
+ \]</p><p>Gravity is a constant force <span>$-mg$</span> along <span>$y$</span> (Fig. 1.7d labels it <code>Se: −mg</code>):</p><pre><code class="language-julia hljs">@named mg = Se(-m * g)              # (N) Weight</code></pre><p class="math-container">\[ \begin{align}
+e\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+\mathtt{pout.e}\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+f\left( t \right) &amp;=  - \mathtt{pout.f}\left( t \right) + \mathtt{power.f}\left( t \right) \\
+e\left( t \right) &amp;= -4.905
+\end{align}
+ \]</p><p>The angle: a flow detector reads <span>$\omega$</span> on its 1-junction, and an integrator turns it into <span>$\varphi$</span>. Its initial value is the starting angle, the pendulum hanging at rest:</p><pre><code class="language-julia hljs">@named ω = Df()
+@named φ = Blocks.Integrator(x = -π / 2)</code></pre><p class="math-container">\[ \begin{align}
+u\left( t \right) &amp;= \mathtt{input.u}\left( t \right) \\
+y\left( t \right) &amp;= \mathtt{output.u}\left( t \right) \\
+\frac{\mathrm{d}x\left( t \right)}{\mathrm{d}t} &amp;= k ~ u\left( t \right) \\
+y\left( t \right) &amp;= x\left( t \right)
+\end{align}
+ \]</p><p>The rod&#39;s two transformers read the integrator&#39;s output in their moduli, so they are built with <code>@named</code> (see <a href="../two_ports/#two-ports">Transformers and Gyrators</a>):</p><pre><code class="language-julia hljs">@named mtfx = TF(m = -l * sin(φ.output.u))
+@named mtfy = TF(m = l * cos(φ.output.u))</code></pre><p class="math-container">\[ \begin{align}
+\mathtt{p1.e}\left( t \right) &amp;= 0.3 ~ \cos\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{p2.e}\left( t \right) \\
+ - \mathtt{p2.f}\left( t \right) &amp;= 0.3 ~ \cos\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{p1.f}\left( t \right)
+\end{align}
+ \]</p><h2 id="Model-Construction"><a class="docs-heading-anchor" href="#Model-Construction">Model Construction</a><a id="Model-Construction-1"></a><a class="docs-heading-anchor-permalink" href="#Model-Construction" title="Permalink"></a></h2><p>The bonds follow Fig. 1.7d. The source&#39;s bond points into the current junction and the bonds of <span>$R_e$</span> and <span>$L$</span> out of it, into the elements, as in the <a href="../electrical_dc_motor/#dc-motor">DC motor</a>; the bond to the motor leaves the junction (<code>:gy</code>):</p><pre><code class="language-julia hljs">@named ji = Junction1(us =&gt; :pout, Re, L, :gy)</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( us_{+}pout, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( Re_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( L_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( gy, core_{+}p4 \right) \\
+ - \mathtt{core.p2.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p3.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p4.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{core.p1.e}\left( t \right) - \mathtt{core.p2.e}\left( t \right) - \mathtt{core.p3.e}\left( t \right) - \mathtt{core.p4.e}\left( t \right) \\
+\mathtt{us.e}\left( t \right) &amp;= \mathtt{us.power.e}\left( t \right) \\
+\mathtt{us.pout.e}\left( t \right) &amp;= \mathtt{us.power.e}\left( t \right) \\
+\mathtt{us.f}\left( t \right) &amp;=  - \mathtt{us.pout.f}\left( t \right) + \mathtt{us.power.f}\left( t \right) \\
+\mathtt{us.e}\left( t \right) &amp;= 1 \\
+\mathtt{Re.e}\left( t \right) &amp;= \mathtt{Re.power.e}\left( t \right) \\
+\mathtt{Re.pout.e}\left( t \right) &amp;= \mathtt{Re.power.e}\left( t \right) \\
+\mathtt{Re.f}\left( t \right) &amp;=  - \mathtt{Re.pout.f}\left( t \right) + \mathtt{Re.power.f}\left( t \right) \\
+\mathtt{Re.e}\left( t \right) &amp;= \mathtt{Re.R} ~ \mathtt{Re.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{L.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{L.e}\left( t \right) \\
+\mathtt{L.e}\left( t \right) &amp;= \mathtt{L.power.e}\left( t \right) \\
+\mathtt{L.pout.e}\left( t \right) &amp;= \mathtt{L.power.e}\left( t \right) \\
+\mathtt{L.f}\left( t \right) &amp;=  - \mathtt{L.pout.f}\left( t \right) + \mathtt{L.power.f}\left( t \right) \\
+\mathtt{L.f}\left( t \right) &amp;= \frac{\mathtt{L.p}\left( t \right)}{\mathtt{L.I}}
+\end{align}
+ \]</p><p>The motor&#39;s bond enters the <span>$\omega$</span> junction (<code>:gy =&gt; :in</code>); the bonds of <span>$J$</span>, <span>$b$</span> and the detector point out of it, and so do the two bonds to the rod&#39;s transformers (<code>:x</code>, <code>:y</code>): power flows from the motor to the mass.</p><pre><code class="language-julia hljs">@named jω = Junction1(:gy =&gt; :in, J, b, ω, :x, :y)</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( gy, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( J_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( b_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( \omega_{+}power, core_{+}p4 \right) \\
+0 &amp;= \mathrm{connect}\left( x, core_{+}p5 \right) \\
+0 &amp;= \mathrm{connect}\left( y, core_{+}p6 \right) \\
+ - \mathtt{core.p2.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p3.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p4.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p5.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p6.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{core.p1.e}\left( t \right) - \mathtt{core.p2.e}\left( t \right) - \mathtt{core.p3.e}\left( t \right) - \mathtt{core.p4.e}\left( t \right) - \mathtt{core.p5.e}\left( t \right) - \mathtt{core.p6.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{J.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{J.e}\left( t \right) \\
+\mathtt{J.e}\left( t \right) &amp;= \mathtt{J.power.e}\left( t \right) \\
+\mathtt{J.pout.e}\left( t \right) &amp;= \mathtt{J.power.e}\left( t \right) \\
+\mathtt{J.f}\left( t \right) &amp;=  - \mathtt{J.pout.f}\left( t \right) + \mathtt{J.power.f}\left( t \right) \\
+\mathtt{J.f}\left( t \right) &amp;= \frac{\mathtt{J.p}\left( t \right)}{\mathtt{J.I}} \\
+\mathtt{b.e}\left( t \right) &amp;= \mathtt{b.power.e}\left( t \right) \\
+\mathtt{b.pout.e}\left( t \right) &amp;= \mathtt{b.power.e}\left( t \right) \\
+\mathtt{b.f}\left( t \right) &amp;=  - \mathtt{b.pout.f}\left( t \right) + \mathtt{b.power.f}\left( t \right) \\
+\mathtt{b.e}\left( t \right) &amp;= \mathtt{b.R} ~ \mathtt{b.f}\left( t \right) \\
+\mathtt{\omega.e}\left( t \right) &amp;= \mathtt{\omega.power.e}\left( t \right) \\
+\mathtt{\omega.pout.e}\left( t \right) &amp;= \mathtt{\omega.power.e}\left( t \right) \\
+\mathtt{\omega.f}\left( t \right) &amp;=  - \mathtt{\omega.pout.f}\left( t \right) + \mathtt{\omega.power.f}\left( t \right) \\
+\mathtt{\omega.e}\left( t \right) &amp;= 0 \\
+\mathtt{\omega.output.u}\left( t \right) &amp;= \mathtt{\omega.f}\left( t \right)
+\end{align}
+ \]</p><p>The <span>$y$</span> transformer&#39;s bond enters the junction of <span>$\dot{y}$</span> (<code>:tf =&gt; :in</code>), and so does the weight&#39;s (<code>mg =&gt; :pout</code>); the bond of <code>my</code> points out of it. In the <span>$x$</span> direction there is nothing else on the velocity <span>$\dot{x}$</span>, so Breedveld bonds the transformer straight into <code>mx</code> (Fig. 1.7d), as here.</p><pre><code class="language-julia hljs">@named jy = Junction1(:tf =&gt; :in, mg =&gt; :pout, my)</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( tf, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( mg_{+}pout, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( my_{+}power, core_{+}p3 \right) \\
+\mathtt{core.p2.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p3.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{core.p1.e}\left( t \right) + \mathtt{core.p2.e}\left( t \right) - \mathtt{core.p3.e}\left( t \right) \\
+\mathtt{mg.e}\left( t \right) &amp;= \mathtt{mg.power.e}\left( t \right) \\
+\mathtt{mg.pout.e}\left( t \right) &amp;= \mathtt{mg.power.e}\left( t \right) \\
+\mathtt{mg.f}\left( t \right) &amp;=  - \mathtt{mg.pout.f}\left( t \right) + \mathtt{mg.power.f}\left( t \right) \\
+\mathtt{mg.e}\left( t \right) &amp;= -4.905 \\
+\frac{\mathrm{d}\mathtt{my.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{my.e}\left( t \right) \\
+\mathtt{my.e}\left( t \right) &amp;= \mathtt{my.power.e}\left( t \right) \\
+\mathtt{my.pout.e}\left( t \right) &amp;= \mathtt{my.power.e}\left( t \right) \\
+\mathtt{my.f}\left( t \right) &amp;=  - \mathtt{my.pout.f}\left( t \right) + \mathtt{my.power.f}\left( t \right) \\
+\mathtt{my.f}\left( t \right) &amp;= \frac{\mathtt{my.p}\left( t \right)}{\mathtt{my.I}}
+\end{align}
+ \]</p><p>Each transformer&#39;s port 1 is the bond into it and port 2 the bond out of it. The last <code>connect</code> is the signal from the detector to the integrator.</p><pre><code class="language-julia hljs">@named model = System([connect(ji.gy, Km.p1), connect(Km.p2, jω.gy),
+                       connect(jω.x, mtfx.p1), connect(mtfx.p2, mx.power),
+                       connect(jω.y, mtfy.p1), connect(mtfy.p2, jy.tf),
+                       connect(jω.ω.output, φ.input)], t;
+                      systems = [ji, Km, jω, mtfx, mx, mtfy, jy, φ])</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( ji_{+}gy, Km_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( Km_{+}p2, j\omega_{+}gy \right) \\
+0 &amp;= \mathrm{connect}\left( j\omega_{+}x, mtfx_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( mtfx_{+}p2, mx_{+}power \right) \\
+0 &amp;= \mathrm{connect}\left( j\omega_{+}y, mtfy_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( mtfy_{+}p2, jy_{+}tf \right) \\
+0 &amp;= \mathrm{connect}\left( j\omega_+\omega_{+}output, \varphi_{+}input \right) \\
+0 &amp;= \mathrm{connect}\left( us_{+}pout, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( Re_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( L_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( gy, core_{+}p4 \right) \\
+ - \mathtt{ji.core.p2.f}\left( t \right) &amp;= \mathtt{ji.core.p1.f}\left( t \right) \\
+ - \mathtt{ji.core.p3.f}\left( t \right) &amp;= \mathtt{ji.core.p1.f}\left( t \right) \\
+ - \mathtt{ji.core.p4.f}\left( t \right) &amp;= \mathtt{ji.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{ji.core.p1.e}\left( t \right) - \mathtt{ji.core.p2.e}\left( t \right) - \mathtt{ji.core.p3.e}\left( t \right) - \mathtt{ji.core.p4.e}\left( t \right) \\
+\mathtt{ji.us.e}\left( t \right) &amp;= \mathtt{ji.us.power.e}\left( t \right) \\
+\mathtt{ji.us.pout.e}\left( t \right) &amp;= \mathtt{ji.us.power.e}\left( t \right) \\
+\mathtt{ji.us.f}\left( t \right) &amp;=  - \mathtt{ji.us.pout.f}\left( t \right) + \mathtt{ji.us.power.f}\left( t \right) \\
+\mathtt{ji.us.e}\left( t \right) &amp;= 1 \\
+\mathtt{ji.Re.e}\left( t \right) &amp;= \mathtt{ji.Re.power.e}\left( t \right) \\
+\mathtt{ji.Re.pout.e}\left( t \right) &amp;= \mathtt{ji.Re.power.e}\left( t \right) \\
+\mathtt{ji.Re.f}\left( t \right) &amp;=  - \mathtt{ji.Re.pout.f}\left( t \right) + \mathtt{ji.Re.power.f}\left( t \right) \\
+\mathtt{ji.Re.e}\left( t \right) &amp;= \mathtt{ji.Re.R} ~ \mathtt{ji.Re.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{ji.L.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{ji.L.e}\left( t \right) \\
+\mathtt{ji.L.e}\left( t \right) &amp;= \mathtt{ji.L.power.e}\left( t \right) \\
+\mathtt{ji.L.pout.e}\left( t \right) &amp;= \mathtt{ji.L.power.e}\left( t \right) \\
+\mathtt{ji.L.f}\left( t \right) &amp;=  - \mathtt{ji.L.pout.f}\left( t \right) + \mathtt{ji.L.power.f}\left( t \right) \\
+\mathtt{ji.L.f}\left( t \right) &amp;= \frac{\mathtt{ji.L.p}\left( t \right)}{\mathtt{ji.L.I}} \\
+\mathtt{Km.p1.e}\left( t \right) &amp;=  - \mathtt{Km.p2.f}\left( t \right) ~ \mathtt{Km.r} \\
+\mathtt{Km.p2.e}\left( t \right) &amp;= \mathtt{Km.p1.f}\left( t \right) ~ \mathtt{Km.r} \\
+0 &amp;= \mathrm{connect}\left( gy, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( J_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( b_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( \omega_{+}power, core_{+}p4 \right) \\
+0 &amp;= \mathrm{connect}\left( x, core_{+}p5 \right) \\
+0 &amp;= \mathrm{connect}\left( y, core_{+}p6 \right) \\
+ - \mathtt{j\omega.core.p2.f}\left( t \right) &amp;= \mathtt{j\omega.core.p1.f}\left( t \right) \\
+ - \mathtt{j\omega.core.p3.f}\left( t \right) &amp;= \mathtt{j\omega.core.p1.f}\left( t \right) \\
+ - \mathtt{j\omega.core.p4.f}\left( t \right) &amp;= \mathtt{j\omega.core.p1.f}\left( t \right) \\
+ - \mathtt{j\omega.core.p5.f}\left( t \right) &amp;= \mathtt{j\omega.core.p1.f}\left( t \right) \\
+ - \mathtt{j\omega.core.p6.f}\left( t \right) &amp;= \mathtt{j\omega.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{j\omega.core.p1.e}\left( t \right) - \mathtt{j\omega.core.p2.e}\left( t \right) - \mathtt{j\omega.core.p3.e}\left( t \right) - \mathtt{j\omega.core.p4.e}\left( t \right) - \mathtt{j\omega.core.p5.e}\left( t \right) - \mathtt{j\omega.core.p6.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{j\omega.J.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{j\omega.J.e}\left( t \right) \\
+\mathtt{j\omega.J.e}\left( t \right) &amp;= \mathtt{j\omega.J.power.e}\left( t \right) \\
+\mathtt{j\omega.J.pout.e}\left( t \right) &amp;= \mathtt{j\omega.J.power.e}\left( t \right) \\
+\mathtt{j\omega.J.f}\left( t \right) &amp;=  - \mathtt{j\omega.J.pout.f}\left( t \right) + \mathtt{j\omega.J.power.f}\left( t \right) \\
+\mathtt{j\omega.J.f}\left( t \right) &amp;= \frac{\mathtt{j\omega.J.p}\left( t \right)}{\mathtt{j\omega.J.I}} \\
+\mathtt{j\omega.b.e}\left( t \right) &amp;= \mathtt{j\omega.b.power.e}\left( t \right) \\
+\mathtt{j\omega.b.pout.e}\left( t \right) &amp;= \mathtt{j\omega.b.power.e}\left( t \right) \\
+\mathtt{j\omega.b.f}\left( t \right) &amp;=  - \mathtt{j\omega.b.pout.f}\left( t \right) + \mathtt{j\omega.b.power.f}\left( t \right) \\
+\mathtt{j\omega.b.e}\left( t \right) &amp;= \mathtt{j\omega.b.R} ~ \mathtt{j\omega.b.f}\left( t \right) \\
+\mathtt{j\omega.\omega.e}\left( t \right) &amp;= \mathtt{j\omega.\omega.power.e}\left( t \right) \\
+\mathtt{j\omega.\omega.pout.e}\left( t \right) &amp;= \mathtt{j\omega.\omega.power.e}\left( t \right) \\
+\mathtt{j\omega.\omega.f}\left( t \right) &amp;=  - \mathtt{j\omega.\omega.pout.f}\left( t \right) + \mathtt{j\omega.\omega.power.f}\left( t \right) \\
+\mathtt{j\omega.\omega.e}\left( t \right) &amp;= 0 \\
+\mathtt{j\omega.\omega.output.u}\left( t \right) &amp;= \mathtt{j\omega.\omega.f}\left( t \right) \\
+\mathtt{mtfx.p1.e}\left( t \right) &amp;=  - 0.3 ~ \mathtt{mtfx.p2.e}\left( t \right) ~ \sin\left( \mathtt{\varphi.output.u}\left( t \right) \right) \\
+ - \mathtt{mtfx.p2.f}\left( t \right) &amp;=  - 0.3 ~ \mathtt{mtfx.p1.f}\left( t \right) ~ \sin\left( \mathtt{\varphi.output.u}\left( t \right) \right) \\
+\frac{\mathrm{d}\mathtt{mx.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{mx.e}\left( t \right) \\
+\mathtt{mx.e}\left( t \right) &amp;= \mathtt{mx.power.e}\left( t \right) \\
+\mathtt{mx.pout.e}\left( t \right) &amp;= \mathtt{mx.power.e}\left( t \right) \\
+\mathtt{mx.f}\left( t \right) &amp;=  - \mathtt{mx.pout.f}\left( t \right) + \mathtt{mx.power.f}\left( t \right) \\
+\mathtt{mx.f}\left( t \right) &amp;= \frac{\mathtt{mx.p}\left( t \right)}{\mathtt{mx.I}} \\
+\mathtt{mtfy.p1.e}\left( t \right) &amp;= 0.3 ~ \cos\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{mtfy.p2.e}\left( t \right) \\
+ - \mathtt{mtfy.p2.f}\left( t \right) &amp;= 0.3 ~ \cos\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{mtfy.p1.f}\left( t \right) \\
+0 &amp;= \mathrm{connect}\left( tf, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( mg_{+}pout, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( my_{+}power, core_{+}p3 \right) \\
+\mathtt{jy.core.p2.f}\left( t \right) &amp;= \mathtt{jy.core.p1.f}\left( t \right) \\
+ - \mathtt{jy.core.p3.f}\left( t \right) &amp;= \mathtt{jy.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{jy.core.p1.e}\left( t \right) + \mathtt{jy.core.p2.e}\left( t \right) - \mathtt{jy.core.p3.e}\left( t \right) \\
+\mathtt{jy.mg.e}\left( t \right) &amp;= \mathtt{jy.mg.power.e}\left( t \right) \\
+\mathtt{jy.mg.pout.e}\left( t \right) &amp;= \mathtt{jy.mg.power.e}\left( t \right) \\
+\mathtt{jy.mg.f}\left( t \right) &amp;=  - \mathtt{jy.mg.pout.f}\left( t \right) + \mathtt{jy.mg.power.f}\left( t \right) \\
+\mathtt{jy.mg.e}\left( t \right) &amp;= -4.905 \\
+\frac{\mathrm{d}\mathtt{jy.my.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{jy.my.e}\left( t \right) \\
+\mathtt{jy.my.e}\left( t \right) &amp;= \mathtt{jy.my.power.e}\left( t \right) \\
+\mathtt{jy.my.pout.e}\left( t \right) &amp;= \mathtt{jy.my.power.e}\left( t \right) \\
+\mathtt{jy.my.f}\left( t \right) &amp;=  - \mathtt{jy.my.pout.f}\left( t \right) + \mathtt{jy.my.power.f}\left( t \right) \\
+\mathtt{jy.my.f}\left( t \right) &amp;= \frac{\mathtt{jy.my.p}\left( t \right)}{\mathtt{jy.my.I}} \\
+\mathtt{\varphi.u}\left( t \right) &amp;= \mathtt{\varphi.input.u}\left( t \right) \\
+\mathtt{\varphi.y}\left( t \right) &amp;= \mathtt{\varphi.output.u}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{\varphi.x}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{\varphi.k} ~ \mathtt{\varphi.u}\left( t \right) \\
+\mathtt{\varphi.y}\left( t \right) &amp;= \mathtt{\varphi.x}\left( t \right)
+\end{align}
+ \]</p><p>The bond graph, drawn by the library:</p><pre><code class="language-julia hljs">bgplot(model)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 15.1.0 (20260618.0150)
+ -->
+<!-- Title: BondGraph Pages: 1 -->
+<svg width="752pt" height="202pt"
+ viewBox="0.00 0.00 752.00 202.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 198)">
+<title>BondGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-198 747.75,-198 747.75,4 -4,4"/>
+<!-- ji -->
+<g id="node1" class="node">
+<title>ji</title>
+<text xml:space="preserve" text-anchor="middle" x="125" y="-92.33" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- ji₊L -->
+<g id="node4" class="node">
+<title>ji₊L</title>
+<text xml:space="preserve" text-anchor="middle" x="125" y="-13.32" font-family="Times,serif" font-size="14.00">I:L</text>
+</g>
+<!-- ji&%2345;&gt;ji₊L -->
+<g id="edge3" class="edge">
+<title>ji&%2345;&gt;ji₊L</title>
+<path fill="none" stroke="black" d="M125,-79.34C125,-68.25 125,-57.17 125,-46.08"/>
+<polygon fill="black" stroke="black" points="125,-36.1 129.5,-46.1 125,-40.9 125,-46.1 125,-46.1 125,-36.1"/>
+</g>
+<!-- Km -->
+<g id="node5" class="node">
+<title>Km</title>
+<text xml:space="preserve" text-anchor="middle" x="226.62" y="-92.33" font-family="Times,serif" font-size="14.00">GY:Km</text>
+</g>
+<!-- ji&%2345;&gt;Km -->
+<g id="edge9" class="edge">
+<title>ji&%2345;&gt;Km</title>
+<path fill="none" stroke="black" d="M151.92,-97C162.07,-97 173.96,-97 185.18,-97"/>
+<polygon fill="black" stroke="black" points="195.04,-97 185.04,-101.5 190.24,-97 185.04,-97 185.04,-97 195.04,-97"/>
+</g>
+<!-- ji₊us -->
+<g id="node2" class="node">
+<title>ji₊us</title>
+<text xml:space="preserve" text-anchor="middle" x="27.5" y="-92.33" font-family="Times,serif" font-size="14.00">Se:us</text>
+</g>
+<!-- ji₊us&%2345;&gt;ji -->
+<g id="edge1" class="edge">
+<title>ji₊us&%2345;&gt;ji</title>
+<path fill="none" stroke="black" d="M54.85,-97C65.06,-97 76.91,-97 87.89,-97"/>
+<polygon fill="black" stroke="black" points="97.86,-97 87.86,-101.5 93.07,-97 87.86,-97 87.86,-97 97.86,-97"/>
+</g>
+<!-- ji₊Re -->
+<g id="node3" class="node">
+<title>ji₊Re</title>
+<text xml:space="preserve" text-anchor="middle" x="125" y="-171.32" font-family="Times,serif" font-size="14.00">R:Re</text>
+</g>
+<!-- ji₊Re&%2345;&gt;ji -->
+<g id="edge2" class="edge">
+<title>ji₊Re&%2345;&gt;ji</title>
+<path fill="none" stroke="black" d="M125,-148.16C125,-137.07 125,-125.98 125,-114.9"/>
+<polygon fill="black" stroke="black" points="125,-158.13 120.5,-148.13 125,-153.34 125,-148.13 125,-148.13 125,-158.13"/>
+</g>
+<!-- jω -->
+<g id="node6" class="node">
+<title>jω</title>
+<text xml:space="preserve" text-anchor="middle" x="328.25" y="-92.33" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- Km&%2345;&gt;jω -->
+<g id="edge10" class="edge">
+<title>Km&%2345;&gt;jω</title>
+<path fill="none" stroke="black" d="M258.06,-97C268.55,-97 280.4,-97 291.3,-97"/>
+<polygon fill="black" stroke="black" points="301.17,-97 291.17,-101.5 296.37,-97 291.17,-97 291.17,-97 301.17,-97"/>
+</g>
+<!-- jω₊b -->
+<g id="node8" class="node">
+<title>jω₊b</title>
+<text xml:space="preserve" text-anchor="middle" x="328.25" y="-13.32" font-family="Times,serif" font-size="14.00">R:b</text>
+</g>
+<!-- jω&%2345;&gt;jω₊b -->
+<g id="edge5" class="edge">
+<title>jω&%2345;&gt;jω₊b</title>
+<path fill="none" stroke="black" d="M328.25,-79.34C328.25,-68.25 328.25,-57.17 328.25,-46.08"/>
+<polygon fill="black" stroke="black" points="328.25,-36.1 332.75,-46.1 328.25,-40.9 328.25,-46.1 328.25,-46.1 328.25,-36.1"/>
+</g>
+<!-- jω₊ω -->
+<g id="node9" class="node">
+<title>jω₊ω</title>
+<text xml:space="preserve" text-anchor="middle" x="434" y="-171.32" font-family="Times,serif" font-size="14.00">Df:ω</text>
+</g>
+<!-- jω&%2345;&gt;jω₊ω -->
+<g id="edge6" class="edge">
+<title>jω&%2345;&gt;jω₊ω</title>
+<path fill="none" stroke="black" d="M352.79,-114.93C367.25,-125.94 385.95,-140.17 401.65,-152.13"/>
+<polygon fill="black" stroke="black" points="409.39,-158.02 398.71,-155.54 405.57,-155.12 401.43,-151.96 401.43,-151.96 409.39,-158.02"/>
+</g>
+<!-- mtfx -->
+<g id="node10" class="node">
+<title>mtfx</title>
+<text xml:space="preserve" text-anchor="middle" x="434" y="-92.33" font-family="Times,serif" font-size="14.00">TF:mtfx</text>
+</g>
+<!-- jω&%2345;&gt;mtfx -->
+<g id="edge11" class="edge">
+<title>jω&%2345;&gt;mtfx</title>
+<path fill="none" stroke="black" d="M355.16,-97C365.18,-97 376.94,-97 388.24,-97"/>
+<polygon fill="black" stroke="black" points="398.22,-97 388.22,-101.5 393.42,-97 388.22,-97 388.22,-97 398.22,-97"/>
+</g>
+<!-- mtfy -->
+<g id="node12" class="node">
+<title>mtfy</title>
+<text xml:space="preserve" text-anchor="middle" x="434" y="-13.32" font-family="Times,serif" font-size="14.00">TF:mtfy</text>
+</g>
+<!-- jω&%2345;&gt;mtfy -->
+<g id="edge13" class="edge">
+<title>jω&%2345;&gt;mtfy</title>
+<path fill="none" stroke="black" d="M352.79,-79.07C367.25,-68.06 385.95,-53.83 401.65,-41.87"/>
+<polygon fill="black" stroke="black" points="409.39,-35.98 404.16,-45.62 405.57,-38.88 401.43,-42.04 401.43,-42.04 409.39,-35.98"/>
+</g>
+<!-- jω₊J -->
+<g id="node7" class="node">
+<title>jω₊J</title>
+<text xml:space="preserve" text-anchor="middle" x="328.25" y="-171.32" font-family="Times,serif" font-size="14.00">I:J</text>
+</g>
+<!-- jω₊J&%2345;&gt;jω -->
+<g id="edge4" class="edge">
+<title>jω₊J&%2345;&gt;jω</title>
+<path fill="none" stroke="black" d="M328.25,-148.16C328.25,-137.07 328.25,-125.98 328.25,-114.9"/>
+<polygon fill="black" stroke="black" points="328.25,-158.13 323.75,-148.13 328.25,-153.34 328.25,-148.13 328.25,-148.13 328.25,-158.13"/>
+</g>
+<!-- mx -->
+<g id="node11" class="node">
+<title>mx</title>
+<text xml:space="preserve" text-anchor="middle" x="576.25" y="-92.33" font-family="Times,serif" font-size="14.00">PointInertia:mx</text>
+</g>
+<!-- mtfx&%2345;&gt;mx -->
+<g id="edge12" class="edge">
+<title>mtfx&%2345;&gt;mx</title>
+<path fill="none" stroke="black" d="M469.67,-97C479.77,-97 491.2,-97 502.72,-97"/>
+<polygon fill="black" stroke="black" points="512.63,-97 502.63,-101.5 507.84,-97 502.63,-97 502.63,-97 512.63,-97"/>
+</g>
+<!-- jy -->
+<g id="node13" class="node">
+<title>jy</title>
+<text xml:space="preserve" text-anchor="middle" x="576.25" y="-13.32" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- mtfy&%2345;&gt;jy -->
+<g id="edge14" class="edge">
+<title>mtfy&%2345;&gt;jy</title>
+<path fill="none" stroke="black" d="M469.67,-18C490.86,-18 517.91,-18 539.33,-18"/>
+<polygon fill="black" stroke="black" points="549.14,-18 539.14,-22.5 544.34,-18 539.14,-18 539.14,-18 549.14,-18"/>
+</g>
+<!-- jy₊mg -->
+<g id="node14" class="node">
+<title>jy₊mg</title>
+<text xml:space="preserve" text-anchor="middle" x="713.25" y="-13.32" font-family="Times,serif" font-size="14.00">Se:mg</text>
+</g>
+<!-- jy&%2345;&gt;jy₊mg -->
+<g id="edge7" class="edge">
+<title>jy&%2345;&gt;jy₊mg</title>
+<path fill="none" stroke="black" d="M613.14,-18C634.93,-18 662.39,-18 682.88,-18"/>
+<polygon fill="black" stroke="black" points="603.17,-18 613.17,-13.5 607.96,-18 613.17,-18 613.17,-18 603.17,-18"/>
+</g>
+<!-- jy₊my -->
+<g id="node15" class="node">
+<title>jy₊my</title>
+<text xml:space="preserve" text-anchor="middle" x="576.25" y="-171.32" font-family="Times,serif" font-size="14.00">PointInertia:my</text>
+</g>
+<!-- jy₊my&%2345;&gt;jy -->
+<g id="edge8" class="edge">
+<title>jy₊my&%2345;&gt;jy</title>
+<path fill="none" stroke="black" d="M576.25,-148.18C576.25,-110.75 576.25,-73.33 576.25,-35.9"/>
+<polygon fill="black" stroke="black" points="576.25,-158.01 571.75,-148.01 576.25,-153.21 576.25,-148.01 576.25,-148.01 576.25,-158.01"/>
+</g>
+</g>
+</svg>
+'/><h2 id="Analysing-the-model"><a class="docs-heading-anchor" href="#Analysing-the-model">Analysing the model</a><a id="Analysing-the-model-1"></a><a class="docs-heading-anchor-permalink" href="#Analysing-the-model" title="Permalink"></a></h2><p>Breedveld&#39;s causality assignment leaves both inertias of the point mass in derivative causality (Fig. 1.8, p. 26): the rigid rod fixes their velocities by the rotor&#39;s, so the three inertias are not independent (§1.5.9, p. 33). The library assigns no causality; <code>mtkcompile</code> finds the same dependency and reduces the index of the model.</p><pre><code class="language-julia hljs">sys = mtkcompile(model)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{\varphi.output.u}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{j\omega.J.f}\left( t \right) ~ \mathtt{\varphi.k} \\
+\frac{\mathrm{d}\mathtt{j\omega.J.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{j\omega.J.I} ~ \mathtt{j\omega.J.fˍt}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{ji.L.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{ji.L.e}\left( t \right) \\
+0 &amp;=  - \mathtt{j\omega.core.p5.e}\left( t \right) - 0.3 ~ \mathtt{mtfx.p2.e}\left( t \right) ~ \sin\left( \mathtt{\varphi.output.u}\left( t \right) \right) \\
+0 &amp;=  - \mathtt{jy.core.p1.fˍt}\left( t \right) + 0.3 ~ \cos\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{j\omega.J.fˍt}\left( t \right) - 0.3 ~ \left( \mathtt{j\omega.J.f}\left( t \right) \right)^{2} ~ \sin\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{\varphi.k}
+\end{align}
+ \]</p><p>Print system states</p><pre><code class="language-julia hljs">unknowns(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ φ₊output₊u(t)
+ jω₊J₊p(t)
+ ji₊L₊p(t)
+ jy₊core₊p1₊e(t)
+ jω₊J₊fˍt(t)</code></pre><p>Print system parameters</p><pre><code class="language-julia hljs">parameters(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">10-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ ji₊Re₊R
+ ji₊L₊I
+ Km₊r
+ jω₊J₊I
+ jω₊b₊R
+ mx₊I
+ jy₊my₊I
+ φ₊u_start
+ φ₊y_start
+ φ₊k</code></pre><p>Print the system&#39;s equations in terms of the states</p><pre><code class="language-julia hljs">full_equations(sys)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{\varphi.output.u}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{j\omega.J.p}\left( t \right) ~ \mathtt{\varphi.k}}{\mathtt{j\omega.J.I}} \\
+\frac{\mathrm{d}\mathtt{j\omega.J.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{j\omega.J.I} ~ \mathtt{j\omega.J.fˍt}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{ji.L.p}\left( t \right)}{\mathrm{d}t} &amp;= 1 + \frac{ - \mathtt{Km.r} ~ \mathtt{j\omega.J.p}\left( t \right)}{\mathtt{j\omega.J.I}} + \frac{ - \mathtt{ji.L.p}\left( t \right) ~ \mathtt{ji.Re.R}}{\mathtt{ji.L.I}} \\
+0 &amp;=  - \frac{\mathtt{Km.r} ~ \mathtt{ji.L.p}\left( t \right)}{\mathtt{ji.L.I}} - \frac{ - \mathtt{j\omega.J.p}\left( t \right) ~ \mathtt{j\omega.b.R}}{\mathtt{j\omega.J.I}} + 0.3 ~ \cos\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{jy.core.p1.e}\left( t \right) + \mathtt{j\omega.J.I} ~ \mathtt{j\omega.J.fˍt}\left( t \right) + 0.3 ~ \left( 0.3 ~ \mathtt{j\omega.J.fˍt}\left( t \right) ~ \sin\left( \mathtt{\varphi.output.u}\left( t \right) \right) + 0.3 ~ \left( \frac{\mathtt{j\omega.J.p}\left( t \right)}{\mathtt{j\omega.J.I}} \right)^{2} ~ \cos\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{\varphi.k} \right) ~ \mathtt{mx.I} ~ \sin\left( \mathtt{\varphi.output.u}\left( t \right) \right) \\
+0 &amp;= \frac{4.905 - \mathtt{jy.core.p1.e}\left( t \right)}{\mathtt{jy.my.I}} + 0.3 ~ \cos\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{j\omega.J.fˍt}\left( t \right) - 0.3 ~ \left( \frac{\mathtt{j\omega.J.p}\left( t \right)}{\mathtt{j\omega.J.I}} \right)^{2} ~ \sin\left( \mathtt{\varphi.output.u}\left( t \right) \right) ~ \mathtt{\varphi.k}
+\end{align}
+ \]</p><h3 id="Generated-equations-against-the-hand-derivation"><a class="docs-heading-anchor" href="#Generated-equations-against-the-hand-derivation">Generated equations against the hand derivation</a><a id="Generated-equations-against-the-hand-derivation-1"></a><a class="docs-heading-anchor-permalink" href="#Generated-equations-against-the-hand-derivation" title="Permalink"></a></h3><p><code>bgequations</code> gives the same equations with names of our choice. ModelingToolkit kept the angle <span>$\varphi$</span> (the integrator&#39;s output), the rotor&#39;s angular momentum <span>$h = J\omega$</span>, the flux linkage <span>$\lambda = L\,i$</span>, the rod&#39;s force on the <span>$\dot{y}$</span> junction <span>$F_y$</span> (the effort of the <span>$y$</span> transformer&#39;s port 2) and <span>$\dot{\omega}$</span>, a <em>dummy derivative</em> added by the index reduction. We rename them, and the parameters, to the symbols of the introduction; the integrator&#39;s gain is 1 (inside a <code>let</code>, so the names <code>L</code>, <code>J</code>, <code>b</code>, <code>m</code> keep pointing at the elements and values):</p><pre><code class="language-julia hljs">let
+    @variables φ(t) h(t) λ(t) F_y(t) ω̇(t)
+    @parameters R_e L K_m J b m
+    ω_t = only(filter(v -&gt; endswith(string(v), &quot;fˍt(t)&quot;), unknowns(sys)))   # the dummy derivative
+    bgequations(model; rename = Dict(
+        model.φ.output.u =&gt; φ, model.jω.J.p =&gt; h,
+        model.ji.L.p =&gt; λ, model.jy.core.p1.e =&gt; F_y, ω_t =&gt; ω̇,
+        model.φ.k =&gt; 1, model.ji.Re.R =&gt; R_e, model.ji.L.I =&gt; L, model.Km.r =&gt; K_m,
+        model.jω.J.I =&gt; J, model.jω.b.R =&gt; b, model.mx.I =&gt; m, model.jy.my.I =&gt; m))
+end</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\varphi\left( t \right)}{\mathrm{d}t} &amp;= \frac{h\left( t \right)}{J} \\
+\frac{\mathrm{d}h\left( t \right)}{\mathrm{d}t} &amp;= J ~ \mathtt{\dot{\omega}}\left( t \right) \\
+\frac{\mathrm{d}\lambda\left( t \right)}{\mathrm{d}t} &amp;= 1 + \frac{ - \mathtt{K\_m} ~ h\left( t \right)}{J} + \frac{ - \mathtt{R\_e} ~ \lambda\left( t \right)}{L} \\
+0 &amp;= \frac{ - \mathtt{K\_m} ~ \lambda\left( t \right)}{L} + \frac{b ~ h\left( t \right)}{J} + 0.3 ~ \mathtt{F\_y}\left( t \right) ~ \cos\left( \varphi\left( t \right) \right) + J ~ \mathtt{\dot{\omega}}\left( t \right) + 0.3 ~ \left( 0.3 ~ \sin\left( \varphi\left( t \right) \right) ~ \mathtt{\dot{\omega}}\left( t \right) + 0.3 ~ \left( \frac{h\left( t \right)}{J} \right)^{2} ~ \cos\left( \varphi\left( t \right) \right) \right) ~ m ~ \sin\left( \varphi\left( t \right) \right) \\
+0 &amp;= \frac{4.905 - \mathtt{F\_y}\left( t \right)}{m} + 0.3 ~ \cos\left( \varphi\left( t \right) \right) ~ \mathtt{\dot{\omega}}\left( t \right) - 0.3 ~ \left( \frac{h\left( t \right)}{J} \right)^{2} ~ \sin\left( \varphi\left( t \right) \right)
+\end{align}
+ \]</p><p>The rod length and the weight appear as their values, <span>$l = 0.3$</span> and <span>$mg = 4.905$</span>, and the source as <span>$u_s = 1$</span>. Read against the hand derivation:</p><ul><li><p class="math-container">\[\dot{\varphi} = h/J = \omega\]</p>, the integrator, and <span>$\dot{\lambda} = u_s - K_m\,\omega - R_e\,i$</span> with <span>$i = \lambda/L$</span>, Kirchhoff&#39;s law of the introduction.</li><li><p class="math-container">\[\dot{h} = J\dot{\omega}\]</p>ties the rotor&#39;s momentum to the dummy derivative.</li><li>The <span>$\omega$</span> junction is the torque balance <span>$K_m i = J\dot{\omega} + b\,\omega + (l\cos\varphi)\,F_y + (-l\sin\varphi)\,F_x$</span>, the rod&#39;s torque of Eq. 1.18. The <span>$x$</span> mass is gone from the states: its force <span>$F_x = \dot{p}_x = m\,\ddot{x}$</span>, with <span>$\dot{x} = (-l\sin\varphi)\,\omega$</span> (Eq. 1.15) differentiated, is <span>$-m\,l\,(\sin\varphi\,\dot{\omega} + \cos\varphi\,\omega^2)$</span>, substituted in place.</li><li>The <span>$\dot{y}$</span> junction gives <span>$\dot{p}_y = F_y - mg$</span>, with <span>$p_y = m\,\dot{y} = m\,l\cos\varphi\,\omega$</span> differentiated: <span>$0 = (mg - F_y)/m + l\cos\varphi\,\dot{\omega} - l\sin\varphi\,\omega^2$</span>.</li></ul><p>Substituting <span>$F_y$</span> into the torque balance, the centripetal terms in <span>$\omega^2$</span> cancel (Breedveld&#39;s gyristors, Eq. 1.24) and the mass terms add up to <span>$m l^2 \dot{\omega}$</span> (Eq. 1.22), leaving <span>$(J + m l^2)\,\dot{\omega} + b\,\omega + m g l\cos\varphi = K_m i$</span>: the hand-derived equation. Nothing divides by <span>$\sin\varphi$</span>, so the model holds at every angle.</p><h2 id="System-Simulations"><a class="docs-heading-anchor" href="#System-Simulations">System Simulations</a><a id="System-Simulations-1"></a><a class="docs-heading-anchor-permalink" href="#System-Simulations" title="Permalink"></a></h2><h3 id="Bond-graph-model"><a class="docs-heading-anchor" href="#Bond-graph-model">Bond graph model</a><a id="Bond-graph-model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-graph-model" title="Permalink"></a></h3><p>Define the simulation time</p><pre><code class="language-julia hljs">tspan = (0.0, 10.0)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(0.0, 10.0)</code></pre><p>Generate an <code>ODEProblem</code>. All states start from the defaults: no current, the pendulum at rest at <span>$\varphi = -\pi/2$</span>.</p><pre><code class="language-julia hljs">prob = ODEProblem(sys, [], tspan)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr38_2" style="color:#56b6c2">ODEProblem</span> with uType <span class="sgr38_2" style="color:#56b6c2">Vector{Float64}</span> and tType <span class="sgr38_2" style="color:#56b6c2">Float64</span>. In-place: <span class="sgr38_2" style="color:#56b6c2">true</span>
+Initialization status: <span class="sgr38_2" style="color:#56b6c2">FULLY_DETERMINED</span>
+Non-trivial mass matrix: <span class="sgr38_2" style="color:#56b6c2">true</span>
+timespan: (0.0, 10.0)
+u0: 5-element Vector{Float64}:
+ -1.5707963267948966
+  0.0
+  0.0
+  4.905
+  0.0</code></pre><p>Use <code>solve</code> to simulate the system. The source&#39;s voltage drives a torque <span>$K_m u_s / R_e = 0.5$</span> N⋅m in steady state, which swings the pendulum up to where gravity balances it, <span>$m g l\cos\varphi = 0.5$</span>.</p><pre><code class="language-julia hljs">sol = solve(prob, Rodas5P(), reltol = 1e-10, abstol = 1e-10)
+plot(sol, idxs = [φ.output.u, jω.J.f, ji.L.f],
+     labels = [&quot;φ (rad)&quot; &quot;ω (rad/s)&quot; &quot;i (A)&quot;], xlabel = &quot;Time (s)&quot;)</code></pre><img src="f225af34.svg" alt="Example block output"/><h3 id="Reduced-pendulum-model"><a class="docs-heading-anchor" href="#Reduced-pendulum-model">Reduced pendulum model</a><a id="Reduced-pendulum-model-1"></a><a class="docs-heading-anchor-permalink" href="#Reduced-pendulum-model" title="Permalink"></a></h3><p>The hand-derived equations of the introduction, as a plain MTK <code>System</code>, with the same parameter values and initial state:</p><pre><code class="language-julia hljs">@variables i(t) = 0.0           # Armature current
+@variables ϕ(t) = -π / 2        # Pendulum angle
+@variables ω̃(t) = 0.0           # Angular velocity
+
+Reᵥ = 1.0                       # (Ω) Armature resistance
+Lᵥ = 0.01                       # (H) Armature inductance
+Uᵥ = 1.0                        # (V) Source voltage
+Kᵥ = 0.5                        # (N⋅m/A) Motor constant
+Jᵥ = 0.01                       # (kg⋅m²) Rotor inertia
+bᵥ = 0.05                       # (N⋅m⋅s/rad) Bearing friction
+
+eqs_t = [
+    Lᵥ * D(i) ~ Uᵥ - Reᵥ * i - Kᵥ * ω̃,                           # Armature loop
+    (Jᵥ + m * l^2) * D(ω̃) ~ Kᵥ * i - bᵥ * ω̃ - m * g * l * cos(ϕ),  # Rotation
+    D(ϕ) ~ ω̃,                                                    # Angle
+]</code></pre><p class="math-container">\[ \begin{align}
+0.01 ~ \frac{\mathrm{d}i\left( t \right)}{\mathrm{d}t} &amp;= 1 - i\left( t \right) - 0.5 ~ \mathtt{\tilde{\omega}}\left( t \right) \\
+0.055 ~ \frac{\mathrm{d}\mathtt{\tilde{\omega}}\left( t \right)}{\mathrm{d}t} &amp;=  - 1.4715 ~ \cos\left( \phi\left( t \right) \right) + 0.5 ~ i\left( t \right) - 0.05 ~ \mathtt{\tilde{\omega}}\left( t \right) \\
+\frac{\mathrm{d}\phi\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{\tilde{\omega}}\left( t \right)
+\end{align}
+ \]</p><p>Then, we create the <code>System</code> and compile it.</p><pre><code class="language-julia hljs">@named sys_t = System(eqs_t, t)
+sys_t = mtkcompile(sys_t)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\phi\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{\tilde{\omega}}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{\tilde{\omega}}\left( t \right)}{\mathrm{d}t} &amp;= \frac{1.4715 ~ \cos\left( \phi\left( t \right) \right) - 0.5 ~ i\left( t \right) + 0.05 ~ \mathtt{\tilde{\omega}}\left( t \right)}{-0.055} \\
+\frac{\mathrm{d}i\left( t \right)}{\mathrm{d}t} &amp;= \frac{-1 + i\left( t \right) + 0.5 ~ \mathtt{\tilde{\omega}}\left( t \right)}{-0.01}
+\end{align}
+ \]</p><p>The reduced model is an ODE, solved with <code>Tsit5</code> and the same tolerances.</p><pre><code class="language-julia hljs">sol_t = solve(ODEProblem(sys_t, [], tspan), Tsit5(), reltol = 1e-10, abstol = 1e-10);</code></pre><h3 id="Compare-models"><a class="docs-heading-anchor" href="#Compare-models">Compare models</a><a id="Compare-models-1"></a><a class="docs-heading-anchor-permalink" href="#Compare-models" title="Permalink"></a></h3><p>Pendulum angle</p><pre><code class="language-julia hljs">plot(sol, idxs = [φ.output.u], label = &quot;Bond graph&quot;, ylabel = &quot;Angle (rad)&quot;)
+plot!(sol_t, idxs = [ϕ], label = &quot;Reduced model&quot;, xlabel = &quot;Time (s)&quot;, linestyle = :dash)</code></pre><img src="2af3d3b2.svg" alt="Example block output"/><p>Armature current</p><pre><code class="language-julia hljs">plot(sol, idxs = [ji.L.f], label = &quot;Bond graph&quot;, ylabel = &quot;Current (A)&quot;)
+plot!(sol_t, idxs = [i], label = &quot;Reduced model&quot;, xlabel = &quot;Time (s)&quot;, linestyle = :dash)</code></pre><img src="b0630f73.svg" alt="Example block output"/><p>On a common time grid, the largest difference between the two models, in angle, angular velocity and current:</p><pre><code class="language-julia hljs">tgrid = range(tspan..., length = 1001)
+(maximum(abs, sol(tgrid; idxs = φ.output.u).u - sol_t(tgrid; idxs = ϕ).u),
+ maximum(abs, sol(tgrid; idxs = jω.J.f).u - sol_t(tgrid; idxs = ω̃).u),
+ maximum(abs, sol(tgrid; idxs = ji.L.f).u - sol_t(tgrid; idxs = i).u))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(1.2183143383026618e-11, 5.913103879695396e-11, 4.929724406466107e-10)</code></pre><h3 id="Starting-with-the-rod-horizontal"><a class="docs-heading-anchor" href="#Starting-with-the-rod-horizontal">Starting with the rod horizontal</a><a id="Starting-with-the-rod-horizontal-1"></a><a class="docs-heading-anchor-permalink" href="#Starting-with-the-rod-horizontal" title="Permalink"></a></h3><p>At <span>$\varphi = 0$</span>, where a state <span>$p_x$</span> would freeze the pendulum, both models start from rest and the motor&#39;s torque, <span>$0.5$</span> N⋅m at most, can&#39;t hold the weight&#39;s <span>$m g l = 1.47$</span> N⋅m: the pendulum falls towards its balance angle. The same compiled model takes the new starting angle:</p><pre><code class="language-julia hljs">sol_h = solve(ODEProblem(sys, [φ.x =&gt; 0.0], tspan), Rodas5P(), reltol = 1e-10, abstol = 1e-10)
+sol_th = solve(ODEProblem(sys_t, [ϕ =&gt; 0.0], tspan), Tsit5(), reltol = 1e-10, abstol = 1e-10)
+plot(sol_h, idxs = [φ.output.u], label = &quot;Bond graph&quot;, ylabel = &quot;Angle (rad)&quot;)
+plot!(sol_th, idxs = [ϕ], label = &quot;Reduced model&quot;, xlabel = &quot;Time (s)&quot;, linestyle = :dash)</code></pre><img src="0e963419.svg" alt="Example block output"/><p>Their largest difference in angle:</p><pre><code class="language-julia hljs">maximum(abs, sol_h(tgrid; idxs = φ.output.u).u - sol_th(tgrid; idxs = ϕ).u)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">6.801448293458634e-12</code></pre><h3 id="Small-angle-frequency"><a class="docs-heading-anchor" href="#Small-angle-frequency">Small-angle frequency</a><a id="Small-angle-frequency-1"></a><a class="docs-heading-anchor-permalink" href="#Small-angle-frequency" title="Permalink"></a></h3><p>Without the motor&#39;s coupling and the friction (<span>$K_m = 0$</span>, <span>$b = 0$</span>), the pendulum released at a small angle <span>$\psi_0$</span> from <span>$-\pi/2$</span> swings as <span>$\psi_0\cos\omega_0 t$</span>, with <span>$\omega_0$</span> from Eq. 1.26. The same compiled model takes the new parameter values and starting angle:</p><pre><code class="language-julia hljs">ψ₀ = 1e-3
+prob_0 = ODEProblem(sys, [Km.r =&gt; 0.0, jω.b.R =&gt; 0.0, φ.x =&gt; -π / 2 + ψ₀], tspan)
+sol_0 = solve(prob_0, Rodas5P(), reltol = 1e-12, abstol = 1e-12)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">retcode: Success
+Interpolation: specialized 4th (Rodas6P = 5th) order &quot;free&quot; stiffness-aware interpolation
+t: 1004-element Vector{Float64}:
+  0.0
+  1.0e-6
+  3.1473430989118587e-6
+  7.338897903070618e-6
+  1.748151512700536e-5
+  3.849150127666821e-5
+  8.459704290972358e-5
+  0.0001779447581162612
+  0.00034063826908177237
+  0.0005375233358601308
+  ⋮
+  9.917557947976045
+  9.929038242713341
+  9.940518537450638
+  9.951998832187934
+  9.962306273162417
+  9.9726137141369
+  9.982921155111383
+  9.993228596085865
+ 10.0
+u: 1004-element Vector{Vector{Float64}}:
+ [-1.5697963267948967, 0.0, 0.0, 4.90499598681952, -0.026754540995453456]
+ [-1.5697963267949098, -2.6754540995334887e-10, 9.99950001666631e-7, 4.90499598681952, -0.02675454099510295]
+ [-1.5697963267950288, -8.420571996288484e-10, 3.1468478624400847e-6, 4.904995986819522, -0.02675454099191875]
+ [-1.569796326795617, -1.9634884476204604e-9, 7.336205590609538e-6, 4.904995986819531, -0.026754540976181834]
+ [-1.5697963267989847, -4.677099124908255e-9, 1.7466243858575245e-5, 4.904995986819586, -0.026754540886079245]
+ [-1.5697963268147166, -1.029822442079885e-8, 3.8417516449818114e-5, 4.904995986819838, -0.026754540465180686]
+ [-1.5697963268906334, -2.263354980393675e-8, 8.424021684954435e-5, 4.904995986821056, -0.026754538434061465]
+ [-1.5697963272184794, -4.760829653745571e-8, 0.00017637089047915013, 4.90499598682632, -0.026754529662695873]
+ [-1.5697963283471206, -9.113615819307321e-8, 0.0003349018666436332, 4.904995986844437, -0.026754499466429212]
+ [-1.5697963306600071, -1.4381171596983376e-7, 0.0005233321732638542, 4.904995986881565, -0.026754437586231836]
+ ⋮
+ [-1.5702839797271024, -4.442013968423067e-5, 0.01, 4.9050019062646255, -0.013707612314097289]
+ [-1.5703358484389014, -4.59145957658362e-5, 0.01, 4.9050023112685395, -0.012319888670926064]
+ [-1.5703893404000553, -4.7247196612028636e-5, 0.01, 4.90500268371103, -0.010888735699565872]
+ [-1.5704442670440761, -4.841324461854894e-5, 0.01, 4.905003018345077, -0.0094191984114622]
+ [-1.570494645317751, -4.931487221267651e-5, 0.01, 4.905003282688223, -0.00807135067065307]
+ [-1.5705458809155681, -5.007635587213755e-5, 0.01, 4.905003509742655, -0.006700565592353355]
+ [-1.5705978282352373, -5.0695531596285446e-5, 0.01, 4.905003696929214, -0.005310738702188993]
+ [-1.5706503396518818, -5.117063979815859e-5, 0.01, 4.905003842121607, -0.003905819639696948]
+ [-1.5706850718104675, -5.140368104409573e-5, 0.01, 4.905003913833767, -0.002976576531813623]</code></pre><p>The frequency of Eq. 1.26, in Hz:</p><pre><code class="language-julia hljs">ω₀ = sqrt(m * g * l / (Jᵥ + m * l^2))
+ω₀ / 2π</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">0.8232257001070961</code></pre><p>The simulated deviation <span>$\psi = \varphi + \pi/2$</span>, scaled by <span>$\psi_0$</span>, against <span>$\cos\omega_0 t$</span>:</p><pre><code class="language-julia hljs">ψ = (sol_0(tgrid; idxs = φ.output.u).u .+ π / 2) ./ ψ₀
+plot(tgrid, ψ, label = &quot;Bond graph&quot;, xlabel = &quot;Time (s)&quot;, ylabel = &quot;ψ / ψ₀&quot;)
+plot!(τ -&gt; cos(ω₀ * τ), 0, 10, label = &quot;cos ω₀t&quot;, linestyle = :dash)</code></pre><img src="800aa1ed.svg" alt="Example block output"/><p>Their largest difference. It comes from the pendulum&#39;s nonlinearity, not the solver: a pendulum&#39;s frequency drops with amplitude, <span>$\omega \approx \omega_0 (1 - \psi_0^2/16)$</span> (the standard large-amplitude correction, not from Breedveld), a phase lag of <span>$\psi_0^2 \omega_0 t / 16 \approx 3 \cdot 10^{-6}$</span> after 10 s.</p><pre><code class="language-julia hljs">maximum(abs, ψ - cos.(ω₀ .* tgrid))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3.2149873909897986e-6</code></pre><p>The bond graph of Fig. 1.7d, with the point mass in derivative causality, reproduces the reduced pendulum to the solver&#39;s tolerance, and its small oscillations have the frequency of Eq. 1.26.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../control_dc_motor_pi/">« DC Motor Speed Control</a><a class="docs-footer-nextpage" href="../electrical_rlc/">Series RLC Circuit »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Sunday 18 October 2026 18:08">Sunday 18 October 2026</span>. Using Julia version 1.10.12.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

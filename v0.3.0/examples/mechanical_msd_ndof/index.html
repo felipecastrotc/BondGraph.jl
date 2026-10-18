@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>MSD system with N-DoF · BondGraphToolkit.jl</title><meta name="title" content="MSD system with N-DoF · BondGraphToolkit.jl"/><meta property="og:title" content="MSD system with N-DoF · BondGraphToolkit.jl"/><meta property="twitter:title" content="MSD system with N-DoF · BondGraphToolkit.jl"/><meta name="description" content="Documentation for BondGraphToolkit.jl."/><meta property="og:description" content="Documentation for BondGraphToolkit.jl."/><meta property="twitter:description" content="Documentation for BondGraphToolkit.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img class="docs-light-only" src="../../assets/logo.svg" alt="BondGraphToolkit.jl logo"/><img class="docs-dark-only" src="../../assets/logo-dark.svg" alt="BondGraphToolkit.jl logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../getting_started_auto/">Getting started</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../../man/user_guide/">Concepts and conventions</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox" checked/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Systems</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../mechanical_msd_1dof/">Harmonic Oscillator</a></li><li><a class="tocitem" href="../mechanical_msd_2dof/">Mass-Spring-Damper system 2-DoF</a></li><li class="is-active"><a class="tocitem" href>MSD system with N-DoF</a><ul class="internal"><li><a class="tocitem" href="#Introduction"><span>Introduction</span></a></li><li><a class="tocitem" href="#Preliminary-Steps"><span>Preliminary Steps</span></a></li><li><a class="tocitem" href="#System-Element-Definitions"><span>System Element Definitions</span></a></li><li><a class="tocitem" href="#Model-Construction"><span>Model Construction</span></a></li><li><a class="tocitem" href="#Analysing-the-model"><span>Analysing the model</span></a></li><li><a class="tocitem" href="#System-Simulations"><span>System Simulations</span></a></li></ul></li><li><a class="tocitem" href="../mechanical_duffing/">Duffing Equation</a></li><li><a class="tocitem" href="../electrical_dc_motor/">DC Motor</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Features</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../two_ports/">Transformers and Gyrators</a></li><li><a class="tocitem" href="../signals/">Signals and Detectors</a></li><li><a class="tocitem" href="../adapters/">Coupling with the MTK Standard Library</a></li><li><a class="tocitem" href="../elements_oneport/">One-Port Elements</a></li><li><a class="tocitem" href="../composition/">Reusable Subsystems</a></li><li><a class="tocitem" href="../equations_latex/">Equations and LaTeX</a></li><li><a class="tocitem" href="../drawing/">Drawing Bond Graphs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox"/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Applications</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../control_dc_motor_pi/">DC Motor Speed Control</a></li><li><a class="tocitem" href="../robotics_motor_pendulum/">Pendulum Driven by a DC Motor</a></li><li><a class="tocitem" href="../electrical_rlc/">Series RLC Circuit</a></li><li><a class="tocitem" href="../biomedical_windkessel/">Arterial Windkessel</a></li><li><a class="tocitem" href="../hydraulic_coupled_tanks/">Coupled Tanks</a></li><li><a class="tocitem" href="../chemical_reaction_network/">Chemical Reaction Network</a></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/public/">Public</a></li><li><a class="tocitem" href="../../lib/internals/">Internals</a></li></ul></li><li><a class="tocitem" href="../../citing/">Citing BondGraphToolkit</a></li><li><a class="tocitem" href="../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../license/">License</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Systems</a></li><li class="is-active"><a href>MSD system with N-DoF</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>MSD system with N-DoF</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl/blob/main/examples/mechanical_msd_ndof.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="msd-ndof"><a class="docs-heading-anchor" href="#msd-ndof">MSD system with N-DoF</a><a id="msd-ndof-1"></a><a class="docs-heading-anchor-permalink" href="#msd-ndof" title="Permalink"></a></h1><p><em>The source files for all examples can be found in <a href="https://github.com/felipecastrotc/BondGraph.jl/tree/main/examples/">/examples</a>.</em></p><h2 id="Introduction"><a class="docs-heading-anchor" href="#Introduction">Introduction</a><a id="Introduction-1"></a><a class="docs-heading-anchor-permalink" href="#Introduction" title="Permalink"></a></h2><p>One of the advantages of a scripting approach to modeling is that a model can be built algorithmically. To showcase this with the bond-graph toolkit, we consider a mass–spring–damper (MSD) chain with <span>$N$</span> degrees of freedom, built by repeating one bond pattern in a comprehension.</p><h3 id="N-DoF-MSD-model"><a class="docs-heading-anchor" href="#N-DoF-MSD-model">N-DoF MSD model</a><a id="N-DoF-MSD-model-1"></a><a class="docs-heading-anchor-permalink" href="#N-DoF-MSD-model" title="Permalink"></a></h3><p>The chain has <span>$N$</span> masses <span>$m_1, \dots, m_N$</span> in a line, each moving along the line with displacement <span>$x_i$</span> from its rest position (positive in the same direction for all masses). The first mass is attached to the ground by a spring <span>$k_1$</span> and a damper <span>$c_1$</span> in parallel. Each pair of neighbouring masses <span>$i-1$</span> and <span>$i$</span> is coupled by a spring <span>$k_i$</span> and a damper <span>$c_i$</span> in parallel, <span>$i = 2, \dots, N$</span>. The springs and dampers are linear and massless, and no external force acts on the chain.</p><p>Treat the ground as a mass <span>$0$</span> that does not move, <span>$x_0 = 0$</span>. Spring–damper pair <span>$i$</span> joins mass <span>$i-1$</span> to mass <span>$i$</span>; when <span>$x_{i-1} - x_i &gt; 0$</span> it is compressed, so it pushes mass <span>$i$</span> forward and mass <span>$i-1$</span> back with the force</p><p class="math-container">\[F_i = k_i\,(x_{i-1} - x_i) + c_i\,(\dot{x}_{i-1} - \dot{x}_i), \qquad i = 1, \dots, N.\]</p><p>Mass <span>$i$</span> is pushed by pair <span>$i$</span> behind it and pulled back by pair <span>$i+1$</span> ahead of it (there is no pair <span>$N+1$</span>, so <span>$F_{N+1} = 0$</span>). Newton&#39;s 2nd law then gives, for every mass,</p><p class="math-container">\[m_i\,\ddot{x}_i = F_i - F_{i+1}, \qquad i = 1, \dots, N.\]</p><p>For <span>$N = 4$</span>, written out:</p><p class="math-container">\[m_1\,\ddot{x}_1 = -k_1\,x_1 - c_1\,\dot{x}_1 - k_2\,(x_1 - x_2) - c_2\,(\dot{x}_1 - \dot{x}_2),\]</p><p class="math-container">\[m_2\,\ddot{x}_2 = k_2\,(x_1 - x_2) + c_2\,(\dot{x}_1 - \dot{x}_2) - k_3\,(x_2 - x_3) - c_3\,(\dot{x}_2 - \dot{x}_3),\]</p><p class="math-container">\[m_3\,\ddot{x}_3 = k_3\,(x_2 - x_3) + c_3\,(\dot{x}_2 - \dot{x}_3) - k_4\,(x_3 - x_4) - c_4\,(\dot{x}_3 - \dot{x}_4),\]</p><p class="math-container">\[m_4\,\ddot{x}_4 = k_4\,(x_3 - x_4) + c_4\,(\dot{x}_3 - \dot{x}_4).\]</p><p>All masses, stiffnesses and damping coefficients are one. The chain starts at rest with the spring between masses 1 and 2 stretched by one unit: <span>$x_1 = 0$</span> and <span>$x_2 = x_3 = x_4 = 1$</span>, so the other springs are at their rest length.</p><h3 id="Bond-Graph-Model"><a class="docs-heading-anchor" href="#Bond-Graph-Model">Bond Graph Model</a><a id="Bond-Graph-Model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-Graph-Model" title="Permalink"></a></h3><p>Karnopp, Margolis &amp; Rosenberg (2012) model a mass as an inertia <code>I:m</code> with momentum <span>$p = m\,\dot{x}$</span> and <span>$\dot{p} = F$</span>, a spring as a compliance <code>C:1/k</code> with displacement <span>$q$</span> and effort <span>$e = q/C = k\,q$</span>, and a dashpot as a resistance <code>R:c</code> (§3.1, pp. 38–47). A mechanical 1-junction is a force balance at a common velocity, and a mechanical 0-junction expresses the geometric compatibility of velocities at a common force (§3.3, pp. 58, 61).</p><p>The bond graph has one 1-junction per velocity:</p><ul><li>the velocity <span>$\dot{x}_1$</span> of mass 1, with <code>I:m₁</code>, <code>C:1/k₁</code> and <code>R:c₁</code> on it;</li><li>the velocity <span>$\dot{x}_i$</span> of mass <span>$i = 2, \dots, N$</span>, with <code>I:mᵢ</code> on it;</li><li>the relative velocity of spring–damper pair <span>$i = 2, \dots, N$</span>, with <code>C:1/kᵢ</code> and <code>R:cᵢ</code> on it.</li></ul><p>Between the junctions of masses <span>$i-1$</span> and <span>$i$</span> sits a 0-junction, which shares the force of pair <span>$i$</span> among the three 1-junctions around it and relates their velocities. In short, the repeating pattern is <code>1 (mass i−1) → 0 → 1 (mass i)</code>, with a third bond <code>0 → 1 (pair i)</code>. The <a href="../mechanical_msd_2dof/#msd-2dof">2-DoF</a> example draws the same pattern for two masses, with a force on the second.</p><h2 id="Preliminary-Steps"><a class="docs-heading-anchor" href="#Preliminary-Steps">Preliminary Steps</a><a id="Preliminary-Steps-1"></a><a class="docs-heading-anchor-permalink" href="#Preliminary-Steps" title="Permalink"></a></h2><p>In this example we build and simulate the bond graph model of the chain for <span>$N = 4$</span>. Then we simulate the hand-derived equations above as a plain ModelingToolkit model and compare the two.</p><p>We import the bond-graph toolkit to model the system and <code>OrdinaryDiffEqTsit5</code> to solve the resulting ODE. We also import ModelingToolkit&#39;s independent variable <code>t</code> and derivative <code>D</code> for the reference model at the end.</p><pre><code class="language-julia hljs">using BondGraphToolkit
+using BondGraphToolkit.ModelingToolkit: t_nounits as t, D_nounits as D
+using OrdinaryDiffEqTsit5
+using Plots</code></pre><p>Set the number of degrees of freedom. The construction below needs <span>$N \geq 2$</span>.</p><pre><code class="language-julia hljs">n = 4</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">4</code></pre><h2 id="System-Element-Definitions"><a class="docs-heading-anchor" href="#System-Element-Definitions">System Element Definitions</a><a id="System-Element-Definitions-1"></a><a class="docs-heading-anchor-permalink" href="#System-Element-Definitions" title="Permalink"></a></h2><p>The elements of mass 1: its inertia, the spring to ground (a compliance <span>$C = 1/k_1$</span>) and the damper to ground:</p><pre><code class="language-julia hljs">@named m = Inertia(I = 1.0)       # (kg) Mass
+@named s = Compliance(C = 1.0)    # (m/N) Spring compliance, 1/k
+@named d = Resistance(R = 1.0)    # (N⋅s/m) Damping coefficient</code></pre><p class="math-container">\[ \begin{align}
+e\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+\mathtt{pout.e}\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+f\left( t \right) &amp;=  - \mathtt{pout.f}\left( t \right) + \mathtt{power.f}\left( t \right) \\
+e\left( t \right) &amp;= R ~ f\left( t \right)
+\end{align}
+ \]</p><p>The masses <span>$2, \dots, N$</span> reuse <code>m</code>, and the coupling dampers reuse <code>d</code>. The coupling springs are created per pair below, because the second one starts with an initial displacement.</p><h2 id="Model-Construction"><a class="docs-heading-anchor" href="#Model-Construction">Model Construction</a><a id="Model-Construction-1"></a><a class="docs-heading-anchor-permalink" href="#Model-Construction" title="Permalink"></a></h2><h3 id="Mass-1"><a class="docs-heading-anchor" href="#Mass-1">Mass 1</a><a id="Mass-1-1"></a><a class="docs-heading-anchor-permalink" href="#Mass-1" title="Permalink"></a></h3><p>Mass 1 is a 1-junction: its inertia, spring and damper share its velocity <span>$\dot{x}_1$</span>. Following the usual orientation (Karnopp, Margolis &amp; Rosenberg 2012, §3.1, pp. 39, 42), the bonds of the passive elements point out of the junction into the elements (a bare member <code>x</code>). A free port named <code>out</code>, also pointing out of the junction (<code>:out</code>), will carry the force of the first coupling. The junction then states <span>$0 = -\dot{p}_1 - k_1 q_1 - c_1\,\dot{x}_1 - e_{\text{out}}$</span>, where the compliance&#39;s displacement <span>$q_1 = x_1$</span> is the stretch of the spring to ground.</p><pre><code class="language-julia hljs">@named m1 = Junction1(m, d, s, :out)</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( m_{+}power, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( d_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( s_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( out, core_{+}p4 \right) \\
+ - \mathtt{core.p2.f}\left( t \right) &amp;=  - \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p3.f}\left( t \right) &amp;=  - \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p4.f}\left( t \right) &amp;=  - \mathtt{core.p1.f}\left( t \right) \\
+0 &amp;=  - \mathtt{core.p1.e}\left( t \right) - \mathtt{core.p2.e}\left( t \right) - \mathtt{core.p3.e}\left( t \right) - \mathtt{core.p4.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{m.e}\left( t \right) \\
+\mathtt{m.e}\left( t \right) &amp;= \mathtt{m.power.e}\left( t \right) \\
+\mathtt{m.pout.e}\left( t \right) &amp;= \mathtt{m.power.e}\left( t \right) \\
+\mathtt{m.f}\left( t \right) &amp;=  - \mathtt{m.pout.f}\left( t \right) + \mathtt{m.power.f}\left( t \right) \\
+\mathtt{m.f}\left( t \right) &amp;= \frac{\mathtt{m.p}\left( t \right)}{\mathtt{m.I}} \\
+\mathtt{d.e}\left( t \right) &amp;= \mathtt{d.power.e}\left( t \right) \\
+\mathtt{d.pout.e}\left( t \right) &amp;= \mathtt{d.power.e}\left( t \right) \\
+\mathtt{d.f}\left( t \right) &amp;=  - \mathtt{d.pout.f}\left( t \right) + \mathtt{d.power.f}\left( t \right) \\
+\mathtt{d.e}\left( t \right) &amp;= \mathtt{d.R} ~ \mathtt{d.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{s.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{s.f}\left( t \right) \\
+\mathtt{s.e}\left( t \right) &amp;= \mathtt{s.power.e}\left( t \right) \\
+\mathtt{s.pout.e}\left( t \right) &amp;= \mathtt{s.power.e}\left( t \right) \\
+\mathtt{s.f}\left( t \right) &amp;=  - \mathtt{s.pout.f}\left( t \right) + \mathtt{s.power.f}\left( t \right) \\
+\mathtt{s.e}\left( t \right) &amp;= \frac{\mathtt{s.q}\left( t \right)}{\mathtt{s.C}}
+\end{align}
+ \]</p><h3 id="Masses-2-to-N"><a class="docs-heading-anchor" href="#Masses-2-to-N">Masses 2 to N</a><a id="Masses-2-to-N-1"></a><a class="docs-heading-anchor-permalink" href="#Masses-2-to-N" title="Permalink"></a></h3><p>Each further mass is a 1-junction with a free port <code>in</code>, pointing into the junction from the coupling behind it (<code>:in =&gt; :in</code>), and its inertia <code>m</code>. Every mass but the last also has a port <code>out</code>, pointing out towards the next coupling. So mass <span>$i$</span> states <span>$\dot{p}_i = e_{\text{in}} - e_{\text{out}}$</span>: the force from behind minus the force ahead.</p><pre><code class="language-julia hljs">masses = [Junction1(:in =&gt; :in, m, (i &lt; n ? [:out] : [])...; name = Symbol(:m, i))
+          for i in 2:n]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{System}:
+ <span class="sgr1">Model m2:</span>
+<span class="sgr1">Subsystems (4):</span> see hierarchy(m2)
+  core
+  in
+  m
+  out
+<span class="sgr1">Equations (20):</span>
+  11 standard: see equations(m2)
+  9 connecting: see equations(expand_connections(m2))
+<span class="sgr1">Unknowns (27):</span> see unknowns(m2)
+  core₊p2₊f(t)
+  core₊p1₊f(t)
+  core₊p3₊f(t)
+  core₊p2₊e(t)
+  ⋮
+<span class="sgr1">Parameters (1):</span> see parameters(m2)
+  m₊I
+ <span class="sgr1">Model m3:</span>
+<span class="sgr1">Subsystems (4):</span> see hierarchy(m3)
+  core
+  in
+  m
+  out
+<span class="sgr1">Equations (20):</span>
+  11 standard: see equations(m3)
+  9 connecting: see equations(expand_connections(m3))
+<span class="sgr1">Unknowns (27):</span> see unknowns(m3)
+  core₊p2₊f(t)
+  core₊p1₊f(t)
+  core₊p3₊f(t)
+  core₊p2₊e(t)
+  ⋮
+<span class="sgr1">Parameters (1):</span> see parameters(m3)
+  m₊I
+ <span class="sgr1">Model m4:</span>
+<span class="sgr1">Subsystems (3):</span> see hierarchy(m4)
+  core
+  in
+  m
+<span class="sgr1">Equations (15):</span>
+  9 standard: see equations(m4)
+  6 connecting: see equations(expand_connections(m4))
+<span class="sgr1">Unknowns (21):</span> see unknowns(m4)
+  core₊p2₊f(t)
+  core₊p1₊f(t)
+  core₊p2₊e(t)
+  core₊p1₊e(t)
+  ⋮
+<span class="sgr1">Parameters (1):</span> see parameters(m4)
+  m₊I</code></pre><h3 id="Spring–damper-pairs"><a class="docs-heading-anchor" href="#Spring–damper-pairs">Spring–damper pairs</a><a id="Spring–damper-pairs-1"></a><a class="docs-heading-anchor-permalink" href="#Spring–damper-pairs" title="Permalink"></a></h3><p>Pair <span>$i$</span> is a 1-junction whose free port <code>j0</code> points into it from the 0-junction (<code>:j0 =&gt; :in</code>), with its compliance and resistance bonds pointing out into the elements. It states <span>$e_{\text{j0}} = q_i/C_i + c_i\,f$</span>: the force carried to the 0-junction is the spring force plus the damper force, at the pair&#39;s relative velocity <span>$f$</span>.</p><p>The compliance of pair 2 starts at <span>$q = -1$</span>. The sign follows from the bond directions, as the 0-junction below shows: they make <span>$q_i = x_{i-1} - x_i$</span>, which is negative when the spring is stretched. The initial stretch of one unit is therefore <span>$q_2 = -1$</span>.</p><pre><code class="language-julia hljs">sds = [Junction1(Compliance(C = 1.0, q = i == 2 ? -1.0 : 0.0, name = :s), d, :j0 =&gt; :in;
+                 name = Symbol(:sd, i))
+       for i in 2:n]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{System}:
+ <span class="sgr1">Model sd2:</span>
+<span class="sgr1">Subsystems (4):</span> see hierarchy(sd2)
+  core
+  s
+  d
+  j0
+<span class="sgr1">Equations (24):</span>
+  15 standard: see equations(sd2)
+  9 connecting: see equations(expand_connections(sd2))
+<span class="sgr1">Unknowns (35):</span> see unknowns(sd2)
+  core₊p2₊f(t)
+  core₊p1₊f(t)
+  core₊p3₊f(t)
+  core₊p2₊e(t)
+  ⋮
+<span class="sgr1">Parameters (2):</span> see parameters(sd2)
+  s₊C
+  d₊R
+ <span class="sgr1">Model sd3:</span>
+<span class="sgr1">Subsystems (4):</span> see hierarchy(sd3)
+  core
+  s
+  d
+  j0
+<span class="sgr1">Equations (24):</span>
+  15 standard: see equations(sd3)
+  9 connecting: see equations(expand_connections(sd3))
+<span class="sgr1">Unknowns (35):</span> see unknowns(sd3)
+  core₊p2₊f(t)
+  core₊p1₊f(t)
+  core₊p3₊f(t)
+  core₊p2₊e(t)
+  ⋮
+<span class="sgr1">Parameters (2):</span> see parameters(sd3)
+  s₊C
+  d₊R
+ <span class="sgr1">Model sd4:</span>
+<span class="sgr1">Subsystems (4):</span> see hierarchy(sd4)
+  core
+  s
+  d
+  j0
+<span class="sgr1">Equations (24):</span>
+  15 standard: see equations(sd4)
+  9 connecting: see equations(expand_connections(sd4))
+<span class="sgr1">Unknowns (35):</span> see unknowns(sd4)
+  core₊p2₊f(t)
+  core₊p1₊f(t)
+  core₊p3₊f(t)
+  core₊p2₊e(t)
+  ⋮
+<span class="sgr1">Parameters (2):</span> see parameters(sd4)
+  s₊C
+  d₊R</code></pre><h3 id="Couplings"><a class="docs-heading-anchor" href="#Couplings">Couplings</a><a id="Couplings-1"></a><a class="docs-heading-anchor-permalink" href="#Couplings" title="Permalink"></a></h3><p>Each coupling is a 0-junction joining three free ports: <code>out</code> of mass <span>$i-1$</span>, <code>in</code> of mass <span>$i$</span> and <code>j0</code> of pair <span>$i$</span>. A plain <code>connect</code> of free ports forms that 0-junction: the efforts are shared and the signed flows sum to zero, each flow counted positive when its bond points into the 0-junction (Karnopp, Margolis &amp; Rosenberg 2012, Eqs. 3.16–3.17, pp. 58–59). The signs come from the half-arrows chosen above, not from the order of the <code>connect</code> arguments.</p><p>The bond from mass <span>$i-1$</span> points into the 0-junction and the bonds to mass <span>$i$</span> and to pair <span>$i$</span> point out of it. Flow continuity gives <span>$\dot{x}_{i-1} = \dot{x}_i + f$</span>, so the pair&#39;s velocity is <span>$f = \dot{x}_{i-1} - \dot{x}_i$</span> and its displacement is <span>$q_i = x_{i-1} - x_i$</span>: positive when the spring is compressed. The common effort is then the force <span>$F_i$</span> of the hand derivation, which enters mass <span>$i$</span> with a plus sign (<code>in</code>) and mass <span>$i-1$</span> with a minus sign (<code>out</code>), as in <span>$m_i\,\ddot{x}_i = F_i - F_{i+1}$</span>.</p><pre><code class="language-julia hljs">prev = [m1; masses[1:end-1]]
+cons = [connect(prev[k].out, masses[k].in, sds[k].j0) for k in 1:n-1]
+@named model = System(cons, t; systems = [m1; masses; sds])</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( m1_{+}out, m2_{+}in, sd2_{+}j0 \right) \\
+0 &amp;= \mathrm{connect}\left( m2_{+}out, m3_{+}in, sd3_{+}j0 \right) \\
+0 &amp;= \mathrm{connect}\left( m3_{+}out, m4_{+}in, sd4_{+}j0 \right) \\
+0 &amp;= \mathrm{connect}\left( m_{+}power, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( d_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( s_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( out, core_{+}p4 \right) \\
+ - \mathtt{m1.core.p2.f}\left( t \right) &amp;=  - \mathtt{m1.core.p1.f}\left( t \right) \\
+ - \mathtt{m1.core.p3.f}\left( t \right) &amp;=  - \mathtt{m1.core.p1.f}\left( t \right) \\
+ - \mathtt{m1.core.p4.f}\left( t \right) &amp;=  - \mathtt{m1.core.p1.f}\left( t \right) \\
+0 &amp;=  - \mathtt{m1.core.p1.e}\left( t \right) - \mathtt{m1.core.p2.e}\left( t \right) - \mathtt{m1.core.p3.e}\left( t \right) - \mathtt{m1.core.p4.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m1.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{m1.m.e}\left( t \right) \\
+\mathtt{m1.m.e}\left( t \right) &amp;= \mathtt{m1.m.power.e}\left( t \right) \\
+\mathtt{m1.m.pout.e}\left( t \right) &amp;= \mathtt{m1.m.power.e}\left( t \right) \\
+\mathtt{m1.m.f}\left( t \right) &amp;=  - \mathtt{m1.m.pout.f}\left( t \right) + \mathtt{m1.m.power.f}\left( t \right) \\
+\mathtt{m1.m.f}\left( t \right) &amp;= \frac{\mathtt{m1.m.p}\left( t \right)}{\mathtt{m1.m.I}} \\
+\mathtt{m1.d.e}\left( t \right) &amp;= \mathtt{m1.d.power.e}\left( t \right) \\
+\mathtt{m1.d.pout.e}\left( t \right) &amp;= \mathtt{m1.d.power.e}\left( t \right) \\
+\mathtt{m1.d.f}\left( t \right) &amp;=  - \mathtt{m1.d.pout.f}\left( t \right) + \mathtt{m1.d.power.f}\left( t \right) \\
+\mathtt{m1.d.e}\left( t \right) &amp;= \mathtt{m1.d.R} ~ \mathtt{m1.d.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m1.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{m1.s.f}\left( t \right) \\
+\mathtt{m1.s.e}\left( t \right) &amp;= \mathtt{m1.s.power.e}\left( t \right) \\
+\mathtt{m1.s.pout.e}\left( t \right) &amp;= \mathtt{m1.s.power.e}\left( t \right) \\
+\mathtt{m1.s.f}\left( t \right) &amp;=  - \mathtt{m1.s.pout.f}\left( t \right) + \mathtt{m1.s.power.f}\left( t \right) \\
+\mathtt{m1.s.e}\left( t \right) &amp;= \frac{\mathtt{m1.s.q}\left( t \right)}{\mathtt{m1.s.C}} \\
+0 &amp;= \mathrm{connect}\left( \in, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( m_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( out, core_{+}p3 \right) \\
+ - \mathtt{m2.core.p2.f}\left( t \right) &amp;= \mathtt{m2.core.p1.f}\left( t \right) \\
+ - \mathtt{m2.core.p3.f}\left( t \right) &amp;= \mathtt{m2.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{m2.core.p1.e}\left( t \right) - \mathtt{m2.core.p2.e}\left( t \right) - \mathtt{m2.core.p3.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m2.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{m2.m.e}\left( t \right) \\
+\mathtt{m2.m.e}\left( t \right) &amp;= \mathtt{m2.m.power.e}\left( t \right) \\
+\mathtt{m2.m.pout.e}\left( t \right) &amp;= \mathtt{m2.m.power.e}\left( t \right) \\
+\mathtt{m2.m.f}\left( t \right) &amp;=  - \mathtt{m2.m.pout.f}\left( t \right) + \mathtt{m2.m.power.f}\left( t \right) \\
+\mathtt{m2.m.f}\left( t \right) &amp;= \frac{\mathtt{m2.m.p}\left( t \right)}{\mathtt{m2.m.I}} \\
+0 &amp;= \mathrm{connect}\left( \in, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( m_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( out, core_{+}p3 \right) \\
+ - \mathtt{m3.core.p2.f}\left( t \right) &amp;= \mathtt{m3.core.p1.f}\left( t \right) \\
+ - \mathtt{m3.core.p3.f}\left( t \right) &amp;= \mathtt{m3.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{m3.core.p1.e}\left( t \right) - \mathtt{m3.core.p2.e}\left( t \right) - \mathtt{m3.core.p3.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m3.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{m3.m.e}\left( t \right) \\
+\mathtt{m3.m.e}\left( t \right) &amp;= \mathtt{m3.m.power.e}\left( t \right) \\
+\mathtt{m3.m.pout.e}\left( t \right) &amp;= \mathtt{m3.m.power.e}\left( t \right) \\
+\mathtt{m3.m.f}\left( t \right) &amp;=  - \mathtt{m3.m.pout.f}\left( t \right) + \mathtt{m3.m.power.f}\left( t \right) \\
+\mathtt{m3.m.f}\left( t \right) &amp;= \frac{\mathtt{m3.m.p}\left( t \right)}{\mathtt{m3.m.I}} \\
+0 &amp;= \mathrm{connect}\left( \in, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( m_{+}power, core_{+}p2 \right) \\
+ - \mathtt{m4.core.p2.f}\left( t \right) &amp;= \mathtt{m4.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{m4.core.p1.e}\left( t \right) - \mathtt{m4.core.p2.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m4.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{m4.m.e}\left( t \right) \\
+\mathtt{m4.m.e}\left( t \right) &amp;= \mathtt{m4.m.power.e}\left( t \right) \\
+\mathtt{m4.m.pout.e}\left( t \right) &amp;= \mathtt{m4.m.power.e}\left( t \right) \\
+\mathtt{m4.m.f}\left( t \right) &amp;=  - \mathtt{m4.m.pout.f}\left( t \right) + \mathtt{m4.m.power.f}\left( t \right) \\
+\mathtt{m4.m.f}\left( t \right) &amp;= \frac{\mathtt{m4.m.p}\left( t \right)}{\mathtt{m4.m.I}} \\
+0 &amp;= \mathrm{connect}\left( s_{+}power, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( d_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( j0, core_{+}p3 \right) \\
+ - \mathtt{sd2.core.p2.f}\left( t \right) &amp;=  - \mathtt{sd2.core.p1.f}\left( t \right) \\
+\mathtt{sd2.core.p3.f}\left( t \right) &amp;=  - \mathtt{sd2.core.p1.f}\left( t \right) \\
+0 &amp;=  - \mathtt{sd2.core.p1.e}\left( t \right) - \mathtt{sd2.core.p2.e}\left( t \right) + \mathtt{sd2.core.p3.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{sd2.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{sd2.s.f}\left( t \right) \\
+\mathtt{sd2.s.e}\left( t \right) &amp;= \mathtt{sd2.s.power.e}\left( t \right) \\
+\mathtt{sd2.s.pout.e}\left( t \right) &amp;= \mathtt{sd2.s.power.e}\left( t \right) \\
+\mathtt{sd2.s.f}\left( t \right) &amp;=  - \mathtt{sd2.s.pout.f}\left( t \right) + \mathtt{sd2.s.power.f}\left( t \right) \\
+\mathtt{sd2.s.e}\left( t \right) &amp;= \frac{\mathtt{sd2.s.q}\left( t \right)}{\mathtt{sd2.s.C}} \\
+\mathtt{sd2.d.e}\left( t \right) &amp;= \mathtt{sd2.d.power.e}\left( t \right) \\
+\mathtt{sd2.d.pout.e}\left( t \right) &amp;= \mathtt{sd2.d.power.e}\left( t \right) \\
+\mathtt{sd2.d.f}\left( t \right) &amp;=  - \mathtt{sd2.d.pout.f}\left( t \right) + \mathtt{sd2.d.power.f}\left( t \right) \\
+\mathtt{sd2.d.e}\left( t \right) &amp;= \mathtt{sd2.d.R} ~ \mathtt{sd2.d.f}\left( t \right) \\
+0 &amp;= \mathrm{connect}\left( s_{+}power, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( d_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( j0, core_{+}p3 \right) \\
+ - \mathtt{sd3.core.p2.f}\left( t \right) &amp;=  - \mathtt{sd3.core.p1.f}\left( t \right) \\
+\mathtt{sd3.core.p3.f}\left( t \right) &amp;=  - \mathtt{sd3.core.p1.f}\left( t \right) \\
+0 &amp;=  - \mathtt{sd3.core.p1.e}\left( t \right) - \mathtt{sd3.core.p2.e}\left( t \right) + \mathtt{sd3.core.p3.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{sd3.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{sd3.s.f}\left( t \right) \\
+\mathtt{sd3.s.e}\left( t \right) &amp;= \mathtt{sd3.s.power.e}\left( t \right) \\
+\mathtt{sd3.s.pout.e}\left( t \right) &amp;= \mathtt{sd3.s.power.e}\left( t \right) \\
+\mathtt{sd3.s.f}\left( t \right) &amp;=  - \mathtt{sd3.s.pout.f}\left( t \right) + \mathtt{sd3.s.power.f}\left( t \right) \\
+\mathtt{sd3.s.e}\left( t \right) &amp;= \frac{\mathtt{sd3.s.q}\left( t \right)}{\mathtt{sd3.s.C}} \\
+\mathtt{sd3.d.e}\left( t \right) &amp;= \mathtt{sd3.d.power.e}\left( t \right) \\
+\mathtt{sd3.d.pout.e}\left( t \right) &amp;= \mathtt{sd3.d.power.e}\left( t \right) \\
+\mathtt{sd3.d.f}\left( t \right) &amp;=  - \mathtt{sd3.d.pout.f}\left( t \right) + \mathtt{sd3.d.power.f}\left( t \right) \\
+\mathtt{sd3.d.e}\left( t \right) &amp;= \mathtt{sd3.d.R} ~ \mathtt{sd3.d.f}\left( t \right) \\
+0 &amp;= \mathrm{connect}\left( s_{+}power, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( d_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( j0, core_{+}p3 \right) \\
+ - \mathtt{sd4.core.p2.f}\left( t \right) &amp;=  - \mathtt{sd4.core.p1.f}\left( t \right) \\
+\mathtt{sd4.core.p3.f}\left( t \right) &amp;=  - \mathtt{sd4.core.p1.f}\left( t \right) \\
+0 &amp;=  - \mathtt{sd4.core.p1.e}\left( t \right) - \mathtt{sd4.core.p2.e}\left( t \right) + \mathtt{sd4.core.p3.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{sd4.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{sd4.s.f}\left( t \right) \\
+\mathtt{sd4.s.e}\left( t \right) &amp;= \mathtt{sd4.s.power.e}\left( t \right) \\
+\mathtt{sd4.s.pout.e}\left( t \right) &amp;= \mathtt{sd4.s.power.e}\left( t \right) \\
+\mathtt{sd4.s.f}\left( t \right) &amp;=  - \mathtt{sd4.s.pout.f}\left( t \right) + \mathtt{sd4.s.power.f}\left( t \right) \\
+\mathtt{sd4.s.e}\left( t \right) &amp;= \frac{\mathtt{sd4.s.q}\left( t \right)}{\mathtt{sd4.s.C}} \\
+\mathtt{sd4.d.e}\left( t \right) &amp;= \mathtt{sd4.d.power.e}\left( t \right) \\
+\mathtt{sd4.d.pout.e}\left( t \right) &amp;= \mathtt{sd4.d.power.e}\left( t \right) \\
+\mathtt{sd4.d.f}\left( t \right) &amp;=  - \mathtt{sd4.d.pout.f}\left( t \right) + \mathtt{sd4.d.power.f}\left( t \right) \\
+\mathtt{sd4.d.e}\left( t \right) &amp;= \mathtt{sd4.d.R} ~ \mathtt{sd4.d.f}\left( t \right)
+\end{align}
+ \]</p><h2 id="Analysing-the-model"><a class="docs-heading-anchor" href="#Analysing-the-model">Analysing the model</a><a id="Analysing-the-model-1"></a><a class="docs-heading-anchor-permalink" href="#Analysing-the-model" title="Permalink"></a></h2><p><code>mtkcompile</code> reduces the model to its states: the momenta of the <span>$N$</span> inertias and the displacements of the <span>$N$</span> compliances.</p><pre><code class="language-julia hljs">sys = mtkcompile(model)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{sd4.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{sd4.d.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{sd3.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{sd3.d.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{sd2.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{sd2.d.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m4.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{sd4.core.p1.e}\left( t \right) + \mathtt{sd4.core.p2.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m3.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{sd3.core.p1.e}\left( t \right) + \mathtt{sd3.core.p2.e}\left( t \right) - \mathtt{sd4.core.p1.e}\left( t \right) - \mathtt{sd4.core.p2.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m2.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{sd2.core.p1.e}\left( t \right) + \mathtt{sd2.core.p2.e}\left( t \right) - \mathtt{sd3.core.p1.e}\left( t \right) - \mathtt{sd3.core.p2.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m1.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{m1.d.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{m1.m.p}\left( t \right)}{\mathrm{d}t} &amp;=  - \mathtt{m1.core.p2.e}\left( t \right) - \mathtt{m1.core.p3.e}\left( t \right) - \mathtt{m2.core.p2.e}\left( t \right) - \mathtt{m3.core.p2.e}\left( t \right) - \mathtt{m3.core.p3.e}\left( t \right)
+\end{align}
+ \]</p><p>Print system states</p><pre><code class="language-julia hljs">unknowns(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">8-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ sd4₊s₊q(t)
+ sd3₊s₊q(t)
+ sd2₊s₊q(t)
+ m4₊m₊p(t)
+ m3₊m₊p(t)
+ m2₊m₊p(t)
+ m1₊s₊q(t)
+ m1₊m₊p(t)</code></pre><p>Print system parameters</p><pre><code class="language-julia hljs">parameters(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">12-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ m1₊m₊I
+ m1₊d₊R
+ m1₊s₊C
+ m2₊m₊I
+ m3₊m₊I
+ m4₊m₊I
+ sd2₊s₊C
+ sd2₊d₊R
+ sd3₊s₊C
+ sd3₊d₊R
+ sd4₊s₊C
+ sd4₊d₊R</code></pre><p>Print the system&#39;s equations in terms of the states</p><pre><code class="language-julia hljs">full_equations(sys)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{sd4.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{m3.m.p}\left( t \right)}{\mathtt{m3.m.I}} + \frac{ - \mathtt{m4.m.p}\left( t \right)}{\mathtt{m4.m.I}} \\
+\frac{\mathrm{d}\mathtt{sd3.s.q}\left( t \right)}{\mathrm{d}t} &amp;=  - \frac{ - \mathtt{m2.m.p}\left( t \right)}{\mathtt{m2.m.I}} - \frac{\mathtt{m3.m.p}\left( t \right)}{\mathtt{m3.m.I}} \\
+\frac{\mathrm{d}\mathtt{sd2.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{m1.m.p}\left( t \right)}{\mathtt{m1.m.I}} + \frac{ - \mathtt{m2.m.p}\left( t \right)}{\mathtt{m2.m.I}} \\
+\frac{\mathrm{d}\mathtt{m4.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{sd4.s.q}\left( t \right)}{\mathtt{sd4.s.C}} + \mathtt{sd4.d.R} ~ \left( \frac{\mathtt{m3.m.p}\left( t \right)}{\mathtt{m3.m.I}} + \frac{ - \mathtt{m4.m.p}\left( t \right)}{\mathtt{m4.m.I}} \right) \\
+\frac{\mathrm{d}\mathtt{m3.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{sd3.s.q}\left( t \right)}{\mathtt{sd3.s.C}} + \frac{ - \mathtt{sd4.s.q}\left( t \right)}{\mathtt{sd4.s.C}} + \mathtt{sd3.d.R} ~ \left(  - \frac{ - \mathtt{m2.m.p}\left( t \right)}{\mathtt{m2.m.I}} - \frac{\mathtt{m3.m.p}\left( t \right)}{\mathtt{m3.m.I}} \right) - \mathtt{sd4.d.R} ~ \left( \frac{\mathtt{m3.m.p}\left( t \right)}{\mathtt{m3.m.I}} + \frac{ - \mathtt{m4.m.p}\left( t \right)}{\mathtt{m4.m.I}} \right) \\
+\frac{\mathrm{d}\mathtt{m2.m.p}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{sd2.s.q}\left( t \right)}{\mathtt{sd2.s.C}} + \frac{ - \mathtt{sd3.s.q}\left( t \right)}{\mathtt{sd3.s.C}} + \mathtt{sd2.d.R} ~ \left( \frac{\mathtt{m1.m.p}\left( t \right)}{\mathtt{m1.m.I}} + \frac{ - \mathtt{m2.m.p}\left( t \right)}{\mathtt{m2.m.I}} \right) - \mathtt{sd3.d.R} ~ \left(  - \frac{ - \mathtt{m2.m.p}\left( t \right)}{\mathtt{m2.m.I}} - \frac{\mathtt{m3.m.p}\left( t \right)}{\mathtt{m3.m.I}} \right) \\
+\frac{\mathrm{d}\mathtt{m1.s.q}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{m1.m.p}\left( t \right)}{\mathtt{m1.m.I}} \\
+\frac{\mathrm{d}\mathtt{m1.m.p}\left( t \right)}{\mathrm{d}t} &amp;=  - \frac{\mathtt{sd2.s.q}\left( t \right)}{\mathtt{sd2.s.C}} - \frac{\mathtt{sd3.s.q}\left( t \right)}{\mathtt{sd3.s.C}} - \frac{ - \mathtt{sd3.s.q}\left( t \right)}{\mathtt{sd3.s.C}} - \frac{\mathtt{sd4.s.q}\left( t \right)}{\mathtt{sd4.s.C}} - \frac{ - \mathtt{sd4.s.q}\left( t \right)}{\mathtt{sd4.s.C}} + \frac{ - \mathtt{m1.s.q}\left( t \right)}{\mathtt{m1.s.C}} + \frac{ - \mathtt{m1.d.R} ~ \mathtt{m1.m.p}\left( t \right)}{\mathtt{m1.m.I}} - \mathtt{sd2.d.R} ~ \left( \frac{\mathtt{m1.m.p}\left( t \right)}{\mathtt{m1.m.I}} + \frac{ - \mathtt{m2.m.p}\left( t \right)}{\mathtt{m2.m.I}} \right)
+\end{align}
+ \]</p><h3 id="Generated-equations-against-the-hand-derivation"><a class="docs-heading-anchor" href="#Generated-equations-against-the-hand-derivation">Generated equations against the hand derivation</a><a id="Generated-equations-against-the-hand-derivation-1"></a><a class="docs-heading-anchor-permalink" href="#Generated-equations-against-the-hand-derivation" title="Permalink"></a></h3><p><code>bgequations</code> returns the same equations with the names we choose. Here, for <span>$N = 4$</span>, we rename the momenta to <span>$p_i$</span>, the displacements to <span>$q_i$</span> and the parameters to <span>$m_i$</span>, <span>$C_i = 1/k_i$</span> and <span>$c_i$</span> (inside a <code>let</code>, so these helper names stay local):</p><pre><code class="language-julia hljs">let
+    @variables p₁(t) p₂(t) p₃(t) p₄(t) q₁(t) q₂(t) q₃(t) q₄(t)
+    @parameters m₁ m₂ m₃ m₄ C₁ C₂ C₃ C₄ c₁ c₂ c₃ c₄
+    J = [m1; masses]
+    p, q, M, C, c = [p₁, p₂, p₃, p₄], [q₁, q₂, q₃, q₄], [m₁, m₂, m₃, m₄], [C₁, C₂, C₃, C₄], [c₁, c₂, c₃, c₄]
+    S = [m1; sds]
+    rename = Dict([[J[i].m.p =&gt; p[i] for i in 1:n]; [J[i].m.I =&gt; M[i] for i in 1:n];
+                   [S[i].s.q =&gt; q[i] for i in 1:n]; [S[i].s.C =&gt; C[i] for i in 1:n];
+                   [S[i].d.R =&gt; c[i] for i in 1:n]])
+    bgequations(model; rename)
+end</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{q_4}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{p_3}\left( t \right)}{\mathtt{m_3}} + \frac{ - \mathtt{p_4}\left( t \right)}{\mathtt{m_4}} \\
+\frac{\mathrm{d}\mathtt{q_3}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{p_2}\left( t \right)}{\mathtt{m_2}} + \frac{ - \mathtt{p_3}\left( t \right)}{\mathtt{m_3}} \\
+\frac{\mathrm{d}\mathtt{q_2}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{p_1}\left( t \right)}{\mathtt{m_1}} + \frac{ - \mathtt{p_2}\left( t \right)}{\mathtt{m_2}} \\
+\frac{\mathrm{d}\mathtt{p_4}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{q_4}\left( t \right)}{\mathtt{C_4}} + \mathtt{c_4} ~ \left( \frac{\mathtt{p_3}\left( t \right)}{\mathtt{m_3}} + \frac{ - \mathtt{p_4}\left( t \right)}{\mathtt{m_4}} \right) \\
+\frac{\mathrm{d}\mathtt{p_3}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{q_3}\left( t \right)}{\mathtt{C_3}} + \frac{ - \mathtt{q_4}\left( t \right)}{\mathtt{C_4}} + \mathtt{c_3} ~ \left( \frac{\mathtt{p_2}\left( t \right)}{\mathtt{m_2}} + \frac{ - \mathtt{p_3}\left( t \right)}{\mathtt{m_3}} \right) - \mathtt{c_4} ~ \left( \frac{\mathtt{p_3}\left( t \right)}{\mathtt{m_3}} + \frac{ - \mathtt{p_4}\left( t \right)}{\mathtt{m_4}} \right) \\
+\frac{\mathrm{d}\mathtt{p_2}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{q_2}\left( t \right)}{\mathtt{C_2}} + \frac{ - \mathtt{q_3}\left( t \right)}{\mathtt{C_3}} + \mathtt{c_2} ~ \left( \frac{\mathtt{p_1}\left( t \right)}{\mathtt{m_1}} + \frac{ - \mathtt{p_2}\left( t \right)}{\mathtt{m_2}} \right) - \mathtt{c_3} ~ \left( \frac{\mathtt{p_2}\left( t \right)}{\mathtt{m_2}} + \frac{ - \mathtt{p_3}\left( t \right)}{\mathtt{m_3}} \right) \\
+\frac{\mathrm{d}\mathtt{q_1}\left( t \right)}{\mathrm{d}t} &amp;= \frac{\mathtt{p_1}\left( t \right)}{\mathtt{m_1}} \\
+\frac{\mathrm{d}\mathtt{p_1}\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - \mathtt{q_1}\left( t \right)}{\mathtt{C_1}} + \frac{ - \mathtt{q_2}\left( t \right)}{\mathtt{C_2}} + \frac{\mathtt{q_3}\left( t \right)}{\mathtt{C_3}} + \frac{ - \mathtt{q_3}\left( t \right)}{\mathtt{C_3}} + \frac{\mathtt{q_4}\left( t \right)}{\mathtt{C_4}} + \frac{ - \mathtt{q_4}\left( t \right)}{\mathtt{C_4}} + \frac{ - \mathtt{c_1} ~ \mathtt{p_1}\left( t \right)}{\mathtt{m_1}} - \mathtt{c_2} ~ \left( \frac{\mathtt{p_1}\left( t \right)}{\mathtt{m_1}} + \frac{ - \mathtt{p_2}\left( t \right)}{\mathtt{m_2}} \right)
+\end{align}
+ \]</p><p>MTK writes the equations without collecting terms, so some appear twice with opposite signs, and <span>$\dot{x}_i = p_i/m_i$</span> shows up as a quotient. With <span>$p_i = m_i\,\dot{x}_i$</span>, <span>$q_1 = x_1$</span>, <span>$q_i = x_{i-1} - x_i$</span> and <span>$q_i/C_i = k_i\,q_i$</span>:</p><ul><li>the equations for <span>$\dot{q}_1$</span> and <span>$\dot{q}_i$</span> restate <span>$\dot{q}_1 = \dot{x}_1$</span> and <span>$\dot{q}_i = \dot{x}_{i-1} - \dot{x}_i$</span>;</li><li>the equation for <span>$\dot{p}_1$</span> is <span>$m_1\,\ddot{x}_1 = -k_1 x_1 - c_1\,\dot{x}_1 - F_2$</span>;</li><li>the equation for <span>$\dot{p}_i$</span>, <span>$1 &lt; i &lt; N$</span>, is <span>$m_i\,\ddot{x}_i = F_i - F_{i+1}$</span>, and the one for <span>$\dot{p}_N$</span> is <span>$m_N\,\ddot{x}_N = F_N$</span>,</li></ul><p>where, for <span>$i \geq 2$</span>, <span>$F_i = q_i/C_i + c_i\,(p_{i-1}/m_{i-1} - p_i/m_i) = k_i\,(x_{i-1} - x_i) + c_i\,(\dot{x}_{i-1} - \dot{x}_i)$</span>: the governing equations of the introduction.</p><h2 id="System-Simulations"><a class="docs-heading-anchor" href="#System-Simulations">System Simulations</a><a id="System-Simulations-1"></a><a class="docs-heading-anchor-permalink" href="#System-Simulations" title="Permalink"></a></h2><h3 id="Bond-graph-model"><a class="docs-heading-anchor" href="#Bond-graph-model">Bond graph model</a><a id="Bond-graph-model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-graph-model" title="Permalink"></a></h3><p>Define the simulation time</p><pre><code class="language-julia hljs">tspan = (0.0, 10.0)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(0.0, 10.0)</code></pre><p>Generate an <code>ODEProblem</code> as for any ModelingToolkit model. The initial values are those set on the elements: zero momenta, and the initial displacement of the second compliance.</p><pre><code class="language-julia hljs">prob = ODEProblem(sys, [], tspan)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi"><span class="sgr38_2" style="color:#56b6c2">ODEProblem</span> with uType <span class="sgr38_2" style="color:#56b6c2">Vector{Float64}</span> and tType <span class="sgr38_2" style="color:#56b6c2">Float64</span>. In-place: <span class="sgr38_2" style="color:#56b6c2">true</span>
+Initialization status: <span class="sgr38_2" style="color:#56b6c2">FULLY_DETERMINED</span>
+Non-trivial mass matrix: <span class="sgr38_2" style="color:#56b6c2">false</span>
+timespan: (0.0, 10.0)
+u0: 8-element Vector{Float64}:
+  0.0
+  0.0
+ -1.0
+  0.0
+  0.0
+  0.0
+  0.0
+  0.0</code></pre><p>Use <code>solve</code> to simulate the system. Tight tolerances let us compare it with the reference model at the end.</p><pre><code class="language-julia hljs">sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">retcode: Success
+Interpolation: specialized 4th order &quot;free&quot; interpolation
+t: 175-element Vector{Float64}:
+  0.0
+  0.003598046159398746
+  0.009860378964455598
+  0.01726223572703434
+  0.02641198938139029
+  0.03684787336096694
+  0.048681151413067766
+  0.06165192137611987
+  0.07569581120788378
+  0.09064290546326854
+  ⋮
+  8.92991917200254
+  9.077418738507951
+  9.22567485757694
+  9.374623996720448
+  9.524395475033401
+  9.674906048159968
+  9.826122016019308
+  9.977972621354706
+ 10.0
+u: 175-element Vector{Vector{Float64}}:
+ [0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+ [-7.728505158831898e-9, -6.441991388584248e-6, -0.9999871005532494, -7.735463298798312e-9, -6.441991393590791e-6, -0.0035786815009333155, 6.449719893743072e-6, 0.0035786737654700165]
+ [-1.5782484281702258e-7, -4.7978719451738867e-5, -0.9999037265206259, -1.582148574717837e-7, -4.7978720220859616e-5, -0.00971565133794895, 4.813654429455572e-5, 0.009715493123091477]
+ [-8.390053376461025e-7, -0.00014560351558153792, -0.9997071113091003, -8.426418081161086e-7, -0.000145603528136196, -0.016821208271896627, 0.00014644252091918384, 0.01682036563008851]
+ [-2.971012112194656e-6, -0.0003367337625691245, -0.9993205705978797, -2.990760092403616e-6, -0.0003367338668855807, -0.025386814022273718, 0.00033970477468131907, 0.025383823262181315]
+ [-7.962769404869599e-6, -0.0006463599985111007, -0.9986912798804215, -8.036804178725568e-6, -0.0006463605441152595, -0.0348685325716219, 0.0006543227679159699, 0.034860495767443184]
+ [-1.8091385320416772e-5, -0.001110533786756084, -0.9977425245780978, -1.831427523326668e-5, -0.0011105359568618235, -0.04525774488287576, 0.0011286251720765011, 0.045239430607642496]
+ [-3.615500846674218e-5, -0.0017506951987881205, -0.9964257265550097, -3.672098786362196e-5, -0.0017507021775260694, -0.056215629749672355, 0.0017868502072548634, 0.056178908761808734]
+ [-6.57497754946211e-5, -0.002590319672471653, -0.9946865734151813, -6.701801937698118e-5, -0.0025903388726021474, -0.06758839711175964, 0.0026560694479662744, 0.06752137909238266]
+ [-0.00011079816365811807, -0.0036412804272974372, -0.9924932265586148, -0.0001133671385490683, -0.0036413269990979106, -0.07914942450706952, 0.0037520785909555547, 0.07903605736852046]
+ ⋮
+ [0.07535074678383748, 0.14161550462680192, 0.19079858084518303, -0.019596687710578656, -0.01724732069535784, -0.012798315368610582, -0.2169662514106394, -0.006798372341968014]
+ [0.0755961670486227, 0.1420808444380288, 0.19142624102680691, -0.008216485258957773, -0.007234957780671192, -0.005367912171116102, -0.21767701148665147, -0.00284857308784164]
+ [0.0756410294182829, 0.1421677842644078, 0.19154382939657352, 0.0030417773765405508, 0.0026691966367923424, 0.001982392765435799, -0.2178088136826907, 0.0010593846111047825]
+ [0.07548570206607459, 0.14187732325237432, 0.19115274366387058, 0.014144018705438036, 0.012435287055533976, 0.009230412602436544, -0.21736302531844892, 0.0049136061030014945]
+ [0.07513088650891771, 0.14121105146166485, 0.19025517242446624, 0.025070697265019534, 0.02204625102450086, 0.016363455108763154, -0.21634193797058257, 0.008707242156256357]
+ [0.0745781131175316, 0.1401720767469407, 0.1888553428758654, 0.03578675464516557, 0.031471374143858, 0.023358697175133832, -0.21475018986447234, 0.012428057470031752]
+ [0.07382965908559419, 0.1387648745581751, 0.18695931890545203, 0.0462615185864504, 0.040683794215072906, 0.03019617636591679, -0.21259453364376932, 0.01606534222053363]
+ [0.07288881029297452, 0.13699578139016014, 0.18457566597096536, 0.05646267711363597, 0.04965519796457436, 0.036854855483643964, -0.2098845916831347, 0.019607821629992077]
+ [0.07273692965936611, 0.1367101949803408, 0.18419087015891158, 0.057914680215858556, 0.050932134351776986, 0.037802618176985874, -0.20944712463970694, 0.02011206203887275]</code></pre><p>The velocity of each mass is the flow of its inertia&#39;s bond:</p><pre><code class="language-julia hljs">velocities = [J.m.f for J in [m1; masses]]
+plot(sol, idxs = velocities, xlabel = &quot;Time (s)&quot;, ylabel = &quot;Velocity (m/s)&quot;,
+     label = permutedims([&quot;ẋ$i&quot; for i in 1:n]))</code></pre><img src="1e42230a.svg" alt="Example block output"/><h3 id="N-DoF-MSD-model-2"><a class="docs-heading-anchor" href="#N-DoF-MSD-model-2">N-DoF MSD model</a><a class="docs-heading-anchor-permalink" href="#N-DoF-MSD-model-2" title="Permalink"></a></h3><p>The reference model is the hand-derived <span>$m_i\,\ddot{x}_i = F_i - F_{i+1}$</span> as a plain ModelingToolkit <code>System</code>, with the displacements <span>$x_i$</span> and velocities <span>$v_i = \dot{x}_i$</span> as states. First, the parameters (all one, as in the bond graph model):</p><pre><code class="language-julia hljs">mᵥ = ones(n)                      # (kg) Masses
+kᵥ = ones(n)                      # (N/m) Spring stiffnesses
+cᵥ = ones(n)                      # (N⋅s/m) Damping coefficients</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">4-element Vector{Float64}:
+ 1.0
+ 1.0
+ 1.0
+ 1.0</code></pre><p>Then the states, with the initial stretch of the spring between masses 1 and 2:</p><pre><code class="language-julia hljs">@variables x(t)[1:n] = [0.0; ones(n - 1)]   # Displacements
+@variables v(t)[1:n] = zeros(n)             # Velocities</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1-element Vector{Symbolics.Arr{Num, 1}}:
+ (v(t))[1:4]</code></pre><p>The force <span>$F_i$</span> of spring–damper pair <span>$i$</span>, with the ground as <span>$x_0 = \dot{x}_0 = 0$</span> and no pair beyond the last mass:</p><pre><code class="language-julia hljs">F(i) = i &gt; n ? 0 :
+       i == 1 ? -kᵥ[1] * x[1] - cᵥ[1] * v[1] :
+       kᵥ[i] * (x[i-1] - x[i]) + cᵥ[i] * (v[i-1] - v[i])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">F (generic function with 1 method)</code></pre><p>Newton&#39;s 2nd law for every mass:</p><pre><code class="language-julia hljs">eqs_t = [[D(x[i]) ~ v[i] for i in 1:n];
+         [mᵥ[i] * D(v[i]) ~ F(i) - F(i + 1) for i in 1:n]]</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}x\_{1}\left( t \right)}{\mathrm{d}t} &amp;= v\_{1}\left( t \right) \\
+\frac{\mathrm{d}x\_{2}\left( t \right)}{\mathrm{d}t} &amp;= v\_{2}\left( t \right) \\
+\frac{\mathrm{d}x\_{3}\left( t \right)}{\mathrm{d}t} &amp;= v\_{3}\left( t \right) \\
+\frac{\mathrm{d}x\_{4}\left( t \right)}{\mathrm{d}t} &amp;= v\_{4}\left( t \right) \\
+\frac{\mathrm{d}v\_{1}\left( t \right)}{\mathrm{d}t} &amp;=  - 2 ~ v\_{1}\left( t \right) + v\_{2}\left( t \right) - 2 ~ x\_{1}\left( t \right) + x\_{2}\left( t \right) \\
+\frac{\mathrm{d}v\_{2}\left( t \right)}{\mathrm{d}t} &amp;= v\_{1}\left( t \right) - 2 ~ v\_{2}\left( t \right) + v\_{3}\left( t \right) + x\_{1}\left( t \right) - 2 ~ x\_{2}\left( t \right) + x\_{3}\left( t \right) \\
+\frac{\mathrm{d}v\_{3}\left( t \right)}{\mathrm{d}t} &amp;= v\_{2}\left( t \right) - 2 ~ v\_{3}\left( t \right) + v\_{4}\left( t \right) + x\_{2}\left( t \right) - 2 ~ x\_{3}\left( t \right) + x\_{4}\left( t \right) \\
+\frac{\mathrm{d}v\_{4}\left( t \right)}{\mathrm{d}t} &amp;= v\_{3}\left( t \right) - v\_{4}\left( t \right) + x\_{3}\left( t \right) - x\_{4}\left( t \right)
+\end{align}
+ \]</p><p>Then, we use the equations to create a <code>System</code> and compile it with <code>mtkcompile</code>, as for the bond graph model.</p><pre><code class="language-julia hljs">@named sys_t = System(eqs_t, t)
+sys_t = mtkcompile(sys_t)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}x\_{4}\left( t \right)}{\mathrm{d}t} &amp;= v\_{4}\left( t \right) \\
+\frac{\mathrm{d}x\_{3}\left( t \right)}{\mathrm{d}t} &amp;= v\_{3}\left( t \right) \\
+\frac{\mathrm{d}x\_{2}\left( t \right)}{\mathrm{d}t} &amp;= v\_{2}\left( t \right) \\
+\frac{\mathrm{d}x\_{1}\left( t \right)}{\mathrm{d}t} &amp;= v\_{1}\left( t \right) \\
+\frac{\mathrm{d}v\_{4}\left( t \right)}{\mathrm{d}t} &amp;= v\_{3}\left( t \right) - v\_{4}\left( t \right) + x\_{3}\left( t \right) - x\_{4}\left( t \right) \\
+\frac{\mathrm{d}v\_{3}\left( t \right)}{\mathrm{d}t} &amp;= v\_{2}\left( t \right) - 2 ~ v\_{3}\left( t \right) + v\_{4}\left( t \right) + x\_{2}\left( t \right) - 2 ~ x\_{3}\left( t \right) + x\_{4}\left( t \right) \\
+\frac{\mathrm{d}v\_{2}\left( t \right)}{\mathrm{d}t} &amp;= v\_{1}\left( t \right) - 2 ~ v\_{2}\left( t \right) + v\_{3}\left( t \right) + x\_{1}\left( t \right) - 2 ~ x\_{2}\left( t \right) + x\_{3}\left( t \right) \\
+\frac{\mathrm{d}v\_{1}\left( t \right)}{\mathrm{d}t} &amp;=  - 2 ~ v\_{1}\left( t \right) + v\_{2}\left( t \right) - 2 ~ x\_{1}\left( t \right) + x\_{2}\left( t \right)
+\end{align}
+ \]</p><p>Define the <code>ODEProblem</code> with the same time span and solve it with the same tolerances.</p><pre><code class="language-julia hljs">prob_t = ODEProblem(sys_t, [], tspan)
+sol_t = solve(prob_t, Tsit5(), reltol = 1e-10, abstol = 1e-10)
+plot(sol_t, idxs = collect(v), xlabel = &quot;Time (s)&quot;, ylabel = &quot;Velocity (m/s)&quot;,
+     label = permutedims([&quot;v$i&quot; for i in 1:n]))</code></pre><img src="6d308237.svg" alt="Example block output"/><h3 id="Compare-models"><a class="docs-heading-anchor" href="#Compare-models">Compare models</a><a id="Compare-models-1"></a><a class="docs-heading-anchor-permalink" href="#Compare-models" title="Permalink"></a></h3><p>The velocities of the bond graph model (solid) and of the reference model (dashed):</p><pre><code class="language-julia hljs">plot(sol, idxs = velocities, label = permutedims([&quot;Bond graph ẋ$i&quot; for i in 1:n]))
+plot!(sol_t, idxs = collect(v), linestyle = :dash, label = permutedims([&quot;Model v$i&quot; for i in 1:n]),
+      xlabel = &quot;Time (s)&quot;, ylabel = &quot;Velocity (m/s)&quot;)</code></pre><img src="270fce2f.svg" alt="Example block output"/><p>The displacements of the compliances against those of the springs in the reference model, <span>$q_1 = x_1$</span> and <span>$q_i = x_{i-1} - x_i$</span>:</p><pre><code class="language-julia hljs">stretch = [m1.s.q; [S.s.q for S in sds]]
+stretch_t = [x[1]; [x[i-1] - x[i] for i in 2:n]]
+plot(sol, idxs = stretch, label = permutedims([&quot;Bond graph q$i&quot; for i in 1:n]))
+plot!(sol_t, idxs = stretch_t, linestyle = :dash, label = permutedims([&quot;Model q$i&quot; for i in 1:n]),
+      xlabel = &quot;Time (s)&quot;, ylabel = &quot;Displacement (m)&quot;)</code></pre><img src="c43131dd.svg" alt="Example block output"/><p>On a common time grid, the largest difference between the two models over all velocities and spring displacements:</p><pre><code class="language-julia hljs">tgrid = range(tspan..., length = 1001)
+maximum(maximum(abs, sol(tgrid; idxs = a).u - sol_t(tgrid; idxs = b).u)
+        for (a, b) in zip([velocities; stretch], [collect(v); stretch_t]))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1.929757742491489e-11</code></pre><p>The bond graph model, built by repeating one pattern, reproduces the hand-derived dynamics of the chain to the solver&#39;s tolerance.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../mechanical_msd_2dof/">« Mass-Spring-Damper system 2-DoF</a><a class="docs-footer-nextpage" href="../mechanical_duffing/">Duffing Equation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Sunday 18 October 2026 18:08">Sunday 18 October 2026</span>. Using Julia version 1.10.12.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

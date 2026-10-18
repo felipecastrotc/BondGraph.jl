@@ -1,0 +1,59 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+
+\input{base_tikzset.tex}
+
+\begin{document}
+
+\begin{tikzpicture}[line width=0.25mm, node distance=1.5cm]
+
+  % Force
+  \node[port] (Se) {Se: \(F(t)\)};
+
+  % 1dof m 1-junction
+  \node[below=of Se, port] (1junction-11) {1};
+  \drawbg{Se}{1junction-11};
+  
+  % Inertance
+  \node[left=of 1junction-11, port] (I1) {I: \(m\)};
+  \drawbg{1junction-11}{I1};
+  
+  % 1dof 0-junction
+  \node[below=of 1junction-11, port] (0junction-1) {0};
+  \drawbg{1junction-11}{0junction-1};
+
+  % 1dof ck 1-junction
+  \node[right=of 0junction-1, port] (1junction-12) {1};
+  \drawbg{0junction-1}{1junction-12};
+
+  % Resistance
+  \node[above=of 1junction-12, port] (R1) {R: \(c\)};
+  \drawbg{1junction-12}{R1};
+  
+  % Compliance
+  \node[right=of 1junction-12, port] (C1) {C: \(1/k\)};
+  \drawbg{1junction-12}{C1};
+
+  % 2dof
+  \node[below=of 0junction-1, port] (1junction-2) {1};
+  \drawbg{0junction-1}{1junction-2};
+  
+  % Inertance
+  \node[below=of 1junction-2, port] (I) {I: \(m\)};
+  \drawbg{1junction-2}{I};
+  
+  % Resistance
+  \node[right=of 1junction-2, port] (R) {R: \(c\)};
+  \drawbg{1junction-2}{R};
+  
+  % Compliance
+  \node[left=of 1junction-2, port] (C) {C: \(1/k\)};
+  \drawbg{1junction-2}{C};
+
+
+  
+\end{tikzpicture}
+  
+
+\end{document}

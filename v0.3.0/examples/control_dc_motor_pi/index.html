@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>DC Motor Speed Control · BondGraphToolkit.jl</title><meta name="title" content="DC Motor Speed Control · BondGraphToolkit.jl"/><meta property="og:title" content="DC Motor Speed Control · BondGraphToolkit.jl"/><meta property="twitter:title" content="DC Motor Speed Control · BondGraphToolkit.jl"/><meta name="description" content="Documentation for BondGraphToolkit.jl."/><meta property="og:description" content="Documentation for BondGraphToolkit.jl."/><meta property="twitter:description" content="Documentation for BondGraphToolkit.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../"><img class="docs-light-only" src="../../assets/logo.svg" alt="BondGraphToolkit.jl logo"/><img class="docs-dark-only" src="../../assets/logo-dark.svg" alt="BondGraphToolkit.jl logo"/></a><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../getting_started_auto/">Getting started</a></li><li><span class="tocitem">User Guide</span><ul><li><a class="tocitem" href="../../man/user_guide/">Concepts and conventions</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox"/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Systems</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../mechanical_msd_1dof/">Harmonic Oscillator</a></li><li><a class="tocitem" href="../mechanical_msd_2dof/">Mass-Spring-Damper system 2-DoF</a></li><li><a class="tocitem" href="../mechanical_msd_ndof/">MSD system with N-DoF</a></li><li><a class="tocitem" href="../mechanical_duffing/">Duffing Equation</a></li><li><a class="tocitem" href="../electrical_dc_motor/">DC Motor</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">Features</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../two_ports/">Transformers and Gyrators</a></li><li><a class="tocitem" href="../signals/">Signals and Detectors</a></li><li><a class="tocitem" href="../adapters/">Coupling with the MTK Standard Library</a></li><li><a class="tocitem" href="../elements_oneport/">One-Port Elements</a></li><li><a class="tocitem" href="../composition/">Reusable Subsystems</a></li><li><a class="tocitem" href="../equations_latex/">Equations and LaTeX</a></li><li><a class="tocitem" href="../drawing/">Drawing Bond Graphs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-3" type="checkbox" checked/><label class="tocitem" for="menuitem-4-3"><span class="docs-label">Applications</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>DC Motor Speed Control</a><ul class="internal"><li><a class="tocitem" href="#Introduction"><span>Introduction</span></a></li><li><a class="tocitem" href="#Preliminary-Steps"><span>Preliminary Steps</span></a></li><li><a class="tocitem" href="#System-Element-Definitions"><span>System Element Definitions</span></a></li><li><a class="tocitem" href="#Model-Construction"><span>Model Construction</span></a></li><li><a class="tocitem" href="#Analysing-the-model"><span>Analysing the model</span></a></li><li><a class="tocitem" href="#System-Simulations"><span>System Simulations</span></a></li></ul></li><li><a class="tocitem" href="../robotics_motor_pendulum/">Pendulum Driven by a DC Motor</a></li><li><a class="tocitem" href="../electrical_rlc/">Series RLC Circuit</a></li><li><a class="tocitem" href="../biomedical_windkessel/">Arterial Windkessel</a></li><li><a class="tocitem" href="../hydraulic_coupled_tanks/">Coupled Tanks</a></li><li><a class="tocitem" href="../chemical_reaction_network/">Chemical Reaction Network</a></li></ul></li></ul></li><li><span class="tocitem">Library</span><ul><li><a class="tocitem" href="../../lib/public/">Public</a></li><li><a class="tocitem" href="../../lib/internals/">Internals</a></li></ul></li><li><a class="tocitem" href="../../citing/">Citing BondGraphToolkit</a></li><li><a class="tocitem" href="../../contributing/">Contributing</a></li><li><a class="tocitem" href="../../license/">License</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Applications</a></li><li class="is-active"><a href>DC Motor Speed Control</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>DC Motor Speed Control</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/felipecastrotc/BondGraph.jl/blob/main/examples/control_dc_motor_pi.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="control-dc-motor-pi"><a class="docs-heading-anchor" href="#control-dc-motor-pi">DC Motor Speed Control</a><a id="control-dc-motor-pi-1"></a><a class="docs-heading-anchor-permalink" href="#control-dc-motor-pi" title="Permalink"></a></h1><p><em>The source files for all examples can be found in <a href="https://github.com/felipecastrotc/BondGraph.jl/tree/main/examples/">/examples</a>.</em></p><h2 id="Introduction"><a class="docs-heading-anchor" href="#Introduction">Introduction</a><a id="Introduction-1"></a><a class="docs-heading-anchor-permalink" href="#Introduction" title="Permalink"></a></h2><p>A DC motor left to itself settles at whatever speed its voltage, its resistance and its friction allow. To make it turn at a commanded speed, a controller measures the speed, compares it with the reference and adjusts the armature voltage. This example closes that loop around the motor of the <a href="../electrical_dc_motor/#dc-motor">DC Motor</a> example: a flow detector measures the shaft speed, an MTK standard-library PI controller turns the speed error into a voltage, and a modulated effort source applies it. The bond graph carries the power; the loop is made of signals, which carry none.</p><p>The problem is the one of the University of Michigan <em>Control Tutorials for MATLAB and Simulink</em> (CTMS), <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&amp;section=SystemModeling">DC Motor Speed: System Modeling</a> and <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=MotorSpeed&amp;section=ControlPID">DC Motor Speed: PID Controller Design</a>, whose physical sketch is</p><p><img src="https://ctms.engin.umich.edu/CTMS/Content/MotorSpeed/System/Modeling/figures/motor.png" alt="DC motor"/></p><h3 id="Plant"><a class="docs-heading-anchor" href="#Plant">Plant</a><a id="Plant-1"></a><a class="docs-heading-anchor-permalink" href="#Plant" title="Permalink"></a></h3><p>CTMS assumes a rigid rotor and shaft, viscous friction, and a constant magnetic field, so that the motor torque is <span>$T = K i$</span> and the back EMF is <span>$e = K\dot{\theta}$</span>, with one constant <span>$K$</span> for both in SI units. Newton&#39;s second law and Kirchhoff&#39;s voltage law give</p><p class="math-container">\[J\ddot{\theta} + b\,\dot{\theta} = K\,i,\]</p><p class="math-container">\[L\frac{di}{dt} + R\,i = V - K\,\dot{\theta},\]</p><p>and, eliminating <span>$I(s)$</span>, the transfer function from the armature voltage to the shaft speed <span>$\omega = \dot{\theta}$</span>,</p><p class="math-container">\[P(s) = \dfrac{\Omega(s)}{V(s)} = \dfrac{K}{(Js + b)(Ls + R) + K^2}.\]</p><p>The parameters are CTMS&#39;s: <span>$J = 0.01$</span> kg⋅m², <span>$b = 0.1$</span> N⋅m⋅s, <span>$K = 0.01$</span> (V⋅s/rad = N⋅m/A), <span>$R = 1$</span> Ω, <span>$L = 0.5$</span> H. They are the same values as in the <a href="../electrical_dc_motor/#dc-motor">DC Motor</a> example; what changes is the input: there a constant 12 V and an applied torque, here a voltage set by the controller and no load torque.</p><h3 id="Requirements-and-controller"><a class="docs-heading-anchor" href="#Requirements-and-controller">Requirements and controller</a><a id="Requirements-and-controller-1"></a><a class="docs-heading-anchor-permalink" href="#Requirements-and-controller" title="Permalink"></a></h3><p>Without control, 1 V gives 0.1 rad/s in steady state. For a 1 rad/s step in the speed reference, CTMS asks for a settling time under 2 s, an overshoot under 5 % and a steady-state error under 1 %. Its controller is <span>$C(s) = K_p + K_i/s + K_d s$</span> acting on the error <span>$\omega_r - \omega$</span>, with unity feedback; its PID page ends with <span>$K_p = 100$</span>, <span>$K_i = 200$</span>, <span>$K_d = 10$</span>.</p><p>This example keeps the integral term, which removes the steady-state error, and leaves out the derivative: a PI controller, <span>$V = K_p(\omega_r - \omega) + K_i\int(\omega_r - \omega)\,dt$</span>. Its gains are not CTMS&#39;s; we choose them here. The plant&#39;s denominator is <span>$JL\,s^2 + (JR + bL)\,s + bR + K^2 = 0.005\,s^2 + 0.06\,s + 0.1001$</span>, with poles near <span>$-2$</span> and <span>$-10$</span>. Putting the PI zero <span>$-K_i/K_p$</span> on the slow pole cancels it, and the loop becomes <span>$\dfrac{2K_p}{s(s + 10)}$</span>, whose closed loop <span>$s^2 + 10\,s + 2K_p$</span> is a second-order system with <span>$\omega_n^2 = 2K_p$</span> and <span>$\zeta = 5/\omega_n$</span>. With <span>$K_p = 20$</span> and <span>$K_i = 40$</span>, <span>$\zeta \approx 0.79$</span>: about 2 % overshoot and a settling time near <span>$4/(\zeta\omega_n) = 0.8$</span> s.</p><p>The closed loop has three states, the speed, the current and the integral of the error <span>$z$</span>:</p><p class="math-container">\[J\dot{\omega} = K\,i - b\,\omega,\]</p><p class="math-container">\[L\frac{di}{dt} = V - R\,i - K\,\omega,\]</p><p class="math-container">\[\dot{z} = \omega_r - \omega, \qquad V = K_p(\omega_r - \omega) + K_i\,z.\]</p><h3 id="Bond-Graph-Model"><a class="docs-heading-anchor" href="#Bond-Graph-Model">Bond Graph Model</a><a id="Bond-Graph-Model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-Graph-Model" title="Permalink"></a></h3><p>The plant is the DC motor&#39;s bond graph without the torque source: an electrical 1-junction with the source <span>$V$</span>, the resistance <span>$R$</span> and the inertia <span>$L$</span>; a mechanical 1-junction with the inertia <span>$J$</span> and the resistance <span>$b$</span>; and the gyrator, with modulus <span>$K$</span>, between them. The source is now modulated (MSe): its effort comes from a signal. A flow detector Df on the mechanical junction reads the shared flow, the shaft speed, and outputs it as a signal. Its bond carries no power (<span>$e = 0$</span>), so it doesn&#39;t change the plant. The feedback path, from Df through the error and the PI controller to the source, consists of activated bonds (Karnopp, Margolis &amp; Rosenberg 2012, §3.2).</p><p>The drawing is made from the model with <code>bgplot</code>, once the model is built.</p><h2 id="Preliminary-Steps"><a class="docs-heading-anchor" href="#Preliminary-Steps">Preliminary Steps</a><a id="Preliminary-Steps-1"></a><a class="docs-heading-anchor-permalink" href="#Preliminary-Steps" title="Permalink"></a></h2><p>We build the closed loop from bond-graph elements and standard-library blocks, simulate a 1 rad/s step in the reference, and compare it with the closed-loop equations above written as a plain MTK model.</p><pre><code class="language-julia hljs">using BondGraphToolkit
+using BondGraphToolkit.ModelingToolkit: t_nounits as t, D_nounits as D
+import ModelingToolkitStandardLibrary.Blocks as Blocks
+using OrdinaryDiffEqTsit5
+using Plots</code></pre><h2 id="System-Element-Definitions"><a class="docs-heading-anchor" href="#System-Element-Definitions">System Element Definitions</a><a id="System-Element-Definitions-1"></a><a class="docs-heading-anchor-permalink" href="#System-Element-Definitions" title="Permalink"></a></h2><p>CTMS&#39;s motor parameters, and the PI gains chosen above. Both models below take their numbers from here.</p><pre><code class="language-julia hljs">p = (J = 0.01,     # (kg⋅m²) rotor moment of inertia
+     b = 0.1,      # (N⋅m⋅s) viscous friction
+     K = 0.01,     # (V⋅s/rad = N⋅m/A) motor constant
+     R = 1.0,      # (Ω) armature resistance
+     L = 0.5,      # (H) armature inductance
+     Kp = 20.0,    # (V⋅s/rad) proportional gain
+     Ki = 40.0,    # (V/rad) integral gain
+     ωr = 1.0)     # (rad/s) speed reference</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(J = 0.01, b = 0.1, K = 0.01, R = 1.0, L = 0.5, Kp = 20.0, Ki = 40.0, ωr = 1.0)</code></pre><p>The electrical side: the armature inductance and resistance, and the armature voltage as a modulated effort source, <code>Se()</code> without a value, which reads its effort from its <code>input</code>:</p><pre><code class="language-julia hljs">@named L = Inertia(I = p.L)
+@named R = Resistance(R = p.R)
+@named V = Se()</code></pre><p class="math-container">\[ \begin{align}
+e\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+\mathtt{pout.e}\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+f\left( t \right) &amp;=  - \mathtt{pout.f}\left( t \right) + \mathtt{power.f}\left( t \right) \\
+e\left( t \right) &amp;= \mathtt{input.u}\left( t \right)
+\end{align}
+ \]</p><p>The mechanical side: the rotor inertia, its friction, and the speed sensor, a flow detector whose <code>output</code> is the flow of its bond:</p><pre><code class="language-julia hljs">@named J = Inertia(I = p.J)
+@named b = Resistance(R = p.b)
+@named tach = Df()</code></pre><p class="math-container">\[ \begin{align}
+e\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+\mathtt{pout.e}\left( t \right) &amp;= \mathtt{power.e}\left( t \right) \\
+f\left( t \right) &amp;=  - \mathtt{pout.f}\left( t \right) + \mathtt{power.f}\left( t \right) \\
+e\left( t \right) &amp;= 0 \\
+\mathtt{output.u}\left( t \right) &amp;= f\left( t \right)
+\end{align}
+ \]</p><p>The motor&#39;s gyrator, with the motor constant as its modulus:</p><pre><code class="language-julia hljs">@named gy = GY(r = p.K)</code></pre><p class="math-container">\[ \begin{align}
+\mathtt{p1.e}\left( t \right) &amp;=  - \mathtt{p2.f}\left( t \right) ~ r \\
+\mathtt{p2.e}\left( t \right) &amp;= \mathtt{p1.f}\left( t \right) ~ r
+\end{align}
+ \]</p><p>The control blocks: the reference, the error <span>$\omega_r - \omega$</span> (<code>Feedback</code> outputs <code>input1 - input2</code>), and the PI controller. <code>Blocks.PI</code> computes <span>$k\,(e + \frac{1}{T}\int e\,dt)$</span>, so <span>$k = K_p$</span> and <span>$T = K_p/K_i$</span>.</p><pre><code class="language-julia hljs">@named ref = Blocks.Constant(k = p.ωr)
+@named err = Blocks.Feedback()
+@named pi = Blocks.PI(k = p.Kp, T = p.Kp / p.Ki)</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( err_{input}, addPI_{+}input1 \right) \\
+0 &amp;= \mathrm{connect}\left( addPI_{+}output, gainPI_{+}input \right) \\
+0 &amp;= \mathrm{connect}\left( gainPI_{+}output, ctr_{output} \right) \\
+0 &amp;= \mathrm{connect}\left( err_{input}, int_{+}input \right) \\
+0 &amp;= \mathrm{connect}\left( int_{+}output, addPI_{+}input2 \right) \\
+\mathtt{gainPI.u}\left( t \right) &amp;= \mathtt{gainPI.input.u}\left( t \right) \\
+\mathtt{gainPI.y}\left( t \right) &amp;= \mathtt{gainPI.output.u}\left( t \right) \\
+\mathtt{gainPI.y}\left( t \right) &amp;= \mathtt{gainPI.k} ~ \mathtt{gainPI.u}\left( t \right) \\
+\mathtt{addPI.output.u}\left( t \right) &amp;= \mathtt{addPI.input1.u}\left( t \right) ~ \mathtt{addPI.k1} + \mathtt{addPI.input2.u}\left( t \right) ~ \mathtt{addPI.k2} \\
+\mathtt{int.u}\left( t \right) &amp;= \mathtt{int.input.u}\left( t \right) \\
+\mathtt{int.y}\left( t \right) &amp;= \mathtt{int.output.u}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{int.x}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{int.k} ~ \mathtt{int.u}\left( t \right) \\
+\mathtt{int.y}\left( t \right) &amp;= \mathtt{int.x}\left( t \right)
+\end{align}
+ \]</p><h2 id="Model-Construction"><a class="docs-heading-anchor" href="#Model-Construction">Model Construction</a><a id="Model-Construction-1"></a><a class="docs-heading-anchor-permalink" href="#Model-Construction" title="Permalink"></a></h2><p>The junctions follow the DC motor example. On each 1-junction the source&#39;s bond points in, away from the source, and the bonds of R, I and the detector point out into the element (Karnopp, Margolis &amp; Rosenberg 2012, §3.1, pp. 39 and 49). The electrical bond leaves its junction towards the gyrator and the mechanical bond enters its junction from it, following the power from the source to the shaft (Fig. 2.3d, pp. 25–26). So the back EMF enters the electrical effort sum with a minus sign and the motor torque enters the mechanical one with a plus sign.</p><pre><code class="language-julia hljs">@named je = Junction1(V =&gt; :pout, R, L, :gy)
+@named jm = Junction1(:gy =&gt; :in, J, b, tach)</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( gy, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( J_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( b_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( tach_{+}power, core_{+}p4 \right) \\
+ - \mathtt{core.p2.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p3.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+ - \mathtt{core.p4.f}\left( t \right) &amp;= \mathtt{core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{core.p1.e}\left( t \right) - \mathtt{core.p2.e}\left( t \right) - \mathtt{core.p3.e}\left( t \right) - \mathtt{core.p4.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{J.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{J.e}\left( t \right) \\
+\mathtt{J.e}\left( t \right) &amp;= \mathtt{J.power.e}\left( t \right) \\
+\mathtt{J.pout.e}\left( t \right) &amp;= \mathtt{J.power.e}\left( t \right) \\
+\mathtt{J.f}\left( t \right) &amp;=  - \mathtt{J.pout.f}\left( t \right) + \mathtt{J.power.f}\left( t \right) \\
+\mathtt{J.f}\left( t \right) &amp;= \frac{\mathtt{J.p}\left( t \right)}{\mathtt{J.I}} \\
+\mathtt{b.e}\left( t \right) &amp;= \mathtt{b.power.e}\left( t \right) \\
+\mathtt{b.pout.e}\left( t \right) &amp;= \mathtt{b.power.e}\left( t \right) \\
+\mathtt{b.f}\left( t \right) &amp;=  - \mathtt{b.pout.f}\left( t \right) + \mathtt{b.power.f}\left( t \right) \\
+\mathtt{b.e}\left( t \right) &amp;= \mathtt{b.R} ~ \mathtt{b.f}\left( t \right) \\
+\mathtt{tach.e}\left( t \right) &amp;= \mathtt{tach.power.e}\left( t \right) \\
+\mathtt{tach.pout.e}\left( t \right) &amp;= \mathtt{tach.power.e}\left( t \right) \\
+\mathtt{tach.f}\left( t \right) &amp;=  - \mathtt{tach.pout.f}\left( t \right) + \mathtt{tach.power.f}\left( t \right) \\
+\mathtt{tach.e}\left( t \right) &amp;= 0 \\
+\mathtt{tach.output.u}\left( t \right) &amp;= \mathtt{tach.f}\left( t \right)
+\end{align}
+ \]</p><p>The bonds go through the gyrator, port 1 in and port 2 out; the signals go from the detector to the error&#39;s second input, from the reference to its first, then through the controller to the source.</p><pre><code class="language-julia hljs">@named loop = System([connect(je.gy, gy.p1), connect(gy.p2, jm.gy),
+                      connect(ref.output, err.input1), connect(jm.tach.output, err.input2),
+                      connect(err.output, pi.err_input), connect(pi.ctr_output, je.V.input)], t;
+                     systems = [je, gy, jm, ref, err, pi])</code></pre><p class="math-container">\[ \begin{align}
+0 &amp;= \mathrm{connect}\left( je_{+}gy, gy_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( gy_{+}p2, jm_{+}gy \right) \\
+0 &amp;= \mathrm{connect}\left( ref_{+}output, err_{+}input1 \right) \\
+0 &amp;= \mathrm{connect}\left( jm_{+}tach_{+}output, err_{+}input2 \right) \\
+0 &amp;= \mathrm{connect}\left( err_{+}output, pi_{+}err_{input} \right) \\
+0 &amp;= \mathrm{connect}\left( pi_{+}ctr_{output}, je_{+}V_{+}input \right) \\
+0 &amp;= \mathrm{connect}\left( V_{+}pout, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( R_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( L_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( gy, core_{+}p4 \right) \\
+ - \mathtt{je.core.p2.f}\left( t \right) &amp;= \mathtt{je.core.p1.f}\left( t \right) \\
+ - \mathtt{je.core.p3.f}\left( t \right) &amp;= \mathtt{je.core.p1.f}\left( t \right) \\
+ - \mathtt{je.core.p4.f}\left( t \right) &amp;= \mathtt{je.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{je.core.p1.e}\left( t \right) - \mathtt{je.core.p2.e}\left( t \right) - \mathtt{je.core.p3.e}\left( t \right) - \mathtt{je.core.p4.e}\left( t \right) \\
+\mathtt{je.V.e}\left( t \right) &amp;= \mathtt{je.V.power.e}\left( t \right) \\
+\mathtt{je.V.pout.e}\left( t \right) &amp;= \mathtt{je.V.power.e}\left( t \right) \\
+\mathtt{je.V.f}\left( t \right) &amp;=  - \mathtt{je.V.pout.f}\left( t \right) + \mathtt{je.V.power.f}\left( t \right) \\
+\mathtt{je.V.e}\left( t \right) &amp;= \mathtt{je.V.input.u}\left( t \right) \\
+\mathtt{je.R.e}\left( t \right) &amp;= \mathtt{je.R.power.e}\left( t \right) \\
+\mathtt{je.R.pout.e}\left( t \right) &amp;= \mathtt{je.R.power.e}\left( t \right) \\
+\mathtt{je.R.f}\left( t \right) &amp;=  - \mathtt{je.R.pout.f}\left( t \right) + \mathtt{je.R.power.f}\left( t \right) \\
+\mathtt{je.R.e}\left( t \right) &amp;= \mathtt{je.R.R} ~ \mathtt{je.R.f}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{je.L.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{je.L.e}\left( t \right) \\
+\mathtt{je.L.e}\left( t \right) &amp;= \mathtt{je.L.power.e}\left( t \right) \\
+\mathtt{je.L.pout.e}\left( t \right) &amp;= \mathtt{je.L.power.e}\left( t \right) \\
+\mathtt{je.L.f}\left( t \right) &amp;=  - \mathtt{je.L.pout.f}\left( t \right) + \mathtt{je.L.power.f}\left( t \right) \\
+\mathtt{je.L.f}\left( t \right) &amp;= \frac{\mathtt{je.L.p}\left( t \right)}{\mathtt{je.L.I}} \\
+\mathtt{gy.p1.e}\left( t \right) &amp;=  - \mathtt{gy.p2.f}\left( t \right) ~ \mathtt{gy.r} \\
+\mathtt{gy.p2.e}\left( t \right) &amp;= \mathtt{gy.p1.f}\left( t \right) ~ \mathtt{gy.r} \\
+0 &amp;= \mathrm{connect}\left( gy, core_{+}p1 \right) \\
+0 &amp;= \mathrm{connect}\left( J_{+}power, core_{+}p2 \right) \\
+0 &amp;= \mathrm{connect}\left( b_{+}power, core_{+}p3 \right) \\
+0 &amp;= \mathrm{connect}\left( tach_{+}power, core_{+}p4 \right) \\
+ - \mathtt{jm.core.p2.f}\left( t \right) &amp;= \mathtt{jm.core.p1.f}\left( t \right) \\
+ - \mathtt{jm.core.p3.f}\left( t \right) &amp;= \mathtt{jm.core.p1.f}\left( t \right) \\
+ - \mathtt{jm.core.p4.f}\left( t \right) &amp;= \mathtt{jm.core.p1.f}\left( t \right) \\
+0 &amp;= \mathtt{jm.core.p1.e}\left( t \right) - \mathtt{jm.core.p2.e}\left( t \right) - \mathtt{jm.core.p3.e}\left( t \right) - \mathtt{jm.core.p4.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{jm.J.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{jm.J.e}\left( t \right) \\
+\mathtt{jm.J.e}\left( t \right) &amp;= \mathtt{jm.J.power.e}\left( t \right) \\
+\mathtt{jm.J.pout.e}\left( t \right) &amp;= \mathtt{jm.J.power.e}\left( t \right) \\
+\mathtt{jm.J.f}\left( t \right) &amp;=  - \mathtt{jm.J.pout.f}\left( t \right) + \mathtt{jm.J.power.f}\left( t \right) \\
+\mathtt{jm.J.f}\left( t \right) &amp;= \frac{\mathtt{jm.J.p}\left( t \right)}{\mathtt{jm.J.I}} \\
+\mathtt{jm.b.e}\left( t \right) &amp;= \mathtt{jm.b.power.e}\left( t \right) \\
+\mathtt{jm.b.pout.e}\left( t \right) &amp;= \mathtt{jm.b.power.e}\left( t \right) \\
+\mathtt{jm.b.f}\left( t \right) &amp;=  - \mathtt{jm.b.pout.f}\left( t \right) + \mathtt{jm.b.power.f}\left( t \right) \\
+\mathtt{jm.b.e}\left( t \right) &amp;= \mathtt{jm.b.R} ~ \mathtt{jm.b.f}\left( t \right) \\
+\mathtt{jm.tach.e}\left( t \right) &amp;= \mathtt{jm.tach.power.e}\left( t \right) \\
+\mathtt{jm.tach.pout.e}\left( t \right) &amp;= \mathtt{jm.tach.power.e}\left( t \right) \\
+\mathtt{jm.tach.f}\left( t \right) &amp;=  - \mathtt{jm.tach.pout.f}\left( t \right) + \mathtt{jm.tach.power.f}\left( t \right) \\
+\mathtt{jm.tach.e}\left( t \right) &amp;= 0 \\
+\mathtt{jm.tach.output.u}\left( t \right) &amp;= \mathtt{jm.tach.f}\left( t \right) \\
+\mathtt{ref.output.u}\left( t \right) &amp;= \mathtt{ref.k} \\
+\mathtt{err.output.u}\left( t \right) &amp;= \mathtt{err.input1.u}\left( t \right) - \mathtt{err.input2.u}\left( t \right) \\
+0 &amp;= \mathrm{connect}\left( err_{input}, addPI_{+}input1 \right) \\
+0 &amp;= \mathrm{connect}\left( addPI_{+}output, gainPI_{+}input \right) \\
+0 &amp;= \mathrm{connect}\left( gainPI_{+}output, ctr_{output} \right) \\
+0 &amp;= \mathrm{connect}\left( err_{input}, int_{+}input \right) \\
+0 &amp;= \mathrm{connect}\left( int_{+}output, addPI_{+}input2 \right) \\
+\mathtt{pi.gainPI.u}\left( t \right) &amp;= \mathtt{pi.gainPI.input.u}\left( t \right) \\
+\mathtt{pi.gainPI.y}\left( t \right) &amp;= \mathtt{pi.gainPI.output.u}\left( t \right) \\
+\mathtt{pi.gainPI.y}\left( t \right) &amp;= \mathtt{pi.gainPI.k} ~ \mathtt{pi.gainPI.u}\left( t \right) \\
+\mathtt{pi.addPI.output.u}\left( t \right) &amp;= \mathtt{pi.addPI.input1.u}\left( t \right) ~ \mathtt{pi.addPI.k1} + \mathtt{pi.addPI.input2.u}\left( t \right) ~ \mathtt{pi.addPI.k2} \\
+\mathtt{pi.int.u}\left( t \right) &amp;= \mathtt{pi.int.input.u}\left( t \right) \\
+\mathtt{pi.int.y}\left( t \right) &amp;= \mathtt{pi.int.output.u}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{pi.int.x}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{pi.int.k} ~ \mathtt{pi.int.u}\left( t \right) \\
+\mathtt{pi.int.y}\left( t \right) &amp;= \mathtt{pi.int.x}\left( t \right)
+\end{align}
+ \]</p><p>The bond graph, drawn from the model. <code>bgplot</code> draws the bonds only: the signal path from <code>tach</code> through the blocks to <code>V</code> is not drawn, and the modulated source is labelled <code>Se</code>.</p><pre><code class="language-julia hljs">bgplot(loop)</code></pre><img src='data:image/svg+xml;utf-8,<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 15.1.0 (20260618.0150)
+ -->
+<!-- Title: BondGraph Pages: 1 -->
+<svg width="466pt" height="202pt"
+ viewBox="0.00 0.00 466.00 202.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 198)">
+<title>BondGraph</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-198 462.25,-198 462.25,4 -4,4"/>
+<!-- je -->
+<g id="node1" class="node">
+<title>je</title>
+<text xml:space="preserve" text-anchor="middle" x="124" y="-92.33" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- je₊L -->
+<g id="node4" class="node">
+<title>je₊L</title>
+<text xml:space="preserve" text-anchor="middle" x="124" y="-13.32" font-family="Times,serif" font-size="14.00">I:L</text>
+</g>
+<!-- je&%2345;&gt;je₊L -->
+<g id="edge3" class="edge">
+<title>je&%2345;&gt;je₊L</title>
+<path fill="none" stroke="black" d="M124,-79.34C124,-68.25 124,-57.17 124,-46.08"/>
+<polygon fill="black" stroke="black" points="124,-36.1 128.5,-46.1 124,-40.9 124,-46.1 124,-46.1 124,-36.1"/>
+</g>
+<!-- gy -->
+<g id="node5" class="node">
+<title>gy</title>
+<text xml:space="preserve" text-anchor="middle" x="222.25" y="-92.33" font-family="Times,serif" font-size="14.00">GY:gy</text>
+</g>
+<!-- je&%2345;&gt;gy -->
+<g id="edge7" class="edge">
+<title>je&%2345;&gt;gy</title>
+<path fill="none" stroke="black" d="M150.79,-97C161.03,-97 172.99,-97 184.12,-97"/>
+<polygon fill="black" stroke="black" points="193.83,-97 183.83,-101.5 189.04,-97 183.83,-97 183.83,-97 193.83,-97"/>
+</g>
+<!-- je₊V -->
+<g id="node2" class="node">
+<title>je₊V</title>
+<text xml:space="preserve" text-anchor="middle" x="27" y="-92.33" font-family="Times,serif" font-size="14.00">Se:V</text>
+</g>
+<!-- je₊V&%2345;&gt;je -->
+<g id="edge1" class="edge">
+<title>je₊V&%2345;&gt;je</title>
+<path fill="none" stroke="black" d="M53.96,-97C64.12,-97 75.94,-97 86.91,-97"/>
+<polygon fill="black" stroke="black" points="96.87,-97 86.87,-101.5 92.07,-97 86.87,-97 86.87,-97 96.87,-97"/>
+</g>
+<!-- je₊R -->
+<g id="node3" class="node">
+<title>je₊R</title>
+<text xml:space="preserve" text-anchor="middle" x="124" y="-171.32" font-family="Times,serif" font-size="14.00">R:R</text>
+</g>
+<!-- je₊R&%2345;&gt;je -->
+<g id="edge2" class="edge">
+<title>je₊R&%2345;&gt;je</title>
+<path fill="none" stroke="black" d="M124,-148.16C124,-137.07 124,-125.98 124,-114.9"/>
+<polygon fill="black" stroke="black" points="124,-158.13 119.5,-148.13 124,-153.34 124,-148.13 124,-148.13 124,-158.13"/>
+</g>
+<!-- jm -->
+<g id="node6" class="node">
+<title>jm</title>
+<text xml:space="preserve" text-anchor="middle" x="327.38" y="-92.33" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- gy&%2345;&gt;jm -->
+<g id="edge8" class="edge">
+<title>gy&%2345;&gt;jm</title>
+<path fill="none" stroke="black" d="M250.34,-97C262.59,-97 277.23,-97 290.38,-97"/>
+<polygon fill="black" stroke="black" points="300.32,-97 290.32,-101.5 295.53,-97 290.32,-97 290.32,-97 300.32,-97"/>
+</g>
+<!-- jm₊J -->
+<g id="node7" class="node">
+<title>jm₊J</title>
+<text xml:space="preserve" text-anchor="middle" x="431.25" y="-92.33" font-family="Times,serif" font-size="14.00">I:J</text>
+</g>
+<!-- jm&%2345;&gt;jm₊J -->
+<g id="edge4" class="edge">
+<title>jm&%2345;&gt;jm₊J</title>
+<path fill="none" stroke="black" d="M354.35,-97C366.44,-97 381.03,-97 394.17,-97"/>
+<polygon fill="black" stroke="black" points="404.12,-97 394.12,-101.5 399.33,-97 394.12,-97 394.12,-97 404.12,-97"/>
+</g>
+<!-- jm₊tach -->
+<g id="node9" class="node">
+<title>jm₊tach</title>
+<text xml:space="preserve" text-anchor="middle" x="327.38" y="-13.32" font-family="Times,serif" font-size="14.00">Df:tach</text>
+</g>
+<!-- jm&%2345;&gt;jm₊tach -->
+<g id="edge6" class="edge">
+<title>jm&%2345;&gt;jm₊tach</title>
+<path fill="none" stroke="black" d="M327.38,-79.34C327.38,-68.25 327.38,-57.17 327.38,-46.08"/>
+<polygon fill="black" stroke="black" points="327.38,-36.1 331.88,-46.1 327.38,-40.9 327.38,-46.1 327.38,-46.1 327.38,-36.1"/>
+</g>
+<!-- jm₊b -->
+<g id="node8" class="node">
+<title>jm₊b</title>
+<text xml:space="preserve" text-anchor="middle" x="327.38" y="-171.32" font-family="Times,serif" font-size="14.00">R:b</text>
+</g>
+<!-- jm₊b&%2345;&gt;jm -->
+<g id="edge5" class="edge">
+<title>jm₊b&%2345;&gt;jm</title>
+<path fill="none" stroke="black" d="M327.38,-148.16C327.38,-137.07 327.38,-125.98 327.38,-114.9"/>
+<polygon fill="black" stroke="black" points="327.38,-158.13 322.88,-148.13 327.38,-153.34 327.38,-148.13 327.38,-148.13 327.38,-158.13"/>
+</g>
+</g>
+</svg>
+'/><h2 id="Analysing-the-model"><a class="docs-heading-anchor" href="#Analysing-the-model">Analysing the model</a><a id="Analysing-the-model-1"></a><a class="docs-heading-anchor-permalink" href="#Analysing-the-model" title="Permalink"></a></h2><p><code>mtkcompile</code> keeps three states: the two inertias&#39; momenta and the controller&#39;s integrator.</p><pre><code class="language-julia hljs">sys = mtkcompile(loop)</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}\mathtt{pi.addPI.input2.u}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{err.output.u}\left( t \right) ~ \mathtt{pi.int.k} \\
+\frac{\mathrm{d}\mathtt{jm.J.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{jm.J.e}\left( t \right) \\
+\frac{\mathrm{d}\mathtt{je.L.p}\left( t \right)}{\mathrm{d}t} &amp;= \mathtt{je.L.e}\left( t \right)
+\end{align}
+ \]</p><p>Print system states</p><pre><code class="language-julia hljs">unknowns(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ pi₊addPI₊input2₊u(t)
+ jm₊J₊p(t)
+ je₊L₊p(t)</code></pre><p>Print system parameters</p><pre><code class="language-julia hljs">parameters(sys)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">14-element Vector{SymbolicUtils.BasicSymbolicImpl.var&quot;typeof(BasicSymbolicImpl)&quot;{SymReal}}:
+ je₊R₊R
+ je₊L₊I
+ gy₊r
+ jm₊J₊I
+ jm₊b₊R
+ ref₊k
+ pi₊k
+ pi₊T
+ pi₊gainPI₊u_start
+ pi₊gainPI₊y_start
+ pi₊addPI₊k1
+ pi₊addPI₊k2
+ pi₊int₊u_start
+ pi₊int₊y_start</code></pre><h3 id="Generated-equations-against-the-hand-derivation"><a class="docs-heading-anchor" href="#Generated-equations-against-the-hand-derivation">Generated equations against the hand derivation</a><a id="Generated-equations-against-the-hand-derivation-1"></a><a class="docs-heading-anchor-permalink" href="#Generated-equations-against-the-hand-derivation" title="Permalink"></a></h3><p><code>bgequations</code> names the states and parameters as we choose. The inertias&#39; states are their momenta, the flux linkage <span>$\lambda = L\,i$</span> and the angular momentum <span>$h = J\omega$</span>; the controller&#39;s state is its integrator&#39;s output, <span>$x = z/T$</span>. We rename them, and the parameters, to the symbols of the introduction, inside a <code>let</code> so that <code>L</code>, <code>R</code>, <code>J</code> and <code>b</code> keep naming the elements:</p><pre><code class="language-julia hljs">let
+    @variables λ(t) h(t) x(t)
+    @parameters L R J b K Kp T ωᵣ
+    bgequations(loop; rename = Dict(je.L.p =&gt; λ, jm.J.p =&gt; h, pi.addPI.input2.u =&gt; x,
+                                     je.L.I =&gt; L, je.R.R =&gt; R, jm.J.I =&gt; J, jm.b.R =&gt; b,
+                                     gy.r =&gt; K, pi.k =&gt; Kp, pi.T =&gt; T, ref.k =&gt; ωᵣ,
+                                     pi.addPI.k1 =&gt; 1, pi.addPI.k2 =&gt; 1))
+end</code></pre><p class="math-container">\[ \begin{align}
+\frac{\mathrm{d}x\left( t \right)}{\mathrm{d}t} &amp;= \frac{\frac{ - h\left( t \right)}{J} + \mathtt{\omega{_r}}}{T} \\
+\frac{\mathrm{d}h\left( t \right)}{\mathrm{d}t} &amp;= \frac{K ~ \lambda\left( t \right)}{L} + \frac{ - b ~ h\left( t \right)}{J} \\
+\frac{\mathrm{d}\lambda\left( t \right)}{\mathrm{d}t} &amp;= \frac{ - K ~ h\left( t \right)}{J} + \frac{ - R ~ \lambda\left( t \right)}{L} + \mathtt{Kp} ~ \left( x\left( t \right) + \frac{ - h\left( t \right)}{J} + \mathtt{\omega_r} \right)
+\end{align}
+ \]</p><p>With <span>$\lambda = L\,i$</span> and <span>$h = J\omega$</span>, these read <span>$L\frac{di}{dt} = V - R\,i - K\omega$</span> and <span>$J\dot{\omega} = K\,i - b\,\omega$</span>, the plant&#39;s equations, where the source&#39;s effort is the controller&#39;s output <span>$V = K_p\,(\omega_r - \omega + x)$</span> (the weights of <code>Blocks.PI</code>&#39;s internal <code>Add</code>, both 1, are substituted), and the integrator gives <span>$T\dot{x} = \omega_r - \omega$</span>. With <span>$x = z/T$</span> and <span>$K_p/T = K_i$</span>, this is the closed loop of the introduction.</p><h2 id="System-Simulations"><a class="docs-heading-anchor" href="#System-Simulations">System Simulations</a><a id="System-Simulations-1"></a><a class="docs-heading-anchor-permalink" href="#System-Simulations" title="Permalink"></a></h2><h3 id="Bond-graph-model"><a class="docs-heading-anchor" href="#Bond-graph-model">Bond graph model</a><a id="Bond-graph-model-1"></a><a class="docs-heading-anchor-permalink" href="#Bond-graph-model" title="Permalink"></a></h3><p>Everything starts at rest, with the reference at 1 rad/s: a step at <span>$t = 0$</span>.</p><pre><code class="language-julia hljs">tspan = (0.0, 3.0)
+prob = ODEProblem(sys, [], tspan)
+sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
+plot(sol, idxs = [jm.J.f, je.L.f], labels = [&quot;ω (rad/s)&quot; &quot;i (A)&quot;], xlabel = &quot;Time (s)&quot;)</code></pre><img src="d3f6b17d.svg" alt="Example block output"/><h3 id="Closed-loop-reference-model"><a class="docs-heading-anchor" href="#Closed-loop-reference-model">Closed-loop reference model</a><a id="Closed-loop-reference-model-1"></a><a class="docs-heading-anchor-permalink" href="#Closed-loop-reference-model" title="Permalink"></a></h3><p>The closed-loop equations of the introduction, as a plain MTK model with CTMS&#39;s parameters and the same gains:</p><pre><code class="language-julia hljs">@variables ω(t) = 0.0 i(t) = 0.0 z(t) = 0.0 Vₐ(t)
+eqs_cl = [
+    p.J * D(ω) ~ p.K * i - p.b * ω,
+    p.L * D(i) ~ Vₐ - p.R * i - p.K * ω,
+    D(z) ~ p.ωr - ω,
+    Vₐ ~ p.Kp * (p.ωr - ω) + p.Ki * z,
+]
+@named sys_cl = System(eqs_cl, t)
+sys_cl = mtkcompile(sys_cl)
+sol_cl = solve(ODEProblem(sys_cl, [], tspan), Tsit5(), reltol = 1e-10, abstol = 1e-10);</code></pre><h3 id="Compare-models"><a class="docs-heading-anchor" href="#Compare-models">Compare models</a><a id="Compare-models-1"></a><a class="docs-heading-anchor-permalink" href="#Compare-models" title="Permalink"></a></h3><p>Shaft speed:</p><pre><code class="language-julia hljs">plot(sol.t, sol[jm.J.f], label = &quot;Bond graph&quot;, ylabel = &quot;Speed (rad/s)&quot;)
+plot!(sol_cl.t, sol_cl[ω], label = &quot;Closed-loop equations&quot;, xlabel = &quot;Time (s)&quot;, linestyle = :dash)</code></pre><img src="8471d63c.svg" alt="Example block output"/><p>Armature voltage, the controller&#39;s output:</p><pre><code class="language-julia hljs">plot(sol.t, sol[pi.ctr_output.u], label = &quot;Bond graph&quot;, ylabel = &quot;Voltage (V)&quot;)
+plot!(sol_cl.t, sol_cl[Vₐ], label = &quot;Closed-loop equations&quot;, xlabel = &quot;Time (s)&quot;, linestyle = :dash)</code></pre><img src="1f0185a8.svg" alt="Example block output"/><p>On a common time grid, the largest difference between the two models in speed, current and voltage:</p><pre><code class="language-julia hljs">tgrid = range(tspan..., length = 1001)
+(maximum(abs, sol(tgrid; idxs = jm.J.f).u - sol_cl(tgrid; idxs = ω).u),
+ maximum(abs, sol(tgrid; idxs = je.L.f).u - sol_cl(tgrid; idxs = i).u),
+ maximum(abs, sol(tgrid; idxs = pi.ctr_output.u).u - sol_cl(tgrid; idxs = Vₐ).u))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(2.4874213799819245e-10, 2.730597969957671e-10, 4.914420870250069e-9)</code></pre><h3 id="Against-CTMS&#39;s-requirements"><a class="docs-heading-anchor" href="#Against-CTMS&#39;s-requirements">Against CTMS&#39;s requirements</a><a id="Against-CTMS&#39;s-requirements-1"></a><a class="docs-heading-anchor-permalink" href="#Against-CTMS&#39;s-requirements" title="Permalink"></a></h3><p>The overshoot (%), the 2 % settling time (s) and the steady-state error (%) at the end of the run, for a 1 rad/s step:</p><pre><code class="language-julia hljs">ωg = sol(tgrid; idxs = jm.J.f).u
+overshoot = 100 * (maximum(ωg) - p.ωr) / p.ωr
+settling = tgrid[findlast(w -&gt; abs(w - p.ωr) &gt; 0.02 * p.ωr, ωg) + 1]
+steady_error = 100 * abs(p.ωr - ωg[end]) / p.ωr
+(overshoot, settling, steady_error)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(1.706999275038168, 0.585, 0.00033159148846717557)</code></pre><p>All three meet CTMS&#39;s requirements (under 5 %, under 2 s, under 1 %). The bond graph with a detector, blocks and a modulated source reproduces the hand-derived closed loop to the solver&#39;s tolerance.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../drawing/">« Drawing Bond Graphs</a><a class="docs-footer-nextpage" href="../robotics_motor_pendulum/">Pendulum Driven by a DC Motor »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Sunday 18 October 2026 18:08">Sunday 18 October 2026</span>. Using Julia version 1.10.12.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
