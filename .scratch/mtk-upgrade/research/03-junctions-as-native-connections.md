@@ -13,7 +13,7 @@ Ticket: `.scratch/mtk-upgrade/issues/03-junctions-as-native-connections.md` · D
 
 ---
 
-## 0. How it works today (BondGraph.jl v0.2 on MTK 8.71)
+## 0. How it works today (BondGraphToolkit.jl v0.2 on MTK 8.71)
 
 - `Power` has `e`, `f`, both tagged `[connect = bg]` plus metadata `(op|j0|j1|tpgy|tptf, bgeffort|bgflow)` (`src/bg.jl:27-36`, `src/types.jl:7-20`).
 - `Junction0/1(ps...)` creates one **hub** port `power` and, for each element, `connect(s.power, power)` (sign +1: bond element→junction) or `connect(power, s.power)` (sign −1: junction→element) (`src/bg.jl:159-231`, `src/utils/bg_utils.jl:96-136`). Junction–junction bonds are `connect(j_a.power, j_b.power)` at model level (`examples/mechanical_msd_2dof.jl`).

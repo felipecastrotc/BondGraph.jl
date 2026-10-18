@@ -57,11 +57,11 @@ Ticket: [issues/01-bondgraphs-jl-comparison.md](../issues/01-bondgraphs-jl-compa
 - **Custom elements.** You build a Dict and register it into the global `DEFAULT_LIBRARY` with `addlibrary!(Dict(:ReMM => ReMM))`. Then you instantiate it with `Component(:ReMM, "MM1"; r1=100)`. The docstring warns: "This library is likely to change in the future. Do not rely on this schema too much." Sources: [libraryfunctions.jl@v0.5.1](https://github.com/jedforrest/BondGraphs.jl/blob/v0.5.1/src/libraries/libraryfunctions.jl), [examples.md L330-L400](https://github.com/jedforrest/BondGraphs.jl/blob/v0.5.1/docs/src/examples.md). Issue [#68](https://github.com/jedforrest/BondGraphs.jl/issues/68) calls this "unintuitive and not very flexible".
 - **Direction of the rewrite (unreleased).** `dev` adds function-style constructors such as `resistor(; R=1, name)` → `DissipatorElement([V ~ R * I], [V], [I]; name)` ([dev electrical.jl](https://github.com/jedforrest/BondGraphs.jl/blob/78c4e5c2e9f4ebdc8520a51e4e1431190fcd0452/src/libraries/electrical.jl)). This moves closer to MTK idioms, but the model is still a separate `BondGraph`/`BondGraphElement` object compiled through `ODESystem(...)` ([dev systems.jl](https://github.com/jedforrest/BondGraphs.jl/blob/78c4e5c2e9f4ebdc8520a51e4e1431190fcd0452/src/systems.jl)).
 
-## 3. Overlap and difference with BondGraph.jl's goal
+## 3. Overlap and difference with BondGraphToolkit.jl's goal
 
 Our goal, from [map.md](../map.md): bond-graph models *are* ordinary MTK systems. They compose and couple with any MTK model, and custom nonlinear R/C and mGY/mTF stay easy to write.
 
-| Axis | BondGraphs.jl v0.5.1 | BondGraph.jl (this repo, v0.2.1 @ `7638f46`) |
+| Axis | BondGraphs.jl v0.5.1 | BondGraphToolkit.jl (this repo, v0.2.1 @ `7638f46`) |
 |---|---|---|
 | Model object | Own `BondGraph` graph type (Graphs.jl), mutated with `add_node!`/`connect!`; MTK only at compile time | Each element is an MTK `ODESystem` (`compose(ODESystem(eqs,t,…), power)`, [src/bg.jl L406-L441](../../../src/bg.jl)); a junction composes MTK systems |
 | Building style | Imperative graph editing (`swap!`, `insert_node!`, …), graph algorithms | MTK-style `@named x = Element(...)` + junction constructors |
@@ -92,7 +92,7 @@ R.R = 2
 sol = simulate(model, (0., 10.); u0 = [1])   # u0 for C.q
 ```
 
-BondGraph.jl. Source: [examples/electrical_rc.jl L27-L48 @ 7638f46](../../../examples/electrical_rc.jl).
+BondGraphToolkit.jl. Source: [examples/electrical_rc.jl L27-L48 @ 7638f46](../../../examples/electrical_rc.jl).
 
 ```julia
 using BondGraph, DifferentialEquations
@@ -105,8 +105,8 @@ sol = solve(prob)
 ```
 
 What the comparison shows:
-- In BondGraphs.jl you build a graph and call `simulate`. In BondGraph.jl the junction call returns an MTK system, and you use the standard `ODEProblem`/`solve`.
-- BondGraphs.jl indexes initial conditions positionally (`u0 = [1]`). BondGraph.jl uses MTK symbolic maps.
+- In BondGraphs.jl you build a graph and call `simulate`. In BondGraphToolkit.jl the junction call returns an MTK system, and you use the standard `ODEProblem`/`solve`.
+- BondGraphs.jl indexes initial conditions positionally (`u0 = [1]`). BondGraphToolkit.jl uses MTK symbolic maps.
 
 ## 4. Naming: General registry rules and AutoMerge checks
 

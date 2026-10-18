@@ -1,4 +1,4 @@
-# Map: MTK 11 upgrade of BondGraph.jl
+# Map: MTK 11 upgrade of BondGraphToolkit.jl
 
 Labels: wayfinder:map
 Status: open

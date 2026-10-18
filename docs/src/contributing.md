@@ -1,6 +1,6 @@
 # [Contributing](@id contribute)
 
-Contributions and bug reports are welcome. Report bugs and propose changes in the [BondGraphToolkit issue tracker](https://github.com/felipecastrotc/BondGraph.jl/issues).
+Contributions and bug reports are welcome. Report bugs and propose changes in the [BondGraphToolkit issue tracker](https://github.com/felipecastrotc/BondGraphToolkit.jl/issues).
 
 ## Working on a change
 
