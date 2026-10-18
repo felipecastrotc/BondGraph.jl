@@ -1,7 +1,7 @@
 name = "BondGraphToolkit"
 uuid = "41e83443-7082-4de0-b466-8936bcd80675"
 authors = ["Felipe de Castro <felipecastrotc@gmail.com>"]
-version = "0.2.1"
+version = "0.3.0"
 
 [deps]
 Graphviz_jll = "3c863552-8265-54e4-a6dc-903eb78fde85"
