@@ -79,7 +79,8 @@ end
 
 Compliance with displacement state `q`: `q̇ = f`, `e = q / C`. `q` is the initial
 displacement. For a spring of stiffness k, `C = 1/k`. Conventionally its bond points
-into it.
+into it. In derivative causality (its displacement fixed by other states), pass
+`q = nothing`: an initial value would over-determine the initialisation.
 """
 @oneport function Compliance(; name, C = 1.0, q = 0.0)
     @parameters C = C
@@ -91,7 +92,10 @@ end
     Inertia(; name, I = 1.0, p = 0.0)
 
 Inertia with momentum state `p`: `ṗ = e`, `f = p / I`. `p` is the initial momentum.
-Conventionally its bond points into it.
+Conventionally its bond points into it. In derivative causality (its flow fixed by other
+states, e.g. two inertias on one 1-junction), pass `p = nothing`: an initial value would
+over-determine the initialisation. See [Concepts and Conventions](@ref concepts) for
+steering which momentum MTK keeps as a state.
 """
 @oneport function Inertia(; name, I = 1.0, p = 0.0)
     @parameters I = I

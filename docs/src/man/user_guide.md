@@ -59,13 +59,18 @@ A bond-graph model is an ordinary ModelingToolkit system: `mtkcompile` reduces i
 using BondGraphToolkit
 @named se = Se(1.0)
 @named m1 = Inertia(I = 1.0)
-@named m2 = Inertia(I = 2.0)
+@named m2 = Inertia(I = 2.0, p = nothing)   # in derivative causality: no initial value
 @named model = Junction1(se => :pout, m1, m2)
 sys = mtkcompile(model)
 unknowns(sys)
 ```
 
 The result is a small DAE (a mass-matrix ODE), so solve it with a DAE-capable solver such as `Rodas5P` from OrdinaryDiffEqRosenbrock rather than `Tsit5`.
+
+Two things follow for elements in derivative causality:
+
+- **No initial value.** Their state is fixed by the others, so give it none: `Inertia(I = 2.0, p = nothing)`, `Compliance(C = 1.0, q = nothing)`. An initial value over-determines the initialisation, and MTK warns.
+- **Which state MTK keeps.** MTK chooses the states once, at compile time, and its choice can be singular somewhere. In the [motor-driven pendulum](@ref motor-pendulum), keeping the point mass's momentum $p_x$ recovers $\omega$ from $p_x = -m l\sin\varphi\,\omega$: started with the rod horizontal ($\sin\varphi = 0$), the pendulum stays frozen while the solver reports success. A low `state_priority` on the momenta in derivative causality, `@variables p(t) [state_priority = -10]` in a custom element, steers MTK to a state that holds everywhere; the example shows how.
 
 **Causal conflicts.** Two flow sources on one 1-junction both try to set the shared flow, a causal conflict. MTK reports it as a structurally singular system:
 
