@@ -69,9 +69,19 @@ m = 0.5                             # (kg) Point mass m
 l = 0.3                             # (m) Rod length l
 g = 9.81                            # (m/s²) Gravitational acceleration g
 
-# The point mass is one inertia per direction. Its momenta are fixed by the rotor speed through the rigid rod, so they are not independent states (below) and get no initial value, `p = nothing`; an initial value would over-determine the model's initialisation.
-@named mx = Inertia(I = m, p = nothing)   # (kg) Point mass, x direction
-@named my = Inertia(I = m, p = nothing)   # (kg) Point mass, y direction
+# The point mass is one inertia per direction. Its momenta are fixed by the rotor speed through the rigid rod, so they are not independent states: in bond-graph terms they are in derivative causality (below). Two things follow.
+#
+# - They get no initial value, or the model's initialisation is over-determined. With the library's element that is `Inertia(I = m, p = nothing)`.
+# - ModelingToolkit must not keep one of their momenta as a state. Left to itself, it keeps $p_x$ and recovers $\omega$ from $p_x = -m l\sin\varphi\,\omega$, which has no solution for $\omega$ where $\sin\varphi = 0$, the rod horizontal: started there, the pendulum stays frozen while the solver reports success. A low `state_priority` on the momenta steers ModelingToolkit to the rotor's momentum instead.
+#
+# `Inertia` has no option for that, so the point mass is a small custom element, the library's inertia law with that metadata on its momentum (see [One-Port Elements](@ref elements-oneport)):
+@oneport function PointInertia(; name, I)
+    @parameters I = I
+    @variables p(t) [state_priority = -10]   # no initial value
+    [D(p) ~ e, f ~ p / I]
+end
+@named mx = PointInertia(I = m)     # (kg) Point mass, x direction
+@named my = PointInertia(I = m)     # (kg) Point mass, y direction
 
 # Gravity is a constant force $-mg$ along $y$ (Fig. 1.7d labels it `Se: −mg`):
 @named mg = Se(-m * g)              # (N) Weight
@@ -121,13 +131,13 @@ full_equations(sys)
 
 # ### Generated equations against the hand derivation
 #
-# `bg_equations` gives the same equations with names of our choice. ModelingToolkit kept the angle $\varphi$ (the integrator's output), the $x$-momentum of the mass $p_x$, the rotor speed $\omega$, the flux linkage $\lambda = L\,i$, the rod's force on the $\dot{y}$ junction $F_y$ (the effort of the $y$ transformer's port 2) and $\dot{\omega}$, a *dummy derivative* added by the index reduction. We rename them, and the parameters, to the symbols of the introduction; the integrator's gain is 1 (inside a `let`, so the names `L`, `J`, `b`, `m` keep pointing at the elements and values):
+# `bg_equations` gives the same equations with names of our choice. ModelingToolkit kept the angle $\varphi$ (the integrator's output), the rotor's angular momentum $h = J\omega$, the flux linkage $\lambda = L\,i$, the rod's force on the $\dot{y}$ junction $F_y$ (the effort of the $y$ transformer's port 2) and $\dot{\omega}$, a *dummy derivative* added by the index reduction. We rename them, and the parameters, to the symbols of the introduction; the integrator's gain is 1 (inside a `let`, so the names `L`, `J`, `b`, `m` keep pointing at the elements and values):
 let
-    @variables φ(t) p_x(t) ω(t) λ(t) F_y(t) ω̇(t)
+    @variables φ(t) h(t) λ(t) F_y(t) ω̇(t)
     @parameters R_e L K_m J b m
     ω_t = only(filter(v -> endswith(string(v), "fˍt(t)"), unknowns(sys)))   # the dummy derivative
     bg_equations(model; rename = Dict(
-        model.φ.output.u => φ, model.mx.p => p_x, model.jω.J.f => ω,
+        model.φ.output.u => φ, model.jω.J.p => h,
         model.ji.L.p => λ, model.jy.core.p1.e => F_y, ω_t => ω̇,
         model.φ.k => 1, model.ji.Re.R => R_e, model.ji.L.I => L, model.Km.r => K_m,
         model.jω.J.I => J, model.jω.b.R => b, model.mx.I => m, model.jy.my.I => m))
@@ -135,14 +145,12 @@ end
 
 # The rod length and the weight appear as their values, $l = 0.3$ and $mg = 4.905$, and the source as $u_s = 1$. Read against the hand derivation:
 #
-# - $\dot{\varphi} = \omega$, the integrator, and $\dot{\lambda} = u_s - R_e\,i - K_m\,\omega$ with $i = \lambda/L$, Kirchhoff's law of the introduction.
-# - $0 = -p_x/m - l\sin\varphi\,\omega$ is the $x$ transformer's flow law, $\dot{x} = (-l\sin\varphi)\,\omega$ (Eq. 1.15), and the equation for $\dot{p}_x$ its derivative, $\dot{p}_x = m\,\ddot{x}$. These are how MTK recovers $\omega$ from the state $p_x$.
-# - The $\dot{y}$ junction gives $\dot{p}_y = F_y - mg$, with $p_y = m\,\dot{y} = m\,l\cos\varphi\,\omega$ differentiated: $(F_y - mg)/m = l\cos\varphi\,\dot{\omega} - l\sin\varphi\,\omega^2$.
-# - The $\omega$ junction is the torque balance $K_m i = J\dot{\omega} + b\,\omega + (l\cos\varphi)\,F_y + (-l\sin\varphi)\,\dot{p}_x$, the rod's torque of Eq. 1.18 with the mass's forces $F_x = \dot{p}_x$ and $F_y$.
+# - $\dot{\varphi} = h/J = \omega$, the integrator, and $\dot{\lambda} = u_s - K_m\,\omega - R_e\,i$ with $i = \lambda/L$, Kirchhoff's law of the introduction.
+# - $\dot{h} = J\dot{\omega}$ ties the rotor's momentum to the dummy derivative.
+# - The $\omega$ junction is the torque balance $K_m i = J\dot{\omega} + b\,\omega + (l\cos\varphi)\,F_y + (-l\sin\varphi)\,F_x$, the rod's torque of Eq. 1.18. The $x$ mass is gone from the states: its force $F_x = \dot{p}_x = m\,\ddot{x}$, with $\dot{x} = (-l\sin\varphi)\,\omega$ (Eq. 1.15) differentiated, is $-m\,l\,(\sin\varphi\,\dot{\omega} + \cos\varphi\,\omega^2)$, substituted in place.
+# - The $\dot{y}$ junction gives $\dot{p}_y = F_y - mg$, with $p_y = m\,\dot{y} = m\,l\cos\varphi\,\omega$ differentiated: $0 = (mg - F_y)/m + l\cos\varphi\,\dot{\omega} - l\sin\varphi\,\omega^2$.
 #
-# Substituting $\dot{p}_x$ and $F_y$ into the torque balance, the centripetal terms in $\omega^2$ cancel (Breedveld's gyristors, Eq. 1.24) and the mass terms add up to $m l^2 \dot{\omega}$ (Eq. 1.22), leaving $(J + m l^2)\,\dot{\omega} + b\,\omega + m g l\cos\varphi = K_m i$: the hand-derived equation.
-#
-# **Note:** ModelingToolkit chooses the states once, at compile time. With $p_x$ as a state, $\omega$ is recovered from $p_x = -m l\sin\varphi\,\omega$, which fails where $\sin\varphi = 0$, the rod horizontal. The runs below stay in the lower half, $-\pi < \varphi < 0$.
+# Substituting $F_y$ into the torque balance, the centripetal terms in $\omega^2$ cancel (Breedveld's gyristors, Eq. 1.24) and the mass terms add up to $m l^2 \dot{\omega}$ (Eq. 1.22), leaving $(J + m l^2)\,\dot{\omega} + b\,\omega + m g l\cos\varphi = K_m i$: the hand-derived equation. Nothing divides by $\sin\varphi$, so the model holds at every angle.
 #
 # ## System Simulations
 #
@@ -201,6 +209,17 @@ tgrid = range(tspan..., length = 1001)
 (maximum(abs, sol(tgrid; idxs = φ.output.u).u - sol_t(tgrid; idxs = ϕ).u),
  maximum(abs, sol(tgrid; idxs = jω.J.f).u - sol_t(tgrid; idxs = ω̃).u),
  maximum(abs, sol(tgrid; idxs = ji.L.f).u - sol_t(tgrid; idxs = i).u))
+
+# ### Starting with the rod horizontal
+#
+# At $\varphi = 0$, where a state $p_x$ would freeze the pendulum, both models start from rest and the motor's torque, $0.5$ N⋅m at most, can't hold the weight's $m g l = 1.47$ N⋅m: the pendulum falls towards its balance angle. The same compiled model takes the new starting angle:
+sol_h = solve(ODEProblem(sys, [φ.x => 0.0], tspan), Rodas5P(), reltol = 1e-10, abstol = 1e-10)
+sol_th = solve(ODEProblem(sys_t, [ϕ => 0.0], tspan), Tsit5(), reltol = 1e-10, abstol = 1e-10)
+plot(sol_h, idxs = [φ.output.u], label = "Bond graph", ylabel = "Angle (rad)")
+plot!(sol_th, idxs = [ϕ], label = "Reduced model", xlabel = "Time (s)", linestyle = :dash)
+
+# Their largest difference in angle:
+maximum(abs, sol_h(tgrid; idxs = φ.output.u).u - sol_th(tgrid; idxs = ϕ).u)
 
 # ### Small-angle frequency
 #
