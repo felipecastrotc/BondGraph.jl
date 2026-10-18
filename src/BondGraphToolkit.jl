@@ -73,8 +73,14 @@ end
 # Shared by @oneport and @twoport: make `fdef` an MTK component whose body ends with the
 # vector of laws (long-form `function`). Its subsystems are `ports`, plus the signal
 # connectors `input` (RealInput) and `output` (RealOutput) when the body defines them;
-# `extra` are equations added to the laws.
-function element(fdef, ports, preamble, source; extra = :(Equation[]))
+# `extra` are equations added to the laws. An argument named like one of the `reserved`
+# variables the preamble defines would be silently replaced by it, so it throws.
+function element(fdef, ports, preamble, source; reserved, extra = :(Equation[]))
+    sig = fdef.args[1]
+    clash = intersect(sig_names(sig), reserved)
+    isempty(clash) || throw(ArgumentError(
+        "argument `$(first(clash))` of `$(sig.args[1])`: the names $(join(("`$r`" for r in reserved), ", ")) " *
+        "are the element's ports and bond variables; rename it"))
     body = fdef.args[2]
     signals = [:(@isdefined($s) ? [$s] : []) for s in (:input, :output) if mentions(body, s)]
     body.args[end] = :($System(vcat($extra, $(body.args[end])), $t; name,
@@ -84,6 +90,13 @@ function element(fdef, ports, preamble, source; extra = :(Equation[]))
 end
 mentions(ex::Expr, s) = any(a -> mentions(a, s), ex.args)
 mentions(ex, s) = ex === s
+# Argument names of a signature `Name(a, b::T; c = 1, d)`
+sig_names(ex::Symbol) = [ex]
+function sig_names(ex::Expr)
+    ex.head in (:kw, :(::)) && return sig_names(ex.args[1])
+    args = ex.head === :call ? ex.args[2:end] : ex.head === :parameters ? ex.args : []
+    reduce(vcat, sig_names.(args); init = Symbol[])
+end
 
 """
     @oneport function Name(args...; name, kwargs...) ... [laws] end
@@ -95,11 +108,14 @@ adds the ports `power` (bond into the element) and `pout` (bond out of it, see
 MTK `@component`; MTK finds the unknowns and parameters itself. A signal connector the
 body defines as `input` (`RealInput`) or `output` (`RealOutput`) becomes part of the
 element.
+
+The names `e`, `f`, `power` and `pout` are taken: an argument with one of them throws,
+and a `@parameters f` (a frequency, say) clashes with the bond's flow. Call it `ν` or `freq`.
 """
 macro oneport(fdef)
     eqs = gensym(:bond)
     element(fdef, [:power, :pout], [:((power, pout, e, f, $eqs) = $bond_ports())],
-            __source__; extra = eqs)
+            __source__; reserved = [:e, :f, :power, :pout], extra = eqs)
 end
 
 """
@@ -109,7 +125,8 @@ Define a two-port element: port `p1` is the bond into it, port `p2` the bond out
 The body can use the bond variables `e1, f1` (port 1) and `e2, f2` (port 2), each flow
 positive along its bond's half-arrow, and must end with the vector of laws, written as
 in the books (e.g. Karnopp Eq. 3.9). The macro adds the ports and wraps the laws in a
-`System`, as an MTK `@component`. Signal connectors as for [`@oneport`](@ref).
+`System`, as an MTK `@component`. Signal connectors and taken names (`e1`, `f1`, `e2`,
+`f2`, `p1`, `p2`) as for [`@oneport`](@ref).
 
 MTK counts every port's flow positive into the component, so `f2 = -p2.f`; write the
 laws in `e1, f1, e2, f2` and this sign is handled for you.
@@ -117,7 +134,8 @@ laws in `e1, f1, e2, f2` and this sign is handled for you.
 macro twoport(fdef)
     element(fdef, [:p1, :p2],
             [:(p1 = $PowerPort(name = :p1)), :(p2 = $PowerPort(name = :p2)),
-             :(e1 = p1.e), :(f1 = p1.f), :(e2 = p2.e), :(f2 = -p2.f)], __source__)
+             :(e1 = p1.e), :(f1 = p1.f), :(e2 = p2.e), :(f2 = -p2.f)], __source__;
+            reserved = [:e1, :f1, :e2, :f2, :p1, :p2])
 end
 
 include("elements.jl")

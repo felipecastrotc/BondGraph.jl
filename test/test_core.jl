@@ -71,6 +71,16 @@ end
     @test simulate(custom)(T1; idxs = custom.C.q) ≈ simulate(builtin)(T1; idxs = builtin.C.q) atol = 1e-10
 end
 
+@testset "A macro argument named like a port or bond variable throws" begin
+    # Without the check, the bond's flow would silently replace `f = 3.0` in the law.
+    @test_throws ArgumentError macroexpand(@__MODULE__, :(@oneport function G(; name, f = 3.0)
+        [e ~ 2f]
+    end))
+    @test_throws ArgumentError macroexpand(@__MODULE__, :(@twoport function G(m; name, e1::Real = 1.0)
+        [e1 ~ m * e2, f2 ~ m * f1]
+    end))
+end
+
 # MTK gives every connector's flow at least a singleton connection set, so an
 # unconnected PowerPort carries no flow (ModelingToolkitBase, src/systems/connectors.jl,
 # generate_connection_set!). Oriented ports (ticket 12) rely on this for the unused port.
