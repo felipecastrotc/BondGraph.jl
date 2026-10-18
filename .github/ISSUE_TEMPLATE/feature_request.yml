@@ -1,0 +1,16 @@
+name: Feature request
+description: An element, a convention, an output, or a better way to build models
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What you want to model or do
+      description: The system or task, and what is hard or missing today.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposal
+      description: How it could look in code. A textbook reference helps for a new element or convention.
