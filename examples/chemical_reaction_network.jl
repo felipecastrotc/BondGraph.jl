@@ -71,7 +71,7 @@ using Plots
     @parameters K = K           # (1/mol) Thermodynamic constant, K = exp(μ⁰/RT)/V
     @parameters RT = RT         # (J/mol) Gas constant times temperature
     @variables x(t) = x         # (mol) Amount of the species, with its initial value
-    [D(x) ~ power.f, power.e ~ RT * log(K * x)]
+    [D(x) ~ f, e ~ RT * log(K * x)]
 end
 
 # ### Reactions
@@ -99,10 +99,10 @@ RT = 8.314 * 310.0              # (J/mol) R = 8.314 J/(mol⋅K)
 
 # ## Model Construction
 #
-# Each species sits on a 0-junction, which gives it free ports for the reactions. Following Gawthrop & Crampin (2014, Fig. 1c and Eq. 10), every bond to a species points out of its junction into the species (`[-1, x]`), so the species' flow is its rate of change, $\dot{x}_i$; this is also Karnopp's usual orientation for a C (§3.1, p. 42). Each reaction's bonds follow the forward reaction: from A's junction into `r1` (`[-1, :r1]`), out of `r1` into B's junction (`:r1`), and the same for `r2`. B's junction thus has one bond in and two out, and its flow balance is $v_1 - \dot{x}_b - v_2 = 0$, the mass balance of B.
-@named ja = Junction0([-1, A], [-1, :r1])
-@named jb = Junction0(:r1, [-1, B], [-1, :r2])
-@named jc = Junction0(:r2, [-1, C])
+# Each species sits on a 0-junction, which gives it free ports for the reactions. Following Gawthrop & Crampin (2014, Fig. 1c and Eq. 10), every bond to a species points out of its junction into the species (a bare member `x`), so the species' flow is its rate of change, $\dot{x}_i$; this is also Karnopp's usual orientation for a C (§3.1, p. 42). Each reaction's bonds follow the forward reaction: from A's junction into `r1` (free port `:r1`, leaving), out of `r1` into B's junction (`:r1 => :in`, entering), and the same for `r2`. B's junction thus has one bond in and two out, and its flow balance is $v_1 - \dot{x}_b - v_2 = 0$, the mass balance of B.
+@named ja = Junction0(A, :r1)
+@named jb = Junction0(:r1 => :in, B, :r2)
+@named jc = Junction0(:r2 => :in, C)
 
 # A reaction's port 1 is its bond in and port 2 its bond out, so each junction's port towards a reaction connects to `p1` and the one from it to `p2`:
 @named network = System([connect(ja.r1, r1.p1), connect(r1.p2, jb.r1),

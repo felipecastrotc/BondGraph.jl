@@ -1,6 +1,7 @@
 # Two-ports through the public API (Karnopp Eqs. 3.8-3.11): port 1 is the bond into the
-# two-port, port 2 the bond out of it. A source reaches port 1 through a 1-junction
-# (Se ⇀ 1 ⇀ TF), and port 2 bonds straight into a storage element (TF ⇀ I).
+# two-port, port 2 the bond out of it. Most tests reach port 1 through a 1-junction
+# (Se ⇀ 1 ⇀ TF); a source's outgoing port `pout` also bonds to it directly (ADR 0002).
+# Port 2 bonds straight into a storage element (TF ⇀ I).
 
 # Power into port 1 and out of port 2, in the bonds' own variables (f₂ = -p2.f).
 power_in(sol, tp) = sol(TT; idxs = tp.p1.e) .* sol(TT; idxs = tp.p1.f)
@@ -56,4 +57,19 @@ end
     @named I = Inertia(I = 1.0)
     builtin = driven(tf, I; E = 3.0)
     @test solve_tp(custom)(TT; idxs = custom.I.p) ≈ solve_tp(builtin)(TT; idxs = builtin.I.p) atol = 1e-10
+end
+
+@testset "Plain connects from a source's pout: Se ⇀ TF ⇀ I, Sf ⇀ TF ⇀ C" begin
+    @named se = Se(3.0)
+    @named tf = TF(m = 2.0)
+    @named I = Inertia(I = 1.0)
+    @named m = System([connect(se.pout, tf.p1), connect(tf.p2, I.power)], t; systems = [se, tf, I])
+    sol = solve_tp(m)
+    @test sol(TT; idxs = m.I.p) ≈ 1.5 .* TT atol = 1e-8       # ṗ = e₂ = E/m
+    @test sol(TT; idxs = m.se.f) ≈ 0.75 .* TT atol = 1e-8     # the source's own flow, f₁ > 0
+    @named sf = Sf(1.0)
+    @named tf = TF(m = 2.0)
+    @named C = Compliance(C = 1.0)
+    @named m = System([connect(sf.pout, tf.p1), connect(tf.p2, C.power)], t; systems = [sf, tf, C])
+    @test solve_tp(m)(TT; idxs = m.C.q) ≈ 2.0 .* TT atol = 1e-8   # q̇ = f₂ = m F
 end

@@ -3,7 +3,7 @@
 @oneport function CubicCompliance(; name, C = 0.2, q = 0.0)
     @parameters C = C
     @variables q(t) = q
-    [power.e ~ q^3 / C, D(q) ~ power.f]
+    [e ~ q^3 / C, D(q) ~ f]
 end
 
 for (case, force, displacement) in
@@ -14,8 +14,8 @@ for (case, force, displacement) in
     @named s3 = CubicCompliance(C = 0.2, q = displacement)
     @named d = Resistance(R = 0.02)
     @named f = Se(force)
-    @named model = Junction1(f, [-1, m], [-1, d], [-1, s], [-1, s3])
-    check_case(case, model, ["m₊power₊f(t)" => model.m.power.f,
+    @named model = Junction1(f => :pout, m, d, s, s3)
+    check_case(case, model, ["m₊power₊f(t)" => model.m.f,
                              "s₊q(t)" => model.s.q,
                              "s3₊q(t)" => model.s3.q])
 end

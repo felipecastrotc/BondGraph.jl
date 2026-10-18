@@ -39,7 +39,10 @@ export ElectricalAdapter, TranslationalAdapter, TranslationalPositionAdapter,
     PowerPort(; name)
 
 The connector through which an element exchanges power: effort `e` and flow `f`. MTK
-counts `f` positive into the component that owns the port.
+counts `f` positive into the component that owns the port. A bond is a `connect` from
+an outgoing port (an element's `pout`, a two-port's `p2`, a junction's outgoing free
+port) to an incoming one (an element's `power`, a two-port's `p1`, a junction's
+incoming free port); see [Concepts and Conventions](@ref concepts).
 """
 @connector function PowerPort(; name)
     vars = @variables begin
@@ -49,13 +52,32 @@ counts `f` positive into the component that owns the port.
     System(Equation[], t, vars, []; name)
 end
 
+"""
+    bond_ports()
+
+The ports and bond variables of an element: `power`, the incoming port (its
+bond points into the element), `pout`, the outgoing port (its bond points out of it),
+and the bond's effort `e` and flow `f` along its half-arrow, whichever port carries it.
+Returns `(power, pout, e, f, eqs)`. An element connects one of the two ports; MTK
+zeroes the flow of the other, so `f = power.f - pout.f` is the bond flow either way.
+MTK leaves the unused port's effort free, so it is tied to the bond's: both ports share
+one effort, and only the flow carries the direction.
+"""
+function bond_ports()
+    @named power = PowerPort()
+    @named pout = PowerPort()
+    @variables e(t) f(t)
+    (power, pout, e, f, [e ~ power.e, pout.e ~ power.e, f ~ power.f - pout.f])
+end
+
 # Shared by @oneport and @twoport: make `fdef` an MTK component whose body ends with the
 # vector of laws (long-form `function`). Its subsystems are `ports`, plus the signal
-# connectors `input` (RealInput) and `output` (RealOutput) when the body defines them.
-function element(fdef, ports, preamble, source)
+# connectors `input` (RealInput) and `output` (RealOutput) when the body defines them;
+# `extra` are equations added to the laws.
+function element(fdef, ports, preamble, source; extra = :(Equation[]))
     body = fdef.args[2]
     signals = [:(@isdefined($s) ? [$s] : []) for s in (:input, :output) if mentions(body, s)]
-    body.args[end] = :($System(vcat($(body.args[end])), $t; name,
+    body.args[end] = :($System(vcat($extra, $(body.args[end])), $t; name,
                                systems = [$(ports...); $(signals...)]))
     prepend!(body.args, preamble)
     esc(Expr(:macrocall, GlobalRef(ModelingToolkit, Symbol("@component")), source, fdef))
@@ -66,14 +88,18 @@ mentions(ex, s) = ex === s
 """
     @oneport function Name(args...; name, kwargs...) ... [laws] end
 
-Define a one-port element. The body can use `power.e` and `power.f`, the effort and
-flow of the element's bond as drawn, and must end with the vector of laws. The macro
-adds the `power` port and wraps the laws in a `System`, as an MTK `@component`; MTK
-finds the unknowns and parameters itself. A signal connector the body defines as
-`input` (`RealInput`) or `output` (`RealOutput`) becomes part of the element.
+Define a one-port element. The body can use `e` and `f`, the effort and flow of the
+element's bond along its half-arrow, and must end with the vector of laws. The macro
+adds the ports `power` (bond into the element) and `pout` (bond out of it, see
+[`bond_ports`](@ref BondGraphToolkit.bond_ports)) and wraps the laws in a `System`, as an
+MTK `@component`; MTK finds the unknowns and parameters itself. A signal connector the
+body defines as `input` (`RealInput`) or `output` (`RealOutput`) becomes part of the
+element.
 """
 macro oneport(fdef)
-    element(fdef, [:power], [:(power = $PowerPort(name = :power))], __source__)
+    eqs = gensym(:bond)
+    element(fdef, [:power, :pout], [:((power, pout, e, f, $eqs) = $bond_ports())],
+            __source__; extra = eqs)
 end
 
 """

@@ -1,5 +1,6 @@
-# One-port elements. Their laws are in the variables of their bond as drawn
-# (`power.e`, `power.f`); the docstrings give the conventional drawing (Karnopp §3.1).
+# One-port elements. Their laws are in the variables of their bond as drawn (`e`, `f`),
+# whichever port carries it: `power` (bond into the element) or `pout` (bond out of it),
+# ADR 0002. The docstrings give the conventional drawing (Karnopp §3.1).
 
 """
     Se(E; name)
@@ -8,14 +9,15 @@
 Effort source, `e = E`. `E` is a number or any expression of `t` and system variables
 (an expression of another subsystem's variables needs `@named`). Without `E`, the
 effort comes from the signal connector `input::RealInput` (a modulated source, MSe).
-Conventionally its bond points away from the source.
+Conventionally its bond points away from the source: connect `pout`, or make it a
+junction member `se => :pout`.
 """
 @oneport function Se(E = nothing; name)
     if E === nothing
         @named input = RealInput()
         E = input.u
     end
-    [power.e ~ E]
+    [e ~ E]
 end
 
 """
@@ -24,14 +26,14 @@ end
 
 Flow source, `f = F`. `F` is a number or any expression, as for [`Se`](@ref). Without
 `F`, the flow comes from `input::RealInput` (MSf). Conventionally its bond points away
-from the source.
+from the source: connect `pout`, or make it a junction member `sf => :pout`.
 """
 @oneport function Sf(F = nothing; name)
     if F === nothing
         @named input = RealInput()
         F = input.u
     end
-    [power.f ~ F]
+    [f ~ F]
 end
 
 """
@@ -40,12 +42,12 @@ end
 Effort detector: outputs the effort of its bond as `output::RealOutput` and carries no
 power (`f = 0`), so it doesn't change the model. It sits on a 0-junction, where every
 bond shares the effort it reads (Borutzky 2011, Ch. 3 p. 116). Write its bond like a
-passive element's, from the junction into the detector (`[-1, de]`); it carries no power,
+passive element's, from the junction into the detector (member `de`); it carries no power,
 so the direction doesn't change the model.
 """
 @oneport function De(; name)
     @named output = RealOutput()
-    [power.f ~ 0, output.u ~ power.e]
+    [f ~ 0, output.u ~ e]
 end
 
 """
@@ -54,11 +56,11 @@ end
 Flow detector: outputs the flow of its bond as `output::RealOutput` and carries no
 power (`e = 0`). It sits on a 1-junction, where every bond shares the flow it reads.
 Write its bond like a passive element's, from the junction into the detector
-(`[-1, df]`); it carries no power, so the direction doesn't change the model.
+(member `df`); it carries no power, so the direction doesn't change the model.
 """
 @oneport function Df(; name)
     @named output = RealOutput()
-    [power.e ~ 0, output.u ~ power.f]
+    [e ~ 0, output.u ~ f]
 end
 
 """
@@ -69,7 +71,7 @@ Resistance, `e = R f`. Conventionally its bond points into it, so it dissipates
 """
 @oneport function Resistance(; name, R = 1.0)
     @parameters R = R
-    [power.e ~ R * power.f]
+    [e ~ R * f]
 end
 
 """
@@ -82,7 +84,7 @@ into it.
 @oneport function Compliance(; name, C = 1.0, q = 0.0)
     @parameters C = C
     @variables q(t) = q
-    [D(q) ~ power.f, power.e ~ q / C]
+    [D(q) ~ f, e ~ q / C]
 end
 
 """
@@ -94,7 +96,7 @@ Conventionally its bond points into it.
 @oneport function Inertia(; name, I = 1.0, p = 0.0)
     @parameters I = I
     @variables p(t) = p
-    [D(p) ~ power.e, power.f ~ p / I]
+    [D(p) ~ e, f ~ p / I]
 end
 
 """

@@ -1,7 +1,7 @@
 # 1. Junctions on native ModelingToolkit connections
 
 Date: 2026-10-15
-Status: accepted; amended 2026-10-15 by ticket 06 (sign convention)
+Status: accepted; amended 2026-10-15 by ticket 06 (sign convention) and 2026-10-18 by [ADR 0002](0002-oriented-ports.md) (element ports, junction member syntax)
 
 ## Context
 

@@ -86,14 +86,14 @@ g = 9.81                            # (m/s²) Gravitational acceleration g
 
 # ## Model Construction
 #
-# The bonds follow Fig. 1.7d. The source's bond points into the current junction and the bonds of $R_e$ and $L$ out of it, into the elements, as in the [DC motor](@ref dc-motor); the bond to the motor leaves the junction (`[-1, :gy]`):
-@named ji = Junction1(us, [-1, Re], [-1, L], [-1, :gy])
+# The bonds follow Fig. 1.7d. The source's bond points into the current junction and the bonds of $R_e$ and $L$ out of it, into the elements, as in the [DC motor](@ref dc-motor); the bond to the motor leaves the junction (`:gy`):
+@named ji = Junction1(us => :pout, Re, L, :gy)
 
-# The motor's bond enters the $\omega$ junction (`:gy`); the bonds of $J$, $b$ and the detector point out of it, and so do the two bonds to the rod's transformers (`[-1, :x]`, `[-1, :y]`): power flows from the motor to the mass.
-@named jω = Junction1(:gy, [-1, J], [-1, b], [-1, ω], [-1, :x], [-1, :y])
+# The motor's bond enters the $\omega$ junction (`:gy => :in`); the bonds of $J$, $b$ and the detector point out of it, and so do the two bonds to the rod's transformers (`:x`, `:y`): power flows from the motor to the mass.
+@named jω = Junction1(:gy => :in, J, b, ω, :x, :y)
 
-# The $y$ transformer's bond enters the junction of $\dot{y}$ (`:tf`), and so does the weight's; the bond of `my` points out of it. In the $x$ direction there is nothing else on the velocity $\dot{x}$, so Breedveld bonds the transformer straight into `mx` (Fig. 1.7d), as here.
-@named jy = Junction1(:tf, mg, [-1, my])
+# The $y$ transformer's bond enters the junction of $\dot{y}$ (`:tf => :in`), and so does the weight's (`mg => :pout`); the bond of `my` points out of it. In the $x$ direction there is nothing else on the velocity $\dot{x}$, so Breedveld bonds the transformer straight into `mx` (Fig. 1.7d), as here.
+@named jy = Junction1(:tf => :in, mg => :pout, my)
 
 # Each transformer's port 1 is the bond into it and port 2 the bond out of it. The last `connect` is the signal from the detector to the integrator.
 @named model = System([connect(ji.gy, Km.p1), connect(Km.p2, jω.gy),
@@ -127,7 +127,7 @@ let
     @parameters R_e L K_m J b m
     ω_t = only(filter(v -> endswith(string(v), "fˍt(t)"), unknowns(sys)))   # the dummy derivative
     bg_equations(model; rename = Dict(
-        model.φ.output.u => φ, model.mx.p => p_x, model.jω.J.power.f => ω,
+        model.φ.output.u => φ, model.mx.p => p_x, model.jω.J.f => ω,
         model.ji.L.p => λ, model.jy.core.p1.e => F_y, ω_t => ω̇,
         model.φ.k => 1, model.ji.Re.R => R_e, model.ji.L.I => L, model.Km.r => K_m,
         model.jω.J.I => J, model.jω.b.R => b, model.mx.I => m, model.jy.my.I => m))
@@ -156,7 +156,7 @@ prob = ODEProblem(sys, [], tspan)
 
 # Use `solve` to simulate the system. The source's voltage drives a torque $K_m u_s / R_e = 0.5$ N⋅m in steady state, which swings the pendulum up to where gravity balances it, $m g l\cos\varphi = 0.5$.
 sol = solve(prob, Rodas5P(), reltol = 1e-10, abstol = 1e-10)
-plot(sol, idxs = [φ.output.u, jω.J.power.f, ji.L.power.f],
+plot(sol, idxs = [φ.output.u, jω.J.f, ji.L.f],
      labels = ["φ (rad)" "ω (rad/s)" "i (A)"], xlabel = "Time (s)")
 
 # ### Reduced pendulum model
@@ -193,14 +193,14 @@ plot(sol, idxs = [φ.output.u], label = "Bond graph", ylabel = "Angle (rad)")
 plot!(sol_t, idxs = [ϕ], label = "Reduced model", xlabel = "Time (s)", linestyle = :dash)
 
 # Armature current
-plot(sol, idxs = [ji.L.power.f], label = "Bond graph", ylabel = "Current (A)")
+plot(sol, idxs = [ji.L.f], label = "Bond graph", ylabel = "Current (A)")
 plot!(sol_t, idxs = [i], label = "Reduced model", xlabel = "Time (s)", linestyle = :dash)
 
 # On a common time grid, the largest difference between the two models, in angle, angular velocity and current:
 tgrid = range(tspan..., length = 1001)
 (maximum(abs, sol(tgrid; idxs = φ.output.u).u - sol_t(tgrid; idxs = ϕ).u),
- maximum(abs, sol(tgrid; idxs = jω.J.power.f).u - sol_t(tgrid; idxs = ω̃).u),
- maximum(abs, sol(tgrid; idxs = ji.L.power.f).u - sol_t(tgrid; idxs = i).u))
+ maximum(abs, sol(tgrid; idxs = jω.J.f).u - sol_t(tgrid; idxs = ω̃).u),
+ maximum(abs, sol(tgrid; idxs = ji.L.f).u - sol_t(tgrid; idxs = i).u))
 
 # ### Small-angle frequency
 #

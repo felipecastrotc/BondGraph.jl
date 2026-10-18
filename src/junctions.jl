@@ -1,22 +1,34 @@
-# 0- and 1-junctions: one signed component (Karnopp Eqs. 3.16-3.21, ADR 0001).
+# 0- and 1-junctions: one signed component (Karnopp Eqs. 3.16-3.21, ADRs 0001, 0002).
 #
-# A junction member is `x` (bond into the junction, sign +1) or `[-1, x]` (bond out of
-# it), where `x` is an element or a `Symbol` naming a free port. The core has one
-# PowerPort per bond. MTK measures each core port's flow `c` into the core, so the bond
-# flow along its half-arrow is `σ c`:
-#   - element member: `connect(x.power, port)` makes x.power.f = -c, and the element's
-#     variable is the bond flow whatever the sign, so σ = -1;
-#   - free port: `c` is the flow into this junction, so σ = sign.
+# A junction member is an element `x` (its bond points from the junction into x, through
+# `x.power`), `x => :pout` (from x into the junction, through `x.pout`), or a free port
+# that other junctions and two-ports bond to with `connect`: `:a` (the bond leaves the
+# junction) or `:a => :in` (it enters). Each member's sign is its bond's half-arrow, +1
+# into the junction. The core has one PowerPort per bond and MTK measures each core
+# port's flow `c` into the core; for every kind of member the bond flow along its
+# half-arrow is then `sign * c`.
 
-_member(a::AbstractVector) = length(a) == 2 && a[1] in (1, -1) ? (Int(a[1]), a[2]) :
-    throw(ArgumentError("junction member must be `x` or `[-1, x]` (or `[1, x]`), got $a"))
-_member(a) = (1, a)
+const MEMBER_FORMS = "`x` (bond into element x), `x => :pout` (bond out of x), `:a` (free port, bond leaving the junction) or `:a => :in` (bond entering it)"
+
+# A member as (sign, element or free-port name, port): port is :power/:pout, or :free.
+function _member(a)
+    a isa AbstractVector && throw(ArgumentError(
+        "junction member `[±1, x]`: this form was removed; write $MEMBER_FORMS"))
+    x, port = a isa Pair ? a : (a, a isa Symbol ? :out : :power)
+    if x isa Symbol
+        port in (:in, :out) || throw(ArgumentError("free port `$x => $port`: use `:$x` or `:$x => :in`"))
+        return (port === :in ? 1 : -1, x, :free)
+    end
+    port in (:power, :pout) ||
+        throw(ArgumentError("junction member `$(nameof(x)) => $port`: write $MEMBER_FORMS"))
+    (port === :pout ? 1 : -1, x, port)
+end
 
 struct JunctionMembers end   # system metadata key
 
-function junction_core(kind, signs, σs; name)
+function junction_core(kind, signs; name)
     ps = [PowerPort(name = Symbol(:p, k)) for k in eachindex(signs)]
-    bond_f = [σ * p.f for (σ, p) in zip(σs, ps)]
+    bond_f = [s * p.f for (s, p) in zip(signs, ps)]
     eqs = kind == 0 ?
         [[p.e ~ ps[1].e for p in ps[2:end]]; 0 ~ sum(signs .* bond_f)] :
         [[f ~ bond_f[1] for f in bond_f[2:end]]; 0 ~ sum(s * p.e for (s, p) in zip(signs, ps))]
@@ -24,28 +36,29 @@ function junction_core(kind, signs, σs; name)
 end
 
 function junction(kind, args; name)
-    signs, xs = first.(_member.(args)), last.(_member.(args))
-    σs = [x isa Symbol ? s : -1 for (s, x) in zip(signs, xs)]
-    core = junction_core(kind, signs, σs; name = :core)
-    ends = [x isa Symbol ? PowerPort(name = x) : x for x in xs]
-    cons = [connect(x isa Symbol ? sys : sys.power, getproperty(core, Symbol(:p, k)))
-            for (k, (x, sys)) in enumerate(zip(xs, ends))]
+    members = _member.(args)
+    signs = first.(members)
+    core = junction_core(kind, signs; name = :core)
+    ends = [port === :free ? PowerPort(name = x) : x for (_, x, port) in members]
+    cons = [connect(port === :free ? sys : getproperty(sys, port), getproperty(core, Symbol(:p, k)))
+            for (k, ((_, _, port), sys)) in enumerate(zip(members, ends))]
     # Recorded for `bondgraph`: each member's sign, name, and whether it is a free port.
-    members = [(s, nameof(e), x isa Symbol) for (s, x, e) in zip(signs, xs, ends)]
-    System(cons, t; name, systems = [core; ends], metadata = Dict(JunctionMembers => (kind, members)))
+    meta = [(s, nameof(e), port === :free) for ((s, _, port), e) in zip(members, ends)]
+    System(cons, t; name, systems = [core; ends], metadata = Dict(JunctionMembers => (kind, meta)))
 end
 
 """
     Junction0(members...; name)
 
 0-junction: every bond shares one effort and `Σ ± fᵢ = 0`, + for bonds into the
-junction. A member is an element `x` (its bond points into the junction), `[-1, x]` (its
-bond points out of the junction, towards `x`), or a free port `:name` / `[-1, :name]`
-that other junctions and two-ports bond to with `connect`. A plain `connect` of free
-ports is itself a 0-junction.
+junction. A member is an element `x` (its bond points from the junction into `x`),
+`x => :pout` (its bond points out of `x`, into the junction), or a free port that other
+junctions and two-ports bond to with `connect`: `:a` (the bond leaves the junction) or
+`:a => :in` (it enters). A plain `connect` of element and free ports is itself a
+0-junction.
 
 ```julia
-@named rc = Junction0([-1, R], [-1, C])   # 0 ⇀ R, 0 ⇀ C
+@named rc = Junction0(sf => :pout, R, C)   # Sf ⇀ 0, 0 ⇀ R, 0 ⇀ C
 ```
 """
 Junction0(args...; name) = junction(0, args; name)
@@ -57,7 +70,7 @@ Junction0(args...; name) = junction(0, args; name)
 Members as in [`Junction0`](@ref).
 
 ```julia
-@named m = Junction1(se, [-1, R], [-1, C])   # Se ⇀ 1, 1 ⇀ R, 1 ⇀ C
+@named m = Junction1(se => :pout, R, C)   # Se ⇀ 1, 1 ⇀ R, 1 ⇀ C
 ```
 """
 Junction1(args...; name) = junction(1, args; name)

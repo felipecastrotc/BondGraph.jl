@@ -9,7 +9,7 @@ with_block(model, block, input) =
     function series_rc(se)
         @named R = Resistance(R = 1.0)
         @named C = Compliance(C = 1.0)
-        Junction1(se, [-1, R], [-1, C]; name = :m)
+        Junction1(se => :pout, R, C; name = :m)
     end
     @named se = Se(sin(2π * t))
     reference = series_rc(se)
@@ -23,7 +23,7 @@ end
 @testset "Sf(): flow from a signal (MSf)" begin
     @named sf = Sf()
     @named C = Compliance(C = 1.0)
-    @named m = Junction0(sf, [-1, C])
+    @named m = Junction0(sf => :pout, C)
     @named k = Blocks.Constant(k = 2.0)
     top = with_block(m, k, m.sf.input)
     @test solve_tp(top)(TT; idxs = top.m.C.q) ≈ 2 .* TT atol = 1e-8   # q = F t
@@ -42,13 +42,13 @@ end
     @named se = Se(2.0)
     @named R = Resistance(R = 4.0)
     @named df = Df()
-    @named m = Junction1(se, [-1, R], [-1, df])   # Df sits on a 1-junction
+    @named m = Junction1(se => :pout, R, df)   # Df sits on a 1-junction
     sol = solve_tp(m)
     @test sol(TT; idxs = m.df.output.u) ≈ fill(0.5, length(TT)) atol = 1e-10   # f = E/R
     @named se = Se(2.0)
     @named de = De()
     @named R = Resistance(R = 4.0)
-    @named m = Junction0(se, [-1, R], [-1, de])   # De sits on a 0-junction
+    @named m = Junction0(se => :pout, R, de)   # De sits on a 0-junction
     @test solve_tp(m)(TT; idxs = m.de.output.u) ≈ fill(2.0, length(TT)) atol = 1e-10
 end
 
@@ -58,9 +58,9 @@ end
     function loop(gy)
         @named C = Compliance(C = 1.0)
         @named de = De()
-        @named out = Junction0(:in, [-1, C], [-1, de])
+        @named out = Junction0(:in => :in, C, de)
         @named se = Se(2.0)
-        @named src = Junction1(se, [-1, :out])
+        @named src = Junction1(se => :pout, :out)
         System([connect(src.out, gy.p1), connect(gy.p2, out.in)], t;
                name = :m, systems = [src, gy, out])
     end

@@ -8,7 +8,8 @@
     TF(; name, m)
 
 Transformer with modulus `m`: `e₁ = m e₂`, `f₂ = m f₁` (Karnopp Eq. 3.9). Port `p1` is
-the bond into it, `p2` the bond out. `m` can be an expression (modulated transformer,
+the bond into it, `p2` the bond out: `Se ⇀ TF ⇀ I` is `connect(se.pout, tf.p1)` and
+`connect(tf.p2, mass.power)`. `m` can be an expression (modulated transformer,
 MTF); build it with `@named` when the expression uses other subsystems' variables.
 Without `m`, the modulus comes from `input::RealInput`. MTK keeps an algebraic
 equation for a modulus read from a signal, so solve with a DAE-capable solver such as

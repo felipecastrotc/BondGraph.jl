@@ -57,6 +57,7 @@ Callers were found with the codebase knowledge graph: every junction equation co
 
 | Concept | Books | Code | Status |
 |---|---|---|---|
+| Bond direction in element ports (v0.3, ADR 0002) | one e and one f per bond (item 1); opposed arrows `→0←` give `e₁ = e₂`, `f₁ = −f₂`, and `→1←` give `f₁ = f₂`, `e₁ = −e₂` (Karnopp §3.3 p. 63) | `bond_ports`, `src/BondGraphToolkit.jl`: `e ~ power.e`, `pout.e ~ power.e`, `f ~ power.f - pout.f`, so `pout` is the `→0←` form | **Agrees**. **Design choice:** flipping the flow rather than the effort; the books allow either, and MTK's `connect` (a 0-junction) can only express `→0←` |
 | Junction signs: in the sum, unsigned in the equality | item 2 above | `src/utils/graph.jl:198-268`: −1 for a bond leaving, +1 for one arriving, and `s = apply_equalityeqs ? 1 : s` (l. 249) | **Agrees** |
 | Bond direction set by the user | half-arrow | `Junction0`/`Junction1` turn the signs into the direction of `connect` (`src/bg.jl:172-176`, `220-224`) | **Agrees** |
 | Se, Sf | `e = E(t)`, `f = F(t)` | `src/bg.jl:63`, `:107` | **Agrees** |

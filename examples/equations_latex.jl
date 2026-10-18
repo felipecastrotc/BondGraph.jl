@@ -11,7 +11,7 @@ using OrdinaryDiffEqTsit5
 @named m = Inertia(I = 1.0)
 @named k = Compliance(C = 1.0)
 @named b = Resistance(R = 0.5)
-@named model = Junction1(F, [-1, m], [-1, k], [-1, b])
+@named model = Junction1(F => :pout, m, k, b)
 
 # The equations in terms of the states, the spring's displacement `q` and the mass's momentum `p`. Namespaced names such as `k₊q` show which element each variable belongs to:
 bg_equations(model)
@@ -35,5 +35,5 @@ sol = solve(ODEProblem(mtkcompile(aliased), [], (0.0, 10.0)), Tsit5())
 sol[x][end]
 
 # A solution can be indexed by one variable at a time. To plot or compute a product such as the power `e⋅f` on a bond, sample each factor and multiply:
-power = sol[model.b.power.e] .* sol[model.b.power.f]
+power = sol[model.b.e] .* sol[model.b.f]
 power[end]

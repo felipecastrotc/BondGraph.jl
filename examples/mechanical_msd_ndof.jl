@@ -67,21 +67,21 @@ n = 4
 #
 # ### Mass 1
 #
-# Mass 1 is a 1-junction: its inertia, spring and damper share its velocity $\dot{x}_1$. Following the usual orientation (Karnopp, Margolis & Rosenberg 2012, §3.1, pp. 39, 42), the bonds of the passive elements point out of the junction into the elements, `[-1, x]`. A free port named `out`, also pointing out of the junction (`[-1, :out]`), will carry the force of the first coupling. The junction then states $0 = -\dot{p}_1 - k_1 q_1 - c_1\,\dot{x}_1 - e_{\text{out}}$, where the compliance's displacement $q_1 = x_1$ is the stretch of the spring to ground.
-@named m1 = Junction1([-1, m], [-1, d], [-1, s], [-1, :out])
+# Mass 1 is a 1-junction: its inertia, spring and damper share its velocity $\dot{x}_1$. Following the usual orientation (Karnopp, Margolis & Rosenberg 2012, §3.1, pp. 39, 42), the bonds of the passive elements point out of the junction into the elements (a bare member `x`). A free port named `out`, also pointing out of the junction (`:out`), will carry the force of the first coupling. The junction then states $0 = -\dot{p}_1 - k_1 q_1 - c_1\,\dot{x}_1 - e_{\text{out}}$, where the compliance's displacement $q_1 = x_1$ is the stretch of the spring to ground.
+@named m1 = Junction1(m, d, s, :out)
 
 # ### Masses 2 to N
 #
-# Each further mass is a 1-junction with a free port `in`, pointing into the junction from the coupling behind it, and its inertia `[-1, m]`. Every mass but the last also has a port `out`, pointing out towards the next coupling. So mass $i$ states $\dot{p}_i = e_{\text{in}} - e_{\text{out}}$: the force from behind minus the force ahead.
-masses = [Junction1(:in, [-1, m], (i < n ? [[-1, :out]] : [])...; name = Symbol(:m, i))
+# Each further mass is a 1-junction with a free port `in`, pointing into the junction from the coupling behind it (`:in => :in`), and its inertia `m`. Every mass but the last also has a port `out`, pointing out towards the next coupling. So mass $i$ states $\dot{p}_i = e_{\text{in}} - e_{\text{out}}$: the force from behind minus the force ahead.
+masses = [Junction1(:in => :in, m, (i < n ? [:out] : [])...; name = Symbol(:m, i))
           for i in 2:n]
 
 # ### Spring–damper pairs
 #
-# Pair $i$ is a 1-junction whose free port `j0` points into it from the 0-junction, with its compliance and resistance bonds pointing out into the elements. It states $e_{\text{j0}} = q_i/C_i + c_i\,f$: the force carried to the 0-junction is the spring force plus the damper force, at the pair's relative velocity $f$.
+# Pair $i$ is a 1-junction whose free port `j0` points into it from the 0-junction (`:j0 => :in`), with its compliance and resistance bonds pointing out into the elements. It states $e_{\text{j0}} = q_i/C_i + c_i\,f$: the force carried to the 0-junction is the spring force plus the damper force, at the pair's relative velocity $f$.
 #
 # The compliance of pair 2 starts at $q = -1$. The sign follows from the bond directions, as the 0-junction below shows: they make $q_i = x_{i-1} - x_i$, which is negative when the spring is stretched. The initial stretch of one unit is therefore $q_2 = -1$.
-sds = [Junction1([-1, Compliance(C = 1.0, q = i == 2 ? -1.0 : 0.0, name = :s)], [-1, d], :j0;
+sds = [Junction1(Compliance(C = 1.0, q = i == 2 ? -1.0 : 0.0, name = :s), d, :j0 => :in;
                  name = Symbol(:sd, i))
        for i in 2:n]
 
@@ -145,7 +145,7 @@ prob = ODEProblem(sys, [], tspan)
 sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
 
 # The velocity of each mass is the flow of its inertia's bond:
-velocities = [J.m.power.f for J in [m1; masses]]
+velocities = [J.m.f for J in [m1; masses]]
 plot(sol, idxs = velocities, xlabel = "Time (s)", ylabel = "Velocity (m/s)",
      label = permutedims(["ẋ$i" for i in 1:n]))
 

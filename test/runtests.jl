@@ -22,7 +22,7 @@ solve_dae(model) =
 # Se(E) ⇀ 1 ⇀ two-port ⇀ load, as one model.
 function driven(twoport, load; E)
     @named se = Se(E)
-    @named src = Junction1(se, [-1, :out])
+    @named src = Junction1(se => :pout, :out)
     System([connect(src.out, twoport.p1), connect(twoport.p2, load.power)], t;
            name = :m, systems = [src, twoport, load])
 end

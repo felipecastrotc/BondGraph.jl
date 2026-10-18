@@ -14,20 +14,19 @@ using Plots
 
 # ## A lever: constant transformer
 #
-# The force source acts on a 1-junction, whose free port `out` bonds into the lever's port 1. The lever's port 2 bonds straight into the mass: a plain `connect` between a two-port and an element is a bond pointing into the element.
+# The bond graph is `Se ⇀ TF ⇀ I`, and each bond is a `connect` from an outgoing port to an incoming one. The source's bond leaves it through its outgoing port `pout` and enters the lever's port 1; the lever's port 2 bonds into the mass's incoming port `power`.
 function lever(tf)
     @named F = Se(3.0)
     @named mass = Inertia(I = 1.0)
-    @named src = Junction1(F, [-1, :out])
-    System([connect(src.out, tf.p1), connect(tf.p2, mass.power)], t;
-           name = :model, systems = [src, tf, mass])
+    System([connect(F.pout, tf.p1), connect(tf.p2, mass.power)], t;
+           name = :model, systems = [F, tf, mass])
 end
 
 @named tf = TF(m = 2.0)
 model = lever(tf)
 sol = solve(ODEProblem(mtkcompile(model), [], (0.0, 5.0)), Tsit5(), reltol = 1e-10, abstol = 1e-10)
 
-# By hand: the 1-junction shares one flow, and its efforts sum with `+` for the source's bond (in) and `-` for the bond to the lever (out), so `e₁ = F = 3`. The transformer gives `e₂ = e₁ / m = 1.5`, and the mass integrates its effort, `ṗ = e₂`, so from rest `p = 1.5 t`.
+# By hand: the source sets the effort on its bond, which is port 1's, so `e₁ = F = 3`. The transformer gives `e₂ = e₁ / m = 1.5`, and the mass integrates its effort, `ṗ = e₂`, so from rest `p = 1.5 t`.
 plot(sol, idxs = [model.mass.p], label = "Bond graph", xlabel = "Time", ylabel = "Momentum")
 plot!(τ -> 1.5τ, 0, 5, label = "Closed form", linestyle = :dash)
 

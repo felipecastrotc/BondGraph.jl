@@ -5,15 +5,15 @@ for (case, force, q) in (("mechanical_msd_2dof_unforced", 0.0, 1.0),
     @named s = Compliance(C = 1.0)
     @named d = Resistance(R = 1.0)
     @named f = Se(force)
-    @named m1 = Junction1([-1, m], [-1, d], [-1, s], [-1, :out])
-    @named m2 = Junction1([-1, m], f, :in)
+    @named m1 = Junction1(m, d, s, :out)
+    @named m2 = Junction1(m, f => :pout, :in => :in)
     @named s2 = Compliance(C = 1.0, q = q)
-    @named sd = Junction1([-1, s2], [-1, d], :in)
+    @named sd = Junction1(s2, d, :in => :in)
     @named model = System([connect(m1.out, m2.in, sd.in)], t; systems = [m1, m2, sd])
     check_case(case, model, [
-        "m1_j1₊m₊power₊f(t)" => model.m1.m.power.f,
+        "m1_j1₊m₊power₊f(t)" => model.m1.m.f,
         "m1_j1₊s₊q(t)" => model.m1.s.q,
-        "m2_j1₊m₊power₊f(t)" => model.m2.m.power.f,
+        "m2_j1₊m₊power₊f(t)" => model.m2.m.f,
         "m2_sd₊s₊q(t)" => model.sd.s2.q,
     ])
 end

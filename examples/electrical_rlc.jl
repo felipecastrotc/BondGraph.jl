@@ -83,8 +83,8 @@ using Plots
 
 # ## Model Construction
 #
-# A single 1-junction holds the whole circuit. Following Karnopp's usual orientation (§3.1, pp. 39, 42, 49), the source's bond points into the junction (`V`, positive) and the bonds of the passive elements point out of it, towards the elements (`[-1, x]`). By the junction sign rule (§3.3, p. 59) the junction then states that all four bonds carry the current $i$ and that $V - v_R - v_L - v_C = 0$, Kirchhoff's voltage law.
-@named model = Junction1(V, [-1, R], [-1, L], [-1, C])
+# A single 1-junction holds the whole circuit. Following Karnopp's usual orientation (§3.1, pp. 39, 42, 49), the source's bond points into the junction (`V => :pout`, positive) and the bonds of the passive elements point out of it, towards the elements (a bare member `x`). By the junction sign rule (§3.3, p. 59) the junction then states that all four bonds carry the current $i$ and that $V - v_R - v_L - v_C = 0$, Kirchhoff's voltage law.
+@named model = Junction1(V => :pout, R, L, C)
 
 # The library draws the bond graph from the model:
 bgplot(model)
@@ -132,11 +132,11 @@ sols = [solve(ODEProblem(sys, [sys.R.R => r], tspan), Tsit5(), reltol = 1e-10, a
         for r in Rs];
 
 # The capacitor voltage is the effort on the capacitor's bond, and the current the flow common to all bonds.
-plot([s.t for s in sols], [s[model.C.power.e] for s in sols], labels = labels,
+plot([s.t for s in sols], [s[model.C.e] for s in sols], labels = labels,
      xlabel = "Time (s)", ylabel = "Capacitor voltage (V)")
 
 # The current starts at zero, as the inductor requires, and decays to zero once the capacitor is charged:
-plot([s.t for s in sols], [s[model.L.power.f] for s in sols], labels = labels,
+plot([s.t for s in sols], [s[model.L.f] for s in sols], labels = labels,
      xlabel = "Time (s)", ylabel = "Current (A)")
 
 # ### Analytic step response
@@ -183,13 +183,13 @@ ref_sols = [solve(ODEProblem(ref_sys, [q => 0.0, i => 0.0, Rᵥ => r], tspan), T
 # ### Compare models
 #
 # The bond graph's capacitor voltage against the analytic step response (dashed), for the three cases:
-plot([s.t for s in sols], [s[model.C.power.e] for s in sols], labels = labels,
+plot([s.t for s in sols], [s[model.C.e] for s in sols], labels = labels,
      xlabel = "Time (s)", ylabel = "Capacitor voltage (V)")
 plot!([τ -> step_response(τ, r)[1] for r in Rs], tspan..., labels = "",
       linestyle = :dash, color = :black)
 
 # And the current:
-plot([s.t for s in sols], [s[model.L.power.f] for s in sols], labels = labels,
+plot([s.t for s in sols], [s[model.L.f] for s in sols], labels = labels,
      xlabel = "Time (s)", ylabel = "Current (A)")
 plot!([τ -> step_response(τ, r)[2] for r in Rs], tspan..., labels = "",
       linestyle = :dash, color = :black)
@@ -197,7 +197,7 @@ plot!([τ -> step_response(τ, r)[2] for r in Rs], tspan..., labels = "",
 # On a common time grid, the largest difference of the bond graph model from the analytic solution and from the reference model, over the capacitor voltage and the current, for each case (one row per case: analytic, reference):
 tgrid = range(tspan..., length = 1001)
 function maxdiff(sol, ref_sol, r)
-    vC, i_bg = sol(tgrid; idxs = model.C.power.e).u, sol(tgrid; idxs = model.L.power.f).u
+    vC, i_bg = sol(tgrid; idxs = model.C.e).u, sol(tgrid; idxs = model.L.f).u
     exact = step_response.(tgrid, r)
     analytic = max(maximum(abs, vC .- first.(exact)), maximum(abs, i_bg .- last.(exact)))
     reference = max(maximum(abs, vC .- ref_sol(tgrid; idxs = q).u ./ Cᵥ),

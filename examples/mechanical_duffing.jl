@@ -63,11 +63,11 @@ using Plots
 #
 # ### Custom compliance
 #
-# The library's `Compliance` is linear, so the cubic spring is a custom element. `@oneport` adds the element's power port `power`, and the element's law is written in its bond variables `power.e` and `power.f`, as for the built-in elements: the displacement $q$ integrates the flow, and the effort is $q^3/C$.
+# The library's `Compliance` is linear, so the cubic spring is a custom element. `@oneport` adds the element's ports `power` and `pout`, and the element's law is written in its bond variables `e` and `f`, as for the built-in elements: the displacement $q$ integrates the flow, and the effort is $q^3/C$.
 @oneport function CubicCompliance(; name, C = 1.0, q = 0.0)
     @parameters C = C           # (m³/N) Cubic compliance, C = 1/k_nl
     @variables q(t) = q         # (m) Displacement, with its initial value
-    [D(q) ~ power.f, power.e ~ q^3 / C]
+    [D(q) ~ f, e ~ q^3 / C]
 end
 
 # ### Elements
@@ -90,8 +90,8 @@ end
 
 # ## Model Construction
 #
-# A single 1-junction holds the whole model. Following Karnopp's usual orientation (§3.1, pp. 39, 42, 49), the source's bond points into the junction (`force`, positive) and the bonds of the passive elements point out of it, towards the elements (`[-1, x]`). The junction states that all five bonds share the velocity and that the force balance $F - \dot{p} - c_{\text{duff}}\,\dot{x} - k_{\text{lin}}\,q - k_{\text{nl}}\,q_{\text{nl}}^3 = 0$ holds.
-@named model = Junction1(force, [-1, mass], [-1, damper], [-1, spring], [-1, spring_nl])
+# A single 1-junction holds the whole model. Following Karnopp's usual orientation (§3.1, pp. 39, 42, 49), the source's bond points into the junction (`force => :pout`, positive) and the bonds of the passive elements point out of it, towards the elements (a bare member `x`). The junction states that all five bonds share the velocity and that the force balance $F - \dot{p} - c_{\text{duff}}\,\dot{x} - k_{\text{lin}}\,q - k_{\text{nl}}\,q_{\text{nl}}^3 = 0$ holds.
+@named model = Junction1(force => :pout, mass, damper, spring, spring_nl)
 
 # ## Analysing the model
 #
@@ -130,15 +130,15 @@ prob = ODEProblem(sys, [sys.spring.q => 1.0, sys.spring_nl.q => 1.0], tspan)
 
 # Use `solve` to simulate the system.
 sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
-plot(sol, idxs = [model.spring.q, model.mass.power.f], labels = ["x" "ẋ"],
+plot(sol, idxs = [model.spring.q, model.mass.f], labels = ["x" "ẋ"],
      xlabel = "Time (s)", ylabel = "Displacement (m) / velocity (m/s)")
 
 # For the forced case, the force source becomes $F(t) = \gamma\cos(\omega t)$, built from the same elements. The oscillator starts at rest at $x(0) = 0$, the springs' default.
 @named force_cos = Se(γ * cos(ω * t))           # (N) External force
-@named forced = Junction1(force_cos, [-1, mass], [-1, damper], [-1, spring], [-1, spring_nl])
+@named forced = Junction1(force_cos => :pout, mass, damper, spring, spring_nl)
 forced_sol = solve(ODEProblem(mtkcompile(forced), [], tspan), Tsit5(),
                    reltol = 1e-10, abstol = 1e-10)
-plot(forced_sol, idxs = [forced.spring.q, forced.mass.power.f], labels = ["x" "ẋ"],
+plot(forced_sol, idxs = [forced.spring.q, forced.mass.f], labels = ["x" "ẋ"],
      xlabel = "Time (s)", ylabel = "Displacement (m) / velocity (m/s)")
 
 # ### Duffing oscillator model
@@ -172,7 +172,7 @@ plot!(ref_forced_sol, idxs = x, label = "Model", xlabel = "Time (s)", linestyle 
 tgrid = range(tspan..., length = 1001)
 maxdiff(bg, m, ref) = maximum(maximum(abs.(bg(tgrid; idxs = a) .- ref(tgrid; idxs = b)))
                               for (a, b) in [m.spring.q => x, m.spring_nl.q => x,
-                                             m.mass.power.f => v])
+                                             m.mass.f => v])
 maxdiff(sol, model, ref_sol), maxdiff(forced_sol, forced, ref_forced_sol)
 
 # The bond graph model, with its custom cubic compliance, reproduces the hand-derived Duffing dynamics.
