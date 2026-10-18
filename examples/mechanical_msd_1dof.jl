@@ -5,10 +5,15 @@
 # The harmonic oscillator is a classic example of a dynamic system with oscillatory behaviour. In the mechanical domain it is a mass on a spring and a damper, driven by an external force, as in the free-body diagram below:
 #
 # ```@raw html
-# <picture style="display: flex; justify-content: center; align-items: center;">
-#   <source srcset="../../assets/tikz/fbd_1dof-dark.svg" media="(prefers-color-scheme: dark)">
-#   <img src="../../assets/tikz/fbd_1dof.svg">
-# </picture>
+# <div class="docs-light-only" style="text-align: center;">
+# ```
+# ![Free-body diagram](../assets/tikz/fbd_1dof.svg)
+# ```@raw html
+# </div><div class="docs-dark-only" style="text-align: center;">
+# ```
+# ![Free-body diagram](../assets/tikz/fbd_1dof-dark.svg)
+# ```@raw html
+# </div>
 # ```
 #
 # ### Mass-spring-damper model
@@ -28,10 +33,15 @@
 # The mass, spring and damper all move with the same velocity $\dot{x}$, so their bonds meet at a 1-junction, together with the force source:
 #
 # ```@raw html
-# <picture style="display: flex; justify-content: center; align-items: center;">
-#   <source srcset="../../assets/tikz/bg_1dof-dark.svg" media="(prefers-color-scheme: dark)">
-#   <img src="../../assets/tikz/bg_1dof.svg">
-# </picture>
+# <div class="docs-light-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_1dof.svg)
+# ```@raw html
+# </div><div class="docs-dark-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_1dof-dark.svg)
+# ```@raw html
+# </div>
 # ```
 #
 # Karnopp, Margolis & Rosenberg (2012) model a mass as an inertia `I:m` with momentum $p = m\,\dot{x}$ and $\dot{p} = F$, a spring as a compliance `C:1/k` with displacement $q = x$ and effort $k\,q$, and a dashpot as a resistance `R:c` (§3.1, pp. 38–47). A mechanical 1-junction is a force balance at a common velocity (§3.3, pp. 58, 61). The effort source `Se:F(t)` is the external force.

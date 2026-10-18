@@ -5,10 +5,15 @@
 # The Duffing equation is a nonlinear second-order ordinary differential equation used to model physical systems with nonlinear behaviour, such as electrical circuits, mechanical structures and biological systems. In the mechanical domain it extends the [harmonic oscillator](@ref msd-1dof) with a cubic spring. Despite its simple form, the Duffing equation can show chaotic behaviour. The system is illustrated by the free-body diagram below:
 #
 # ```@raw html
-# <picture style="display: flex; justify-content: center; align-items: center;">
-#   <source srcset="../../assets/tikz/fbd_duffing-dark.svg" media="(prefers-color-scheme: dark)">
-#   <img src="../../assets/tikz/fbd_duffing.svg">
-# </picture>
+# <div class="docs-light-only" style="text-align: center;">
+# ```
+# ![Free-body diagram](../assets/tikz/fbd_duffing.svg)
+# ```@raw html
+# </div><div class="docs-dark-only" style="text-align: center;">
+# ```
+# ![Free-body diagram](../assets/tikz/fbd_duffing-dark.svg)
+# ```@raw html
+# </div>
 # ```
 #
 # ### Duffing oscillator model
@@ -30,10 +35,15 @@
 # The mass, both springs and the damper move with the same velocity $\dot{x}$, so their bonds meet at a 1-junction, together with the force source:
 #
 # ```@raw html
-# <picture style="display: flex; justify-content: center; align-items: center;">
-#   <source srcset="../../assets/tikz/bg_duffing-dark.svg" media="(prefers-color-scheme: dark)">
-#   <img src="../../assets/tikz/bg_duffing.svg">
-# </picture>
+# <div class="docs-light-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_duffing.svg)
+# ```@raw html
+# </div><div class="docs-dark-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_duffing-dark.svg)
+# ```@raw html
+# </div>
 # ```
 #
 # As in the [harmonic oscillator](@ref msd-1dof), the inertia `I` stands for the mass $m_{\text{duff}}$, the compliance `C:1/k_lin` for the linear spring and the resistance `R` for the damper $c_{\text{duff}}$ (Karnopp, Margolis & Rosenberg 2012, §3.1, pp. 38–47). The effort source `Se:F(t)` is the external force. Karnopp's compliance is nonlinear in general, $e = \Phi_C^{-1}(q)$ with $q = \int f\,dt$ (§3.1, pp. 40–42); the cubic spring is such a compliance, `C:1/k_nl`, with $e = k_{\text{nl}}\,q^3$.

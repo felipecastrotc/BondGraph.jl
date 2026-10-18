@@ -13,10 +13,15 @@
 # The resistor and the capacitor share one voltage, so in the bond graph they hang off a 0-junction. As usual for passive elements, both bonds point from the junction into the element (Karnopp, Margolis & Rosenberg, §3.1):
 #
 # ```@raw html
-# <picture style="display: flex; justify-content: center; align-items: center;">
-#   <source srcset="../../assets/tikz/bg_rc-dark.svg" media="(prefers-color-scheme: dark)">
-#   <img src="../../assets/tikz/bg_rc.svg">
-# </picture>
+# <div class="docs-light-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_rc.svg)
+# ```@raw html
+# </div><div class="docs-dark-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_rc-dark.svg)
+# ```@raw html
+# </div>
 # ```
 #
 # ### Using the Bond Graph Toolkit

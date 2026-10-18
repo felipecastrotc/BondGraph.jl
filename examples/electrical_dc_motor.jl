@@ -37,10 +37,15 @@
 # To model the DC motor depicted in the figure above, we can use the bond graph approach and represent the system with the following bond graph:
 # 
 # ```@raw html
-# <picture style="display: flex; justify-content: center; align-items: center;">
-#   <source srcset="../../assets/tikz/bg_dcmotor-dark.svg" media="(prefers-color-scheme: dark)">
-#   <img src="../../assets/tikz/bg_dcmotor.svg">
-# </picture>
+# <div class="docs-light-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_dcmotor.svg)
+# ```@raw html
+# </div><div class="docs-dark-only" style="text-align: center;">
+# ```
+# ![Bond graph](../assets/tikz/bg_dcmotor-dark.svg)
+# ```@raw html
+# </div>
 # ```
 # 
 # In this representation, the inertance elements (I) correspond to the moment of inertia of the rotor ($J$) in the mechanical domain and the armature inductance ($L$) in the electrical domain. The resistance elements (R) represent the viscous friction coefficient ($c$) in the mechanical domain and the armature resistance ($R$) in the electrical domain. The effort sources (Se) are the applied voltage ($V$) and the applied torque ($\tau_a$).
