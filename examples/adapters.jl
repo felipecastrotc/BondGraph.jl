@@ -10,7 +10,7 @@
 # | `RotationalAdapter` | `flange` (`Rotational.Flange`) | torque on the network | `dφ/dt` |
 # | `HydraulicAdapter` | `port` (`HydraulicPort`) | pressure | volume flow into the network |
 #
-# Like any element, an adapter's law is written in the variables of its bond, and its bond conventionally points into the adapter: `[-1, adapter]` at a junction. When the MTKSL side supplies power instead of absorbing it, the power along the bond is negative.
+# Like any element, an adapter's law is written in the variables of its bond, and its bond conventionally points into the adapter: a bare member `adapter` at a junction, or a `connect` to `adapter.power`. When the MTKSL side supplies power instead of absorbing it, the power along the bond is negative.
 
 using BondGraphToolkit
 using BondGraphToolkit.ModelingToolkit: t_nounits as t
@@ -31,8 +31,8 @@ using Plots
 @named V = Se(12.0)
 @named τ = Se(1.0)
 @named shaft = RotationalAdapter(phi = 0.0)
-@named je = Junction1(V, [-1, R], [-1, L], [-1, :gy])
-@named jm = Junction1(τ, :gy, [-1, shaft])
+@named je = Junction1(V => :pout, R, L, :gy)
+@named jm = Junction1(τ => :pout, :gy => :in, shaft)
 @named gy = GY(r = 0.01)
 @named inertia = Rot.Inertia(J = 0.01, w = 0.0)
 @named damper = Rot.Damper(d = 0.1)
@@ -59,20 +59,20 @@ sol = solve(ODEProblem(mtkcompile(motor), [], (0.0, 10.0)), Rodas5P(), reltol = 
                      connect(rotor.flange_b, damper.flange_b), connect(damper.flange_a, emf.support, fixed.flange)], t;
                     systems = [vk, src, res, ind, emf, gnd, τk, torque, rotor, damper, fixed])
 sol_ref = solve(ODEProblem(mtkcompile(ref), [], (0.0, 10.0)), Rodas5P(), reltol = 1e-10, abstol = 1e-10)
-plot(sol, idxs = [inertia.w, je.L.power.f], label = ["ω, bond graph + MTKSL" "i, bond graph + MTKSL"])
+plot(sol, idxs = [inertia.w, je.L.f], label = ["ω, bond graph + MTKSL" "i, bond graph + MTKSL"])
 plot!(sol_ref, idxs = [rotor.w, ind.i], linestyle = :dash, label = ["ω, MTKSL" "i, MTKSL"], xlabel = "Time")
 
 # The largest difference on a common time grid, in angular velocity and in current:
 tgrid = 0:0.01:10
 (maximum(abs, sol(tgrid; idxs = inertia.w).u - sol_ref(tgrid; idxs = rotor.w).u),
- maximum(abs, sol(tgrid; idxs = je.L.power.f).u - sol_ref(tgrid; idxs = ind.i).u))
+ maximum(abs, sol(tgrid; idxs = je.L.f).u - sol_ref(tgrid; idxs = ind.i).u))
 
 # ## An MTKSL circuit behind a bond graph source
 #
 # Here a bond-graph source drives an MTKSL resistor and capacitor in series through an `ElectricalAdapter`; the network's lower terminal is grounded.
 @named se = Se(3.0)
 @named ea = ElectricalAdapter()
-@named j = Junction1(se, [-1, ea])
+@named j = Junction1(se => :pout, ea)
 @named res = El.Resistor(R = 2.0)
 @named cap = El.Capacitor(C = 0.5, v = 0.0)
 @named gnd = El.Ground()
@@ -98,7 +98,7 @@ maximum(abs, sol(tgrid; idxs = cap.v).u - sol_ref(tgrid; idxs = cap.v).u)
 # A bond-graph force pushes a 2 kg MTKSL mass, first velocity-based (`Translational`), then position-based (`TranslationalPosition`). By Newton's 2nd law, a 1 N force accelerates the mass from rest as `v = t/2`, and both models are checked against it. The velocity-based mass needs its own initial position and velocity:
 @named F = Se(1.0)
 @named ta = TranslationalAdapter()
-@named j = Junction1(F, [-1, ta])
+@named j = Junction1(F => :pout, ta)
 @named mass = Tr.Mass(m = 2.0)
 @named push = System([connect(j.ta.flange, mass.flange)], t; systems = [j, mass])
 sys = mtkcompile(push)
@@ -109,7 +109,7 @@ maximum(abs, sol(tgrid; idxs = mass.v).u - tgrid / 2)
 #-
 @named F = Se(1.0)
 @named tpa = TranslationalPositionAdapter()
-@named j = Junction1(F, [-1, tpa])
+@named j = Junction1(F => :pout, tpa)
 @named mass = TP.Mass(m = 2.0, s = 0.0, v = 0.0)
 @named push = System([connect(j.tpa.flange, mass.flange)], t; systems = [j, mass])
 sol = solve(ODEProblem(mtkcompile(push), [], (0.0, 2.0)), Rodas5P(), reltol = 1e-10, abstol = 1e-10)
@@ -124,7 +124,7 @@ maximum(abs, sol(tgrid; idxs = mass.v).u - tgrid / 2)
 @named ha = HydraulicAdapter()
 @named R = Resistance(R = 1.0e9)
 @named C = Compliance(C = 2.0e-9)
-@named j = Junction1([-1, ha], [-1, R], [-1, C])
+@named j = Junction1(ha, R, C)
 @named tank = System([connect(k.output, src.p), connect(fluid, src.port), connect(src.port, j.ha.port)], t;
                      systems = [k, src, fluid, j])
 sol = solve(ODEProblem(mtkcompile(tank), [], (0.0, 10.0)), Rodas5P(); abstol = 1e-18, reltol = 1e-10)

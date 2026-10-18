@@ -6,7 +6,7 @@ function tf_model()
     @named R = Resistance()
     @named tf = TF(m = 2.0)
     @named I = Inertia()
-    @named j = Junction1(se, [-1, R], [-1, :out])
+    @named j = Junction1(se => :pout, R, :out)
     @named model = System([connect(j.out, tf.p1), connect(tf.p2, I.power)], t; systems = [j, tf, I])
 end
 
@@ -21,14 +21,33 @@ end
     @named a = Se(1.0)
     @named b = Resistance()
     @named c = Compliance()
-    @named j1 = Junction1(a, [-1, :out])   # bond leaves j1 ...
-    @named j2 = Junction1(:in, [-1, b])    # ... and enters j2 and j3
-    @named j3 = Junction1(:in, [-1, c])
+    @named j1 = Junction1(a => :pout, :out)   # bond leaves j1 ...
+    @named j2 = Junction1(:in => :in, b)    # ... and enters j2 and j3
+    @named j3 = Junction1(:in => :in, c)
     @named model = System([connect(j1.out, j2.in, j3.in)], t; systems = [j1, j2, j3])
     g = bondgraph(model)
     zero = only(n.id for n in g.nodes if n.label == "0")
     @test Set(g.bonds) == Set(["j1₊a" => "j1", "j1" => zero, zero => "j2", zero => "j3",
                                "j2" => "j2₊b", "j3" => "j3₊c"])
+end
+
+@testset "bondgraph: a source's pout bonds straight to a two-port" begin
+    @named se = Se(1.0)
+    @named tf = TF(m = 2.0)
+    @named I = Inertia()
+    @named model = System([connect(se.pout, tf.p1), connect(tf.p2, I.power)], t; systems = [se, tf, I])
+    @test Set(bondgraph(model).bonds) == Set(["se" => "tf", "tf" => "I"])
+end
+
+@testset "bondgraph rejects an element bonded through both ports" begin
+    @named se = Se(1.0)
+    @named C = Compliance()
+    @named j = Junction1(se => :pout, :out)
+    @named sf = Sf(1.0)
+    @named model = System([connect(j.out, C.power), connect(sf.pout, C.pout)], t; systems = [j, C, sf])
+    err = try bondgraph(model); nothing catch e; e end
+    @test err isa ArgumentError
+    @test occursin("`C`", err.msg) && occursin("j₊out", err.msg) && occursin("sf₊pout", err.msg)
 end
 
 @testset "bondgraph shows as text" begin

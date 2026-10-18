@@ -16,8 +16,8 @@ using BondGraphToolkit.ModelingToolkit: t_nounits as t
 @named J = Inertia(I = 0.01)
 @named c = Resistance(R = 0.1)
 @named τ = Se(1.0)
-@named je = Junction1(V, [-1, R], [-1, L], [-1, :gy])
-@named jm = Junction1(τ, [-1, c], [-1, J], :gy)
+@named je = Junction1(V => :pout, R, L, :gy)
+@named jm = Junction1(τ => :pout, c, J, :gy => :in)
 @named gy = GY(r = 0.01)
 @named motor = System([connect(je.gy, gy.p1), connect(gy.p2, jm.gy)], t; systems = [je, gy, jm])
 

@@ -80,11 +80,11 @@ inflow(t) = ifelse(mod(t, T) < Ts, Q0 * sin(π * mod(t, T) / Ts), 0.0)
 #
 # ## Model Construction
 #
-# The inflow, $Z_c$ and the bond to the rest of the tree share one flow, $Q$: a 1-junction. The source's bond points into the junction, away from the source, and $Z_c$'s bond points out of the junction into it (`[-1, Zc]`), Karnopp, Margolis & Rosenberg's usual orientations (2012, §3.1, pp. 39 and 49). The bond to the compliance and the periphery leaves the junction (`[-1, :wk]`), following the blood downstream. The effort sum is therefore $P - Z_c Q - P_c = 0$: the source's effort, the pressure at the entrance, is $P = Z_c Q + P_c$.
-@named j1 = Junction1(Q, [-1, Zc], [-1, :wk])
+# The inflow, $Z_c$ and the bond to the rest of the tree share one flow, $Q$: a 1-junction. The source's bond points into the junction, away from the source (`Q => :pout`), and $Z_c$'s bond points out of the junction into it (`Zc`), Karnopp, Margolis & Rosenberg's usual orientations (2012, §3.1, pp. 39 and 49). The bond to the compliance and the periphery leaves the junction (`:wk`), following the blood downstream. The effort sum is therefore $P - Z_c Q - P_c = 0$: the source's effort, the pressure at the entrance, is $P = Z_c Q + P_c$.
+@named j1 = Junction1(Q => :pout, Zc, :wk)
 
-# $C$ and $R$ share the pressure $P_c$: a 0-junction. The bond from the 1-junction enters it (`:wk`), and the bonds to $C$ and $R$ point out of it into the elements (`[-1, C]`, `[-1, Rp]`), again the usual orientations. The flow balance is $Q - \dot{V} - P_c/R = 0$, the volume balance of the arteries. The veins are the pressure reference, so $R$'s bond ends there with no element.
-@named j0 = Junction0(:wk, [-1, C], [-1, Rp])
+# $C$ and $R$ share the pressure $P_c$: a 0-junction. The bond from the 1-junction enters it (`:wk => :in`), and the bonds to $C$ and $R$ point out of it into the elements (`C`, `Rp`), again the usual orientations. The flow balance is $Q - \dot{V} - P_c/R = 0$, the volume balance of the arteries. The veins are the pressure reference, so $R$'s bond ends there with no element.
+@named j0 = Junction0(:wk => :in, C, Rp)
 
 # The two free ports `wk` are the two ends of one bond, joined with `connect`:
 @named windkessel = System([connect(j1.wk, j0.wk)], t; systems = [j1, j0])
@@ -132,25 +132,25 @@ kinks = sort([(0:9) * T; (0:9) * T .+ Ts])
 sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10, tstops = kinks)
 
 # The entrance (aortic) pressure is the source's effort, and the pressure after $Z_c$ the compliance's:
-plot(sol, idxs = [j1.Q.power.e, j0.C.power.e], labels = ["P (aortic)" "P_c"],
+plot(sol, idxs = [j1.Q.e, j0.C.e], labels = ["P (aortic)" "P_c"],
      xlabel = "Time (s)", ylabel = "Pressure (mmHg)")
 
 # The inflow, the source's flow, against the peripheral outflow, $R$'s flow. The compliance turns the pulsatile inflow into a nearly steady outflow:
-plot(sol, idxs = [j1.Q.power.f, j0.Rp.power.f], labels = ["Q (aortic inflow)" "P_c/R (peripheral)"],
+plot(sol, idxs = [j1.Q.f, j0.Rp.f], labels = ["Q (aortic inflow)" "P_c/R (peripheral)"],
      xlabel = "Time (s)", ylabel = "Flow (mL/s)")
 
 # ### Periodic pressure range
 #
 # After a few beats the pressure repeats from beat to beat. The diastolic (minimum) and systolic (maximum) aortic pressure of each beat, on a fine grid:
 beats = [range(k * T, (k + 1) * T, length = 801) for k in 0:9]
-P_range = [extrema(sol(b; idxs = j1.Q.power.e).u) for b in beats]
+P_range = [extrema(sol(b; idxs = j1.Q.e).u) for b in beats]
 
 # The last beat's diastolic and systolic pressures, about 73/117 mmHg, and their change from the beat before, a few hundredths of a mmHg: the start-up transient decays with the time constant $RC = 1.5$ s, by a factor $e^{-T/RC} \approx 0.6$ per beat, and after ten beats is almost gone:
 P_range[end], P_range[end] .- P_range[end-1]
 
 # The mean aortic pressure over the last beat and the predicted $(R + Z_c)\,SV/T$:
 let b = beats[end]
-    sum(sol(b[1:end-1]; idxs = j1.Q.power.e).u) / (length(b) - 1), (1.0 + 0.06) * SV / T
+    sum(sol(b[1:end-1]; idxs = j1.Q.e).u) / (length(b) - 1), (1.0 + 0.06) * SV / T
 end
 
 # ### Windkessel model
@@ -168,12 +168,12 @@ ref_sol = solve(ODEProblem(mtkcompile(ref), [], tspan), Tsit5(), reltol = 1e-10,
 # ### Compare models
 #
 # The aortic pressure of the bond graph (solid) against the Windkessel equation (dashed):
-plot(sol, idxs = j1.Q.power.e, label = "Bond graph", xlabel = "Time (s)", ylabel = "Aortic pressure (mmHg)")
+plot(sol, idxs = j1.Q.e, label = "Bond graph", xlabel = "Time (s)", ylabel = "Aortic pressure (mmHg)")
 plot!(ref_sol, idxs = P, label = "Windkessel equation", linestyle = :dash)
 
 # On a common time grid, the largest difference between the two models, in the aortic pressure $P$ and the pressure after $Z_c$, $P_c$:
 tgrid = range(tspan..., length = 1001)
-(maximum(abs, sol(tgrid; idxs = j1.Q.power.e).u - ref_sol(tgrid; idxs = P).u),
- maximum(abs, sol(tgrid; idxs = j0.C.power.e).u - ref_sol(tgrid; idxs = Pc).u))
+(maximum(abs, sol(tgrid; idxs = j1.Q.e).u - ref_sol(tgrid; idxs = P).u),
+ maximum(abs, sol(tgrid; idxs = j0.C.e).u - ref_sol(tgrid; idxs = Pc).u))
 
 # The difference is about $10^{-9}$ of the pressure, the solver's tolerance. The bond graph model reproduces the three-element Windkessel, and its aortic pressure settles into a periodic beat with plausible systolic and diastolic values.

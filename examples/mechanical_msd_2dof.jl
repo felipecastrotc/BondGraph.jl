@@ -78,15 +78,15 @@ using Plots
 #
 # Differently from the [1-DoF](@ref msd-1dof) case, where one 1-junction holds the whole model, the 2-DoF system needs three 1-junctions joined by a 0-junction. We build them in a function of the force source, so both cases share one construction:
 #
-# - `j1` is the velocity $\dot{x}_1$ of the grounded mass. The bonds of the mass, the ground spring and the ground damper point out of it, towards the elements (`[-1, x]`), and a free port `:out` exposes a bond pointing out of it, towards the 0-junction (`[-1, :out]`).
-# - `j2` is the velocity $\dot{x}_2$ of the forced mass. The source's bond points into it (`force`), the mass's bond out of it, and its free port `:in` is a bond pointing into it, from the 0-junction.
-# - `jc` is the velocity of the coupling spring and damper. Their bonds point out of it, and its free port `:in` is a bond pointing into it, from the 0-junction.
+# - `j1` is the velocity $\dot{x}_1$ of the grounded mass. The bonds of the mass, the ground spring and the ground damper point out of it, towards the elements (a bare member `x`), and a free port `:out` exposes a bond pointing out of it, towards the 0-junction.
+# - `j2` is the velocity $\dot{x}_2$ of the forced mass. The source's bond points into it (`force => :pout`), the mass's bond out of it, and its free port `:in => :in` is a bond pointing into it, from the 0-junction.
+# - `jc` is the velocity of the coupling spring and damper. Their bonds point out of it, and its free port `:in => :in` is a bond pointing into it, from the 0-junction.
 #
 # A plain `connect` of free ports is itself a 0-junction: the three bonds share one effort, the coupling force, and their flows balance with the signs of the bond directions, $\dot{x}_1 = \dot{x}_2 + v_c$. The coupling's velocity is therefore $v_c = \dot{x}_1 - \dot{x}_2$, and its spring's displacement $q_c = x_1 - x_2$ is the coupling's elongation, so the shared effort is its tension. The signs come from the bond directions at the junctions, not from the order of the `connect` arguments.
 function two_dof(force; name)
-    @named j1 = Junction1([-1, mass1], [-1, damper1], [-1, spring1], [-1, :out])
-    @named j2 = Junction1(force, [-1, mass2], :in)
-    @named jc = Junction1([-1, spring2], [-1, damper2], :in)
+    @named j1 = Junction1(mass1, damper1, spring1, :out)
+    @named j2 = Junction1(force => :pout, mass2, :in => :in)
+    @named jc = Junction1(spring2, damper2, :in => :in)
     System([connect(j1.out, j2.in, jc.in)], t; name, systems = [j1, j2, jc])
 end
 
@@ -132,13 +132,13 @@ prob = ODEProblem(sys, [sys.jc.spring2.q => 1.0], tspan)
 
 # Use `solve` to simulate the system.
 sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
-plot(sol, idxs = [model.j1.mass1.power.f, model.j2.mass2.power.f], labels = ["ẋ₁" "ẋ₂"],
+plot(sol, idxs = [model.j1.mass1.f, model.j2.mass2.f], labels = ["ẋ₁" "ẋ₂"],
      xlabel = "Time (s)", ylabel = "Velocity (m/s)")
 
 # The forced system starts at rest at the origin, the springs' default.
 forced_sol = solve(ODEProblem(mtkcompile(forced), [], tspan), Tsit5(),
                    reltol = 1e-10, abstol = 1e-10)
-plot(forced_sol, idxs = [forced.j1.mass1.power.f, forced.j2.mass2.power.f],
+plot(forced_sol, idxs = [forced.j1.mass1.f, forced.j2.mass2.f],
      labels = ["ẋ₁" "ẋ₂"], xlabel = "Time (s)", ylabel = "Velocity (m/s)")
 
 # ### Two-mass model
@@ -170,13 +170,13 @@ ref_forced_sol = solve(ODEProblem(mtkcompile(ref_forced),
 # We compare the velocities of the two masses, the flows of their 1-junctions in the bond graph.
 #
 # Unforced case
-plot(sol, idxs = [model.j1.mass1.power.f, model.j2.mass2.power.f],
+plot(sol, idxs = [model.j1.mass1.f, model.j2.mass2.f],
      labels = ["Bond graph ẋ₁" "Bond graph ẋ₂"], ylabel = "Velocity (m/s)")
 plot!(ref_sol, idxs = [v₁, v₂], labels = ["Model ẋ₁" "Model ẋ₂"], xlabel = "Time (s)",
       linestyle = :dash)
 
 # Forced case
-plot(forced_sol, idxs = [forced.j1.mass1.power.f, forced.j2.mass2.power.f],
+plot(forced_sol, idxs = [forced.j1.mass1.f, forced.j2.mass2.f],
      labels = ["Bond graph ẋ₁" "Bond graph ẋ₂"], ylabel = "Velocity (m/s)")
 plot!(ref_forced_sol, idxs = [v₁, v₂], labels = ["Model ẋ₁" "Model ẋ₂"],
       xlabel = "Time (s)", linestyle = :dash)
@@ -184,7 +184,7 @@ plot!(ref_forced_sol, idxs = [v₁, v₂], labels = ["Model ẋ₁" "Model ẋ�
 # The largest difference between the two models on a common time grid, over both velocities and both displacements ($x_1$ and the coupling's elongation $x_1 - x_2$), for both cases:
 tgrid = range(tspan..., length = 1001)
 maxdiff(bg, m, ref) = maximum(maximum(abs.(bg(tgrid; idxs = a) .- ref(tgrid; idxs = b)))
-                              for (a, b) in [m.j1.mass1.power.f => v₁, m.j2.mass2.power.f => v₂,
+                              for (a, b) in [m.j1.mass1.f => v₁, m.j2.mass2.f => v₂,
                                              m.j1.spring1.q => x₁, m.jc.spring2.q => x₁ - x₂])
 maxdiff(sol, model, ref_sol), maxdiff(forced_sol, forced, ref_forced_sol)
 

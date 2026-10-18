@@ -7,7 +7,7 @@ for (case, force, displacement) in
     @named s = Compliance(C = 1.0, q = displacement)
     @named d = Resistance(R = 1.0)
     @named f = Se(force)
-    @named model = Junction1(f, [-1, m], [-1, d], [-1, s])
-    check_case(case, model, ["m₊power₊f(t)" => model.m.power.f,
+    @named model = Junction1(f => :pout, m, d, s)
+    check_case(case, model, ["m₊power₊f(t)" => model.m.f,
                              "s₊q(t)" => model.s.q])
 end

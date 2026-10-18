@@ -85,8 +85,8 @@ p = (J = 0.01,     # (kg⋅m²) rotor moment of inertia
 # ## Model Construction
 #
 # The junctions follow the DC motor example. On each 1-junction the source's bond points in, away from the source, and the bonds of R, I and the detector point out into the element (Karnopp, Margolis & Rosenberg 2012, §3.1, pp. 39 and 49). The electrical bond leaves its junction towards the gyrator and the mechanical bond enters its junction from it, following the power from the source to the shaft (Fig. 2.3d, pp. 25–26). So the back EMF enters the electrical effort sum with a minus sign and the motor torque enters the mechanical one with a plus sign.
-@named je = Junction1(V, [-1, R], [-1, L], [-1, :gy])
-@named jm = Junction1(:gy, [-1, J], [-1, b], [-1, tach])
+@named je = Junction1(V => :pout, R, L, :gy)
+@named jm = Junction1(:gy => :in, J, b, tach)
 
 # The bonds go through the gyrator, port 1 in and port 2 out; the signals go from the detector to the error's second input, from the reference to its first, then through the controller to the source.
 @named loop = System([connect(je.gy, gy.p1), connect(gy.p2, jm.gy),
@@ -130,7 +130,7 @@ end
 tspan = (0.0, 3.0)
 prob = ODEProblem(sys, [], tspan)
 sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
-plot(sol, idxs = [jm.J.power.f, je.L.power.f], labels = ["ω (rad/s)" "i (A)"], xlabel = "Time (s)")
+plot(sol, idxs = [jm.J.f, je.L.f], labels = ["ω (rad/s)" "i (A)"], xlabel = "Time (s)")
 
 # ### Closed-loop reference model
 #
@@ -149,7 +149,7 @@ sol_cl = solve(ODEProblem(sys_cl, [], tspan), Tsit5(), reltol = 1e-10, abstol = 
 # ### Compare models
 #
 # Shaft speed:
-plot(sol.t, sol[jm.J.power.f], label = "Bond graph", ylabel = "Speed (rad/s)")
+plot(sol.t, sol[jm.J.f], label = "Bond graph", ylabel = "Speed (rad/s)")
 plot!(sol_cl.t, sol_cl[ω], label = "Closed-loop equations", xlabel = "Time (s)", linestyle = :dash)
 
 # Armature voltage, the controller's output:
@@ -158,14 +158,14 @@ plot!(sol_cl.t, sol_cl[Vₐ], label = "Closed-loop equations", xlabel = "Time (s
 
 # On a common time grid, the largest difference between the two models in speed, current and voltage:
 tgrid = range(tspan..., length = 1001)
-(maximum(abs, sol(tgrid; idxs = jm.J.power.f).u - sol_cl(tgrid; idxs = ω).u),
- maximum(abs, sol(tgrid; idxs = je.L.power.f).u - sol_cl(tgrid; idxs = i).u),
+(maximum(abs, sol(tgrid; idxs = jm.J.f).u - sol_cl(tgrid; idxs = ω).u),
+ maximum(abs, sol(tgrid; idxs = je.L.f).u - sol_cl(tgrid; idxs = i).u),
  maximum(abs, sol(tgrid; idxs = pi.ctr_output.u).u - sol_cl(tgrid; idxs = Vₐ).u))
 
 # ### Against CTMS's requirements
 #
 # The overshoot (%), the 2 % settling time (s) and the steady-state error (%) at the end of the run, for a 1 rad/s step:
-ωg = sol(tgrid; idxs = jm.J.power.f).u
+ωg = sol(tgrid; idxs = jm.J.f).u
 overshoot = 100 * (maximum(ωg) - p.ωr) / p.ωr
 settling = tgrid[findlast(w -> abs(w - p.ωr) > 0.02 * p.ωr, ωg) + 1]
 steady_error = 100 * abs(p.ωr - ωg[end]) / p.ωr

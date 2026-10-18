@@ -69,8 +69,8 @@ using Plots
 
 # ## Model Construction
 #
-# A single 1-junction holds the whole model. Following Karnopp's usual orientation (§3.1, pp. 39, 42, 49), the source's bond points into the junction (`force`, positive) and the bonds of the passive elements point out of it, towards the elements (`[-1, x]`). The junction then states that all four bonds share the velocity and that $F - \dot{p} - c\,\dot{x} - k\,q = 0$.
-@named model = Junction1(force, [-1, mass], [-1, damper], [-1, spring])
+# A single 1-junction holds the whole model. Following Karnopp's usual orientation (§3.1, pp. 39, 42, 49), the source's bond points into the junction (`force => :pout`, positive) and the bonds of the passive elements point out of it, towards the elements (a bare member `x`). The junction then states that all four bonds share the velocity and that $F - \dot{p} - c\,\dot{x} - k\,q = 0$.
+@named model = Junction1(force => :pout, mass, damper, spring)
 
 # ## Analysing the model
 #
@@ -108,15 +108,15 @@ prob = ODEProblem(sys, [sys.spring.q => 1.0], tspan)
 
 # Use `solve` to simulate the system.
 sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
-plot(sol, idxs = [model.spring.q, model.mass.power.f], labels = ["x" "ẋ"],
+plot(sol, idxs = [model.spring.q, model.mass.f], labels = ["x" "ẋ"],
      xlabel = "Time (s)", ylabel = "Displacement (m) / velocity (m/s)")
 
 # For the forced case, the force source becomes $F(t) = \sin(t)$, built from the same elements. The oscillator starts at rest at $x(0) = 0$, the spring's default.
 @named force_sin = Se(sin(t))       # (N) External force
-@named forced = Junction1(force_sin, [-1, mass], [-1, damper], [-1, spring])
+@named forced = Junction1(force_sin => :pout, mass, damper, spring)
 forced_sol = solve(ODEProblem(mtkcompile(forced), [], tspan), Tsit5(),
                    reltol = 1e-10, abstol = 1e-10)
-plot(forced_sol, idxs = [forced.spring.q, forced.mass.power.f], labels = ["x" "ẋ"],
+plot(forced_sol, idxs = [forced.spring.q, forced.mass.f], labels = ["x" "ẋ"],
      xlabel = "Time (s)", ylabel = "Displacement (m) / velocity (m/s)")
 
 # ### Mass-spring-damper model
@@ -153,7 +153,7 @@ plot!(ref_forced_sol, idxs = x, label = "Model", xlabel = "Time (s)", linestyle 
 # The largest difference between the two models on a common time grid, over the displacement and the velocity, for both cases:
 tgrid = range(tspan..., length = 1001)
 maxdiff(bg, m, ref) = maximum(maximum(abs.(bg(tgrid; idxs = a) .- ref(tgrid; idxs = b)))
-                              for (a, b) in [m.spring.q => x, m.mass.power.f => v])
+                              for (a, b) in [m.spring.q => x, m.mass.f => v])
 maxdiff(sol, model, ref_sol), maxdiff(forced_sol, forced, ref_forced_sol)
 
 # The bond graph model reproduces the hand-derived dynamics of the harmonic oscillator.

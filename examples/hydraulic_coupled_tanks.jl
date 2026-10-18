@@ -68,12 +68,12 @@ using Plots
 #
 # ### Custom orifice
 #
-# The library's `Resistance` is linear, so the orifice is a custom element. `@oneport` adds the element's power port `power`, and the law is written in its bond variables, Eq. 4.12 with the pressure drop `power.e` and the flow `power.f`. It is in conductance form, the flow explicit in the effort:
+# The library's `Resistance` is linear, so the orifice is a custom element. `@oneport` adds the element's ports `power` and `pout`, and the law is written in its bond variables, Eq. 4.12 with the pressure drop `e` and the flow `f`. It is in conductance form, the flow explicit in the effort:
 @oneport function Orifice(; name, cd = 0.6, a = 1e-4, ρ = 1000.0)
     @parameters cd = cd         # (-) Discharge coefficient
     @parameters a = a           # (m²) Orifice area
     @parameters ρ = ρ           # (kg/m³) Liquid density
-    [power.f ~ cd * a * sign(power.e) * sqrt(2 * abs(power.e) / ρ)]
+    [f ~ cd * a * sign(e) * sqrt(2 * abs(e) / ρ)]
 end
 
 # ### Parameters
@@ -107,17 +107,17 @@ h1₀, h2₀ = 0.0, 1.0  # (m) Initial levels
 #
 # The bonds follow Borutzky's Fig. 4.8: every half-arrow points downstream, from the pump to the atmosphere, so a positive flow on any bond is liquid moving towards the outlet.
 #
-# Tank 1's pressure $p_1$ is common to the pump, the tank and valve 1: a 0-junction. The pump's bond points into it, away from the source; the tank's bond points out of it into the tank (`[-1, tank1]`), so the tank fills when its flow is positive; the bond to valve 1 leaves it (`[-1, :v1]`). The flow balance is $Q_p - \dot{V}_1 - Q_1 = 0$.
-@named j1 = Junction0(pump, [-1, tank1], [-1, :v1])
+# Tank 1's pressure $p_1$ is common to the pump, the tank and valve 1: a 0-junction. The pump's bond points into it, away from the source (`pump => :pout`); the tank's bond points out of it into the tank (`tank1`), so the tank fills when its flow is positive; the bond to valve 1 leaves it (`:v1`). The flow balance is $Q_p - \dot{V}_1 - Q_1 = 0$.
+@named j1 = Junction0(pump => :pout, tank1, :v1)
 
-# Valve 1 carries one flow $Q_1$ from tank 1 to tank 2: a 1-junction. The bond from tank 1 enters it (`:v1`), the bond to the valve points into the valve (`[-1, valve1]`) and the bond to tank 2 leaves it (`[-1, :t2]`). The effort sum is $p_1 - \Delta p_1 - p_2 = 0$, so the valve sees the drop $\Delta p_1 = p_1 - p_2$, and the drop and the flow are both positive from tank 1 to tank 2.
-@named jv1 = Junction1(:v1, [-1, valve1], [-1, :t2])
+# Valve 1 carries one flow $Q_1$ from tank 1 to tank 2: a 1-junction. The bond from tank 1 enters it (`:v1 => :in`), the bond to the valve points into the valve (`valve1`) and the bond to tank 2 leaves it (`:t2`). The effort sum is $p_1 - \Delta p_1 - p_2 = 0$, so the valve sees the drop $\Delta p_1 = p_1 - p_2$, and the drop and the flow are both positive from tank 1 to tank 2.
+@named jv1 = Junction1(:v1 => :in, valve1, :t2)
 
-# Tank 2 is a 0-junction like tank 1, filled by valve 1's bond (`:t2`) and drained by the bond to valve 2 (`[-1, :v2]`): $Q_1 - \dot{V}_2 - Q_o = 0$.
-@named j2 = Junction0(:t2, [-1, tank2], [-1, :v2])
+# Tank 2 is a 0-junction like tank 1, filled by valve 1's bond (`:t2 => :in`) and drained by the bond to valve 2 (`:v2`): $Q_1 - \dot{V}_2 - Q_o = 0$.
+@named j2 = Junction0(:t2 => :in, tank2, :v2)
 
-# Valve 2 carries the outflow $Q_o$ from tank 2 to the atmosphere. The bond to the atmosphere points into the `Se:0` element (`[-1, atm]`), as in the book's figure: the atmosphere receives the outflow. The effort sum $p_2 - \Delta p_2 - 0 = 0$ makes the outlet drop $\Delta p_2 = p_2$. The order of the members only sets the drawing: listed first, the atmosphere is drawn on the power path, at the right end as in the book.
-@named jv2 = Junction1(:v2, [-1, atm], [-1, valve2])
+# Valve 2 carries the outflow $Q_o$ from tank 2 to the atmosphere. The bond to the atmosphere points into the `Se:0` element (a bare member `atm`), as in the book's figure: the atmosphere receives the outflow. The effort sum $p_2 - \Delta p_2 - 0 = 0$ makes the outlet drop $\Delta p_2 = p_2$. The order of the members only sets the drawing: listed first, the atmosphere is drawn on the power path, at the right end as in the book.
+@named jv2 = Junction1(:v2 => :in, atm, valve2)
 
 # Each pair of free ports with the same name is one bond, joined with `connect`:
 @named tanks = System([connect(j1.v1, jv1.v1), connect(jv1.t2, j2.t2), connect(j2.v2, jv2.v2)], t;
@@ -173,7 +173,7 @@ plot(sol, idxs = [j1.tank1.q / A1, j2.tank2.q / A2], labels = ["h₁" "h₂"],
      xlabel = "Time (s)", ylabel = "Level (m)")
 
 # The flow through valve 1 is negative at first, liquid flowing back from tank 2 into tank 1, until the levels cross; both valve flows then rise to the pump flow:
-plot(sol, idxs = [jv1.valve1.power.f, jv2.valve2.power.f], labels = ["Q₁ (valve 1)" "Qₒ (valve 2)"],
+plot(sol, idxs = [jv1.valve1.f, jv2.valve2.f], labels = ["Q₁ (valve 1)" "Qₒ (valve 2)"],
      xlabel = "Time (s)", ylabel = "Flow (m³/s)", xlims = (0, 1000))
 
 # ### Steady state

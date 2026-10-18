@@ -80,11 +80,11 @@ r = 0.01
 
 # ## Model Construction
 #
-# Each side is a 1-junction: all its elements share one flow (current or angular velocity), and its efforts (voltages or torques) sum to zero. The sources' bonds point into the junction, away from the source, and the passive elements' bonds point out of the junction into the element, `[-1, x]`, the usual orientations of Karnopp, Margolis & Rosenberg (2012, §3.1, pp. 39 and 49). So $V$ and $\tau_a$ enter each sum with a plus sign, and the R and I efforts with a minus sign.
+# Each side is a 1-junction: all its elements share one flow (current or angular velocity), and its efforts (voltages or torques) sum to zero. The sources' bonds point into the junction, away from the source (`x => :pout`), and the passive elements' bonds point out of the junction into the element (a bare member `x`), the usual orientations of Karnopp, Margolis & Rosenberg (2012, §3.1, pp. 39 and 49). So $V$ and $\tau_a$ enter each sum with a plus sign, and the R and I efforts with a minus sign.
 #
-# The two junctions are bonded through the gyrator, so each gets a free port named `gy`. The electrical bond leaves its junction towards the gyrator (`[-1, :gy]`) and the mechanical bond enters its junction from the gyrator (`:gy`), following the power from the voltage source to the shaft. This is how Karnopp, Margolis & Rosenberg (2012, Fig. 2.3d, pp. 25–26) orient a motor: the armature bond points toward the motor and the shaft bond away from it. The back EMF therefore enters the electrical sum with a minus sign and the motor torque enters the mechanical sum with a plus sign, as in the hand-derived equations.
-@named je = Junction1(V, [-1, R], [-1, L], [-1, :gy])   # Electrical part
-@named jm = Junction1(τ, [-1, c], [-1, J], :gy)         # Mechanical part
+# The two junctions are bonded through the gyrator, so each gets a free port named `gy`. The electrical bond leaves its junction towards the gyrator (`:gy`) and the mechanical bond enters its junction from the gyrator (`:gy => :in`), following the power from the voltage source to the shaft. This is how Karnopp, Margolis & Rosenberg (2012, Fig. 2.3d, pp. 25–26) orient a motor: the armature bond points toward the motor and the shaft bond away from it. The back EMF therefore enters the electrical sum with a minus sign and the motor torque enters the mechanical sum with a plus sign, as in the hand-derived equations.
+@named je = Junction1(V => :pout, R, L, :gy)   # Electrical part
+@named jm = Junction1(τ => :pout, c, J, :gy => :in)         # Mechanical part
 
 # The gyrator's port 1 is the bond into it and port 2 the bond out of it, so the electrical free port connects to `p1` and the mechanical one to `p2`.
 @named gy = GY(r = r)
@@ -127,7 +127,7 @@ prob = ODEProblem(sys, [], tspan)
 
 # Use `solve` to simulate the system. Tight tolerances let us compare it with the reference model at the end.
 sol = solve(prob, Tsit5(), reltol = 1e-10, abstol = 1e-10)
-plot(sol, idxs = [je.L.power.f, jm.J.power.f], xlabel = "Time", ylabel = "Amplitude")
+plot(sol, idxs = [je.L.f, jm.J.f], xlabel = "Time", ylabel = "Amplitude")
 
 # ### DC motor model
 # 
@@ -175,16 +175,16 @@ plot!(sol_t.t, sol_t[i], label = "Armature Current")
 # We will graphically compare the results obtained from the bond graph representation and the direct simulation of the system using the governing differential equations. 
 
 # Electrical domain
-plot(sol.t, sol[je.L.power.f], label = "Bond-graph", ylabel = "Current (A)")
+plot(sol.t, sol[je.L.f], label = "Bond-graph", ylabel = "Current (A)")
 plot!(sol_t.t, sol_t[i], label = "Model", xlabel = "Time (s)")
 
 # Mechanical domain
-plot(sol.t, sol[jm.J.power.f], label = "Bond-graph", ylabel = "Angular velocity (rad/s)")
+plot(sol.t, sol[jm.J.f], label = "Bond-graph", ylabel = "Angular velocity (rad/s)")
 plot!(sol_t.t, sol_t[θ̇], label = "Model", xlabel = "Time (s)")
 
 # On a common time grid, the largest difference between the two models, in current and in angular velocity:
 tgrid = range(tspan..., length = 1001)
-(maximum(abs, sol(tgrid; idxs = je.L.power.f).u - sol_t(tgrid; idxs = i).u),
- maximum(abs, sol(tgrid; idxs = jm.J.power.f).u - sol_t(tgrid; idxs = θ̇).u))
+(maximum(abs, sol(tgrid; idxs = je.L.f).u - sol_t(tgrid; idxs = i).u),
+ maximum(abs, sol(tgrid; idxs = jm.J.f).u - sol_t(tgrid; idxs = θ̇).u))
 
 # The bond graph model reproduces the hand-derived dynamics to the solver's tolerance.

@@ -26,6 +26,7 @@ Branch: `feature/mtk-upgrade`. Destination: **BondGraph installs and passes test
 - [ ] `/grill-with-docs` on the key decisions: produces `GLOSSARY.md` (effort, flow, port, junction, bond, ...) and ADRs in `docs/adr/`.
 - [ ] TODO (future): SCAP causality as an optional diagnostic (ticket 10).
 - [ ] `/to-spec` (done: `.scratch/mtk-upgrade/spec.md`) → `/to-tickets` (done: `.scratch/v0.3-impl/issues/01-10`) → `/implement` per ticket (done 2026-10-15, all 10 on `feature/mtk-upgrade`) (uses `tdd` and `code-review`).
+- [x] Oriented ports (ticket 12's `p1` check): elements get `power`/`pout`, junction members `x`/`x => :pout`/`:a`/`:a => :in`; [ADR 0002](../docs/adr/0002-oriented-ports.md), `.scratch/oriented-ports/` (2026-10-18).
 - [ ] `/diagnosing-bugs` for equation/sign mismatches against the literature (MSD N-DoF, DC motor).
 - [ ] Fold the remaining `TODO.md` items (mTF, rename-by-Dict) into tickets, then delete `TODO.md`.
 - [ ] TODO (deferred by maintainer): decide license and MTK vs ModelingToolkitBase dependency before registration/paper. AGPL is acceptable if needed; keep the current license until then. See `.scratch/mtk-upgrade/issues/07-dependency-license-stance.md`.

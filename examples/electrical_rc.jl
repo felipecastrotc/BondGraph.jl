@@ -37,8 +37,8 @@ using Plots
 @named C = Compliance(C = 1.0, q = 1.0)   # capacitance (F), initial charge (C)
 @named R = Resistance(R = 1.0)            # resistance (Ohm)
 
-## Bond both elements to a 0-junction; `[-1, x]` means the bond points out of the junction, into x
-@named model = Junction0([-1, R], [-1, C])
+## Bond both elements to a 0-junction; a bare element `x` means the bond points out of the junction, into x
+@named model = Junction0(R, C)
 ## Compile the model into its simplest form
 sys = mtkcompile(model)
 
@@ -68,6 +68,6 @@ equations(sys)
 #
 # 1. **Elements.** `Compliance` and `Resistance` are the bond-graph C and R elements. Their laws are `q̇ = f`, `e = q / C` and `e = R f`, written in the variables of the element's bond.
 #
-# 2. **Junction.** `Junction0` makes every bond share one effort (the voltage) and sums the flows with the sign of each bond's half-arrow: `+` into the junction, `-` out of it. Writing `[-1, R]` draws the bond from the junction into `R`.
+# 2. **Junction.** `Junction0` makes every bond share one effort (the voltage) and sums the flows with the sign of each bond's half-arrow: `+` into the junction, `-` out of it. Writing `R` draws the bond from the junction into `R`; `x => :pout` would draw it from `x` into the junction.
 #
 # 3. **Simulation.** A bond-graph model is an ordinary ModelingToolkit system, so `mtkcompile`, `ODEProblem` and `solve` work as for any MTK model. The initial charge comes from the `q = 1.0` keyword of `Compliance`.

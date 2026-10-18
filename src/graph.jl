@@ -38,18 +38,24 @@ and `bonds`, displayed as the list of its bonds (`Se:V ⇀ 1:je`).
   Karnopp's figures (`"C:s"`, `"TF:lever"`). `id` is the path to the subsystem.
 - `bonds`: one `from => to` pair of node ids per bond, following its half-arrow.
 
-A `connect` of more than two power ports, or of two that both expect the bond to point
-into them (e.g. two elements: a plain `connect` to an element is a bond pointing into
-it), is a 0-junction and gets its own node.
+A `connect` from an outgoing port (`pout`, `p2`, a junction's outgoing free port) to an
+incoming one (`power`, `p1`, a junction's incoming free port) is one bond. A `connect` of
+more than two power ports, or of two with the same role (e.g. two elements' `power`
+ports), is a 0-junction and gets its own node.
 
 A subsystem with a `power` port is drawn as one element, even when it is a composite
-model inside: that's how hand-written elements are recognised.
+model inside: that's how hand-written elements are recognised. An element bonded through
+both `power` and `pout` is an error: a one-port has one bond.
 """
 function bondgraph(sys)
     nodes = Node[]
     bonds = Pair{String, String}[]
     ports = Dict{String, Tuple{String, Symbol}}()   # port path => (node id, :into | :outof)
     connections = Vector{String}[]
+    # Where each element's ports are bonded, to reject an element using both.
+    element_port = Dict{String, Tuple{String, Symbol}}()   # port path => (element id, port)
+    uses = Dict{String, Dict{Symbol, Vector{String}}}()   # element id => port => bonds
+    use!(id, port, bond) = push!(get!(get!(uses, id, Dict{Symbol, Vector{String}}()), port, String[]), bond)
     function walk!(sys, path)
         id = isempty(path) ? string(nameof(sys)) : path
         subs = ModelingToolkit.get_systems(sys)
@@ -65,11 +71,15 @@ function bondgraph(sys)
                 else
                     walk!(subs[findfirst(==(name), names)], p)
                     push!(bonds, sign == 1 ? p => id : id => p)
+                    use!(p, sign == 1 ? :pout : :power, "member of junction `$id`")
                 end
             end
         elseif :power in names
             push!(nodes, (; id, kind = :element, label = "$(element_type(sys)):$(nameof(sys))"))
-            ports[subpath(path, :power)] = (id, :into)
+            for (port, role) in ((:power, :into), (:pout, :outof))
+                ports[subpath(path, port)] = (id, role)
+                element_port[subpath(path, port)] = (id, port)
+            end
         elseif :p1 in names && :p2 in names
             push!(nodes, (; id, kind = :twoport, label = "$(element_type(sys)):$(nameof(sys))"))
             ports[subpath(path, :p1)] = (id, :into)
@@ -85,6 +95,9 @@ function bondgraph(sys)
     end
     walk!(sys, "")
     for ends in connections
+        for e in ends
+            haskey(element_port, e) && use!(element_port[e]..., "connect($(join(ends, ", ")))")
+        end
         ends = [ports[e] for e in ends if haskey(ports, e)]   # power ports only
         length(ends) < 2 && continue
         roles = last.(ends)
@@ -95,6 +108,12 @@ function bondgraph(sys)
             push!(nodes, (; id = j0, kind = :junction, label = "0"))
             append!(bonds, [role == :into ? j0 => node : node => j0 for (node, role) in ends])
         end
+    end
+    for (id, used) in uses
+        length(used) > 1 && throw(ArgumentError(
+            "element `$id` is bonded through both `power` ($(join(used[:power], "; "))) and " *
+            "`pout` ($(join(used[:pout], "; "))): a one-port has one bond, so connect only " *
+            "one of its ports"))
     end
     BondGraph(nodes, bonds)
 end

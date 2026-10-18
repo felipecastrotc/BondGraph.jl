@@ -1,5 +1,5 @@
 # Adapters to MTK standard-library networks, each checked against a reference model.
-# An adapter's bond is drawn into it (`[-1, adapter]` at a junction): the MTKSL network
+# An adapter's bond is drawn into it (member `adapter` at a junction): the MTKSL network
 # is the element at the end of that bond.
 import ModelingToolkitStandardLibrary.Electrical as El
 import ModelingToolkitStandardLibrary.Mechanical.Rotational as Rot
@@ -12,14 +12,14 @@ function series_rc(; E, R, C)
     @named se = Se(E)
     @named R = Resistance(R = R)
     @named C = Compliance(C = C)
-    Junction1(se, [-1, R], [-1, C]; name = :ref)
+    Junction1(se => :pout, R, C; name = :ref)
 end
 
 @testset "ElectricalAdapter: MTKSL load" begin
     # Se ⇀ 1 ⇀ adapter, with an MTKSL resistor and capacitor in series behind it.
     @named se = Se(3.0)
     @named ea = ElectricalAdapter()
-    @named j = Junction1(se, [-1, ea])
+    @named j = Junction1(se => :pout, ea)
     @named res = El.Resistor(R = 2.0)
     @named cap = El.Capacitor(C = 0.5, v = 0.0)
     @named gnd = El.Ground()
@@ -27,8 +27,8 @@ end
                       systems = [j, res, cap, gnd])
     ref = series_rc(E = 3.0, R = 2.0, C = 0.5)
     s, r = solve_dae(m), solve_dae(ref)
-    @test s(TT; idxs = m.cap.v) ≈ r(TT; idxs = ref.C.power.e) atol = 1e-8
-    @test s(TT; idxs = m.res.i) ≈ r(TT; idxs = ref.R.power.f) atol = 1e-8
+    @test s(TT; idxs = m.cap.v) ≈ r(TT; idxs = ref.C.e) atol = 1e-8
+    @test s(TT; idxs = m.res.i) ≈ r(TT; idxs = ref.R.f) atol = 1e-8
 end
 
 @testset "ElectricalAdapter: MTKSL source gives negative bond power" begin
@@ -40,13 +40,13 @@ end
     @named ea = ElectricalAdapter()
     @named R = Resistance(R = 2.0)
     @named C = Compliance(C = 0.5)
-    @named j = Junction1([-1, ea], [-1, R], [-1, C])
+    @named j = Junction1(ea, R, C)
     @named m = System([connect(k.output, src.V), connect(src.p, j.ea.p), connect(src.n, j.ea.n, gnd.g)], t;
                       systems = [k, src, gnd, j])
     ref = series_rc(E = 3.0, R = 2.0, C = 0.5)
     s, r = solve_dae(m), solve_dae(ref)
     @test s(TT; idxs = m.j.C.q) ≈ -r(TT; idxs = ref.C.q) atol = 1e-8
-    @test all(<=(1e-12), s(TT; idxs = m.j.ea.power.e) .* s(TT; idxs = m.j.ea.power.f))
+    @test all(<=(1e-12), s(TT; idxs = m.j.ea.e) .* s(TT; idxs = m.j.ea.f))
 end
 
 @testset "RotationalAdapter: DC motor driving an MTKSL load" begin
@@ -56,24 +56,24 @@ end
         @named R = Resistance(R = 1.0)
         @named V = Se(12.0)
         @named τ = Se(1.0)
-        @named je = Junction1(V, [-1, R], [-1, L], [-1, :gy])
-        @named jm = Junction1(τ, :gy, load...)
+        @named je = Junction1(V => :pout, R, L, :gy)
+        @named jm = Junction1(τ => :pout, :gy => :in, load...)
         @named gy = GY(r = 0.01)
         System([connect(je.gy, gy.p1), connect(gy.p2, jm.gy)], t; name = :motor, systems = [je, gy, jm])
     end
     @named J = Inertia(I = 0.01)
     @named c = Resistance(R = 0.1)
-    ref = motor([[-1, c], [-1, J]])
+    ref = motor([c, J])
     @named ra = RotationalAdapter(phi = 0.0)
-    inner = motor([[-1, ra]])
+    inner = motor([ra])
     @named inertia = Rot.Inertia(J = 0.01, w = 0.0)
     @named damper = Rot.Damper(d = 0.1)
     @named fixed = Rot.Fixed()
     @named m = System([connect(inner.jm.ra.flange, inertia.flange_a), connect(inertia.flange_b, damper.flange_b),
                        connect(damper.flange_a, fixed.flange)], t; systems = [inner, inertia, damper, fixed])
     s, r = solve_dae(m), solve_dae(ref)
-    @test s(TT; idxs = m.inertia.w) ≈ r(TT; idxs = ref.jm.J.power.f) atol = 1e-8
-    @test s(TT; idxs = m.motor.je.L.power.f) ≈ r(TT; idxs = ref.je.L.power.f) atol = 1e-8
+    @test s(TT; idxs = m.inertia.w) ≈ r(TT; idxs = ref.jm.J.f) atol = 1e-8
+    @test s(TT; idxs = m.motor.je.L.f) ≈ r(TT; idxs = ref.je.L.f) atol = 1e-8
 end
 
 @testset "ElectricalAdapter: MTKSL armature circuit driving a bond-graph motor" begin
@@ -89,7 +89,7 @@ end
     @named J = Inertia(I = 0.01)
     @named c = Resistance(R = 0.1)
     @named τ = Se(1.0)
-    @named jm = Junction1(τ, [-1, c], [-1, J], :gy)
+    @named jm = Junction1(τ => :pout, c, J, :gy => :in)
     @named m = System([connect(k.output, src.V), connect(src.p, res.p), connect(res.n, ind.p),
                        connect(ind.n, ea.p), connect(ea.n, src.n, gnd.g),
                        connect(ea.power, gy.p1), connect(gy.p2, jm.gy)], t;
@@ -98,16 +98,16 @@ end
     @named L = Inertia(I = 0.5)
     @named R = Resistance(R = 1.0)
     @named V = Se(12.0)
-    @named je = Junction1(V, [-1, R], [-1, L], [-1, :gy])
+    @named je = Junction1(V => :pout, R, L, :gy)
     @named J = Inertia(I = 0.01)
     @named c = Resistance(R = 0.1)
     @named τ = Se(1.0)
-    @named jm = Junction1(τ, [-1, c], [-1, J], :gy)
+    @named jm = Junction1(τ => :pout, c, J, :gy => :in)
     @named gy = GY(r = 0.01)
     @named ref = System([connect(je.gy, gy.p1), connect(gy.p2, jm.gy)], t; systems = [je, gy, jm])
     s, r = solve_dae(m), solve_dae(ref)
-    @test s(TT; idxs = m.jm.J.power.f) ≈ r(TT; idxs = ref.jm.J.power.f) atol = 1e-8
-    @test s(TT; idxs = m.ind.i) ≈ r(TT; idxs = ref.je.L.power.f) atol = 1e-8
+    @test s(TT; idxs = m.jm.J.f) ≈ r(TT; idxs = ref.jm.J.f) atol = 1e-8
+    @test s(TT; idxs = m.ind.i) ≈ r(TT; idxs = ref.je.L.f) atol = 1e-8
 end
 
 @testset "Translational adapters: a force accelerates an MTKSL mass" begin
@@ -119,7 +119,7 @@ end
                         systems = [k, force, mass])
     @named se = Se(1.0)
     @named ta = TranslationalAdapter()
-    @named j = Junction1(se, [-1, ta])
+    @named j = Junction1(se => :pout, ta)
     @named m = System([connect(j.ta.flange, mass.flange)], t; systems = [j, mass])
     # Tr.Mass has no initial values; in `ref` mass.v is observed, so start from the force's.
     trsolve(x, v) = (sys = mtkcompile(x);
@@ -134,7 +134,7 @@ end
                         systems = [k, force, mass])
     @named se = Se(1.0)
     @named tpa = TranslationalPositionAdapter()
-    @named j = Junction1(se, [-1, tpa])
+    @named j = Junction1(se => :pout, tpa)
     @named m = System([connect(j.tpa.flange, mass.flange)], t; systems = [j, mass])
     s, r = solve_dae(m), solve_dae(ref)
     @test s(TT; idxs = m.mass.v) ≈ TT ./ 2 atol = 1e-8
@@ -151,7 +151,7 @@ end
     @named ha = HydraulicAdapter()
     @named R = Resistance(R = Rh)
     @named C = Compliance(C = Ch)
-    @named j = Junction1([-1, ha], [-1, R], [-1, C])
+    @named j = Junction1(ha, R, C)
     @named m = System([connect(k.output, src.p), connect(fluid, src.port), connect(src.port, j.ha.port)], t;
                       systems = [k, src, fluid, j])
     ref = series_rc(E = p0, R = Rh, C = Ch)

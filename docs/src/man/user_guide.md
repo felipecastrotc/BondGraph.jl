@@ -4,7 +4,16 @@ BondGraphToolkit follows the conventions of the bond-graph literature, mainly Ka
 
 ## Bonds and power
 
-A bond carries one effort `e` and one flow `f`, and its half-arrow marks the positive direction of power: when `e·f > 0`, power flows along the arrow (Karnopp §2.2). Every element exchanges power through a [`PowerPort`](@ref) with the variables `e` and `f`; its bond to the rest of the model is an ordinary ModelingToolkit `connect`.
+A bond carries one effort `e` and one flow `f`, and its half-arrow marks the positive direction of power: when `e·f > 0`, power flows along the arrow (Karnopp §2.2). Every element exchanges power through a [`PowerPort`](@ref) with the variables `e` and `f`, and its bond to the rest of the model is an ordinary ModelingToolkit `connect`.
+
+The direction of a bond is in its ports. Every element has two: `power`, through which its bond points into the element, and `pout`, through which it points out of it. It connects one of them. A bond is a `connect` from an outgoing port (an element's `pout`, a two-port's `p2`, a junction's outgoing free port) to an incoming one (an element's `power`, a two-port's `p1`, a junction's incoming free port):
+
+```julia
+connect(se.pout, tf.p1)      # Se ⇀ TF
+connect(tf.p2, mass.power)   # TF ⇀ I
+```
+
+Every element also has the variables `e` and `f`, its bond's effort and flow along the half-arrow, whichever port carries the bond; read results from them (`mass.f`, `se.e`). A port's own `f` is ModelingToolkit's, counted into the element, so `se.pout.f` is minus the bond flow.
 
 ## Elements
 
@@ -26,19 +35,19 @@ The tool never reinterprets a drawing: a resistance whose bond points away from 
 
 At a 0-junction all bonds share one effort and the flows sum to zero; at a 1-junction all bonds share one flow and the efforts sum to zero. In the sum, a bond pointing into the junction counts `+` and one pointing out counts `-`. The shared variable itself is never signed (Karnopp Eqs. 3.16–3.21).
 
-A junction member is written with the sign of its bond:
+A junction member says which way its bond points:
 
 ```julia
-@named m = Junction1(se, [-1, R], [-1, C])   # Se ⇀ 1, 1 ⇀ R, 1 ⇀ C
+@named m = Junction1(se => :pout, R, C)   # Se ⇀ 1, 1 ⇀ R, 1 ⇀ C
 ```
 
-A bare member's bond points into the junction (`+1`), and `[-1, x]` means the bond points out of the junction, towards `x`. A `Symbol` creates a free port: `[-1, :out]` on one junction and `:in` on another, joined with `connect(j1.out, j2.in)`, is a bond from the first junction to the second. A `connect` of more than two free ports is itself a 0-junction.
+A bare element `x` is a bond from the junction into `x` (through `x.power`), and `x => :pout` a bond from `x` into the junction. A `Symbol` creates a free port for bonds to other junctions and two-ports: `:out` is a bond leaving the junction and `:in => :in` one entering it, so `:out` on one junction and `:in => :in` on another, joined with `connect(j1.out, j2.in)`, is a bond from the first junction to the second. A `connect` of more than two ports is itself a 0-junction.
 
 ## Two-ports
 
 [`TF`](@ref) and [`GY`](@ref) have port `p1` (bond in) and `p2` (bond out): `TF`: `e₁ = m e₂`, `f₂ = m f₁`; `GY`: `e₁ = r f₂`, `e₂ = r f₁` (Karnopp Eqs. 3.9, 3.11). A modulus that is an expression, or that comes from a signal, makes them modulated (MTF, MGY).
 
-A plain `connect` to an element's `power` port (from a two-port's port or a junction's free port) is a bond pointing into the element, because ModelingToolkit counts every port's flow positive into its component. A source therefore reaches a two-port through a junction, `Se ⇀ 1 ⇀ TF`, as in the books.
+A source bonds to port 1 through its outgoing port, `connect(se.pout, tf.p1)`, and port 2 to an element through the element's incoming port, `connect(tf.p2, mass.power)`. Connecting two incoming ports, such as `connect(se.power, tf.p1)`, is not a bond but a 0-junction with both bonds pointing out of it, which flips the sign of the source's flow; `bondgraph` draws it that way. An element bonded through both of its ports is an error in `bondgraph`: a one-port has one bond.
 
 ## Simulation and causality
 
@@ -51,7 +60,7 @@ using BondGraphToolkit
 @named se = Se(1.0)
 @named m1 = Inertia(I = 1.0)
 @named m2 = Inertia(I = 2.0)
-@named model = Junction1(se, [-1, m1], [-1, m2])
+@named model = Junction1(se => :pout, m1, m2)
 sys = mtkcompile(model)
 unknowns(sys)
 ```
@@ -63,7 +72,7 @@ The result is a small DAE (a mass-matrix ODE), so solve it with a DAE-capable so
 ```@example causality
 @named a = Sf(1.0)
 @named b = Sf(2.0)
-@named conflict = Junction1(a, [-1, b])
+@named conflict = Junction1(a => :pout, b)
 try
     mtkcompile(conflict)
 catch err

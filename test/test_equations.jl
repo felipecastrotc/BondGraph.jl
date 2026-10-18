@@ -3,7 +3,7 @@
 function rc_model()
     @named R = Resistance(R = 1.0)
     @named C = Compliance(C = 1.0, q = 1.0)
-    @named model = Junction0([-1, R], [-1, C])
+    @named model = Junction0(R, C)
 end
 # Names of the variables and parameters in an equation (derivative terms left out).
 names_in(eq) = filter(!startswith("Differential"), string.(Symbolics.get_variables(eq.lhs - eq.rhs)))
@@ -26,7 +26,7 @@ end
     # keys may also come from the compiled model
     sys = mtkcompile(model)
     @test isequal(bg_equations(sys; rename = Dict(sys.C.q => x))[1].lhs, D(x))
-    @test_throws ArgumentError bg_equations(model; rename = Dict(model.R.power.e => x))
+    @test_throws ArgumentError bg_equations(model; rename = Dict(model.R.e => x))
 end
 
 @testset "LaTeX" begin
