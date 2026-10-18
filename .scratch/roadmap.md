@@ -72,7 +72,7 @@ v0.3.0 is released (GitHub Release, `CITATION.cff`, community files, branch rule
 Before submitting to JOSS:
 - [ ] Decide the license and the MTK vs ModelingToolkitBase dependency (the deferred TODO above). JOSS accepts Apache-2.0 and AGPL, but changing it after publication is awkward.
 - [ ] Register `BondGraphToolkit` in the Julia General registry (not required by JOSS, but reviewers will `pkg> add` it). Then add TagBot and CompatHelper workflows.
-- [ ] Add the ORCID to `CITATION.cff`: `orcid: "https://orcid.org/0000-0002-0871-728X"` under the author.
+- [x] Add the ORCID to `CITATION.cff` (done 2026-10-18)
 - [ ] Check JOSS's current requirements on its site: scope and "substantial scholarly effort", and its policy on AI-assisted code (likely a disclosure, and the history no longer has `Co-Authored-By` lines, so state it in the paper).
 - [ ] Write `paper.md` and `paper.bib`: summary, statement of need, state of the field (BondGraphs.jl, BondGraphTools, 20-sim, plain MTK/MTKSL; positioning above), a short example and the references (Karnopp, Margolis & Rosenberg 2012; Borutzky 2011).
 - [ ] Optional, before review: reassess the value gaps above (causality diagnostic, power/energy diagnostics) and the postponed example review (tickets 13–19). Reviewers will ask what the package adds over MTK.
