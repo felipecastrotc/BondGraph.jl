@@ -19,7 +19,7 @@ using OrdinaryDiffEqTsit5
 @named spring = Spring(k = 2.0, x = 0.2)
 @named damper = Damper(c = 3.0)
 
-# A custom nonlinear compliance gets the same ports (`power`, `pout`) and bond variables (`e`, `f`) as the built-ins.
+# A custom nonlinear compliance gets the same ports (`power`, `pout`) and bond variables (`e`, `f`) as the built-ins. These four names are taken inside `@oneport`: call a frequency `ν`, not `f`.
 @oneport function CubicCompliance(; name, C = 1.0, q = 0.0)
     @parameters C = C
     @variables q(t) = q

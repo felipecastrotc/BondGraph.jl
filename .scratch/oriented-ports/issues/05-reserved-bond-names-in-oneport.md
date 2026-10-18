@@ -4,7 +4,7 @@
 
 **Blocked by:** None.
 
-**Status:** needs-triage
+**Status:** done (feature/mtk-upgrade, uncommitted), user review pending
 
 ## Reproduction
 
@@ -20,7 +20,8 @@ Script: `.scratch/api-usability/recheck/oneport_f_clash.jl`. Before ADR 0002 the
 
 ## Acceptance criteria
 
-- [ ] The `@oneport` docstring (and the user guide's element paragraph) names `e`, `f`, `power`, `pout` as reserved.
-- [ ] Optional: the macro rejects a keyword or `@parameters`/`@variables` named `e` or `f` with a message naming it.
+- [x] The `@oneport` docstring (and the user guide's element paragraph) names `e`, `f`, `power`, `pout` as reserved.
+- [x] Optional: the macro rejects a keyword or `@parameters`/`@variables` named `e` or `f` with a message naming it.
 
 ## Comments
+- 2026-10-18 (agent): a keyword `f` was worse than the clash: `@oneport function G(; name, f = 3.0) [e ~ 2f] end` silently used the bond's flow (`e ~ 2f(t)`). `@oneport`/`@twoport` now throw `ArgumentError` at expansion for an argument named like a port or bond variable (`sig_names` in `src/BondGraphToolkit.jl`); `@parameters f` still gets MTK's duplicate-names error, so both docstrings name the taken names. Test in `test_core.jl`; note in `examples/elements_oneport.jl`.
