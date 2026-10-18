@@ -4,8 +4,10 @@
 
 **Blocked by:** None.
 
-**Status:** needs-triage
+**Status:** ready-for-agent
 
 Open question: should `bg_equations` (optionally) list the observed equations too, as `observed(sys)` does?
 
 ## Comments
+
+- 2026-10-18 (triage, user agreed): 0.3.x (additive, non-breaking): an `observed = true` keyword on `bg_equations` that also lists the observed equations, renameable like the state equations. Then use it in the Windkessel example for `Zc`.
