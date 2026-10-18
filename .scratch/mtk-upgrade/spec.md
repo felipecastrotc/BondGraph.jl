@@ -6,7 +6,7 @@ Sources: the map (`map.md`) and its resolved tickets 01–06 and 08–11 (`issue
 
 ## Problem Statement
 
-BondGraph.jl v0.2 is a bond-graph dialect of ModelingToolkit (MTK). It works only on MTK 8.71 with a hand-kept Manifest.
+BondGraphToolkit.jl v0.2 is a bond-graph dialect of ModelingToolkit (MTK). It works only on MTK 8.71 with a hand-kept Manifest.
 - It overrides MTK internals to turn bonds into equations. MTK 10 rewrote those internals, and Julia 1.10+ refuses method overwriting during precompilation, so the package can't be installed with fresh dependency resolution.
 - CI is red, and the package can't be registered or cited.
 

@@ -11,7 +11,7 @@ Once Julia is installed, you can proceed with installing the Bond Graph toolkit 
 2. Enter the package manager by pressing the `]` key. You should see the prompt change to `pkg>`.
 3. Inside the package manager, type the following command to add the library (it is not registered yet, so add it from its repository):
    ```julia
-   pkg> add https://github.com/felipecastrotc/BondGraph.jl
+   pkg> add https://github.com/felipecastrotc/BondGraphToolkit.jl
    ```
    The examples also use an ODE solver, e.g. `pkg> add OrdinaryDiffEqTsit5`, and `Plots` for the figures.
 4. Wait for Julia to download and install the library and its dependencies. This process may take a few moments depending on your internet connection and system performance.

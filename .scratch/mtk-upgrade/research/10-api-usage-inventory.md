@@ -1,7 +1,7 @@
 # Current BondGraph API and usage inventory
 
 - Scope: the current working tree, read statically; Julia was not run.
-- `src/BondGraph.jl` explicitly exports 19 names: 15 locally defined API names, three names without a local definition, and MTK's `structural_simplify` binding.
+- `src/BondGraphToolkit.jl` explicitly exports 19 names: 15 locally defined API names, three names without a local definition, and MTK's `structural_simplify` binding.
 - The six maintained examples use `@named` element constructors, junctions or explicit `connect`, then `simplifysys`; generated Markdown repeats much of this code.
 - Six tuple `@named` calls exist, all in two-port unit tests; examples use `coneqs` instead.
 - The electrical RC example calls `Spring` for a capacitor and `Damper` for a resistor; the DC motor calls `Mass` for an inductor.
@@ -10,11 +10,11 @@
 
 ## Counting method and scope
 
-Paths below are relative to the repo root. `E`, `T`, and `D` mean respectively `examples/*.jl`, `test/**/*.jl` (including `test/runtests.jl`), and `docs/src/**/*.md`. Each count is the number of source lines containing an active call or binding use, with its full `file:line` list; multiple calls on one line count once. In `.jl`, prose comments, test-set titles and imports are not call sites. In Markdown, fenced Julia code is a call site; a Documenter `@docs` entry is marked separately as a documentation reference. Generated docs are counted independently from their example sources, because they are separate files. The local `tmp_dev_acoustic_carol.jl` and generated `tmp_dev_*.md` are included because the requested globs include them, although `tmp_dev_*` is scratch content. This inventory covers BondGraph-owned names, including its MTK method overwrites, rather than every name re-exported wholesale by `@reexport using ModelingToolkit` (`src/BondGraph.jl:36`).
+Paths below are relative to the repo root. `E`, `T`, and `D` mean respectively `examples/*.jl`, `test/**/*.jl` (including `test/runtests.jl`), and `docs/src/**/*.md`. Each count is the number of source lines containing an active call or binding use, with its full `file:line` list; multiple calls on one line count once. In `.jl`, prose comments, test-set titles and imports are not call sites. In Markdown, fenced Julia code is a call site; a Documenter `@docs` entry is marked separately as a documentation reference. Generated docs are counted independently from their example sources, because they are separate files. The local `tmp_dev_acoustic_carol.jl` and generated `tmp_dev_*.md` are included because the requested globs include them, although `tmp_dev_*` is scratch content. This inventory covers BondGraph-owned names, including its MTK method overwrites, rather than every name re-exported wholesale by `@reexport using ModelingToolkit` (`src/BondGraphToolkit.jl:36`).
 
 ## Definitions and signatures
 
-`src/BondGraph.jl:40-58` is the explicit export list. A single displayed signature means one local method; defaults are shown as written in source. `—` means no local definition. The `@connector` and `@oneport` entries are macros, not ordinary function methods.
+`src/BondGraphToolkit.jl:40-58` is the explicit export list. A single displayed signature means one local method; defaults are shown as written in source. `—` means no local definition. The `@connector` and `@oneport` entries are macros, not ordinary function methods.
 
 | Symbol | Local signature and definition | One-line purpose |
 |---|---|---|
@@ -32,10 +32,10 @@ Paths below are relative to the repo root. `E`, `T`, and `D` mean respectively `
 | `isindependent` | `isindependent(var::Num)` — `src/utils/bg_utils.jl:150` | Classify a symbol as independent of time. |
 | `generate_graph` | `generate_graph(mdl, var=:e; method=:stress)` — `src/utils/graph.jl:53` | Plot the bond connection graph through GraphRecipes/Plots. |
 | `simplifysys` | `simplifysys(sys::ODESystem; name)` — `src/utils/system_utils.jl:16` | Expand bonds, structurally simplify, and substitute observed equations. |
-| `renamevars` | —; export `src/BondGraph.jl:57`; commented old function `src/mtk.jl:232-244` | Intended variable renaming; no live local implementation. |
-| `latexify` | —; export `src/BondGraph.jl:57` | Intended LaTeX rendering; examples separately import `Symbolics.Latexify`. |
-| `structural_simplify` | No BondGraph method; imported from MTK at `src/utils/system_utils.jl:1`, exported at `src/BondGraph.jl:57` | MTK's structural simplification function, called as `structural_simplify(sys)`. |
-| `addsubsys` | —; export `src/BondGraph.jl:57` | Intended subsystem addition; no live local implementation. |
+| `renamevars` | —; export `src/BondGraphToolkit.jl:57`; commented old function `src/mtk.jl:232-244` | Intended variable renaming; no live local implementation. |
+| `latexify` | —; export `src/BondGraphToolkit.jl:57` | Intended LaTeX rendering; examples separately import `Symbolics.Latexify`. |
+| `structural_simplify` | No BondGraph method; imported from MTK at `src/utils/system_utils.jl:1`, exported at `src/BondGraphToolkit.jl:57` | MTK's structural simplification function, called as `structural_simplify(sys)`. |
+| `addsubsys` | —; export `src/BondGraphToolkit.jl:57` | Intended subsystem addition; no live local implementation. |
 | `@oneport` | `macro oneport(ex)` — `src/utils/macros.jl:5` | Rewrite a custom one-port function to create `power`, infer variables and compose an `ODESystem`. |
 
 Non-exported BondGraph-owned names reached by examples or tests are below. The tag types have zero-field `struct Name end` definitions. Test imports themselves are listed later for `t`/`D`; other imports are omitted from call counts.
@@ -381,7 +381,7 @@ The constructor bodies already store the domain-neutral parameters `I`, `C`, and
 
 ## Dead, dangling, and test-only surface
 
-- `renamevars` and `addsubsys` are exported at `src/BondGraph.jl:57`, with no live local definition and zero requested call sites. `renamevars` appears only as commented old code at `src/mtk.jl:232-244`. `latexify` is likewise exported without a local definition; six example calls and seven generated-doc calls are recorded above. Those examples import `Symbolics.Latexify` separately (`examples/electrical_dc_motor.jl:59`, `mechanical_duffing.jl:47`, `mechanical_msd_1dof.jl:45`, `mechanical_msd_2dof.jl:49`, `mechanical_msd_ndof.jl:31`, `tmp_dev_acoustic_carol.jl:6`). This is a static binding inventory, not a runtime claim that `BondGraph.latexify` resolves.
+- `renamevars` and `addsubsys` are exported at `src/BondGraphToolkit.jl:57`, with no live local definition and zero requested call sites. `renamevars` appears only as commented old code at `src/mtk.jl:232-244`. `latexify` is likewise exported without a local definition; six example calls and seven generated-doc calls are recorded above. Those examples import `Symbolics.Latexify` separately (`examples/electrical_dc_motor.jl:59`, `mechanical_duffing.jl:47`, `mechanical_msd_1dof.jl:45`, `mechanical_msd_2dof.jl:49`, `mechanical_msd_ndof.jl:31`, `tmp_dev_acoustic_carol.jl:6`). This is a static binding inventory, not a runtime claim that `BondGraph.latexify` resolves.
 - `structural_simplify` is a different case: it is imported from MTK, not locally defined (`src/utils/system_utils.jl:1`), and is called directly at `examples/electrical_dc_motor.jl:159` and indirectly inside `simplifysys` (`src/utils/system_utils.jl:18`). The research note says MTK 11 retains it as a deprecated alias of `mtkcompile`.
 - `Dq` is exported but has no example, test or local-doc call. `GenericDamper` (`src/bg.jl:460`) is non-exported and has zero example/test calls, despite its Documenter entry at `docs/src/lib/public.md:48`; its own `src/bg.jl:461` TODO questions whether it works. `It` (`src/bg.jl:3`) is a non-exported, unused `Integral` binding. `setinitialval` (`src/utils/macros.jl:46`) has no active call in `src/`, examples or tests. `update_mtk_con` and `add_idx` have test calls but no production call in included source. `tptf` is internal to `mTF`; no caller constructs the tag directly.
 - The graph helpers `adjmtx2eqs`, `retrieve_node_details`, and `gen_con_name` are used in `src/utils/graph.jl` (`:32,207,238,241` as applicable), but their names occur only in TODO comments at `test/unit-tests/test_graph.jl:100-102`, not active tests. The `ConnectionSet` and `ConnectionElement` imports used by that file (`:6-7`) and `src/utils/graph.jl:4-5` are removed in MTK 11 per the research note.
@@ -397,7 +397,7 @@ The constructor bodies already store the domain-neutral parameters `I`, `C`, and
 | `src/utils/bg_utils.jl:27,68,97` | Restrict the accepted variable/array type. |
 | `src/utils/graph.jl:75` | Replace index iteration based on `length`/`size`. |
 | `src/utils/macros.jl:4,44` | Add initial-state support; question `setinitialval`. |
-| `src/mbg.jl:3` | Multibond experiment is old and not working; this file is not included by `src/BondGraph.jl:69`. |
+| `src/mbg.jl:3` | Multibond experiment is old and not working; this file is not included by `src/BondGraphToolkit.jl:69`. |
 
 ## Export decision matrix
 

@@ -1,6 +1,6 @@
 # Bond-graph literature notes
 
-Notes on the two references of the maintainer's thesis, for checking BondGraph.jl's conventions. These are paraphrases with page references. The PDFs live in `literature/`, which is git-ignored and never committed. Page numbers are the **printed book pages**.
+Notes on the two references of the maintainer's thesis, for checking BondGraphToolkit.jl's conventions. These are paraphrases with page references. The PDFs live in `literature/`, which is git-ignored and never committed. Page numbers are the **printed book pages**.
 
 Each note marks the reader's own interpretation with **Inference:**. In this index, "design choice" marks a decision of this project, not something the books state.
 
