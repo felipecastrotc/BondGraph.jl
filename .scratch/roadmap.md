@@ -71,9 +71,9 @@ v0.3.0 is released (GitHub Release, `CITATION.cff`, community files, branch rule
 
 Before submitting to JOSS:
 - [x] Decide the license and the MTK vs ModelingToolkitBase dependency: MIT from 0.3.1, full MTK (ticket 07). Still to check: whether the university's NIT must approve it.
-- [ ] Register `BondGraphToolkit` in the Julia General registry. Ready since 2026-10-18 (v0.3.1 on `main`, `f19f144`): repo renamed to `BondGraphToolkit.jl`, MIT, all `[compat]` bounded, the AutoMerge name-distance check passes, TagBot workflow + `DOCUMENTER_KEY` deploy key, Dependabot (CompatHelper is in maintenance mode), AI disclosure in the README. Steps (maintainer):
+- [ ] Register `BondGraphToolkit` in the Julia General registry. Ready since 2026-10-18 (v0.3.1 on `main`, `0b0bc83`): repo renamed to `BondGraphToolkit.jl`, MIT, all `[compat]` bounded, the AutoMerge name-distance check passes, TagBot workflow + `DOCUMENTER_KEY` deploy key, Dependabot (CompatHelper is in maintenance mode), AI disclosure in the README. Steps (maintainer):
   1. Install the Registrator app on the repo: https://github.com/apps/juliateam-registrator/installations/new
-  2. On GitHub, open the `main` commit `f19f144` ("Merge branch 'release/0.3.1'") and comment `@JuliaRegistrator register`, followed by a blank line, `Release notes:`, and the v0.3.1 entry from `NEWS.md`.
+  2. On GitHub, open the `main` commit `0b0bc83` ("Merge branch 'hotfix/acknowledgements'", version 0.3.1) and comment `@JuliaRegistrator register`, followed by a blank line, `Release notes:`, and the v0.3.1 entry from `NEWS.md`.
   3. Registrator opens a PR in JuliaRegistries/General; new packages wait 3 days. If AutoMerge flags something, fix it and comment again on the fixing commit (don't comment in General).
   4. After the merge, TagBot creates the `v0.3.1` tag and GitHub Release, and the deploy key makes the tag build the `stable` docs. Check the TagBot run in Actions.
   Later releases: bump `version`, merge to `main`, comment `@JuliaRegistrator register` on that commit (15 min wait). Keep workflow-file changes out of the release commit, or TagBot can't tag it.
